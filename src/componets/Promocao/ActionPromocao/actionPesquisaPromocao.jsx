@@ -26,7 +26,7 @@ import { FaDownload } from "react-icons/fa6";
 export const ActionPesquisaPromocao = ({ }) => {
 
   const {
-    mecanicaSelecionada,
+        mecanicaSelecionada,
     setMecanicaSelecionada,
     aplicacaoDestinoSelecionada,
     setAplicacaoDestinoSelecionada,
@@ -128,20 +128,42 @@ export const ActionPesquisaPromocao = ({ }) => {
     mostrarProdutosSelecionadosDestino,
     modalDocumentacao,
     setModalDocumentacao,
-    modalPodutoSelecionadoDestinoCSV, setModalPodutoSelecionadoDestinoCSV,
-    modalPodutoSelecionadoOrigemCSV, setModalPodutoSelecionadoOrigemCSV,
-    isCheckedGrupo, 
+    modalPodutoSelecionadoDestinoCSV,
+    setModalPodutoSelecionadoDestinoCSV,
+    modalPodutoSelecionadoOrigemCSV,
+    setModalPodutoSelecionadoOrigemCSV,
+    isCheckedGrupo,
     setIsCheckedGrupo,
     isCheckedProduto,
     setIsCheckedProduto,
+    isCheckedGrupoProduto,
+    setIsCheckedGrupoProduto,
+    produtoSelecionadoEstProdDestino,
+    setProdutoSelecionadoEstProdutoDestino,
+    produtoSelecionadoEstProdOrigem,
+    setProdutoSelecionadoEstProdutoOrigem,
+    novoProdutoEstProdOrigem,
+    setNovoProdutoEstProdOrigem,
+    novoProdutoEstProdDestino,
+    setNovoProdutoEstProdDestino,
+    modalEstProdOrigem,
+    setModalEstProdOrigem,
+    modalEstProdDestino,
+    setModalEstProdDestino,
+    subGrupoProdutoDestino,
+    setSubGrupoProdutoDestino,
+    subGrupoProdutoOrigem,
+    setSubGrupoProdutoOrigem,
     subGrupoDestino,
     setSubGrupoDestino,
     subGrupoOrigem,
     setSubGrupoOrigem,
+    tipoPromocao, 
+    setTipoPromocao,
     onSubmit,
     downloadPlanilhaModelo,
-    onSubmitEstrutura
-
+    onSubmitEstrutura,
+    onSubmitEstruturaProduto
   } = useCreatePromocaoAtiva({});
 
 
@@ -172,17 +194,11 @@ export const ActionPesquisaPromocao = ({ }) => {
   }, [setSubGrupoOrigem]);
 
   const handleChangeMecanica = useCallback((selectedValue) => {
-
-      
-      setMecanicaSelecionada(selectedValue.MECANICA);
-      setMecanicaSelecionadaEdicao(selectedValue.label)
-      setAplicacaoDestinoSelecionada(selectedValue.APLICAODESTINO);
-      setTipoDescontoSelecionado(selectedValue.TIPODESCONTO);
-    
-      // console.log(mecanicaSelecionada, 'mecanicaSelecionada')
-      // console.log(mecanicaSelecionadaEdicao, 'mecanicaSelecionadaEdicao')
-      // console.log(aplicacaoDestinoSelecionada, 'aplicaoDestinoSelecionada')
-      // console.log(tipoDescontoSelecionado, 'tipoDescontoSelecionado AQUI')
+    setTipoPromocao(selectedValue.value)
+    setMecanicaSelecionada(selectedValue.MECANICA);
+    setMecanicaSelecionadaEdicao(selectedValue.label)
+    setAplicacaoDestinoSelecionada(selectedValue.APLICAODESTINO);
+    setTipoDescontoSelecionado(selectedValue.TIPODESCONTO);
   }, []);
 
   // const handleChangeMecanica = useCallback((selectedValue) => {

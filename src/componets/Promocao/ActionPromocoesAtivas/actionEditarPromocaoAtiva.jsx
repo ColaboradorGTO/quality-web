@@ -463,7 +463,7 @@ export const ActionEditarPromocaoAtiva = ({ dadosPromocao, handleClickIncluir, a
     setCarregouInicial(true); // 🔥 trava o useEffect
 
   }, [optionsProdutosPromocoes, dadosSubGrupo, carregouInicial]);
-  console.log(dadosSubGrupo, "dadosSubGrupo")
+  
   useEffect(() => {
     if (!treeData.length) return;
 
