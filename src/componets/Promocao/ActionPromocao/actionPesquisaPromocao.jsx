@@ -799,7 +799,7 @@ export const ActionPesquisaPromocao = ({ }) => {
         IconRetornar={FaDownload}
       />
 
-
+  
       <ActionCadastrarPromocaoModal
         dadosPromocoesAtivas={dadosPromocoesAtivas}
         show={modalVisivel}
