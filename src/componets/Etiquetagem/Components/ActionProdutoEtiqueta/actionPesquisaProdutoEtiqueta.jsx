@@ -10,10 +10,11 @@ import { MdOutlineLocalPrintshop } from "react-icons/md"
 import { GoDownload } from "react-icons/go"
 import { BsTrash3 } from "react-icons/bs"
 import { useQuery } from "react-query"
-import { animacaoCarregamento, fecharAnimacaoCarregamento, foiCancelado } from "../../../../utils/animationCarregamento"
+import { animacaoCarregamento, fecharAnimacaoCarregamento } from "../../../../utils/animationCarregamento"
 import Swal from "sweetalert2"
 import { CiEdit } from "react-icons/ci"
 import { ActionImprimirEtiquetaModal } from "./actionImprimirEtiquetaModal"
+import { ActionEtiquetaOculosModal } from "./ActionEtiquetaOculos/actionEtiquetaOculosModal"
 
 export const ActionPesquisaProdutoEtiqueta = ({ usuarioLogado }) => {
   const [descricaoProduto, setDescricaoProduto] = useState('')
@@ -27,6 +28,7 @@ export const ActionPesquisaProdutoEtiqueta = ({ usuarioLogado }) => {
   const [produtosSelecionados, setProdutosSelecionados] = useState([]);
   const [dadosAcumuladorEtiquetas, setDadosAcumuladorEtiquetas] = useState([]);
   const [modalImprimirEtiqueta, setModalImprimirEtiqueta] = useState(false);
+  const [modalImprimirEtiquetaOculos, setModalImprimirEtiquetaOculos] = useState(false);
   const [selectAll, setSelectAll] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
 
@@ -65,80 +67,38 @@ export const ActionPesquisaProdutoEtiqueta = ({ usuarioLogado }) => {
   }, [dadosListaPrecos, empresaSelecionada]);
 
 
-  /*  const fetchListaPrecosSap = async () => {
-     const urlBase = `/lista-produtos-etiqueta-sap?idLista=${empresaSelecionadaId}&idProduto=${idProduto}&descricao=${descricaoProduto}&codBarras=${codBarrasProduto}`;
-     let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
-     urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
-     try {
-       animacaoCarregamento('Carregando dados...', true);
- 
-       const primeiraPagina = 1;
-       const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`);
-       const page = primeiraResposta.page || primeiraPagina;
-       const pageSize = primeiraResposta.pageSize || 1000;
-       const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
-       const totalPages = Math.ceil(totalRows / pageSize);
- 
-       let allData = [...(primeiraResposta.data || [])];
- 
-       if (totalPages > 1) {
-         for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
-           animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true);
-           const responsePage = await get(`${urlApi}&page=${currentPage}`);
-           allData.push(...(responsePage.data || []));
-         }
-       }
- 
-       return allData;
-     } catch (error) {
-       console.error('Erro ao buscar dados:', error);
-       throw error;
-     } finally {
-       fecharAnimacaoCarregamento();
-     }
-   }; */
-
   const fetchListaPrecosSap = async () => {
-    const urlBase = `/lista-produtos-etiqueta-sap?idLista=${empresaSelecionada}&idProduto=${idProduto}&descricao=${descricaoProduto}&codBarras=${codBarrasProduto}`;
+    const urlBase = `/lista-produtos-etiqueta-sap?idLista=${empresaSelecionadaId}&idProduto=${idProduto}&descricao=${descricaoProduto}&codBarras=${codBarrasProduto}`;
     let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
     urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
-
-    const controller = new AbortController();
-    let allData = [];
-
     try {
-      animacaoCarregamento('Carregando dados...', true, true, () => controller.abort());
+      animacaoCarregamento('Carregando dados...', true);
 
       const primeiraPagina = 1;
-      const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`, { signal: controller.signal });
+      const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`);
       const page = primeiraResposta.page || primeiraPagina;
       const pageSize = primeiraResposta.pageSize || 1000;
       const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
       const totalPages = Math.ceil(totalRows / pageSize);
 
-      allData = [...(primeiraResposta.data || [])];
+      let allData = [...(primeiraResposta.data || [])];
 
       if (totalPages > 1) {
         for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
-          if (foiCancelado()) break;
-          animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true, true);
-          const responsePage = await get(`${urlApi}&page=${currentPage}`, { signal: controller.signal });
+          animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true);
+          const responsePage = await get(`${urlApi}&page=${currentPage}`);
           allData.push(...(responsePage.data || []));
         }
       }
 
       return allData;
     } catch (error) {
-      if (error.code === 'ERR_CANCELED') {
-        return allData;
-      }
       console.error('Erro ao buscar dados:', error);
       throw error;
     } finally {
       fecharAnimacaoCarregamento();
     }
   };
-
 
   const { data: dadosListaPrecosSap = [], error: errorMalotes, isLoading: isLoadingMalotes, refetch: refetchListaPrecosSap } = useQuery(
     ['lista-produtos-etiqueta-sap',],
@@ -158,6 +118,13 @@ export const ActionPesquisaProdutoEtiqueta = ({ usuarioLogado }) => {
 
     }
   }
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleClick();
+    }
+  };
 
   const handleCancelar = async (isChecked) => {
     const result = await Swal.fire({
@@ -197,6 +164,10 @@ export const ActionPesquisaProdutoEtiqueta = ({ usuarioLogado }) => {
 
   const handleImprimirEtiqueta = () => {
     setModalImprimirEtiqueta(true);
+  }
+  
+  const handleImprimirEtiquetaOculos = () => {
+    setModalImprimirEtiquetaOculos(true);
   }
 
   const handleAcumuladorEtiquetas = async () => {
@@ -270,21 +241,24 @@ export const ActionPesquisaProdutoEtiqueta = ({ usuarioLogado }) => {
 
         InputFieldComponent={InputField}
         labelInputField={"Cód.Barras "}
+        placeHolderInputFieldComponent={"Cód.Barras / Nome Produto"}
         valueInputField={codBarrasProduto}
         onChangeInputField={(e) => setCodBarrasProduto(e.target.value)}
-        placeHolderInputFieldComponent={"Cód.Barras / Nome Produto"}
+        onKeyDownInputField={handleKeyPress}
 
         InputFieldNumeroNFComponent={InputField}
         labelInputFieldNumeroNF={"Id. Produto"}
+        placeHolderInputFieldNumeroNF={"Id. Produto"}
         valueInputFieldNumeroNF={idProduto}
         onChangeInputFieldNumeroNF={(e) => setIDProduto(e.target.value)}
-        placeHolderInputFieldNumeroNF={"Id. Produto"}
+        onKeyDownInputFieldNumeroNF={handleKeyPress}
 
         InputFieldDescricaoComponent={InputField}
         labelInputFieldDescricao={"Descrição"}
+        placeHolderInputFieldDescricao={"Descrição do Produto"}
         valueInputFieldDescricao={descricaoProduto}
         onChangeInputFieldDescricao={(e) => setDescricaoProduto(e.target.value)}
-        placeHolderInputFieldDescricao={"Descrição do Produto"}
+        onKeyDownInputFieldDescricao={handleKeyPress}
 
         ButtonSearchComponent={ButtonType}
         linkNomeSearch={"Pesquisar"}
@@ -308,7 +282,7 @@ export const ActionPesquisaProdutoEtiqueta = ({ usuarioLogado }) => {
 
         ButtonTypeCancelar={ButtonType}
         onButtonClickCancelar={handleImprimirEtiqueta}
-        linkCancelar={"Imprimir"}
+        linkCancelar={"Imprimir Etiqueta Padrão"}
         corCancelar={"info"}
         IconCancelar={MdOutlineLocalPrintshop}
         styleCancelar={{ display: btnVisivel || dadosAcumuladorEtiquetas.length > 0 ? 'block' : 'none' }}
@@ -319,7 +293,14 @@ export const ActionPesquisaProdutoEtiqueta = ({ usuarioLogado }) => {
         corVendasEstrutura={"danger"}
         iconVendasEstrutura={BsTrash3}
         styleVendasEstrutura={{ display: dadosAcumuladorEtiquetas.length > 0 ? 'block' : 'none' }}
-      />
+     
+        ButtonTypeVendasVendedor={ButtonType}
+        linkNomeVendasVendedor={"Imprimir Etiqueta Oculos"}
+        onButtonClickVendasVendedor={handleImprimirEtiquetaOculos}
+        corVendasVendedor={"warning"}
+        iconVendasVendedor={MdOutlineLocalPrintshop}
+        styleVendedor={{ display: btnVisivel || dadosAcumuladorEtiquetas.length > 0 ? 'block' : 'none' }}
+     />
 
       <ActionListaProdutoEtiqueta
         dadosListaPrecosSap={dadosListaPrecosSap}
@@ -341,6 +322,14 @@ export const ActionPesquisaProdutoEtiqueta = ({ usuarioLogado }) => {
       <ActionImprimirEtiquetaModal
         show={modalImprimirEtiqueta}
         handleClose={() => setModalImprimirEtiqueta(false)}
+        dadosAcumuladorEtiquetas={dadosAcumuladorEtiquetas}
+        produtosSelecionados={produtosSelecionados}
+        copia={copia}
+      />
+
+      <ActionEtiquetaOculosModal 
+        show={modalImprimirEtiquetaOculos}
+        handleClose={() => setModalImprimirEtiquetaOculos(false)}
         dadosAcumuladorEtiquetas={dadosAcumuladorEtiquetas}
         produtosSelecionados={produtosSelecionados}
         copia={copia}

@@ -34,11 +34,20 @@ export const ActionImprimirEtiquetaModal = ({
       // Início da página ZPL
       let startPageLabel = `
         ^XA
+        ^FWN
+        ^PW850
+        ^LL320
+        ^CI28
+        ^BY2,3,55
+      `;
+      const zplResetConfiguracao = `
+        ^XA
         ^MD10
         ^FWN
         ^PW850
         ^LL320
         ^CI28
+        ^XZ
       `;
       let endPageLabel = '^XZ';
       let dataLabelsZPLToPrint = startPageLabel;
@@ -78,31 +87,37 @@ export const ActionImprimirEtiquetaModal = ({
           let priceLength = precoVenda.length;
           let ajustePositionPrice = priceLength > 7 ? (priceLength - 7) * 15 : 0;
           let ajusteFontSizePrice = priceLength <= 11 ? 0 : 5;
-          let positionDefault = (contador * 280);
-          let positionPrice = 135 + (contador * 280) - ajustePositionPrice;
-          let positionTamanho = 10 + (contador * 280);
-          let positionCodBars = 30 + (contador * 280);
+          let positionDefault = (contador * 280) + 5;
+          let positionPrice = 135 + positionDefault - ajustePositionPrice;
+          let positionTamanho = positionDefault + (tamanhoProd.length == 1 ? 15 : tamanhoProd.length == 2 ? 10 : 5 );
+          let positionCodBars = 40 + positionDefault;
           let fontSizePrice = 35 - ajusteFontSizePrice;
-          let widthBorder = tamanhoProd.length > 3 ? '75' : '50';
+          let widthBorder = 50 + ( tamanhoProd.length > 2 ? 10 : 0 );
           let abrirMaisUmaPagina = (j + 1) < qtdEtiqueta || (i + 1) < etiquetas.length;
 
+          dataLabelsZPLToPrint += `
+             ^FO${positionDefault},110^A0N,22,28^FB265,4,1,L,0^FD${descricaoProd}^FS
+          ^FO${positionDefault},210^A0N,22,20^FB265,2,0,L,0^FD${estiloProd}^FS
+          ^FO${positionDefault},260^A0N,22,20^FB265,2,0,L,0^FD${localExpProd}^FS
+          ^FO${positionDefault},285^A0N,22,28^FDTAM^FS
+          ^FO${positionDefault},302^GB${widthBorder},30,3^FS
+          ^FO${positionTamanho},309^A0N,22,28^FD${tamanhoProd}^FS
+          ^FO${positionPrice},300^A0,${fontSizePrice}^FD${precoVenda}^FS
+          ^FO${positionCodBars},335^BEN,55,Y,N^FD${codBarras}^FS
+          `;
 
-          // Adiciona comandos ZPL para a etiqueta (sem quebras de linha desnecessárias)
-          dataLabelsZPLToPrint += `^FO${positionDefault},120^A0N,20,30^FB255,4,2,L,0^FD${descricaoProd}^FS`;
-          dataLabelsZPLToPrint += `^FO${positionDefault},205^A0N,20,25^FB255,3,2,L,0^FD${estiloProd}^FS`;
-          dataLabelsZPLToPrint += `^FO${positionDefault},245^A0N,20,25^FB255,3,2,L,0^FD${localExpProd}^FS`;
-          dataLabelsZPLToPrint += `^FO${positionDefault},285^GB${widthBorder},50,3^FS`;
-          dataLabelsZPLToPrint += `^FO${positionDefault},265^A0N,22^FDTAM^FS`;
-          dataLabelsZPLToPrint += `^FO${positionPrice},300^A0,${fontSizePrice}^FD${precoVenda}^FS`;
-          dataLabelsZPLToPrint += `^FO${positionTamanho},300^A0N,22^FD${tamanhoProd}^FS`;
-          dataLabelsZPLToPrint += `^BY1.6,3,500`;
-          dataLabelsZPLToPrint += `^FO${positionCodBars},340`;
-          dataLabelsZPLToPrint += `^BEN,55,Y,N`;
-          dataLabelsZPLToPrint += `^FD${codBarras}^FS`;
 
+          // dataLabelsZPLToPrint += `^FO${positionDefault},120^A0N,20,30^FB255,4,2,L,0^FD${descricaoProd}^FS`;
+          // dataLabelsZPLToPrint += `^FO${positionDefault},205^A0N,20,25^FB255,3,2,L,0^FD${estiloProd}^FS`;
+          // dataLabelsZPLToPrint += `^FO${positionDefault},245^A0N,20,25^FB255,3,2,L,0^FD${localExpProd}^FS`;
+          // dataLabelsZPLToPrint += `^FO${positionDefault},285^GB${widthBorder},50,3^FS`;
+          // dataLabelsZPLToPrint += `^FO${positionDefault},265^A0N,22^FDTAM^FS`;
+          // dataLabelsZPLToPrint += `^FO${positionPrice},300^A0,${fontSizePrice}^FD${precoVenda}^FS`;
+          // dataLabelsZPLToPrint += `^FO${positionTamanho},300^A0N,22^FD${tamanhoProd}^FS`;
+          // dataLabelsZPLToPrint += `^FO${positionCodBars},340^BEN,55,Y,N^FD${codBarras}^FS`;
           contador++;
 
-          // Se completou 3 etiquetas por página, finaliza página
+          
           if (contador === 3) {
             dataLabelsZPLToPrint += endPageLabel;
 
@@ -114,20 +129,20 @@ export const ActionImprimirEtiquetaModal = ({
           }
         }
       }
-
-      // Finaliza última página se necessário
+  
+     
       if (contador !== 0) {
         dataLabelsZPLToPrint += endPageLabel;
       }
 
-      // Limpa formatação e cria comandos finais
+      
       const comandosZPLFinais = dataLabelsZPLToPrint
         .replace(/^[ \t]+/gm, '')
         .replace(/^\s*$/gm, '')
-        .replace(/\n+/g, '\n')  // Remove múltiplas quebras de linha
+        .replace(/\n+/g, '\n')  
         .trim();
 
-      // Validação final antes de enviar
+   
       if (comandosZPLFinais.length < 10) {
         throw new Error('Comandos ZPL muito curtos - possível erro na geração');
       }
@@ -137,7 +152,7 @@ export const ActionImprimirEtiquetaModal = ({
       }
 
       // Envia para impressora via WebSocket
-      await enviarZPLParaImpressora(comandosZPLFinais);
+      await enviarZPLParaImpressora(`${comandosZPLFinais}${zplResetConfiguracao}`);
 
     } catch (error) {
       console.error('❌ Erro ao gerar/imprimir comandos ZPL:', error);
