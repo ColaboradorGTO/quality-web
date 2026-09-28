@@ -66,6 +66,7 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao }) => {
   const [subGrupoOrigem, setSubGrupoOrigem] = useState([])
   const [grupoSelecionadoOrigem, setGrupoSelecionadoOrigem] = useState([])
   const [grupoSelecionadoDestino, setGrupoSelecionadoDestino] = useState([])
+  const [tipoPromocao, setTipoPromocao] = useState('')
 
   const navigate = useNavigate();
 
@@ -1166,6 +1167,7 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao }) => {
         IDSUBGRUPOEMORIGEM: subGrupoSelecionado,
         IDMARCAEMORIGEM: marcaOrigem,
         IDFORNECEDOREMORIGEM: fornecedorSelecionado,
+        NUTIPOPROMOCAO: Number(tipoPromocao),
         IDPRODUTO: Array.from(new Set([
           ...extractIds(produtosDestino),
           ...extractIds(produtoDestinoSelecionado),
@@ -1629,6 +1631,8 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao }) => {
     setSubGrupoOrigem,
     grupoSelecionadoOrigem, 
     setGrupoSelecionadoOrigem,
+     tipoPromocao,
+    setTipoPromocao,
     grupoSelecionadoDestino,
     setGrupoSelecionadoDestino,
     downloadPlanilhaModelo,

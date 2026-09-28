@@ -145,6 +145,8 @@ export const ActionEditarPromocaoAtiva = ({ dadosPromocao, handleClickIncluir, a
     setGrupoSelecionadoOrigem,
     grupoSelecionadoDestino,
     setGrupoSelecionadoDestino,
+     tipoPromocao,
+    setTipoPromocao,
     downloadPlanilhaModelo,
     onSubmitEstrutura
   } = useUpdatePromocaoAtiva({ dadosPromocao });
@@ -161,18 +163,18 @@ export const ActionEditarPromocaoAtiva = ({ dadosPromocao, handleClickIncluir, a
   };
 
   const handleChangeMecanica = useCallback((selectedValue) => {
-    const selectedOption = optionsMecanicaCompleta?.find(option => option.value == selectedValue);
 
-
-    if (selectedOption) {
-      setMecanicaSelecionada(selectedOption.value);
-      setMecanicaSelecionadaEdicao(selectedOption.label)
-      setAplicacaoDestinoSelecionada(selectedOption.aplicacaoDestino);
-      setTipoDescontoSelecionado(selectedOption.tipoDesconto);
+    if (selectedValue) {
+      setTipoPromocao(selectedValue?.value)
+      setMecanicaSelecionada(selectedValue.value);
+      setMecanicaSelecionadaEdicao(selectedValue.label)
+      setAplicacaoDestinoSelecionada(selectedValue.aplicacaoDestino);
+      setTipoDescontoSelecionado(selectedValue.tipoDesconto);
+     
     } else {
-      console.log('Nenhuma opção encontrada para o valor:', selectedValue);
+      // console.log('Nenhuma opção encontrada para o valor:', selectedValue);
     }
-  }, []);
+  }, [optionsMecanicaCompleta]);
 
   // const handleChangeMecanica = useCallback((selectedValue) => {
   //   const selectedOption = dadosMecanicas.find(option => option.ID == selectedValue);
@@ -548,15 +550,15 @@ export const ActionEditarPromocaoAtiva = ({ dadosPromocao, handleClickIncluir, a
         linkComponent={["Cadastro de Promoções"]}
         title="Atualizar Promoção"
 
-        InputSelectMecanicaComponent={InputSelectActionPromocao}
+         InputSelectMecanicaComponent={InputSelectActionPromocao}
         labelSelectMecanica={"Mecanica"}
-        optionsMecanica={dadosMecanicas.map((item) => ({
-          value: item.ID,
-          label: item.DESCRICAO,
-          APLICACAODESTINO: item.APLICACAODESTINO,
-          TIPODESCONTO: item.TIPODESCONTO
+        optionsMecanica={optionsMecanicaCompleta?.map((item) => ({
+          value: item.value,
+          label: `${item.value} - ${item.label}`,
+          APLICACAODESTINO: item.aplicacaoDestino,
+          TIPODESCONTO: item.tipoDesconto
         }))}
-        onChangeSelectMecanica={(e) => handleChangeMecanica(e.value)}
+        onChangeSelectMecanica={(e) => handleChangeMecanica(e)}
         styleMecanica={customStyles}
         defaultValueSelectMecanica={valorSelecionado}
         valueSelectMecanica={valorSelecionado}
