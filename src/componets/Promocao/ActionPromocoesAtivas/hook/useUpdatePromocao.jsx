@@ -1232,7 +1232,9 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao }) => {
         },
         showConfirmButton: false,
         timer: 1500,
-      });
+      }).then(() => {
+        window.location.reload();
+      })
 
       return response.data;
     } catch (error) {
