@@ -285,7 +285,7 @@ export const Permissoes = ({}) => {
 
                                     <Select
                                         options={dadosFuncionarios?.map((item) => ({
-                                            value: item.ID,
+                                            value: item.IDFUNCIONARIO,
                                             label: `${item.NOLOGIN} - ${item.NOFUNCIONARIO} `
                                         }))}
                                         value={funcionarioSelecionado}
