@@ -163,6 +163,14 @@ export const optionsMecanica = [
         mecanica: 2,
         tipoDesconto: 1,
         color: "darkslategray"
+    },
+    {
+        value: 21,
+        label: "PROMOÇÃO POR EM UM PRODUTO // QUANTIDADE VALOR // VALOR FINAL",
+        aplicacaoDestino: 4,  // ✅ TPAPARTIRDE = 4
+        mecanica: 1,          // ✅ TPAPLICADOA = 1
+        tipoDesconto: 0,      // ✅ TPFATORPROMO = 0  
+        color: "navy"
     }
 ]
 
@@ -439,6 +447,8 @@ export const optionsMecanicaCompleta = [
   }
 ];
 
+export const MECANICAS_COM_QTD_LIBERADA = [16, 17, 18, 22, 23, 24];
+
 export const optionsMecanicaCompletaAnterior = [
   {
     value: 1,
@@ -650,7 +660,7 @@ export const optionsMecanicaCompletaAnterior = [
     tipoDesconto: 0,
     color: "steelblue"
   },
-  {
+  { 
     value: 27,
     label: "PROMOÇÃO POR TODOS OS PRODUTOS // VALOR // VALOR FINAL",
     aplicacaoDestino: 1,
@@ -683,5 +693,3 @@ export const optionsMecanicaCompletaAnterior = [
     color: "navy"
   }
 ];
-
-

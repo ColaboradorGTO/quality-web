@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect, useMemo } from "react"
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from "react"
 import { ButtonType } from "../../Buttons/ButtonType";
 import { ActionMainPromocao } from "../../Actions/ActionMainPromocao";
 import { InputFieldAction } from "../../Buttons/InputAction";
@@ -10,32 +10,50 @@ import { IoIosSend } from "react-icons/io";
 import { ActionCadastrarPromocaoModal } from "./ActionCadastrarPromocao/actionCadastrarPromocaoModal";
 import { ActionProdutoDestinoModal } from "../ActionPromocoesAtivas/ActionProdutosDestino/actionProdutoDestinoModal";
 import { ActionProdutoOrigemModal } from '../ActionPromocoesAtivas/ActionProdutosOrigem/actionProdutoOrigemModal'
-import { ActionProdutoModalPromocaoSelecionado } from "../ActionPromocoesAtivas/ActionProdutosDaPromocaoSelecionado/actionProdutoModalPromocaoSelecionado";
 import { ActionProdutoModalPromocaoSelecionadoDestino } from "../ActionPromocoesAtivas/ActionProdutosDaPromocaoSelecionado/actionProdutoModalPromocaoSelecionaDestino";
-import { ActionDocumentacaoAtualizar } from "../ActionPromocoesAtivas/ActionDocumentacao/documentacaoAtualizar";
 import { ActionProdutoModalPromocaoSelecionadoCSVOrigem } from "../ActionPromocoesAtivas/ActionProdutosDaPromocaoSelecionado/actionProdutoModalPromocaoSelecionadoCSVOrigem";
 import { ActionDocumentacaoCriar } from "../ActionPromocoesAtivas/ActionDocumentacao/documentacaoCriar";
-import { useState } from "react";
 import { MenuTreeSelect } from "../../Inputs/menuTreeSelect";
 import { InputFieldActionRadio } from "../../Buttons/InputActionRadio";
-
 import { FaDownload } from "react-icons/fa6";
+import { get } from "../../../api/funcRequest";
+import { useQuery } from "react-query";
+import { ActionEstruturaProdutoOrigemModal } from "./ActionProdutosOrigem/actionEstruturaProdutoOrigemModal";
+import { ActionEstruturaProdutoDestinoModal } from "./ActionProdutosDestino/actionEstruturaProdutoDestinoModal";
+import { animacaoCarregamento, fecharAnimacaoCarregamento } from "../../../utils/animationCarregamento"
+import { MECANICAS_COM_QTD_LIBERADA } from "../../../../mecanica"
 
+export const ActionPesquisaPromocao = ({ usuarioLogado }) => {
+  const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
+  const [treeData, setTreeData] = useState([]);
+  const [selectedNodesOrigem, setSelectedNodesOrigem] = useState({});
+  const [selectedNodesDestino, setSelectedNodesDestino] = useState({});
 
-
-export const ActionPesquisaPromocao = ({ }) => {
+  useEffect(() => {
+    const menuSalvo = localStorage.getItem('menuFilhoSelecionado');
+    if (menuSalvo) {
+      const menuParsed = JSON.parse(menuSalvo);
+      setMenuFilhoAtual(menuParsed);
+    }
+  }, []);
+  
+  const { data: optionsModulos = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
+    ['menus-usuario-excecao', menuFilhoAtual?.ID],
+    async () => {
+      const response = await get(`/menus-usuario-excecao?idUsuario=${usuarioLogado?.id}&idMenuFilho=${menuFilhoAtual?.ID}`);
+      
+      return response.data;
+    },
+    { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000,}
+  );
 
   const {
-        mecanicaSelecionada,
+    mecanicaSelecionada,
     setMecanicaSelecionada,
     aplicacaoDestinoSelecionada,
     setAplicacaoDestinoSelecionada,
     tipoDescontoSelecionado,
     setTipoDescontoSelecionado,
-    fornecedorSelecionado,
-    setFornecedorSelecionado,
-    subGrupoSelecionado,
-    setSubGrupoSelecionado,
     grupoSelecionado,
     setGrupoSelecionado,
     marcaSelecionada,
@@ -48,16 +66,12 @@ export const ActionPesquisaPromocao = ({ }) => {
     setDataFim,
     qtdInicio,
     setQtdInicio,
-    qtdFim,
-    setQtdFim,
     vrDesconto,
     setVrDesconto,
     porcentoDesconto,
     setPorcentoDesconto,
     valorInicio,
     setValorInicio,
-    valorFim,
-    setValorFim,
     produtoOrigem,
     setProdutoOrigem,
     fileProdutoOrigem,
@@ -70,12 +84,10 @@ export const ActionPesquisaPromocao = ({ }) => {
     setDescricao,
     precoProduto,
     setPrecoProduto,
-    dadosFornecedorProduto,
     dadosGrupo,
     dadosSubGrupo,
     optionsMarcas,
     optionsEmpresas,
-    optionsMecanica,
     optionsMecanicaCompleta,
     dadosMecanicas,
     mecanicaSelecionadaEdicao,
@@ -85,12 +97,10 @@ export const ActionPesquisaPromocao = ({ }) => {
     btnSalvar,
     setBtnSalvar,
     handleFileUpload,
-    mostrarProdutosSelecionados,
     dadosPromocoesAtivas,
     modalVisivel,
     setModalVisivel,
     handleSalvarMecanica,
-    mostrarProdutosPromocao,
     handlePesquisarProdutoDestino,
     handlePesquisarProdutoOrigem,
     modalProduto,
@@ -100,13 +110,11 @@ export const ActionPesquisaPromocao = ({ }) => {
     setModalProdutoDestino,
     modalProdutoOrigem,
     setModalProdutoOrigem,
-    modalProdutoDaPromocao,
-    setModalProdutoDaPromocao,
     statusProdutoOrigem,
     setStatusProdutoOrigem,
     statusProdutoDestino,
     setStatusProdutoDestino,
-
+    
     produtoDestinoSelecionado,
     setProdutoDestinoSelecionado,
     produtoOrigemSelecionado,
@@ -119,19 +127,10 @@ export const ActionPesquisaPromocao = ({ }) => {
     setModalPodutoSelecionadoOrigem,
     modalPodutoSelecionadoDestino,
     modalPodutoSelecionadoOrigem,
-    modalEmpresasPromocao,
-    setModalEmpresasPromocao,
-    refetchProdutosPromocoes,
-    dadosEmpresasPromocoes,
-    setDadosEmpresasPromocoes,
     mostrarProdutosSelecionadosOrigem,
     mostrarProdutosSelecionadosDestino,
     modalDocumentacao,
     setModalDocumentacao,
-    modalPodutoSelecionadoDestinoCSV,
-    setModalPodutoSelecionadoDestinoCSV,
-    modalPodutoSelecionadoOrigemCSV,
-    setModalPodutoSelecionadoOrigemCSV,
     isCheckedGrupo,
     setIsCheckedGrupo,
     isCheckedProduto,
@@ -164,8 +163,8 @@ export const ActionPesquisaPromocao = ({ }) => {
     downloadPlanilhaModelo,
     onSubmitEstrutura,
     onSubmitEstruturaProduto
-  } = useCreatePromocaoAtiva({});
 
+  } = useCreatePromocaoAtiva({usuarioLogado, optionsModulos});
 
   const customStyles = {
     option: (provided, state) => ({
@@ -201,21 +200,6 @@ export const ActionPesquisaPromocao = ({ }) => {
     setTipoDescontoSelecionado(selectedValue.TIPODESCONTO);
   }, []);
 
-  // const handleChangeMecanica = useCallback((selectedValue) => {
-
-
-  //   const selectedOption = dadosMecanicas.find(option => option.ID == selectedValue);
-
-  //   if (selectedOption) {
-  //     setMecanicaSelecionada(selectedOption.MECANICA);
-  //     setMecanicaSelecionadaEdicao(selectedOption.DESCRICAO)
-  //     setAplicacaoDestinoSelecionada(selectedOption.APLICACAODESTINO);
-  //     setTipoDescontoSelecionado(selectedOption.TIPODESCONTO);
-  //   }
-  //   console.log(mecanicaSelecionadaEdicao, 'mecanicaSelecionadaEdicao')
-  // }, [dadosMecanicas, setMecanicaSelecionada, setAplicacaoDestinoSelecionada, setTipoDescontoSelecionado,]);
-
-
   const handleEditarMecanica = () => {
     const selectedOption = dadosMecanicas.find(option => option.ID == mecanicaSelecionada);
 
@@ -225,7 +209,6 @@ export const ActionPesquisaPromocao = ({ }) => {
       setBtnSalvar(false);
     }
   };
-
 
   useEffect(() => {
     if (tipoDescontoSelecionado == 0) {
@@ -242,11 +225,15 @@ export const ActionPesquisaPromocao = ({ }) => {
       setValorInicio(0);
     }
 
-    if (mecanicaSelecionada == 1 && mecanicaSelecionadaEdicao !== "PROMOÇÃO POR EM UM PRODUTO // QUANTIDADE VALOR // VALOR FINAL") {
+    if (
+      mecanicaSelecionada == 1 &&
+      mecanicaSelecionadaEdicao !== "PROMOÇÃO POR EM UM PRODUTO // QUANTIDADE VALOR // VALOR FINAL" &&
+      !MECANICAS_COM_QTD_LIBERADA.includes(tipoPromocao)
+    ) {
       setQtdInicio(0);
     }
 
-  }, [mecanicaSelecionada, tipoDescontoSelecionado, mecanicaSelecionadaEdicao, setPrecoProduto, setVrDesconto, setValorInicio, setPorcentoDesconto]);
+  }, [mecanicaSelecionada, tipoDescontoSelecionado, mecanicaSelecionadaEdicao, tipoPromocao, setPrecoProduto, setVrDesconto, setValorInicio, setPorcentoDesconto]);
 
 
   const handleCadastrar = () => {
@@ -281,63 +268,57 @@ export const ActionPesquisaPromocao = ({ }) => {
     setModalDocumentacao(true);
   }, []);
 
-  const [treeData, setTreeData] = useState([]);
-  const [selectedNodesOrigem, setSelectedNodesOrigem] = useState({});
-  const [selectedNodesDestino, setSelectedNodesDestino] = useState({});
-
   useEffect(() => {
-  if (dadosSubGrupo.length) {
-    // 1. Agrupar subgrupos por IDGRUPOESTRUTURA
-    const gruposMap = new Map();
-    
-    dadosSubGrupo.forEach(subgrupo => {
-      const grupoId = subgrupo.IDGRUPOESTRUTURA; // ID do grupo (não do subgrupo)
-      const grupoDescricao = subgrupo.DSGRUPOESTRUTURA; // Nome do grupo
-      
-      // Se o grupo ainda não existe no Map, criar
-      if (!gruposMap.has(grupoId)) {
-        gruposMap.set(grupoId, {
-          key: `grupo_${grupoId}`, // Chave única para o grupo com prefixo
-          label: grupoDescricao,    // Nome do grupo
-          children: [],             // Array dos subgrupos
-        });
-      }
-      
-      // Adicionar o subgrupo como filho do grupo
-      gruposMap.get(grupoId).children.push({
-        key: `subgrupo_${subgrupo.IDSUBGRUPOESTRUTURA}`, // Chave do subgrupo com prefixo
-        label: subgrupo.DSSUBGRUPOESTRUTURA,              // Nome do subgrupo
-        data: subgrupo // Opcional: dados completos do subgrupo
-      });
-    });
-    
-    // 2. Converter o Map em array para o TreeSelect
-    const formattedTreeData = Array.from(gruposMap.values());
-    setTreeData(formattedTreeData);
-    
-  }
-}, [dadosSubGrupo]);
+    if (dadosSubGrupo.length) {
 
-  // UseEffect para inicializar seleções baseado nos dados existentes
+      const gruposMap = new Map();
+
+      dadosSubGrupo.forEach(subgrupo => {
+        const grupoId = subgrupo.IDGRUPOESTRUTURA;
+        const grupoDescricao = subgrupo.DSGRUPOESTRUTURA;
+
+
+        if (!gruposMap.has(grupoId)) {
+          gruposMap.set(grupoId, {
+            key: `grupo_${grupoId}`,
+            label: grupoDescricao,
+            children: [],
+          });
+        }
+
+        gruposMap.get(grupoId).children.push({
+          key: `subgrupo_${subgrupo.IDSUBGRUPOESTRUTURA}`,
+          label: `${subgrupo.IDSUBGRUPOESTRUTURA} - ${subgrupo.DSSUBGRUPOESTRUTURA} `,
+          data: subgrupo
+        });
+      });
+
+
+      const formattedTreeData = Array.from(gruposMap.values());
+      setTreeData(formattedTreeData);
+
+    }
+  }, [dadosSubGrupo]);
+
   useEffect(() => {
     if (treeData.length && (grupoSelecionado.length || subGrupoDestino.length)) {
       const initialSelection = {};
-      
+
       // Marcar grupos selecionados
-      grupoSelecionado.forEach(grupoId => {
+      grupoSelecionado?.forEach(grupoId => {
         const chaveGrupo = `grupo_${grupoId}`;
         initialSelection[chaveGrupo] = true;
       });
-      
+
       // Marcar subgrupos selecionados
       subGrupoDestino.forEach(subgrupoId => {
         const chaveSubgrupo = `subgrupo_${subgrupoId}`;
         initialSelection[chaveSubgrupo] = true;
       });
-      
+
       setSelectedNodesOrigem(initialSelection);
       setSelectedNodesDestino(initialSelection);
-      
+
     }
   }, [treeData]);
 
@@ -389,27 +370,178 @@ export const ActionPesquisaPromocao = ({ }) => {
     setSubGrupoDestino(selectedSubGrupo);
   };
 
+  const handleProdutoSubGrupoOrigemChange = (e) => {
+    const selectedValue = e.value;
+    setSelectedNodesOrigem(selectedValue);
+
+    const selectedGrupo = [];
+    const selectedSubGrupo = [];
+
+    // Processar as chaves selecionadas
+    Object.keys(selectedValue).forEach(key => {
+      if (key.startsWith('grupo_')) {
+        // Extrair o ID do grupo (remove o prefixo 'grupo_')
+        const grupoId = key.replace('grupo_', '');
+        selectedGrupo.push(grupoId);
+      } else if (key.startsWith('subgrupo_')) {
+        // Extrair o ID do subgrupo (remove o prefixo 'subgrupo_')
+        const subgrupoId = Number(key.replace('subgrupo_', ''));
+        selectedSubGrupo.push(subgrupoId);
+      }
+    });
+
+    setGrupoSelecionado(selectedGrupo);
+    setSubGrupoOrigem(selectedSubGrupo);
+    setSubGrupoProdutoOrigem(selectedSubGrupo);
+  };
+
+  const handleProdutoSubGrupoDestinoChange = (e) => {
+    const selectedValue = e.value;
+    setSelectedNodesDestino(selectedValue);
+
+    const selectedGrupo = [];
+    const selectedSubGrupo = [];
+
+    // Processar as chaves selecionadas
+    Object.keys(selectedValue).forEach(key => {
+      if (key.startsWith('grupo_')) {
+        // Extrair o ID do grupo (remove o prefixo 'grupo_')
+        const grupoId = key.replace('grupo_', '');
+        selectedGrupo.push(grupoId);
+      } else if (key.startsWith('subgrupo_')) {
+        // Extrair o ID do subgrupo (remove o prefixo 'subgrupo_')
+        const subgrupoId = Number(key.replace('subgrupo_', ''));
+        selectedSubGrupo.push(subgrupoId);
+      }
+    });
+
+    setGrupoSelecionado(selectedGrupo);
+    setSubGrupoDestino(selectedSubGrupo);
+    setSubGrupoProdutoDestino(selectedSubGrupo);
+
+  };
+
+  const fetchProdutoSubGrupoDestino = async () => {
+    const urlBase = `/produto-subGrupo?idSubGrupo=${subGrupoDestino.join(',')}`;
+    let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
+    urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
+    try {
+      animacaoCarregamento('Carregando dados...', true);
+
+      const primeiraPagina = 1;
+      const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`);
+      const page = primeiraResposta.page || primeiraPagina;
+      const pageSize = primeiraResposta.pageSize || 1000;
+      const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
+      const totalPages = Math.ceil(totalRows / pageSize);
+
+      let allData = [...(primeiraResposta.data || [])];
+
+      if (totalPages > 1) {
+        for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
+          animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true);
+          const responsePage = await get(`${urlApi}&page=${currentPage}`);
+          allData.push(...(responsePage.data || []));
+        }
+      }
+
+      return allData;
+    } catch (error) {
+      console.error('Erro ao buscar dados da api:', error);
+      throw error;
+    } finally {
+      fecharAnimacaoCarregamento();
+    }
+  };
+
+  const { data: dadosProdutoSubGrupoDestino = [], error: errorProdutoSubGrupoDestino, isLoading: isLoadingProdutoSubGrupoDestino, refetch: refetchProdutoSubGrupoDestino } = useQuery(
+    ['produto-subGrupo', subGrupoDestino],
+    async () => fetchProdutoSubGrupoDestino(),
+    { enabled: Boolean(subGrupoDestino.length), staleTime: 1000 * 60 * 60, cacheTime: 1000 * 60 * 60, }
+  );
+
+  const fetchProdutoSubGrupoOrigem = async () => {
+    const urlBase = `/produto-subGrupo?idSubGrupo=${subGrupoOrigem.join(',')}`;
+    let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
+    urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
+    try {
+      animacaoCarregamento('Carregando dados...', true);
+
+      const primeiraPagina = 1;
+      const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`);
+      const page = primeiraResposta.page || primeiraPagina;
+      const pageSize = primeiraResposta.pageSize || 1000;
+      const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
+      const totalPages = Math.ceil(totalRows / pageSize);
+
+      let allData = [...(primeiraResposta.data || [])];
+
+      if (totalPages > 1) {
+        for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
+          animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true);
+          const responsePage = await get(`${urlApi}&page=${currentPage}`);
+          allData.push(...(responsePage.data || []));
+        }
+      }
+
+      return allData;
+    } catch (error) {
+      console.error('Erro ao buscar dados da api:', error);
+      throw error;
+    } finally {
+      fecharAnimacaoCarregamento();
+    }
+  };
+
+  const { data: dadosProdutoSubGrupoOrigem = [], error: errorProdutoSubGrupoOrigem, isLoading: isLoadingProdutoSubGrupoOrigem, refetch: refetchProdutoSubGrupoOrigem } = useQuery(
+    ['produto-subGrupo', subGrupoOrigem],
+    async () => fetchProdutoSubGrupoOrigem(),
+    { enabled: Boolean(subGrupoOrigem.length), staleTime: 1000 * 60 * 60, cacheTime: 1000 * 60 * 60, }
+  );
+
+  const handleChangeGrupo = (e) => {
+    const checked = e.checked;
+    setIsCheckedGrupo(checked);
+    if (checked) {
+      setIsCheckedGrupoProduto(false);
+      setIsCheckedProduto(false);
+    }
+  }
+
+  const handleChangeProduto = (e) => {
+    const checked = e.checked;
+    setIsCheckedProduto(checked);
+    if (checked) {
+      setIsCheckedGrupo(false);
+      setIsCheckedGrupoProduto(false);
+    }
+  }
+
+  const handleChangeGrupoProduto = (e) => {
+    const checked = e.checked;
+    setIsCheckedGrupoProduto(checked);
+    if (checked) {
+      setIsCheckedGrupo(false);
+      setIsCheckedProduto(true);
+    }
+  }
+
+  const mostrarModalEstruturaDestino = () => {
+    setModalEstProdDestino(true);
+  }
+
+  const mostrarModalEstruturaOrigem = () => {
+    setModalEstProdOrigem(true);
+  }
+
+
   return (
     <Fragment>
       <ActionMainPromocao
         linkComponentAnterior={["Home"]}
         linkComponent={["Cadastro de Promoções"]}
         title="Cadastro de Promoções"
-
-        // InputSelectMecanicaComponent={InputSelectActionPromocao}
-        // labelSelectMecanica={"Mecanica"}
-        // optionsMecanica={dadosMecanicas.map((item) => ({
-        //   value: item.ID,
-        //   label: `${item.ID} - ${item.DESCRICAO}`,
-        //   APLICAODESTINO: item.APLICAODESTINO,
-        //   TIPODESCONTO: item.TIPODESCONTO
-        // }))}
-        // defaultValueSelectMecanica={mecanicaSelecionada}
-        // onChangeSelectMecanica={(e) => handleChangeMecanica(e.value)}
-        // styleMecanica={customStyles}
-        // valueSelectMecanica={mecanicaSelecionada}
-        // readOnlyMecanica={mecanicaSelecionada === 0 ? true : false}
-
+     
         InputSelectMecanicaComponent={InputSelectActionPromocao}
         labelSelectMecanica={"Mecanica"}
         optionsMecanica={optionsMecanicaCompleta?.map((item) => ({
@@ -422,6 +554,8 @@ export const ActionPesquisaPromocao = ({ }) => {
         defaultValueSelectMecanica={mecanicaSelecionada}
         onChangeSelectMecanica={(e) => handleChangeMecanica(e)}
         styleMecanica={customStyles}
+        // valueSelectMecanica={mecanicaSelecionada}
+        // readOnlyMecanica={mecanicaSelecionada === 0 ? true : false}
 
         InputFieldPrecoComponent={InputFieldAction}
         labelInputPreco={"Criar Nova Mecânica"}
@@ -460,9 +594,11 @@ export const ActionPesquisaPromocao = ({ }) => {
           setQtdInicio(valor);
         }}
         readOnlyQTDInicio={
-          mecanicaSelecionada == 1 && mecanicaSelecionadaEdicao !== "PROMOÇÃO POR EM UM PRODUTO // QUANTIDADE VALOR // VALOR FINAL" 
-            ? true 
-            : false
+          MECANICAS_COM_QTD_LIBERADA.includes(tipoPromocao)
+            ? false
+            : mecanicaSelecionada == 1 && mecanicaSelecionadaEdicao !== "PROMOÇÃO POR EM UM PRODUTO // QUANTIDADE VALOR // VALOR FINAL"
+              ? true
+              : false
         }
         // styleQTDInicio={styleQTDInicio}
 
@@ -609,25 +745,25 @@ export const ActionPesquisaPromocao = ({ }) => {
           { value: "all", label: "Selecionar Todas" },
           ...(dadosGrupo?.map((item) => ({
             value: item.IDSUBGRUPOESTRUTURA,
-            label:  `${item.IDSUBGRUPOESTRUTURA} - ${item.DSGRUPOESTRUTURA} - ${item.TPSECAO} `
+            label: `${item.IDSUBGRUPOESTRUTURA} - ${item.DSGRUPOESTRUTURA} - ${item.TPSECAO} `
           })) || [])
         ]}
 
         valueSelectSubGrupoOrigemAsync={
           Array.isArray(subGrupoOrigem) && Array.isArray(dadosGrupo)
             ? dadosGrupo
-                .filter(item => subGrupoOrigem.includes(String(item.IDSUBGRUPOESTRUTURA)))
-                .map(item => ({
-                  value: item.IDSUBGRUPOESTRUTURA,
-                  label: `${item.IDSUBGRUPOESTRUTURA} - ${item.DSGRUPOESTRUTURA} - ${item.TPSECAO} `
-                }))
+              .filter(item => subGrupoOrigem.includes(String(item.IDSUBGRUPOESTRUTURA)))
+              .map(item => ({
+                value: item.IDSUBGRUPOESTRUTURA,
+                label: `${item.IDSUBGRUPOESTRUTURA} - ${item.DSGRUPOESTRUTURA} - ${item.TPSECAO} `
+              }))
             : []
         }
         onChangeSelectSubGrupoOrigemAsync={(e) => {
           if (e.some((option) => option.value === "all")) {
             const allValues = dadosGrupo.map((grupo) => String(grupo.IDSUBGRUPOESTRUTURA));
             setSubGrupoOrigem(allValues);
-          } else {            
+          } else {
             handleChangeSubGrupoOrigem(e);
           }
         }}
@@ -644,25 +780,25 @@ export const ActionPesquisaPromocao = ({ }) => {
           { value: "all", label: "Selecionar Todas" },
           ...(dadosGrupo?.map((item) => ({
             value: item.IDSUBGRUPOESTRUTURA,
-            label:  `${item.IDSUBGRUPOESTRUTURA} - ${item.DSGRUPOESTRUTURA} - ${item.TPSECAO} `
+            label: `${item.IDSUBGRUPOESTRUTURA} - ${item.DSGRUPOESTRUTURA} - ${item.TPSECAO} `
           })) || [])
         ]}
 
         valueSelectSubGrupoDestinoAsync={
           Array.isArray(subGrupoDestino) && Array.isArray(dadosGrupo)
             ? dadosGrupo
-                .filter(item => subGrupoDestino.includes(String(item.IDSUBGRUPOESTRUTURA)))
-                .map(item => ({
-                  value: item.IDSUBGRUPOESTRUTURA,
-                  label: `${item.IDSUBGRUPOESTRUTURA} - ${item.DSGRUPOESTRUTURA} - ${item.TPSECAO} `
-                }))
+              .filter(item => subGrupoDestino.includes(String(item.IDSUBGRUPOESTRUTURA)))
+              .map(item => ({
+                value: item.IDSUBGRUPOESTRUTURA,
+                label: `${item.IDSUBGRUPOESTRUTURA} - ${item.DSGRUPOESTRUTURA} - ${item.TPSECAO} `
+              }))
             : []
         }
         onChangeSelectSubGrupoDestinoAsync={(e) => {
           if (e.some((option) => option.value === "all")) {
             const allValues = dadosGrupo.map((grupo) => String(grupo.IDSUBGRUPOESTRUTURA));
             setSubGrupoDestino(allValues);
-          } else {            
+          } else {
             handleChangeSubGrupoDestino(e);
           }
         }}
@@ -672,35 +808,52 @@ export const ActionPesquisaPromocao = ({ }) => {
         onChangeTreeSelectDestino={handleTreeSelectDestinoChange}
         optionsTreeSelectDestino={treeData}
         placeholderTreeSelectDestino={"Selecione"}
-    
-     
+
+        MenuTreeSelectOrigemComponentEstProd={MenuTreeSelect}
+        valueTreeSelectOrigemEstProd={selectedNodesOrigem}
+        onChangeTreeSelectOrigemEstProd={handleProdutoSubGrupoOrigemChange}
+        optionsTreeSelectOrigemEstProd={treeData}
+        placeholderTreeSelectOrigemEstProd="Selecione"
+        labelSelectSubGrupoOrigemAsyncEstProd={"Sub Grupo Origem"}
+
+        ButtonTypeProdutoEstruturaOrigem={ButtonType}
+        linkNomeProdutoEstruturaOrigem={"Visualizar Estrutura / Produto Origem"}
+        onButtonClickProdutoEstruturaOrigem={mostrarModalEstruturaOrigem}
+        corProdutoEstruturaOrigem={"warning"}
+        IconProdutoEstruturaOrigem={GrView}
+
+        MenuTreeSelectDestinoComponentEstProd={MenuTreeSelect}
+        valueTreeSelectDestinoEstProd={selectedNodesDestino}
+        onChangeTreeSelectDestinoEstProd={handleProdutoSubGrupoDestinoChange}
+        optionsTreeSelectDestinoEstProd={treeData}
+        placeholderTreeSelectDestinoEstProd="Selecione"
+        labelSelectSubGrupoDestinoAsyncEstProd={"Sub Grupo Destino"}
+
+        ButtonTypeProdutoEstruturaDestino={ButtonType}
+        linkNomeProdutoEstruturaDestino={"Visualizar Estrutura / Produto Destino"}
+        onButtonClickProdutoEstruturaDestino={mostrarModalEstruturaDestino}
+        corProdutoEstruturaDestino={"info"}
+        IconProdutoEstruturaDestino={GrView}
+
+
         InputGrupoEstrutura={InputFieldActionRadio}
         labelInputGrupoEstrutura={"Estrutura Mercadológica"}
         valueInputGrupoEstrutura={isCheckedGrupo}
-        onChangeInputGrupoEstrutura={(e) => {
-          if (e.checked) {
-            setIsCheckedGrupo(true);
-            setIsCheckedProduto(false); // Desmarca o outro
-          } else {
-            setIsCheckedGrupo(false);
-          }
-        }}
-      
+        onChangeInputGrupoEstrutura={handleChangeGrupo}
+
+        InputGrupoEstruturaProduto={InputFieldActionRadio}
+        labelInputGrupoEstruturaProduto={"Estrutura / Produto"}
+        valueInputGrupoEstruturaProduto={isCheckedGrupoProduto}
+        onChangeInputGrupoEstruturaProduto={handleChangeGrupoProduto}
+
         InputProduto={InputFieldActionRadio}
         labelInputProduto={"Por Produtos"}
         valueInputProduto={isCheckedProduto}
-        onChangeInputProduto={(e) => {
-          if (e.checked) {
-            setIsCheckedProduto(true);
-            setIsCheckedGrupo(false); // Desmarca o outro
-          } else {
-            setIsCheckedProduto(false);
-          }
-        }}
+        onChangeInputProduto={handleChangeProduto}
 
-
-        styleProduto={{ display: isCheckedGrupo ? 'none' : 'block' }}
-        styleEstrutura={{ display: isCheckedProduto ? 'none' : 'block' }}
+        styleProduto={{ display: isCheckedProduto ? 'block' : 'none' }}
+        styleEstrutura={{ display: isCheckedGrupo ? 'block' : 'none' }}
+        styleEstruturaProduto={{ display: isCheckedGrupoProduto ? 'block' : 'none' }}
 
         InputFieldProdutoOigem={InputFieldAction}
         labelInputFieldProdutoOigem={"Produto Origem"}
@@ -773,14 +926,21 @@ export const ActionPesquisaPromocao = ({ }) => {
 
 
         ButtonSearchComponent={ButtonType}
-        linkNomeSearch={"Cadastrar Promoção"}
+        linkNomeSearch={"Cadastrar Por Produto"}
         onButtonClickSearch={handleCadastrar}
         corSearch={"primary"}
         IconSearch={IoIosSend}
-        styleButtonSearch={isCheckedProduto ? false : true}
+        styleButtonSearch={!isCheckedProduto || isCheckedGrupoProduto}
+
+        ButtonTypeEstruturaProduto={ButtonType}
+        linkEstruturaProduto={"Cadastrar Por Estrutura / Produto"}
+        onButtonClickEstruturaProduto={onSubmitEstruturaProduto}
+        corEstruturaProduto={"success"}
+        IconEstruturaProduto={IoIosSend}
+        disabledBTEstruturaProduto={isCheckedGrupoProduto ? false : true}
 
         ButtonTypePedido={ButtonType}
-        linkPedido={"Cadastrar Promoção Mercadologica"}
+        linkPedido={"Cadastrar Por Estrutura"}
         onButtonClickPedido={handleCadastrarEstrutura}
         corPedido={"info"}
         IconPedido={IoIosSend}
@@ -799,7 +959,6 @@ export const ActionPesquisaPromocao = ({ }) => {
         IconRetornar={FaDownload}
       />
 
-  
       <ActionCadastrarPromocaoModal
         dadosPromocoesAtivas={dadosPromocoesAtivas}
         show={modalVisivel}
@@ -860,6 +1019,26 @@ export const ActionPesquisaPromocao = ({ }) => {
         setFileProdutoDestino={setFileProdutoDestino}
       />
 
+      
+      <ActionEstruturaProdutoOrigemModal
+        show={modalEstProdOrigem}
+        handleClose={() => setModalEstProdOrigem(false)}
+        dadosProdutoSubGrupoOrigem={dadosProdutoSubGrupoOrigem}
+        produtoSelecionadoEstProdOrigem={produtoSelecionadoEstProdOrigem}
+        setProdutoSelecionadoEstProdutoOrigem={setProdutoSelecionadoEstProdutoOrigem}
+        novoProdutoEstProdOrigem={novoProdutoEstProdOrigem}
+        setNovoProdutoEstProdOrigem={setNovoProdutoEstProdOrigem}
+      />
+
+      <ActionEstruturaProdutoDestinoModal
+        show={modalEstProdDestino}
+        handleClose={() => setModalEstProdDestino(false)}
+        dadosProdutoSubGrupoDestino={dadosProdutoSubGrupoDestino}
+        produtoSelecionadoEstProdDestino={produtoSelecionadoEstProdDestino}
+        setProdutoSelecionadoEstProdutoDestino={setProdutoSelecionadoEstProdutoDestino}
+        novoProdutoEstProdDestino={novoProdutoEstProdDestino}
+        setNovoProdutoEstProdDestino={setNovoProdutoEstProdDestino}
+      />
 
       <ActionDocumentacaoCriar
         show={modalDocumentacao}

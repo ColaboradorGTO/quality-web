@@ -338,6 +338,8 @@ export const ActionPesquisaPromocoesAtivas = ({ usuarioLogado }) => {
           handleClickIncluir={handleClickIncluir}
           actionEditarVisivel={actionEditarVisivel}
           setActionEditarVisivel={setActionEditarVisivel}
+          usuarioLogado={usuarioLogado}
+          optionsModulos={optionsModulos}
         />
       )}
 

@@ -130,7 +130,7 @@ export const DashBoardPromocao = ({ }) => {
                           <div className="panel-content">
                             <Suspense fallback={<div>Loading...</div>}>
                               {actionVisivel && !resumoVisivel && !componentToShow && (
-                                <ActionPesquisaPromocao />
+                                <ActionPesquisaPromocao usuarioLogado={usuarioLogado} />
 
                               )}
 
