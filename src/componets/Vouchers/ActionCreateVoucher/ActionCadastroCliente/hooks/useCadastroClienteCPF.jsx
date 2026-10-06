@@ -153,7 +153,7 @@ export const useCadastrarClienteCPF = ({ usuarioLogado, optionsModulos, handleCl
             let response = await getDadosEnderecoViaCep_API_externa(cep);    
          
             if (response.status !== 200) {
-                console.log('API principal falhou, tentando API de redundância...');
+                //console.log('API principal falhou, tentando API de redundância...');
                 response = await getDadosEnderecoViaCep_API_redundancia(cep);
             }
             

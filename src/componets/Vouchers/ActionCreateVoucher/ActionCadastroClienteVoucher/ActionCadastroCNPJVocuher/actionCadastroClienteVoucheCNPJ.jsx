@@ -3,7 +3,7 @@ import Modal from 'react-bootstrap/Modal';
 import { HeaderModal } from "../../../../Modais/HeaderModal/HeaderModal";
 import { FormularioCadastro } from "./formularioCadastro";
 
-export const ActionCadastroClienteVoucherCNPJ = ({ show, handleClose, usuarioLogado, optionsModulos, onCpf }) => {
+export const ActionCadastroClienteVoucherCNPJ = ({ show, handleClose, usuarioLogado, optionsModulos, onCpf, cpfCliente }) => {
   return (
 
     <Fragment>
@@ -28,6 +28,7 @@ export const ActionCadastroClienteVoucherCNPJ = ({ show, handleClose, usuarioLog
             handleClose={handleClose}
             usuarioLogado={usuarioLogado}
             optionsModulos={optionsModulos}
+            cpfCliente={cpfCliente}
             onCpf={onCpf}
           />
         </Modal.Body>

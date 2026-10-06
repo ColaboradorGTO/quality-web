@@ -4,10 +4,10 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 
 export const useEditarStatusVoucher = ({
-    dadosEditarVoucher, 
-    usuarioLogado, 
-    optionsModulos, 
-    handleClose, 
+    dadosEditarVoucher,
+    usuarioLogado,
+    optionsModulos,
+    handleClose,
     refetchListaVouchers
 }) => {
     const [trocaSelecionado, setTrocaSelecionado] = useState('')
@@ -17,7 +17,7 @@ export const useEditarStatusVoucher = ({
     const [statusFoiTrocado, setStatusFoiTrocado] = useState(false);
     const [ipUsuario, setIpUsuario] = useState('');
 
-    
+
     const getIPUsuario = async () => {
         let usuarioIP = null;
 
@@ -30,16 +30,16 @@ export const useEditarStatusVoucher = ({
 
         if (!usuarioIP) {
             try {
-            const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-            usuarioIP = ipifyData?.ip;
+                const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
+                usuarioIP = ipifyData?.ip;
             } catch (error) {
-            console.error("Erro ao buscar IP via ipify.org:", error);
+                console.error("Erro ao buscar IP via ipify.org:", error);
             }
         }
         setIpUsuario(usuarioIP);
         return usuarioIP;
     };
-    
+
     useEffect(() => {
         setStatusSelecionado(dadosEditarVoucher[0]?.voucher.STSTATUS)
         setTrocaSelecionado(dadosEditarVoucher[0]?.voucher.STTIPOTROCA)
@@ -48,7 +48,7 @@ export const useEditarStatusVoucher = ({
     const onSubmit = async () => {
         let STATIVO = 'True';
         let STCANCELADO = 'False';
-        if(optionsModulos[0]?.ALTERAR == 'False') {
+        if (optionsModulos[0]?.ALTERAR == 'False') {
             Swal.fire({
                 title: 'Atenção! Ação Não Permitida',
                 text: 'Você não tem permissão para alterar este voucher',
@@ -84,7 +84,7 @@ export const useEditarStatusVoucher = ({
                 })
                 return;
             }
-    
+
             if (statusSelecionado == 'NOVO' || statusSelecionado == 'LIBERADO PARA CLIENTE') {
                 STATIVO = 'True';
                 STCANCELADO = 'False';
@@ -95,7 +95,7 @@ export const useEditarStatusVoucher = ({
                 STATIVO = 'False';
                 STCANCELADO = 'False';
             }
-    
+
             const putData = {
                 STATIVO,
                 STCANCELADO,
@@ -107,23 +107,23 @@ export const useEditarStatusVoucher = ({
                 IDEMPRESALOGADA: usuarioLogado?.IDEMPRESA,
                 IDGRUPOEMPRESARIAL: usuarioLogado?.IDGRUPOEMPRESARIAL,
             }
-            
+
             const response = await put('/todos-web/:id', putData)
             const ipUsuario = await getIPUsuario();
             const textDados = JSON.stringify(putData)
             let textoFuncao = 'GERENCIA/ATUALIZAÇÃO DE VOUCHER';
-    
-    
+
+
             const postData = {
                 IDFUNCIONARIO: String(usuarioLogado?.id),
                 PATHFUNCAO: textoFuncao,
                 DADOS: textDados,
                 IP: ipUsuario
             }
-    
+
             await post('/log-web', postData)
-    
-             
+
+
             Swal.fire({
                 title: 'Cadastro',
                 text: 'Status Voucher Atualizado com Sucesso',
@@ -138,18 +138,6 @@ export const useEditarStatusVoucher = ({
             return response.data;
 
         } catch (error) {
-            const ipUsuario = await getIPUsuario();
-            let textoFuncao = 'GERENCIA/ERRO AO ATUALIZAR  VOUCHER';
-    
-            const postData = {
-                IDFUNCIONARIO: String(usuarioLogado?.id),
-                PATHFUNCAO: textoFuncao,
-                DADOS: '',
-                IP: ipUsuario
-            }
-    
-            const responsePost = await post('/log-web', postData)
-
             Swal.fire({
                 title: 'Erro',
                 text: 'Ocorreu um erro ao atualizar o status do voucher. Por favor, tente novamente.',
@@ -159,7 +147,18 @@ export const useEditarStatusVoucher = ({
                     container: 'custom-swal',
                 },
             });
-            
+
+            const ipUsuario = await getIPUsuario();
+            let textoFuncao = 'GERENCIA/ERRO AO ATUALIZAR  VOUCHER';
+
+            const postData = {
+                IDFUNCIONARIO: String(usuarioLogado?.id),
+                PATHFUNCAO: textoFuncao,
+                DADOS: '',
+                IP: ipUsuario || 'INDISPONIVEL'
+            }
+
+            const responsePost = await post('/log-web', postData)
             return responsePost.data;
         }
     }

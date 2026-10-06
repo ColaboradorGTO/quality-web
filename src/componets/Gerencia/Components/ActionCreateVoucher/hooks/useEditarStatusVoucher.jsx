@@ -11,7 +11,7 @@ export const useEditarStatusVoucher = ({
     handleClose,
     refetchListaVouchers
 }) => {
-    
+
     const [trocaSelecionado, setTrocaSelecionado] = useState('')
     const [statusSelecionado, setStatusSelecionado] = useState('')
     const [motivoTroca, setMotivoTroca] = useState('')
@@ -135,6 +135,16 @@ export const useEditarStatusVoucher = ({
             return responsePost.data;
 
         } catch (error) {
+            Swal.fire({
+                title: 'Erro',
+                text: 'Ocorreu um erro ao atualizar o status do voucher. Por favor, tente novamente.',
+                icon: 'error',
+                confirmButtonText: 'OK',
+                customClass: {
+                    container: 'custom-swal',
+                },
+            });
+
             const putData = {
                 STATIVO,
                 STCANCELADO,
@@ -158,16 +168,6 @@ export const useEditarStatusVoucher = ({
             }
 
             const responsePost = await post('/log-web', postData)
-
-            Swal.fire({
-                title: 'Erro',
-                text: 'Ocorreu um erro ao atualizar o status do voucher. Por favor, tente novamente.',
-                icon: 'error',
-                confirmButtonText: 'OK',
-                customClass: {
-                    container: 'custom-swal',
-                },
-            });
 
             return responsePost.data;
         }

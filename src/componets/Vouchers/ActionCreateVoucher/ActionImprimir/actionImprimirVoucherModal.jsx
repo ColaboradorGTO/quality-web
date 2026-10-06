@@ -2,7 +2,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import Modal from 'react-bootstrap/Modal';
 import { ReactBarcode } from 'react-jsbarcode';
 import { useReactToPrint } from "react-to-print";
-import jsPDF from 'jspdf'; 
+import jsPDF from 'jspdf';
 import Swal from "sweetalert2";
 import { getDataHoraAtual } from "../../../../utils/dataAtual";
 import { dataHoraFormatada } from "../../../../utils/dataFormatada";
@@ -12,7 +12,7 @@ import { HeaderModal } from "../../../Modais/HeaderModal/HeaderModal";
 
 export const ActionImprimirVoucherModal = ({ show, handleClose, dadosImprimirVoucher }) => {
   const [dataHoje, setDataHoje] = useState('');
-  const [layout, setLayout] = useState('layout-normal'); 
+  const [layout, setLayout] = useState('layout-normal');
   useEffect(() => {
     const dataAtual = getDataHoraAtual();
     setDataHoje(dataAtual);
@@ -25,21 +25,32 @@ export const ActionImprimirVoucherModal = ({ show, handleClose, dadosImprimirVou
     documentTitle: 'voucher',
   });
 
-  const handleExportPDF = () => {
-    const doc = new jsPDF();
-    
-    doc.setFontSize(10); 
-    doc.setFont('helvetica'); 
+  const handleExportPDF = async () => {
+    const elemento = dataTableRef.current;
 
-    doc.html(dataTableRef.current, {
-      callback: function (doc) {
-        doc.save("voucher.pdf");
-      },
-      x: 10,
-      y: 10,
+    if (!elemento) return;
+
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+    });
+    const margem = 10;
+    const larguraUtil = doc.internal.pageSize.getWidth() - (margem * 2);
+
+    await doc.html(elemento, {
+      x: margem,
+      y: margem,
+      width: larguraUtil,
+      windowWidth: elemento.scrollWidth,
+      autoPaging: 'text',
       html2canvas: {
-        scale: 0.3 
-      }
+        backgroundColor: '#ffffff',
+        useCORS: true,
+      },
+      callback: (pdf) => {
+        pdf.save("voucher.pdf");
+      },
     });
   };
 
@@ -63,7 +74,7 @@ export const ActionImprimirVoucherModal = ({ show, handleClose, dadosImprimirVou
     };
   });
 
-  
+
 
   const toggleLayout = () => {
     setLayout(layout === 'layout-normal' ? 'layout-cupom' : 'layout-normal');
@@ -80,30 +91,30 @@ export const ActionImprimirVoucherModal = ({ show, handleClose, dadosImprimirVou
       confirmButtonText: 'CUPOM',
       cancelButtonText: 'NORMAL',
       customClass: {
-        container: 'custom-swal', 
+        container: 'custom-swal',
       },
       preConfirm: () => {
         return new Promise((resolve) => {
-        
-          toggleLayout(); 
+
+          toggleLayout();
           setTimeout(() => {
-            handlePrint(); 
-            resolve(); 
-          }, 500); 
+            handlePrint();
+            resolve();
+          }, 500);
         });
       }
     }).then((result) => {
       if (result.value) {
-        toggleLayout(); 
+        toggleLayout();
         setTimeout(() => {
-          handlePrint(); 
-          resolve(); 
+          handlePrint();
+          resolve();
         }, 500)
       } else if (result.dismiss === 'cancel') {
-        toggleLayout(); 
+        toggleLayout();
         setTimeout(() => {
-          handlePrint(); 
-          resolve(); 
+          handlePrint();
+          resolve();
         }, 500)
       }
     });
@@ -118,7 +129,7 @@ export const ActionImprimirVoucherModal = ({ show, handleClose, dadosImprimirVou
           <HeaderModal title={"Voucher"} handleClose={handleClose} />
 
           <Modal.Body>
-            <div ref={dataTableRef} className={layout}> 
+            <div ref={dataTableRef} className={layout}>
               <p className="center" style={{ margin: "0px", textAlign: "center", fontWeight: 700 }}>
                 {dados[0]?.EMPORIGEM}
               </p>
@@ -141,7 +152,7 @@ export const ActionImprimirVoucherModal = ({ show, handleClose, dadosImprimirVou
               </p>
 
               <hr style={{ border: "1px dashed" }} />
-              
+
               <p style={{ margin: "0px", textAlign: "center", fontSize: "16px" }}>
                 ORDEM DE TROCA
                 <br />
@@ -178,10 +189,10 @@ export const ActionImprimirVoucherModal = ({ show, handleClose, dadosImprimirVou
               <hr style={{ border: "1px dashed" }} />
 
               <div style={{ display: "flex", justifyContent: "center" }}>
-                <ReactBarcode 
-                  value={dados[0]?.NUVOUCHER} 
-                  options={{ format: 'code128' }} 
-                  renderer="canvas" 
+                <ReactBarcode
+                  value={dados[0]?.NUVOUCHER}
+                  options={{ format: 'code128' }}
+                  renderer="canvas"
                 />
               </div>
 

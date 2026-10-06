@@ -31,21 +31,32 @@ export const ActionImprimirVoucherModal = ({ show, handleClose, dadosImprimirVou
     documentTitle: 'voucher',
   });
 
-  const handleExportPDF = () => {
-    const doc = new jsPDF();
-    
-    doc.setFontSize(10); 
-    doc.setFont('helvetica'); 
+   const handleExportPDF = async () => {
+    const elemento = dataTableRef.current;
 
-    doc.html(dataTableRef.current, {
-      callback: function (doc) {
-        doc.save("voucher.pdf");
-      },
-      x: 10,
-      y: 10,
+    if (!elemento) return;
+
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+    });
+    const margem = 10;
+    const larguraUtil = doc.internal.pageSize.getWidth() - (margem * 2);
+
+    await doc.html(elemento, {
+      x: margem,
+      y: margem,
+      width: larguraUtil,
+      windowWidth: elemento.scrollWidth,
+      autoPaging: 'text',
       html2canvas: {
-        scale: 0.3 
-      }
+        backgroundColor: '#ffffff',
+        useCORS: true,
+      },
+      callback: (pdf) => {
+        pdf.save("voucher.pdf");
+      },
     });
   };
 
@@ -151,13 +162,13 @@ export const ActionImprimirVoucherModal = ({ show, handleClose, dadosImprimirVou
             iconConfirmar={MdLocalPrintshop}
             iconSizeConfirmar={20}
 
-            ButtonTypeCadastrar={ButtonTypeModal}
+    /*         ButtonTypeCadastrar={ButtonTypeModal}
             textButtonCadastrar={"PDF"}
             onClickButtonCadastrar={handleExportPDF}
             corCadastrar="danger"
             iconCadastrar={FaRegFilePdf}
             iconSizeCadastrar={20}
-            
+             */
           />
 
           <Modal.Body>
@@ -235,7 +246,7 @@ export const ActionImprimirVoucherModal = ({ show, handleClose, dadosImprimirVou
               <hr style={{ border: "1px dashed" }} />
 
               <div style={{ display: "flex", justifyContent: "center" }}>
-                <ReactBarcode value={dados[0]?.NUVOUCHER} options={{ format: 'code128' }} renderer="svg" />
+                <ReactBarcode value={dados[0]?.NUVOUCHER} options={{ format: 'code128' }} renderer="canvas" />
               </div>
 
               <hr style={{ border: "1px dashed" }} />
