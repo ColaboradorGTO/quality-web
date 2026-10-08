@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Swal from 'sweetalert2';
 import axios from "axios";
 import { getDataAtual } from "../../../../../utils/dataAtual";
-import { post, get } from "../../../../../api/funcRequest";
+import { get, post } from "../../../../../api/funcRequest";
 import { removerFormatacaoMoeda } from "../../../../../utils/formatMoeda";
 import { useQuery } from "react-query";
 
@@ -46,7 +46,6 @@ export const useCadastrarPremiacoes = ({ handleClose, usuarioLogado, optionsModu
     setIpUsuario(usuarioIP);
     return usuarioIP;
   };
-
 
   const { data: dadosPremiacaoCadastrada = [], error: errorPremiacaoCadastrada, isLoading: isLoadingPremiacaoCadastrada, refetch: refetchPremiacaoCadastrada } = useQuery(
     ['lista-premiacao-cadastrada'],
@@ -164,6 +163,7 @@ export const useCadastrarPremiacoes = ({ handleClose, usuarioLogado, optionsModu
     setValorBonusJunior,
     valorBonusTodos,
     setValorBonusTodos,
+    dadosPremiacaoCadastrada,
     onSubmit
   }
 }

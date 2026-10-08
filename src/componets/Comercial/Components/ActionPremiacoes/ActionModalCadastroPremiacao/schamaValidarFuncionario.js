@@ -2,10 +2,22 @@ import * as yup from 'yup';
 
 export const schema = yup.object({
 
-  empresaFuncionario: yup
+  funcao: yup
   .object()
   .nullable()
-  .required('Empresa é obrigatória')
-  .typeError('Empresa é obrigatória'),
+  .required('Função é obrigatória')
+  .typeError('Função é obrigatória'),
+
+  indicadores: yup
+  .object()
+  .nullable()
+  .required('Indicadores é obrigatória')
+  .typeError('Indicadores é obrigatória'),
+ 
+  apuracao: yup
+  .object()
+  .nullable()
+  .required('Apuração é obrigatória')
+  .typeError('Apuração é obrigatória'),
 
 });

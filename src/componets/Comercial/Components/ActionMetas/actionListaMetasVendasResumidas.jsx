@@ -268,6 +268,7 @@ export const ActionListaMetasVendasResumidas = ({
       </Row>
     </ColumnGroup>
   )
+  
   return (
 
     <Fragment>

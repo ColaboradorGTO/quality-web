@@ -133,7 +133,7 @@ export const DashBoardComercial = () => {
       component = <ActionPesquisaPrecoProdutoGrupoSubGrupo />
       break;
     case "/comercial/ActionPesquisaMetas":
-      component = <ActionPesquisaMetas />
+      component = <ActionPesquisaMetas usuarioLogado={usuarioLogado}/>
       break;
     case "/comercial/ActionPesquisaPremiacoes":
       component = <ActionPesquisaPremiacoes usuarioLogado={usuarioLogado} />

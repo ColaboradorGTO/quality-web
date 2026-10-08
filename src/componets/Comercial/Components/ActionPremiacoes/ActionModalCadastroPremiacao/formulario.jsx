@@ -44,13 +44,16 @@ export const Formulario = ({
     setValorBonusJunior,
     valorBonusTodos,
     setValorBonusTodos,
+    dadosPremiacaoCadastrada,
     onSubmit
   } = useCadastrarPremiacoes({ usuarioLogado, optionsModulos, marcaSelecionada });
     
   const handleValidatedSubmit = async () => {
     try {
       const dadosParaValidar = {
-        empresaFuncionario: empresaSelecionada,
+        funcao: funcaoSelecionada,
+        indicadores: indicadorSelecionado,
+        apuracao: apuracaoSelecionada
       }
       await schema.validate(dadosParaValidar, { abortEarly: false });
       await onSubmit();

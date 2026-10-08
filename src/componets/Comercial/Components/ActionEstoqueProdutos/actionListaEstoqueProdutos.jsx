@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from "react"
+import { Fragment, useRef, useState } from "react"
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { toFloat } from "../../../../utils/toFloat";
@@ -163,7 +163,7 @@ export const ActionListaEstoqueProduto = ({ dadosEstoqueVendas }) => {
     {
       field: 'SUBGRUPO',
       header: 'Sub Grupo',
-      body: row => <th>{row.SUBGRUPO}</th>,
+      body: row => <p style={{width: '100px'}}>{row.SUBGRUPO}</p>,
       sortable: true,
     },
     {
@@ -181,7 +181,7 @@ export const ActionListaEstoqueProduto = ({ dadosEstoqueVendas }) => {
     {
       field: 'DSNOME',
       header: 'Produto',
-      body: row => <th>{row.DSNOME}</th>,
+      body: row => <p style={{width: '100px'}}>{row.DSNOME}</p>,
       sortable: true,
     },
     {
@@ -313,7 +313,7 @@ export const ActionListaEstoqueProduto = ({ dadosEstoqueVendas }) => {
                 sortable={coluna.sortable}
                 headerStyle={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
                 footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }}
-                bodyStyle={{ fontSize: '0.8rem' }}
+                bodyStyle={{ fontSize: '0.8rem', fontWeight: 600, border: '1px solid #e9e9e9', margin: '0px' }}
               />
             ))}
           </DataTable>

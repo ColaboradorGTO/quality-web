@@ -11,19 +11,25 @@ import * as XLSX from 'xlsx';
 import 'jspdf-autotable';
 import HeaderTable from "../../../Tables/headerTable";
 import { get } from "../../../../api/funcRequest";
+import { useCancelarMeta } from "./hooks/useCancelarMeta";
 
 export const ActionListaMetas = ({ 
   dadosVendasMarca,
+  usuarioLogado,
+  optionsModulos,
   setTabelaVisivel,
   setTabelaVendaResumidaVisivel,
   setTabelaMetasVendasVisivel,
   setDadosVendasResumida,
-  setDadosMetasDetalhadas
+  setDadosMetasDetalhadas,
+  handleClick
 }) => {
   const [globalFilterValue, setGlobalFilterValue] = useState('');
   const [rowSelection, setRowSelection] = useState(null);
   const dataTableRef = useRef();
-
+  const {
+    handleCancelar
+  } = useCancelarMeta({ usuarioLogado, optionsModulos, handleClick })
 
 
   const onGlobalFilterChange = (e) => {
@@ -70,7 +76,7 @@ export const ActionListaMetas = ({
 
   const dados = dadosVendasMarca.map((item, index) => {
     let contador = index + 1;
-
+    
     return {
       contador,
       DSSUBGRUPOEMPRESARIAL: item.DSSUBGRUPOEMPRESARIAL,
@@ -119,8 +125,8 @@ export const ActionListaMetas = ({
       header: 'Situação',
       body: (
         (row) => (
-          <th style={{ color: row.STSALVO == 'SALVO' ? 'blue' : 'red' }}>
-            {row.STSALVO}
+          <th style={{ color: row.STATIVO == 'True' ? 'blue' : 'red' }}>
+            {row.STATIVO == 'True' ? 'ATIVA' : 'DESATIVADA'}
 
           </th>
         )
@@ -163,7 +169,7 @@ export const ActionListaMetas = ({
             <div className="p-1">
               <ButtonTable
                 titleButton={"Excluir Metas"}
-                onClickButton
+                onClickButton={() => handleCancelar(row)}
                 Icon={AiOutlineDelete}
                 iconSize={25}
                 iconColor={"#fff"}
@@ -228,7 +234,7 @@ export const ActionListaMetas = ({
     <Fragment>
       <div className="panel" >
         <div className="panel-hdr">
-          <h2>Metas Marcas Período</h2>
+          <h2>Metas Marcas Período aqui</h2>
         </div>
         <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
           <HeaderTable
@@ -257,7 +263,7 @@ export const ActionListaMetas = ({
             showGridlines
             stripedRows
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
-
+            cellMemo={false}
           >
             {colunasVendas.map(coluna => (
               <Column
