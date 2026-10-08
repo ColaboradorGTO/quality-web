@@ -192,8 +192,8 @@ export const ActionPesquisaRotatividade = () => {
         optionsFornecedores={[
           { value: '', label: 'Selecione um Fornecedor' },
           ...dadosFornecedor.map((fornecedor) => ({
-            value: fornecedor.ID_FORNECEDOR,
-            label: `${fornecedor.ID_FORNECEDOR} ${fornecedor.FORNECEDOR}`,
+            value: fornecedor.IDPN,
+            label: `${fornecedor.IDPN} ${fornecedor.PN}`,
           }))
         ]}
         labelSelectFornecedor={"Por Fornecedor"}
