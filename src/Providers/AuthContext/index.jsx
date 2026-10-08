@@ -11,6 +11,7 @@ export function AuthProvider({ children }) {
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(true);
   const [loginError, setLoginError] = useState('');
+  const [usuarioAutenticado, setUsuarioAutenticado] = useState();
 
   const handleSenhaChange = (e) => {
     setSenha(e.target.value);
@@ -22,7 +23,7 @@ export function AuthProvider({ children }) {
 
   const loginSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Limpa erro anterior
     setLoginError('');
 
@@ -46,19 +47,21 @@ export function AuthProvider({ children }) {
     try {
       setLoading(true);
       const response = await post('/login', data);
-      
+
       if (response && response?.usuario && response?.usuario.token) {
-        
+
         localStorage.removeItem('token');
         localStorage.removeItem('usuario');
         localStorage.setItem('token', response?.usuario.token);
         localStorage.setItem('usuario', JSON.stringify(response?.usuario));
-        
+
+        setUsuarioAutenticado(response?.usuario);
+
         // Força a navegação após um pequeno delay
         setTimeout(() => {
           navigate('/modulo', { replace: true });
         }, 100);
-        
+
         // Limpa os campos
         setUsuario('');
         setSenha('');
@@ -72,18 +75,18 @@ export function AuthProvider({ children }) {
           confirmButtonText: 'OK'
         });
       }
-   
+
       return response?.body || response;
     } catch (error) {
       console.error('Login error:', error);
-      
+
       // Trata diferentes tipos de erro
       let errorMessage = 'Erro interno do servidor. Tente novamente.';
-      
+
       if (error.response) {
         // Erro da API (4xx, 5xx)
         const status = error.response.status;
-        
+
         if (status === 401 || status === 403) {
           errorMessage = 'Usuário ou senha inválidos.';
         } else if (status === 404) {
@@ -97,9 +100,9 @@ export function AuthProvider({ children }) {
         // Erro de rede
         errorMessage = 'Erro de conexão. Verifique sua internet.';
       }
-      
+
       setLoginError(errorMessage);
-      
+
       Swal.fire({
         icon: 'error',
         title: 'Erro de Login',
@@ -114,6 +117,7 @@ export function AuthProvider({ children }) {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');
+    setUsuarioAutenticado(null);
     setUsuario('');
     setSenha('');
     setLoginError('');
@@ -133,6 +137,7 @@ export function AuthProvider({ children }) {
         senha,
         loading,
         loginError,
+        usuarioAutenticado,
         handleSenhaChange,
         handleUsuarioChange,
         loginSubmit,
