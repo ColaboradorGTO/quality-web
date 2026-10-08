@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Swal from 'sweetalert2';
-import axios from "axios";
 import { getDataAtual } from "../../../../../utils/dataAtual";
 import { get, post } from "../../../../../api/funcRequest";
 import { removerFormatacaoMoeda } from "../../../../../utils/formatMoeda";
 import { useQuery } from "react-query";
+import { registrarLogAuditoria } from "../../../../../services/auditLog";
 
 export const useCadastrarPremiacoes = ({ handleClose, usuarioLogado, optionsModulos, marcaSelecionada }) => {
   const [grupoEmpresarial, setGrupoEmpresarial] = useState('');
@@ -17,7 +17,7 @@ export const useCadastrarPremiacoes = ({ handleClose, usuarioLogado, optionsModu
   const [valorBonusPleno, setValorBonusPleno] = useState('0');
   const [valorBonusJunior, setValorBonusJunior] = useState('0');
   const [valorBonusTodos, setValorBonusTodos] = useState('0');
-  const [ipUsuario, setIpUsuario] = useState('');
+
 
   useEffect(() => {
     const dataAtual = getDataAtual();
@@ -25,27 +25,6 @@ export const useCadastrarPremiacoes = ({ handleClose, usuarioLogado, optionsModu
     setDataFim(dataAtual);
   }, [])
 
-  const getIPUsuario = async () => {
-    let usuarioIP = null;
-
-    try {
-      const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-      usuarioIP = ipWhoisData?.ip;
-    } catch (error) {
-      console.error("Erro ao buscar IP via ifconfig.me:", error);
-    }
-
-    if (!usuarioIP) {
-      try {
-        const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-        usuarioIP = ipifyData?.ip;
-      } catch (error) {
-        console.error("Erro ao buscar IP via ipify.org:", error);
-      }
-    }
-    setIpUsuario(usuarioIP);
-    return usuarioIP;
-  };
 
   const { data: dadosPremiacaoCadastrada = [], error: errorPremiacaoCadastrada, isLoading: isLoadingPremiacaoCadastrada, refetch: refetchPremiacaoCadastrada } = useQuery(
     ['lista-premiacao-cadastrada'],
@@ -100,34 +79,22 @@ export const useCadastrarPremiacoes = ({ handleClose, usuarioLogado, optionsModu
         }
       })
 
-      const textDados = JSON.stringify(postData)
-      const textoFuncao = 'COMERCIAL / CADASTRO DE PREMIAÇÕES';
-      const ipUsuario = await getIPUsuario();
+      await registrarLogAuditoria({
+        idFuncionario: usuarioLogado?.id,
+        pathFuncao: 'COMERCIAL / CADASTRO DE PREMIAÇÕES',
+        dados: postData
+      });
 
-      const createData = {
-        IDFUNCIONARIO: String(usuarioLogado.id),
-        PATHFUNCAO: textoFuncao,
-        DADOS: textDados,
-        IP: ipUsuario || 'Indisponível'
-      }
-
-      await post('/log-web', createData)
-
-      refetchPremiacaoCadastrada();
+      refetchPremiacaoCadastrada(); 
+      handleClose()
       return response.data;
     } catch (error) {
-      const textDados = JSON.stringify(postData)
-      const textoFuncao = 'COMERCIAL / ERRO AO CADASTRAR PREMIAÇÕES';
-      const ipUsuario = await getIPUsuario();
+      await registrarLogAuditoria({
+        idFuncionario: usuarioLogado?.id,
+        pathFuncao: 'COMERCIAL / ERRO AO CADASTRAR PREMIAÇÕES',
+        dados: postData
+      });
 
-      const createData = {
-        IDFUNCIONARIO: String(usuarioLogado.id),
-        PATHFUNCAO: textoFuncao,
-        DADOS: textDados,
-        IP: ipUsuario || 'Indisponível'
-      }
-
-      const response = await post('/log-web', createData)
       Swal.fire({
         title: 'Erro ao Cadastrar',
         text: 'Erro ao Tentar Cadastrar Premiações',
@@ -138,7 +105,7 @@ export const useCadastrarPremiacoes = ({ handleClose, usuarioLogado, optionsModu
         }
       })
       console.error('Erro ao parsear o usuário do localStorage:', error);
-      return response.data;
+      return;
     }
   }
 
