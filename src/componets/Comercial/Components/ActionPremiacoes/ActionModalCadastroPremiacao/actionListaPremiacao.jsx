@@ -167,27 +167,27 @@ export const ActionListaPremiacao = ({
       ),
       sortable: true,
     },
-    {
-      field: 'IDPREMIACAO',
-      header: 'Opções',
-      body: (row) => (
-         <div style={{ display: "flex", justifyContent: "space-around" }}>
-          <div className="p-1">
-            <ButtonTable
-              titleButton={"Cancelar Premio"}
-              onClickButton={() => console.log(row)}
-              Icon={CiEdit}
-              iconSize={25}
-              iconColor={"#fff"}
-              cor={"danger"}
-              width="30px"
-              height="30px"
-            />
-          </div>
-        </div>
-      ),
-      sortable: true
-    },
+    // {
+    //   field: 'IDPREMIACAO',
+    //   header: 'Opções',
+    //   body: (row) => (
+    //      <div style={{ display: "flex", justifyContent: "space-around" }}>
+    //       <div className="p-1">
+    //         <ButtonTable
+    //           titleButton={"Cancelar Premio"}
+    //           onClickButton={() => console.log(row)}
+    //           Icon={CiEdit}
+    //           iconSize={25}
+    //           iconColor={"#fff"}
+    //           cor={"danger"}
+    //           width="30px"
+    //           height="30px"
+    //         />
+    //       </div>
+    //     </div>
+    //   ),
+    //   sortable: true
+    // },
 
   ]
 
