@@ -111,6 +111,7 @@ export const useEditarFuncionario = ({
 
   }, [dadosAtualizarFuncionarios]);
 
+  
   const handleRadioChange = (event) => {
     const { id } = event.target;
     if (id === 'radioCLT') {
@@ -153,7 +154,7 @@ export const useEditarFuncionario = ({
     }
 
   };
- // console.log(situacaoSelecionada.value, 'SITUAÇÃO SELECIONADA')
+
   const onSubmit = async (e) => {
     let maximoDesconto = 0;
     let dataBase = new Date('2024-08-01')
@@ -226,7 +227,7 @@ export const useEditarFuncionario = ({
       DSFUNCAO: funcaoSelecionada.value,
       STCONVENIO: categoriaContratacao === 'CLT' ? 'True' : 'False',
       STDESCONTOFOLHA: categoriaContratacao === 'CLT' ? 'True' : 'False',
-      STATIVO: situacaoSelecionada.value,
+      STATIVO: situacaoSelecionada?.value,
       STLOJA: localizacaoSelcionada.value,
       IDFUNCIONARIOULTALTERACAO: usuarioLogado.id,
       MOTIVODESC: '',
