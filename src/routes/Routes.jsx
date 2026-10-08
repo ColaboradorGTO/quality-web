@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Fragment, useEffect, useState, Suspense, lazy } from "react";
-import AuthProvider from "../Providers/AuthContext";
+import AuthProvider, { useAuth } from "../Providers/AuthContext";
 import { Home } from "../pages/Home";
 
 // 🚀 Lazy Loading - só carrega quando o usuário acessa
@@ -40,6 +40,7 @@ const PageLoader = () => (
 export const RoutesMain = () => {
   const [componentToShow, setComponentToShow] = useState("");
   const [usuarioLogado, setUsuarioLogado] = useState(null);
+   const { usuarioAutenticado } = useAuth();
 
   useEffect(() => {
     const usuarioArmazenado = localStorage.getItem('usuario');
@@ -49,9 +50,9 @@ export const RoutesMain = () => {
     }
   }, []);
 
-  useEffect(() => {
+ /*  useEffect(() => {
 
-  }, [usuarioLogado]);
+  }, [usuarioLogado]); */
 
  
 
@@ -63,7 +64,7 @@ export const RoutesMain = () => {
     <Suspense fallback={<PageLoader />}>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/modulo" element={usuarioLogado ? <ModuloTeste  /> : <Navigate to="/"  />} />
+        <Route path="/modulo" element={usuarioAutenticado ? <ModuloTeste  /> : <Navigate to="/"  />} />
         <Route path="/DashBoardFinanceiro" element={<DashBoardFinanceiro componentToShow={componentToShow} handleShowComponent={handleShowComponent}   />  } />
         <Route path="/DashBoardAdministrativo" element={<DashBoardAdministrativo componentToShow={componentToShow} handleShowComponent={handleShowComponent}  />  } />
         <Route path="/DashBoardGerencia" element={<DashBoardGerencia componentToShow={componentToShow} handleShowComponent={handleShowComponent}  /> } />
