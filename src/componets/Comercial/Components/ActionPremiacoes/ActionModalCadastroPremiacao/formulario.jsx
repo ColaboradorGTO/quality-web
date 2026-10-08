@@ -9,6 +9,7 @@ import { schema } from './schamaValidarFuncionario'
 import { useCadastrarPremiacoes } from "../hooks/useCadastrarPremiacoes"
 import { optionsFuncoesComercial, optionsIndicadores, optionsApuracao } from "../../../../../../parceiro.json"
 import { formatarMoeda } from "../../../../../utils/formatMoeda"
+import { ActionListaPremiacao } from "./actionListaPremiacao";
 
 export const Formulario = ({ 
   handleClose,
@@ -302,6 +303,7 @@ export const Formulario = ({
 
         />
       </form>
+      <ActionListaPremiacao dadosPremiacaoCadastrada={dadosPremiacaoCadastrada} />
     </Fragment>
   )
 }
