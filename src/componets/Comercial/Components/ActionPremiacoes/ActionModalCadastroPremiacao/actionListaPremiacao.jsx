@@ -2,26 +2,20 @@ import React, { Fragment, useRef, useState } from "react"
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { CiEdit } from "react-icons/ci";
-import { get } from "../../../../api/funcRequest";
-import { ButtonTable } from "../../../ButtonsTabela/ButtonTable";
-import { dataFormatada } from "../../../../utils/dataFormatada";
-import { ActionUpdateFuncionarioModal } from "./ActionEditarFuncionario/actionUpdateFuncionarioModal";
+import { ButtonTable } from "../../../../ButtonsTabela/ButtonTable";
 import { useReactToPrint } from "react-to-print";
 import { jsPDF } from 'jspdf';
 import * as XLSX from 'xlsx';
 import 'jspdf-autotable';
-import HeaderTable from "../../../Tables/headerTable";
+import HeaderTable from "../../../../Tables/headerTable";
 import Swal from "sweetalert2";
 
 export const ActionListaPremiacao = ({
   dadosPremiacaoCadastrada, 
-  dadosEmpresas,
-  refetchListaFuncionarios,
   usuarioLogado,
   optionsModulos
 }) => {
-  const [dadosAtualizarFuncionarios, setDadosAtualizarFuncionarios] = useState([]);
-  const [modalAlterarFuncionarioVisivel, setModalAlterarFuncionarioVisivel] = useState(false);
+  
   const [globalFilterValue, setGlobalFilterValue] = useState('');
   const [rowSelection, setRowSelection] = useState(null);
   const dataTableRef = useRef();
@@ -33,44 +27,55 @@ export const ActionListaPremiacao = ({
 
   const handlePrint = useReactToPrint({
     content: () => dataTableRef.current,
-    documentTitle: 'Lista de Funcionários',
+    documentTitle: 'Lista de Premiacoes',
   });
 
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.autoTable({
-      head: [['Funcionário', 'Login', 'Função', 'Tipo', 'Desc %', 'Situação', 'DT Desl.']],
+      head: [['contador', 'Função', 'Indicador', 'Apuração', 'Vr. Bonus Sênior', 'Vr. Bonus Pleno', 'Vr. Bonus Júnior',  'Vr. Bonus Todos']],
       body: dados.map(item => [
-        item.NOFUNCIONARIO,
-        item.NOLOGIN,
-        item.DSFUNCAO,
-        item.DSTIPO,
-        item.PERC,
-        item.STATIVO,
-        item.DTDEMISSAO,
+        item.contador,
+        item.NOFUNCAO,
+        item.NOINDICADOR,
+        item.TPAPURACAO,
+        item.VRBONUSSENIOR,
+        item.VRBONUSPLENO,
+        item.VRBONUSJUNIOR,
+        item.VRBONUSTODOS
       ]),
       horizontalPageBreak: true,
       horizontalPageBreakBehaviour: 'immediately'
     });
-    doc.save('lista_funcionarios.pdf');
+    doc.save('lista_premiacoes.pdf');
   };
 
   const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(dados);
+    const worksheet = XLSX.utils.json_to_sheet(dados.map(item => ({
+      'contador': item.contador,
+      'Função': item.NOFUNCAO,
+      'Indicador':  item.NOINDICADOR,
+      'Apuração':  item.TPAPURACAO,
+      'Vr. Bonus Sênior':  item.VRBONUSSENIOR,
+      'Vr. Bonus Pleno':  item.VRBONUSPLENO,
+      'Vr. Bonus Júnior':  item.VRBONUSJUNIOR,
+      'Vr. Bonus Todos':  item.VRBONUSTODOS
+    })));
     const workbook = XLSX.utils.book_new();
-    const header = ['Funcionário', 'Login', 'Função', 'Tipo', 'Desc %', 'Situação', 'DT Desligamento.'];
+    const header = ['contador', 'Função', 'Indicador', 'Apuração', 'Vr. Bonus Sênior', 'Vr. Bonus Pleno', 'Vr. Bonus Júnior',  'Vr. Bonus Todos'];
     worksheet['!cols'] = [
-      { wpx: 200, caption: 'Funcionário' },
-      { wpx: 100, caption: 'Login' },
-      { wpx: 100, caption: 'Função' },
-      { wpx: 200, caption: 'Tipo' },
-      { wpx: 100, caption: 'Desc %' },
-      { wpx: 100, caption: 'Situação' },
-      { wpx: 100, caption: 'DT Desligamento' },
+      { wpx: 50, caption: 'Nº' },
+      { wpx: 150, caption: 'Função' },
+      { wpx: 150, caption: 'Indicador' },
+      { wpx: 150, caption: 'Apuração' },
+      { wpx: 100, caption: 'Vr. Bonus Sênior' },
+      { wpx: 100, caption: 'Vr. Bonus Pleno' },
+      { wpx: 100, caption: 'Vr. Bonus Júnior' },
+      { wpx: 100, caption: 'Vr. Bonus Todos' },
     ];
     XLSX.utils.sheet_add_aoa(worksheet, [header], { origin: 'A1' });
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Lista Funcionários');
-    XLSX.writeFile(workbook, 'lista_funcionarios.xlsx');
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Lista Premiacoes');
+    XLSX.writeFile(workbook, 'lista_premiacoes.xlsx');
   };
 
   const dados = dadosPremiacaoCadastrada.map((item, index) => {
@@ -162,77 +167,29 @@ export const ActionListaPremiacao = ({
       ),
       sortable: true,
     },
-   
     {
-      field: 'STATIVO',
-      header: 'Situação',
-      body: (
-        (row) => (
-          <th style={{ color: row.STATIVO == 'Ativo' ? 'blue' : 'red' }}>
-            {row.STATIVO}
-          </th>
-        )
-      ),
-      sortable: true,
-    },
-    {
-      field: 'ID',
+      field: 'IDPREMIACAO',
       header: 'Opções',
-      body: (
-        (row) => {
-          if(row.STATIVO == 'Ativo'){
-          return  (
-            <div style={{ display: "flex", justifyContent: "space-around" }}>
-              <div className="p-1">
-                <ButtonTable
-                  titleButton={"Alterar"}
-                  onClickButton={() => handleClickEdit(row)}
-                  Icon={CiEdit}
-                  iconSize={25}
-                  iconColor={"#fff"}
-                  cor={"success"}
-                  width="30px"
-                  height="30px"
-                />
-              </div>
-            </div>
-          )  
-          } else {
-            return (
-              <div style={{ display: "flex", justifyContent: "space-around" }}>
-              </div>
-            )
-          }
-        }
+      body: (row) => (
+         <div style={{ display: "flex", justifyContent: "space-around" }}>
+          <div className="p-1">
+            <ButtonTable
+              titleButton={"Cancelar Premio"}
+              onClickButton={() => console.log(row)}
+              Icon={CiEdit}
+              iconSize={25}
+              iconColor={"#fff"}
+              cor={"danger"}
+              width="30px"
+              height="30px"
+            />
+          </div>
+        </div>
       ),
-      sortable: true,
+      sortable: true
     },
 
   ]
-
-  const handleEdit = async (ID) => {
-    try {
-      const response = await get(`/atualizarFuncionario?idFuncionario=${ID}`)
-      if (response.data && response.data.length > 0) {
-        setDadosAtualizarFuncionarios(response.data)
-        setModalAlterarFuncionarioVisivel(true);
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Erro',
-          text: 'Não foi possível buscar detalhes do funcionário.'
-        })
-      }
-    } catch (error) {
-      console.error('Erro ao buscar detalhes do funcionário: ', error);
-    }
-  };
-
-  const handleClickEdit = (row) => {
-    if (row && row.ID) {
-      handleEdit(row.ID);
-    }
-  };
 
   return (
 
@@ -290,15 +247,7 @@ export const ActionListaPremiacao = ({
         </div>
       </div>
 
-      <ActionUpdateFuncionarioModal
-        show={modalAlterarFuncionarioVisivel}
-        handleClose={() => setModalAlterarFuncionarioVisivel(false)}
-        dadosAtualizarFuncionarios={dadosAtualizarFuncionarios}
-        dadosEmpresas={dadosEmpresas}
-        refetchListaFuncionarios={refetchListaFuncionarios}
-        usuarioLogado={usuarioLogado}
-        optionsModulos={optionsModulos}  
-      />
+     
     </Fragment>
   )
 }
