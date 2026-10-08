@@ -8,7 +8,7 @@ import { optionsMecanicaCompleta, MECANICAS_COM_QTD_LIBERADA } from "../../../..
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { registrarLogAuditoria } from "../../../../services/auditLog"
-const LIMITE_MAXIMO_PRODUTOS = 10000;
+const LIMITE_MAXIMO_PRODUTOS = 100000;
 const TAMANHO_LOTE_PRODUTOS = 1000;
 
 export const useCreatePromocaoAtiva = ({usuarioLogado, optionsModulos }) => {
