@@ -8,7 +8,7 @@ import { AiOutlineSearch } from "react-icons/ai";
 import { ActionListaEstoqueProduto } from "./actionListaEstoqueProdutos";
 import { getDataAtual } from "../../../../utils/dataAtual";
 import { useQuery } from "react-query";
-import { animacaoCarregamento, fecharAnimacaoCarregamento } from "../../../../utils/animationCarregamento";
+import { animacaoCarregamento, fecharAnimacaoCarregamento, foiCancelado } from "../../../../utils/animationCarregamento";
 
 
 export const ActionPesquisaEstoqueProdutos = () => {
@@ -41,38 +41,38 @@ export const ActionPesquisaEstoqueProdutos = () => {
     setDataPesquisaFimC(dataFinalC);
   }, []);
 
-  
+
   const { data: dadosGrupos = [], error: errorGrupo, isLoading: isLoadingGrupo, refetch: refetchGrupo } = useQuery(
     'grupo-produto',
     async () => {
       const response = await get(`/grupo-produto`);
       return response.data;
     },
-    
+
     { enabled: true, staleTime: 60 * 60 * 1000, }
-    
+
   );
-  
+
   const { data: dadosSubGrupos = [], error: errorSubGrupo, isLoading: isLoadingSubGrupo, refetch: refetchSubGrupo } = useQuery(
     'subgrupo-produto',
     async () => {
       const response = await get(`/subgrupo-produto?idGrupo=${grupoSelecionado}`);
       return response.data;
     },
-    
+
     { enabled: Boolean(grupoSelecionado), staleTime: 60 * 60 * 1000, }
-    
+
   );
-  
+
   const { data: dadosFornecedor = [], error: errorFornecedor, isLoading: isLoadingFornecedor, refetch: refetchFornecedor } = useQuery(
     'lista-fornecedor-produto',
     async () => {
       const response = await get(`/lista-fornecedor-produto`);
       return response.data;
     },
-    
+
     { enabled: true, staleTime: 60 * 60 * 1000, }
-    
+
   );
 
   const { data: dadosMarcasProdutos = [], error: errorMarcaProduto, isLoading: isLoadingMarcaProduto, refetch: refetchMarcaProduto } = useQuery(
@@ -89,29 +89,36 @@ export const ActionPesquisaEstoqueProdutos = () => {
     const urlBase = `/vendasEstoqueProduto?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&dataPesquisaInicioB=${dataPesquisaInicioB}&dataPesquisaFimB=${dataPesquisaFimB}&dataPesquisaInicioC=${dataPesquisaInicioC}&dataPesquisaFimC=${dataPesquisaFimC}&descricaoProduto=${descricaoProduto}&idFornecedor=${fornecedorSelecionado}&idGrupo=${grupoSelecionado}&idGrade=${subGrupoSelecionado}&idMarcaProduto=${marcaProduto}`;
     let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
     urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
+    const controller = new AbortController();
+    let allData = [];
+
     try {
-      animacaoCarregamento('Carregando dados...', true);
+      animacaoCarregamento('Carregando dados...', true, true, () => controller.abort());
 
       const primeiraPagina = 1;
-      const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`);
+      const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`, { signal: controller.signal });
       const page = primeiraResposta.page || primeiraPagina;
       const pageSize = primeiraResposta.pageSize || 1000;
       const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
       const totalPages = Math.ceil(totalRows / pageSize);
 
-      let allData = [...(primeiraResposta.data || [])];
+      allData = [...(primeiraResposta.data || [])];
 
       if (totalPages > 1) {
         for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
-          animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true);
-          const responsePage = await get(`${urlApi}&page=${currentPage}`);
+          if (foiCancelado()) break;
+          animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true, true);
+          const responsePage = await get(`${urlApi}&page=${currentPage}`, { signal: controller.signal });
           allData.push(...(responsePage.data || []));
         }
       }
 
       return allData;
     } catch (error) {
-      console.error('Erro ao buscar dados da api:', error);
+      if (error.code === 'ERR_CANCELED') {
+        return allData;
+      }
+      console.error('Erro ao buscar dados:', error);
       throw error;
     } finally {
       fecharAnimacaoCarregamento();
@@ -121,36 +128,36 @@ export const ActionPesquisaEstoqueProdutos = () => {
   const { data: dadosEstoqueVendas = [], error: erroVendasEstoque, isLoading: isLoadingVendasEstoque, refetch: refetchVendasEstoque } = useQuery(
     'vendasEstoqueProduto',
     () => fetchVendasEstoque(),
-    { enabled: false, staleTime: 60 * 60 * 1000}
+    { enabled: false, staleTime: 60 * 60 * 1000 }
   );
 
 
   const handleGrupoChange = (selectedOptions) => {
     const values = (selectedOptions || [])
-    .map((option) => option.value)
-    .filter((value) => value !== '' && value !== null && value !== undefined);
-  
+      .map((option) => option.value)
+      .filter((value) => value !== '' && value !== null && value !== undefined);
+
     setGrupoSelecionado(values);
   }
 
   const handleSubGrupoChange = (selectedOptions) => {
     const values = (selectedOptions || [])
-    .map((option) => option.value)
-    .filter((value) => value !== '' && value !== null && value !== undefined);
-    
+      .map((option) => option.value)
+      .filter((value) => value !== '' && value !== null && value !== undefined);
+
     setSubGrupoSelecionado(values);
   }
 
   const handleFornecedorChange = (selectedOptions) => {
     const values = (selectedOptions || [])
-    .map((option) => option.value)
-    .filter((value) => value !== '' && value !== null && value !== undefined);
+      .map((option) => option.value)
+      .filter((value) => value !== '' && value !== null && value !== undefined);
     setFornecedorSelecionado(values);
   }
   const handleMarcarChange = (selectedOptions) => {
     const values = (selectedOptions || [])
-    .map((option) => option.value)
-    .filter((value) => value !== '' && value !== null && value !== undefined);
+      .map((option) => option.value)
+      .filter((value) => value !== '' && value !== null && value !== undefined);
     setMarcaProduto(values);
   }
 
