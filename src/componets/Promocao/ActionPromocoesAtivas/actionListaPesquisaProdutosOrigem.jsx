@@ -85,6 +85,7 @@ export const ActionListaPesquisaProdutosOrigem = ({
       DSPROMOCAOMARKETING: item.DSPROMOCAOMARKETING,
       STATIVOPROMOCAOMARKETING: item.STATIVOPROMOCAOMARKETING === 'True' ? 'ATIVO' : 'INATIVO',
       IDRESUMOPROMOCAOMARKETING: item.IDRESUMOPROMOCAOMARKETING,
+      DSGRUPOEMPRESARIAL: item.DSGRUPOEMPRESARIAL
     }
   });
 
@@ -116,7 +117,7 @@ export const ActionListaPesquisaProdutosOrigem = ({
     {
       field: 'Status Produto',
       header: 'Status Produto',
-      body: row => <th style={{ color: row.STATIVO == 'True' ? 'blue' : 'red' }}>{row.STATIVO}</th>,
+      body: row => <th style={{ color: row.STATIVO == 'ATIVO' ? 'blue' : 'red' }}>{row.STATIVO}</th>,
       sortable: true,
     },
     {
@@ -126,9 +127,15 @@ export const ActionListaPesquisaProdutosOrigem = ({
       sortable: true,
     },
     {
+      field: 'DSGRUPOEMPRESARIAL',
+      header: 'Marca',
+      body: row => <p style={{margin: 0, width: '150px', fontWeight: 600}}>{row.DSGRUPOEMPRESARIAL}</p>,
+      sortable: true,
+    },
+    {
       field: 'STATIVOPROMOCAOMARKETING',
       header: 'Status Promoção',
-      body: row => <th style={{ color: row.STATIVOPROMOCAOMARKETING == 'True' ? 'blue' : 'red' }}>{row.STATIVOPROMOCAOMARKETING }</th>,
+      body: row => <th style={{ color: row.STATIVOPROMOCAOMARKETING == 'ATIVO' ? 'blue' : 'red' }}>{row.STATIVOPROMOCAOMARKETING }</th>,
       sortable: true,
     },
     {
@@ -204,6 +211,7 @@ export const ActionListaPesquisaProdutosOrigem = ({
             filterDisplay="menu"
             showGridlines
             stripedRows
+            cellMemo={false}
             emptyMessage={
               <div className="dataTables_empty">Nenhum resultado encontrado</div>
             }
