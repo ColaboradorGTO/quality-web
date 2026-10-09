@@ -13,8 +13,7 @@ import { ActionListaMetasDetalhadas } from "./actionListaMetasDetalhada";
 import { animacaoCarregamento, fecharAnimacaoCarregamento, foiCancelado } from "../../../../utils/animationCarregamento";
 import { ActionListaCriarMetasDetalhadas } from "./actionListaCriarMetasDetalhada";
 import Swal from "sweetalert2";
-import { useCadastrarMeta } from "./hooks/useCadastrarMeta";
-import { FaRegSave } from "react-icons/fa";
+import { IoMdAdd } from "react-icons/io";
 
 
 export const ActionPesquisaMetas = ({
@@ -188,17 +187,6 @@ export const ActionPesquisaMetas = ({
     }
   }
   
-  // const { handleCadastrar } = useCadastrarMeta({ usuarioLogado, optionsModulos, handleClick });
-  
-  // const handleSalvarMetas = () => {
-  //   const periodo = {
-  //     marcaSelecionada,
-  //     DTMETAINICIO: dataPesquisaInicio,
-  //     DTMETAFIM: dataPesquisaFim,
-  //   };
-  //   console.log(periodo, 'periodo')
-  //   handleCadastrar(periodo, dadosMetasEstrutura, metas);
-  // };
 
   return (
 
@@ -245,14 +233,9 @@ export const ActionPesquisaMetas = ({
         linkNome={"Criar Metas"}
         onButtonClickCadastro={handleClickCriarMeta}
         corCadastro={"danger"}
-        // IconCadastro
- 
-        // ButtonTypeCancelar={ButtonType}
-        // linkCancelar={"Salvar Metas"}
-        // onButtonClickCancelar={handleSalvarMetas}
-        // corCancelar={"success"}
-        // IconCancelar={FaRegSave}
-        // styleCancelar
+        IconCadastro={IoMdAdd}
+        styleCadastro={{display: optionsModulos[0]?.CRIAR == 'True' ? 'block' : 'none'}}
+      
       />
       
 

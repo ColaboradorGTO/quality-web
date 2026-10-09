@@ -18,7 +18,7 @@ export const useCancelarMeta = ({ usuarioLogado, optionsModulos, handleClick }) 
             Swal.fire({
                 icon: "error",
                 title: "Permissão Negada!",
-                html: `${usuarioLogado?.NOFUNCIONARIO} <br/> Você não tem permissão.`,
+                html: `${usuarioLogado?.NOFUNCIONARIO} <br/> Você não tem permissão Para Cancelar uma meta.`,
                 customClass: {
                     container: 'custom-swal'
                 }

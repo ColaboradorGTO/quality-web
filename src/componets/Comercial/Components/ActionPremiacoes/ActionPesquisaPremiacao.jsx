@@ -199,7 +199,7 @@ export const ActionPesquisaPremiacoes = ({ usuarioLogado }) => {
         onButtonClickCadastro={handleCadastrar}
         corCadastro={"danger"}
         IconCadastro={IoIosAdd}
-
+        styleCadastro={{display: optionsModulos[0]?.CRIAR == 'True' ? 'block' : 'none'}}
       />
 
       {tabelaVisivel && (
