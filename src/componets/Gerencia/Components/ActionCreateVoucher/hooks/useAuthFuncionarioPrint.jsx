@@ -48,13 +48,13 @@ export const useAuthFuncionarioPrint = ({ usuarioLogado }) => {
                     const response = await post('/auth-funcionario-print-voucher', data);
 
                     if (response.data) {
-                        console.log(response.data, 'response.data');
+                        //console.log(response.data, 'response.data');
                         return response.data;
                     } else {
                         Swal.showValidationMessage(`Credenciais inválidas`);
                     }
                 } catch (error) {
-                    console.log(error, 'response.data')
+                    //console.log(error, 'response.data')
                     Swal.showValidationMessage(`Erro ao autenticar: ${error.message}`);
                 }
             }

@@ -35,8 +35,19 @@ export const ActionDetalharModal = ({ show, handleClose, dadosDetalheVoucher, us
 
           <Modal.Body>
 
-            <ActionListaVendaOrigem dadosDetalheVoucher={dadosDetalheVoucher} usuarioLogado={usuarioLogado} optionsModulos={optionsModulos} />
-            <ActionListaVendaDestino dadosDetalheVoucher={dadosDetalheVoucher} usuarioLogado={usuarioLogado} optionsModulos={optionsModulos} />
+            <ActionListaVendaOrigem
+              dadosDetalheVoucher={dadosDetalheVoucher}
+              usuarioLogado={usuarioLogado}
+              optionsModulos={optionsModulos}
+            />
+
+            {dadosDetalheVoucher[0]?.detalhedestino?.length > 0 && (
+              <ActionListaVendaDestino
+                dadosDetalheVoucher={dadosDetalheVoucher}
+                usuarioLogado={usuarioLogado}
+                optionsModulos={optionsModulos}
+              />
+            )}
           </Modal.Body>
 
 

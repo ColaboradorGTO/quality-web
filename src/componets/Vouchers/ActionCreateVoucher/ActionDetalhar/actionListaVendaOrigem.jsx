@@ -8,7 +8,6 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { formatMoeda } from "../../../../utils/formatMoeda";
 
-
 export const ActionListaVendaOrigem = ({ dadosDetalheVoucher, usuarioLogado }) => {
   const [globalFilterValueOrigem, setGlobalFilterValueOrigem] = useState('');
   const [rowSelection, setRowSelection] = useState(null);

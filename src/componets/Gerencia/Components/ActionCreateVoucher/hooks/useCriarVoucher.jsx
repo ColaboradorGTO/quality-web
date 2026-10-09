@@ -6,10 +6,14 @@ import { mascaraCPF, validarCPF } from "../../../../../utils/formatCPF";
 
 export const useCriarVoucher = ({
     usuarioLogado,
+    selectedRows,
     dadosVisualizarProdutos,
     quantidadesProdutos,
     setModalCadastroClienteCPFVoucher,
     setModalCadastroClienteCNPJVoucher,
+    dadosProdutosVendas,
+    setDadosProdutosVendas,
+    tipoTrocaSelecionada,
     handleClick
 }) => {
     const [ipUsuario, setIpUsuario] = useState('');
@@ -20,6 +24,8 @@ export const useCriarVoucher = ({
     const [modalCliente, setModalCliente] = useState(false);
     const [optionsCPF, setOptionsCPF] = useState([]);
     const [validaDados, setValidaDados] = useState([]);
+
+
 
     const getIPUsuario = async () => {
         let usuarioIP = null;
@@ -165,16 +171,25 @@ export const useCriarVoucher = ({
 
             const cpf = dadosVisualizarProdutos[0]?.venda.DEST_CPF || dadosVisualizarProdutos[0]?.venda.DEST_CNPJ;
             if (cpf == '') {
-                await onCpf(callback, row);
+                await onCpf();
             }
         }
 
     };
 
-    const onCpf = async (callback, response) => {
-        const cpfVenda = optionsCPF?.[0]?.NUCPFCNPJ || '';
+    const onCpf = async (cpfInformado = null) => {
+        // Quando vem do modal de cadastro, recebe o CPF/CNPJ recém-cadastrado
+        // para já deixar o campo preenchido; o usuário confirma manualmente.
+        const cpfRecemCadastrado = typeof cpfInformado === 'string' ? cpfInformado.replace(/\D/g, '') : '';
+        const cpfVenda = cpfRecemCadastrado || optionsCPF?.[0]?.NUCPFCNPJ || '';
+        const formatarDocumento = (doc) => doc.length === 11 ? mascaraCPF(doc) : doc;
+        const textoAuxiliar = cpfRecemCadastrado
+            ? `Cliente cadastrado: ${formatarDocumento(cpfRecemCadastrado)}`
+            : cpfVenda
+                ? `CPF da venda: ${mascaraCPF(cpfVenda)}`
+                : 'Digite o CPF do cliente';
         const { value: cpfConfirmado } = await Swal.fire({
-            title: 'Insira o CPF  ou CNPJ do Cliente',
+            title: 'Insira o CPF ou CNPJ do Cliente ',
             html: `          
                 <div>
                     <input 
@@ -186,7 +201,7 @@ export const useCriarVoucher = ({
                         value="${cpfVenda || ''}"
                         maxlength="18"
                     >
-                    <small class="fw-700 text-muted">${cpfVenda ? `CPF da venda: ${mascaraCPF(cpfVenda)}` : 'Digite o CPF do cliente'}</small>
+                    <small class="fw-700 text-muted">${textoAuxiliar}</small>
                 </div>    
             `,
             width: '25rem',
@@ -208,24 +223,50 @@ export const useCriarVoucher = ({
                     cpfInput.focus();
                 }
 
-                // Aplicar máscara de CPF em tempo real E verificar cliente automaticamente
-                cpfInput.addEventListener('input', async (e) => {
-                    e.target.value = e.target.value.replace(/[^0-9]/g, '').substring(0, 18);
+                    // Aplicar máscara de CPF em tempo real E verificar cliente automaticamente
+                    cpfInput.addEventListener('input', async (e) => {
+                        e.target.value = e.target.value.replace(/[^0-9]/g, '').substring(0, 18);
 
-                    const cpfDigitado = e.target.value;
-                    if (cpfDigitado.length == 11 || cpfDigitado.length == 14) {
-                        try {
-                            const response = await get(`/cliente-todos?numeroCpfCnpj=${cpfDigitado}`)
+                        const cpfDigitado = e.target.value;
+                        if (cpfDigitado.length == 11 || cpfDigitado.length == 14) {
+                            try {
+                                const response = await get(`/cliente-todos?numeroCpfCnpj=${cpfDigitado}`)
 
-                            if (response && response.data && response.data.length > 0) {
-                                // Cliente existe - pode prosseguir
-                                const confirmButton = swalContainer.querySelector('.swal2-confirm');
-                                if (confirmButton) {
-                                    confirmButton.style.backgroundColor = '#28a745'; // Verde
-                                    confirmButton.textContent = 'Cliente Encontrado - Confirmar';
+                                if (response && response.data && response.data.length > 0) {
+                                    // Cliente existe - pode prosseguir
+                                    const confirmButton = swalContainer.querySelector('.swal2-confirm');
+                                    if (confirmButton) {
+                                        confirmButton.style.backgroundColor = '#28a745'; // Verde
+                                        confirmButton.textContent = 'Cliente Encontrado - Confirmar';
+                                    }
+                                } else {
+                                    // Cliente não existe - fechar SweetAlert e abrir modal automaticamente
+                                    Swal.close();
+
+                                    // Mostrar mensagem de cliente não encontrado
+                                    await Swal.fire({
+                                        title: 'Cliente não encontrado',
+                                        text: `O ${cpfDigitado.length === 11 ? 'CPF' : 'CNPJ'} digitado não está cadastrado. Redirecionando para cadastro...`,
+                                        icon: 'info',
+                                        timer: 2000,
+                                        timerProgressBar: true,
+                                        showConfirmButton: false,
+                                        customClass: {
+                                            container: 'custom-swal',
+                                        }
+                                    });
+
+                                    setCpfCliente(cpfDigitado);
+                                    if (cpfDigitado.length >= 14) {
+                                        setModalCadastroClienteCNPJVoucher(true);
+
+                                    } else if (cpfDigitado.length == 11) {
+                                        setModalCadastroClienteCPFVoucher(true);
+                                    }
+                                    return;
                                 }
-                            } else {
-                                // Cliente não existe - fechar SweetAlert e abrir modal automaticamente
+                            } catch (error) {
+                                // Em caso de erro, também redirecionar automaticamente
                                 Swal.close();
 
                                 // Mostrar mensagem de cliente não encontrado
@@ -249,40 +290,15 @@ export const useCriarVoucher = ({
                                 }
                                 return;
                             }
-                        } catch (error) {
-                            // Em caso de erro, também redirecionar automaticamente
-                            Swal.close();
-
-                            // Mostrar mensagem de cliente não encontrado
-                            await Swal.fire({
-                                title: 'Cliente não encontrado',
-                                text: `O ${cpfDigitado.length === 11 ? 'CPF' : 'CNPJ'} digitado não está cadastrado. Redirecionando para cadastro...`,
-                                icon: 'info',
-                                timer: 2000,
-                                timerProgressBar: true,
-                                showConfirmButton: false,
-                                customClass: {
-                                    container: 'custom-swal',
-                                }
-                            });
-
-                            setCpfCliente(cpfDigitado);
-                            if (cpfDigitado.length >= 14) {
-                                setModalCadastroClienteCNPJVoucher(true);
-                            } else if (cpfDigitado.length == 11) {
-                                setModalCadastroClienteCPFVoucher(true);
+                        } else {
+                            // CPF incompleto - resetar botão
+                            const confirmButton = swalContainer.querySelector('.swal2-confirm');
+                            if (confirmButton) {
+                                confirmButton.style.backgroundColor = '';
+                                confirmButton.textContent = 'Confirmar';
                             }
-                            return;
                         }
-                    } else {
-                        // CPF incompleto - resetar botão
-                        const confirmButton = swalContainer.querySelector('.swal2-confirm');
-                        if (confirmButton) {
-                            confirmButton.style.backgroundColor = '';
-                            confirmButton.textContent = 'Confirmar';
-                        }
-                    }
-                });
+                    });
 
                 swalContainer.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') {
@@ -339,7 +355,6 @@ export const useCriarVoucher = ({
                                 container: 'custom-swal',
                             }
                         });
-
                         setCpfCliente(cpfConfirmado);
                         if (cpfConfirmado.length >= 14) {
                             setModalCadastroClienteCNPJVoucher(true);
@@ -348,7 +363,7 @@ export const useCriarVoucher = ({
                         }
                     }
                 } else {
-                    console.log('❌ Resposta da API inválida (sem response.data)');
+                   // console.log('❌ Resposta da API inválida (sem response.data)');
                     throw new Error('Erro ao buscar dados do cliente');
                 }
             } catch (error) {
@@ -373,7 +388,7 @@ export const useCriarVoucher = ({
                 }
             }
         } else {
-            console.log('❌ CPF não confirmado (usuário cancelou ou validação falhou)');
+          //  console.log('❌ CPF não confirmado (usuário cancelou ou validação falhou)');
         }
 
     };
@@ -391,27 +406,38 @@ export const useCriarVoucher = ({
             return quantidadesProdutos?.[contadorIndex] || quantidadeOriginal;
         };
 
-        // Calcular VRVOUCHER total baseado nas quantidades modificadas
+        // Calcular VRVOUCHER total baseado somente nos produtos selecionados
         let valorTotalVoucher = 0;
-        const detVoucherCalculado = dadosVisualizarProdutos[0]?.detalhe.map((item, index) => {
-            const contadorIndex = index + 1;
-            const quantidadeFinal = getQuantidadeFinal(contadorIndex, item.det.QTD);
-            const valorUnitario = Number(parseFloat(item.det.VUNTRIB).toFixed(2));
+
+        const detalhesVenda = dadosVisualizarProdutos.flatMap((item) => item.detalhe || []);
+
+        const DetalheVoucher = selectedRows.map((produtoSelecionado) => {
+            const itemOriginal = detalhesVenda.find(
+                (item) => String(item.det.IDVENDADETALHE) === String(produtoSelecionado.IDVENDADETALHE)
+            );
+
+            if (!itemOriginal) {
+                throw new Error(`Produto selecionado ${produtoSelecionado.IDVENDADETALHE} não encontrado na venda`);
+            }
+
+            const quantidadeFinal = getQuantidadeFinal(
+                produtoSelecionado.contadorIndex,
+                produtoSelecionado.QTD
+            );
+            const valorUnitario = Number(parseFloat(itemOriginal.det.VUNTRIB).toFixed(2));
             const valorTotalItem = valorUnitario * quantidadeFinal;
 
             valorTotalVoucher += valorTotalItem;
 
             return {
-                IDPRODUTO: item.det.CPROD,
+                IDVENDA: itemOriginal.det.IDVENDA,
+                IDVENDADETALHE: itemOriginal.det.IDVENDADETALHE,
+                IDPRODUTO: itemOriginal.det.CPROD,
                 QTD: Number(quantidadeFinal),
                 VRUNIT: valorUnitario,
-                VRTOTALBRUTO: Number(parseFloat(valorTotalItem).toFixed(2)),
-                VRDESCONTO: Number(parseFloat(item.det.VPROD - item.det.VRTOTALLIQUIDO).toFixed(2)),
-                VRTOTALLIQUIDO: Number(parseFloat(valorTotalItem).toFixed(2)),
-                STATIVO: 'True',
-                STCANCELADO: 'False',
+                IDVENDEDOR: itemOriginal.det.IDVENDEDOR,
             };
-        }) || [];
+        });
 
         const produtosVoucherCalculado = dadosVisualizarProdutos[0]?.detalhe.map((item, index) => {
             const contadorIndex = index + 1;
@@ -433,19 +459,16 @@ export const useCriarVoucher = ({
             IDGRUPOEMPRESARIAL: usuarioLogado?.IDGRUPOEMPRESARIAL,
             IDEMPRESAORIGEM: usuarioLogado?.IDEMPRESA,
             IDCAIXAORIGEM: parseInt(99999),
-            IDNFEDEVOLUCAO: 0,
             IDUSRINVOUCHER: usuarioLogado?.id,
             IDVENDEDOR: dadosVisualizarProdutos[0]?.detalhe[0].det.VENDEDOR_MATRICULA,
             IDCLIENTE: dadosCliente?.IDCLIENTE,
             NUCPF: dadosCliente?.NUCPFCNPJ,
             VRVOUCHER: Number(parseFloat(valorTotalVoucher).toFixed(2)),
             IDRESUMOVENDAWEB: dadosVisualizarProdutos[0]?.venda.IDVENDA,
-            STTIPOTROCA: '',
+            STTIPOTROCA: tipoTrocaSelecionada,
             MOTIVOTROCA: motivoTroca,
             IDUSRLIBERACAOCRIACAO: usuarioLogado?.id,
-            detVoucher: detVoucherCalculado,
-            produtosVoucher: produtosVoucherCalculado
-
+            DETALHEVOUCHER: DetalheVoucher,
         }
         try {
             if (!putData.IDCLIENTE) {
@@ -510,6 +533,7 @@ export const useCriarVoucher = ({
         }
     }
 
+
     return {
         onSubmitVoucher,
         onAuthFuncionario,
@@ -518,6 +542,6 @@ export const useCriarVoucher = ({
         setModalCliente,
         cpfCliente,
         setCpfCliente,
-        onCpf
+        onCpf,
     }
 }

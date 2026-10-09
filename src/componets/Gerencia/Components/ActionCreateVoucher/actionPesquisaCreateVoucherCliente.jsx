@@ -48,6 +48,7 @@ export const ActionPesquisaCreateVoucherCliente = ({
   const [btnVisivel, setBtnVisivel] = useState(false);
   const [selectedRows, setSelectedRows] = useState([])
   const [dadosVisualizarProdutos, setDadosVisualizarProdutos] = useState([])
+  const [dadosProdutosVendas, setDadosProdutosVendas] = useState([])
   const [tipoTrocaSelecionada, setTipoTrocaSelecionada] = useState(null);
   const [quantidade, setQuantidade] = useState(0);
   const [quantidadesProdutos, setQuantidadesProdutos] = useState({});
@@ -59,47 +60,6 @@ export const ActionPesquisaCreateVoucherCliente = ({
     setDataPesquisaFim(dataFim)
 
   }, []);
-
-
-  /*   const fetchListaEmpresasVouchers = async () => {
-      try {
-        const urlApi = `/empresasVoucher?idSubGrupoEmpresa=${usuarioLogado?.IDGRUPOEMPRESARIAL}&idEmpresa=${usuarioLogado?.IDEMPRESA}`;
-        const response = await get(urlApi);
-  
-        if (response.data.length && response.data.length === pageSize) {
-          let allData = [...response.data];
-          animacaoCarregamento(`Carregando... Página ${currentPage} de ${response.data.length}`, true);
-  
-          async function fetchNextPage(currentPage) {
-            try {
-              currentPage++;
-              const responseNextPage = await get(`${urlApi}&page=${currentPage}`);
-              if (responseNextPage.length) {
-                allData.push(...responseNextPage.data);
-                return fetchNextPage(currentPage);
-              } else {
-                return allData;
-              }
-            } catch (error) {
-              console.error('Erro ao buscar próxima página:', error);
-              throw error;
-            }
-          }
-  
-          await fetchNextPage(currentPage);
-          return allData;
-        } else {
-  
-          return response.data;
-        }
-  
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        throw error;
-      } finally {
-        fecharAnimacaoCarregamento();
-      }
-    }; */
 
   const fetchListaEmpresasVouchers = async () => {
     const urlBase = `/empresasVoucher?idSubGrupoEmpresa=${usuarioLogado?.IDGRUPOEMPRESARIAL}&idEmpresa=${usuarioLogado?.IDEMPRESA}`;
@@ -147,40 +107,6 @@ export const ActionPesquisaCreateVoucherCliente = ({
     () => fetchListaEmpresasVouchers(),
     { enabled: Boolean(usuarioLogado?.IDGRUPOEMPRESARIAL), staleTime: 60 * 60 * 1000 }
   );
-
-  /*  const fetchListaVendasClientes = async () => {
-     const urlBase = `/lista-venda-cliente?idEmpresa=${empresaSelecionada}&idSubGrupoEmpresarial=${usuarioLogado?.IDGRUPOEMPRESARIAL}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&cpfOUidVenda=${cpf}&nnf=${numeroNF}&serie=${serie}`;
-     let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
-     urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
-     try {
-       animacaoCarregamento('Carregando dados...', true);
- 
-       const primeiraPagina = 1;
-       const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`);
-       const page = primeiraResposta.page || primeiraPagina;
-       const pageSize = primeiraResposta.pageSize || 1000;
-       const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
-       const totalPages = Math.ceil(totalRows / pageSize);
- 
-       let allData = [...(primeiraResposta.data || [])];
- 
-       if (totalPages > 1) {
-         for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
-           animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true);
-           const responsePage = await get(`${urlApi}&page=${currentPage}`);
-           allData.push(...(responsePage.data || []));
-         }
-       }
- 
-       return allData;
- 
-     } catch (error) {
-       console.error('Error fetching data:', error);
-       throw error;
-     } finally {
-       fecharAnimacaoCarregamento();
-     }
-   }; */
 
   const fetchListaVendasClientes = async () => {
     const urlBase = `/lista-venda-cliente?idEmpresa=${empresaSelecionada}&idSubGrupoEmpresarial=${usuarioLogado?.IDGRUPOEMPRESARIAL}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&cpfOUidVenda=${cpf}&nnf=${numeroNF}&serie=${serie}`;
@@ -263,6 +189,7 @@ export const ActionPesquisaCreateVoucherCliente = ({
     setTabelaVisivelVoucherSelecionados(false);
     setActionPrincipal(true);
     setActionSecundaria(false);
+    setSelectedRows([]);
   }
 
   const handleClickClientes = () => {
@@ -280,6 +207,8 @@ export const ActionPesquisaCreateVoucherCliente = ({
     onCpf,
     onSubmitVoucher,
     onAuthFuncionario,
+    cpfCliente,
+
   } = useCriarVoucher({
     usuarioLogado,
     selectedRows,
@@ -289,11 +218,29 @@ export const ActionPesquisaCreateVoucherCliente = ({
     quantidade,
     quantidadesProdutos,
     modalCadastroClienteCPFVoucher,
+    dadosProdutosVendas,
     setModalCadastroClienteCPFVoucher,
     setModalCadastroClienteCNPJVoucher,
+    setDadosProdutosVendas,
     handleClick
   })
 
+  const handleBack = () => {
+    setTabelaVenda(true);
+    setTabelaSecundaria(false);
+    setTabelaVisivel(false);
+    setTabelaVisivelVoucherSelecionados(false);
+    setTabelaVisivelVoucher(false)
+    setSelectedRows([]);
+
+    if (tabelaVenda === true) {
+      setTabelaVisivel(true);
+      setTabelaVendasClientes(false);
+      setTabelaVisivelVoucherSelecionados(false);
+      setActionPrincipal(true);
+      setActionSecundaria(false);
+    }
+  }
   return (
 
     <Fragment>
@@ -356,7 +303,7 @@ export const ActionPesquisaCreateVoucherCliente = ({
 
         ButtonTypeCancelar={ButtonType}
         linkCancelar={"Voltar"}
-        onButtonClickCancelar={handleClick}
+        onButtonClickCancelar={handleBack}
         corCancelar={"danger"}
         IconCancelar={AiOutlineDoubleLeft}
 
@@ -378,6 +325,8 @@ export const ActionPesquisaCreateVoucherCliente = ({
           selectedRows={selectedRows}
           setSelectedRows={setSelectedRows}
           dadosVisualizarProdutos={dadosVisualizarProdutos}
+          dadosProdutosVendas={dadosProdutosVendas}
+          setDadosProdutosVendas={setDadosProdutosVendas}
           setDadosVisualizarProdutos={setDadosVisualizarProdutos}
           setTipoTrocaSelecionada={setTipoTrocaSelecionada}
           tipoTrocaSelecionada={tipoTrocaSelecionada}
@@ -412,6 +361,7 @@ export const ActionPesquisaCreateVoucherCliente = ({
         handleClose={() => setModalCadastroClienteCNPJVoucher(false)}
         usuarioLogado={usuarioLogado}
         optionsModulos={optionsModulos}
+        cpfCliente={cpfCliente}
         onCpf={onCpf}
       />
 
@@ -421,6 +371,7 @@ export const ActionPesquisaCreateVoucherCliente = ({
         usuarioLogado={usuarioLogado}
         optionsModulos={optionsModulos}
         optionsCPF={optionsCPF}
+        cpfCliente={cpfCliente}
         onCpf={onCpf}
       />
     </Fragment>

@@ -159,7 +159,7 @@ export const useCadastrarClienteCPFVoucher = ({ usuarioLogado, optionsModulos, h
             
          
             if (response.status !== 200) {
-                console.log('API principal falhou, tentando API de redundância...');
+                //console.log('API principal falhou, tentando API de redundância...');
                 response = await getDadosEnderecoViaCep_API_redundancia(cep);
             }
 
@@ -312,12 +312,15 @@ export const useCadastrarClienteCPFVoucher = ({ usuarioLogado, optionsModulos, h
             await post('/log-web', postData)
 
 
-            Swal.fire({
+            await Swal.fire({
                 title: isUpdate ? 'Atualização' : 'Cadastro',
                 text: isUpdate
                     ? 'Cliente atualizado com sucesso'
                     : 'Cliente cadastrado com sucesso',
                 icon: 'success',
+                timer: 1500,
+                timerProgressBar: true,
+                showConfirmButton: false,
                 customClass: {
                     container: 'custom-swal',
                 }
@@ -327,7 +330,8 @@ export const useCadastrarClienteCPFVoucher = ({ usuarioLogado, optionsModulos, h
             setCpf('');
             setCep('');
            
-            await onCpf();
+            // Reabre o Swal de CPF/CNPJ já preenchido com o CPF recém-cadastrado
+            await onCpf(cpfSemMascara);
             
             return response.data;
 

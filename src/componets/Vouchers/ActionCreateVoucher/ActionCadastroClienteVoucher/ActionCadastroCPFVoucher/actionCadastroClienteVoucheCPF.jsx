@@ -4,7 +4,7 @@ import { HeaderModal } from "../../../../Modais/HeaderModal/HeaderModal";
 import { FormularioCadastro } from "./formularioCadastro";
 
 
-export const ActionCadastroClienteVoucherCPF = ({ show, handleClose, usuarioLogado, optionsModulos, optionsCPF, onCpf }) => {
+export const ActionCadastroClienteVoucherCPF = ({ show, handleClose, usuarioLogado, optionsModulos, optionsCPF, onCpf, cpfCliente }) => {
 
   return (
 
@@ -21,7 +21,7 @@ export const ActionCadastroClienteVoucherCPF = ({ show, handleClose, usuarioLoga
       >
         <HeaderModal
           title={"Cadastro do Cliente Voucher"}
-          subTitle={"Cadastro e atualização de dados do Cliente" }
+          subTitle={"Cadastro e atualização de dados do Cliente"}
           handleClose={handleClose}
         />
 
@@ -33,6 +33,8 @@ export const ActionCadastroClienteVoucherCPF = ({ show, handleClose, usuarioLoga
             optionsModulos={optionsModulos}
             optionsCPF={optionsCPF}
             onCpf={onCpf}
+            cpfCliente={cpfCliente}
+
           />
 
         </Modal.Body>
