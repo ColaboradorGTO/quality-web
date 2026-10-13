@@ -4,7 +4,7 @@ import { useQuery } from "react-query"
 import Swal from "sweetalert2"
 import { getDataAtual, getDataTresMesesAtras } from "../../../../utils/dataAtual"
 import * as XLSX from 'xlsx';
-import { optionsMecanica,  optionsMecanicaCompleta, MECANICAS_COM_QTD_LIBERADA } from "../../../../../mecanica"
+import { optionsMecanica, optionsMecanicaCompleta, MECANICAS_COM_QTD_LIBERADA } from "../../../../../mecanica"
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { registrarLogAuditoria } from "../../../../services/auditLog"
@@ -82,7 +82,7 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao, usuarioLogado, optionsMo
     setDataFim(dataFinal)
   }, [])
 
-   const { data: dadosMecanicas = [], error: errorMecanicas, isLoading: isLoadingMecanica, refetch: refetchMecanica } = useQuery(
+  const { data: dadosMecanicas = [], error: errorMecanicas, isLoading: isLoadingMecanica, refetch: refetchMecanica } = useQuery(
     'mecanicas-ativas',
     async () => {
       const response = await get(`/mecanicas-ativas`);
@@ -191,7 +191,7 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao, usuarioLogado, optionsMo
     //     setValorInicio(valor);
     //   }
     // }
-  }, [dadosPromocao, setQtdInicio,  setVrDesconto, setPrecoProduto, setPorcentoDesconto, setMecanicaSelecionadaEdicao, setDescricao, setDataInicio, setDataFim, setStatusSelecionado]);
+  }, [dadosPromocao, setQtdInicio, setVrDesconto, setPrecoProduto, setPorcentoDesconto, setMecanicaSelecionadaEdicao, setDescricao, setDataInicio, setDataFim, setStatusSelecionado]);
 
   const optionsStatus = useMemo(() => [
     { value: "True", label: "ATIVO" },
@@ -226,7 +226,7 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao, usuarioLogado, optionsMo
     },
     { enabled: Boolean(idResumoPromocao), staleTime: 5 * 60 * 60 }
   );
-    
+
   useEffect(() => {
     if (marcaSelecionada) {
       refetchEmpresas();
@@ -846,7 +846,44 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao, usuarioLogado, optionsMo
     [empresasSelecionadas]
   );
 
-  const onSubmit = async (data) => {
+  const LIMITE_PROMOCOES_POR_EMPRESA = 3;
+  const excedeLimitePromocoesPorEmpresa = (promocoesDetalhe) => {
+    const idPromocaoAtual = Number(idResumoPromocao);
+    const empresasJaNaPromocao = new Set((optionsEmpresasPromocoes || []).map(e => Number(e.IDEMPRESA)));
+    const empresasParaValidar = empresasSelecionadasValues
+      .map(id => Number(id))
+      .filter(id => !empresasJaNaPromocao.has(id));
+
+    if (empresasParaValidar.length === 0) return false;
+
+    const qtdPorEmpresa = {};
+    (promocoesDetalhe || [])
+      .filter(promocao => Number(promocao.ResumoPromocao?.IDRESUMOPROMOCAOMARKETING) !== idPromocaoAtual)
+      .forEach(promocao => {
+        const idsEmpresaPromo = new Set(
+          (Array.isArray(promocao.empresa) ? promocao.empresa : [])
+            .map(e => Number(e?.det?.IDEMPRESA))
+            .filter(id => !Number.isNaN(id))
+        );
+        idsEmpresaPromo.forEach(id => { qtdPorEmpresa[id] = (qtdPorEmpresa[id] || 0) + 1; });
+      });
+
+    const empresasNoLimite = empresasParaValidar
+      .filter(id => (qtdPorEmpresa[id] || 0) >= LIMITE_PROMOCOES_POR_EMPRESA);
+
+    if (empresasNoLimite.length === 0) return false;
+
+    Swal.fire({
+      icon: 'warning',
+      title: 'Limite de promoções atingido!',
+      text: `A(s) empresa(s) Nº ${empresasNoLimite.join(', ')} já possui(em) ${LIMITE_PROMOCOES_POR_EMPRESA} promoções ativas. Não é permitido adicioná-la(s) a esta promoção.`,
+      customClass: { container: 'custom-swal' },
+      confirmButtonText: 'OK'
+    });
+    return true;
+  };
+
+    const onSubmit = async (data) => {
     try {
 
       const responsePromocao = await get(`/promocoes-ativas?dataPesquisaFim=${dataFim}`);
@@ -937,21 +974,10 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao, usuarioLogado, optionsMo
         return;
       }
 
-      if (promocoesAtivas && promocoesAtivas.length > 0) {
+      // NUTIPOPROMOCAO 12 é exceção: sem limite e sem verificação de promoção existente
+      if (Number(tipoPromocao) !== 12 && promocoesAtivas && promocoesAtivas.length > 0) {
         const produtoDestinoArray = Array.isArray(produtosDestino) ? produtosDestino : [produtosDestino];
         const idsResumo = promocoesAtivas.map(p => p.IDRESUMOPROMOCAOMARKETING).filter(Boolean);
-        const existeAplicaoDestino = promocoesAtivas.some(ap => ap.TPAPARTIRDE == aplicacaoDestinoSelecionada);
-
-        if (existeAplicaoDestino) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Aplicação de destino já existe!',
-            text: `Já existe uma promoção ativa com a mesma aplicação de destino nesta Empresa. Não é permitido cadastrar outra.`,
-            customClass: { container: 'custom-swal' },
-            confirmButtonText: 'OK'
-          });
-          return;
-        }
 
         if (idsResumo && idsResumo.length > 0) {
           const idResumo = idsResumo.join(',');
@@ -960,6 +986,8 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao, usuarioLogado, optionsMo
           if (!responseProdutoExistente.data) {
             throw new Error('Falha ao verificar produtos existentes');
           }
+
+          if (excedeLimitePromocoesPorEmpresa(responseProdutoExistente.data)) return;
 
           const produtosExistentes = responseProdutoExistente.data.detalhePromo || [];
           const existeProduto = produtosExistentes.some(produto =>
@@ -1006,17 +1034,6 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao, usuarioLogado, optionsMo
             return;
           }
 
-          const promocoesValidasNaEmpresaSelecionada = [];
-          responseProdutoExistente.data.forEach(item => {
-            if (Array.isArray(item.empresa)) {
-              item.empresa.forEach(empresa => {
-                if (empresa.det.IDEMPRESA == empresaSelecionada) {
-                  promocoesValidasNaEmpresaSelecionada.push(empresa.det.IDEMPRESA);
-                }
-              });
-            }
-          })
-
           if (promocaoPorParesAtiva) {
             Swal.fire({
               icon: 'warning',
@@ -1039,16 +1056,6 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao, usuarioLogado, optionsMo
             return;
           }
 
-          if (promocoesValidasNaEmpresaSelecionada.length >= 3) {
-            Swal.fire({
-              icon: 'warning',
-              title: 'Limite atingido',
-              text: 'Já existem 3 promoções ativas nesta empresa. Não é permitido cadastrar outra..',
-              customClass: { container: 'custom-swal' },
-              confirmButtonText: 'OK'
-            });
-            return;
-          }
         }
       }
 
@@ -1330,12 +1337,15 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao, usuarioLogado, optionsMo
         return [value];
       };
 
-      if (promocoesAtivas && promocoesAtivas.length > 0) {   
+      // NUTIPOPROMOCAO 12 é exceção: sem limite e sem verificação de promoção existente
+      if (Number(tipoPromocao) !== 12 && promocoesAtivas && promocoesAtivas.length > 0) {
         const idsResumo = promocoesAtivas.map(p => p.IDRESUMOPROMOCAOMARKETING).filter(Boolean);
 
         if (idsResumo && idsResumo.length > 0) {
           const idResumo = idsResumo.join(',');
           const responseProdutoExistente = await get(`/detalhe-promocoes-ativas?idResumoPromocao=${idResumo}&dataPesquisaFim=${dataFim}`);
+
+          if (excedeLimitePromocoesPorEmpresa(responseProdutoExistente.data)) return;
 
 
           const subgruposDestinoSelecionados = normalizeToArray(subGrupoDestino)
@@ -1427,14 +1437,6 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao, usuarioLogado, optionsMo
             return;
           }
 
-          const idsEmpresaSelecionada = (Array.isArray(empresasSelecionadasValues) ? empresasSelecionadasValues : [empresasSelecionadasValues]).map(id => Number(id));
-          const promocoesValidasNaEmpresaSelecionada =
-          responseProdutoExistente.data.filter((promocao) => {
-            return promocao.empresa?.some((empresa) => {
-              return idsEmpresaSelecionada.includes(Number(empresa?.det?.IDEMPRESA));
-            });
-          });
-
           if (promocaoPorParesAtiva) {
             Swal.fire({
               icon: 'warning',
@@ -1457,16 +1459,6 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao, usuarioLogado, optionsMo
             return;
           }
 
-          if (promocoesValidasNaEmpresaSelecionada.length >= 3) {
-            Swal.fire({
-              icon: 'warning',
-              title: 'Limite atingido',
-              text: 'Já existem 3 promoções ativas nesta empresa. Não é permitido cadastrar outra..',
-              customClass: { container: 'custom-swal' },
-              confirmButtonText: 'OK'
-            });
-            return;
-          }
         }
       }
 
@@ -1671,7 +1663,8 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao, usuarioLogado, optionsMo
         return [value];
       };
 
-      if (promocoesAtivas && promocoesAtivas.length > 0) {
+      // NUTIPOPROMOCAO 12 é exceção: sem limite e sem verificação de promoção existente
+      if (Number(tipoPromocao) !== 12 && promocoesAtivas && promocoesAtivas.length > 0) {
         const produtoDestinoArray = Array.isArray(produtosDestino) ? produtosDestino : [produtosDestino];
         const idResumoPromocaoAtual = Number(dadosPromocao[0]?.IDRESUMOPROMOCAOMARKETING ?? idResumoPromocao);
         const idsResumo = promocoesAtivas
@@ -1685,6 +1678,8 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao, usuarioLogado, optionsMo
           if (!responseProdutoExistente.data) {
             throw new Error('Falha ao verificar produtos existentes');
           }
+
+          if (excedeLimitePromocoesPorEmpresa(responseProdutoExistente.data)) return;
 
           const idsDestinoSelecionados = produtoDestinoArray.map(produtoDestino => {
             return typeof produtoDestino === 'object' && produtoDestino !== null
@@ -1836,19 +1831,6 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao, usuarioLogado, optionsMo
             return;
           }
 
-          const idsEmpresasSelecionadasLimite = (Array.isArray(empresasSelecionadasValues) ? empresasSelecionadasValues : [empresasSelecionadasValues])
-            .map(id => Number(id));
-          const promocoesValidasNaEmpresaSelecionada = [];
-            responseProdutoExistente.data.forEach(item => {
-            if (Array.isArray(item.empresa)) {
-              item.empresa.forEach(empresa => {
-                if (idsEmpresasSelecionadasLimite.includes(Number(empresa.det.IDEMPRESA))) {
-                  promocoesValidasNaEmpresaSelecionada.push(empresa.det.IDEMPRESA);
-                }
-              });
-            }
-          })
-
           if (promocaoPorParesAtiva) {
             Swal.fire({
               icon: 'warning',
@@ -1871,16 +1853,6 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao, usuarioLogado, optionsMo
             return;
           }
 
-          if (promocoesValidasNaEmpresaSelecionada.length >= 3) {
-            Swal.fire({
-              icon: 'warning',
-              title: 'Limite atingido',
-              text: 'Já existem 3 promoções ativas nesta empresa. Não é permitido cadastrar outra..',
-              customClass: { container: 'custom-swal' },
-              confirmButtonText: 'OK'
-            });
-            return;
-          }
         }
       }
 
@@ -2179,7 +2151,6 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao, usuarioLogado, optionsMo
       return;
     }
   };
-
   return {
     mecanicaSelecionada,
     setMecanicaSelecionada,
