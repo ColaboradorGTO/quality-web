@@ -268,7 +268,7 @@ export const ActionListaFechamentoDosCaixas = ({
     {
       field: 'STCONFERIDO',
       header: 'Situação',
-      body: row => <th style={{ color: row.STCONFERIDO == 'Conferido' ? 'blue' : 'red' }} >{row.STCONFERIDO > 0 ? 'Conferido' : 'Sem Conferir'}</th>,
+      body: row => <th style={{ color: row.STCONFERIDO > 0 ? 'blue' : 'red' }} >{row.STCONFERIDO > 0 ? 'Conferido' : 'Sem Conferir'}</th>,
       sortable: true,
     },
     {
