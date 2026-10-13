@@ -154,8 +154,8 @@ export const useCadastrarMeta = ({ usuarioLogado, optionsModulos, handleClick })
                 dados: dados
             });
 
-            // const response = await post("/cadastrar-metas-lojas", dados);
-            const response = await post("/cadastrar-", dados);
+            const response = await post("/cadastrar-metas-lojas", dados);
+            // const response = await post("/cadastrar-", dados);
 
             Swal.close();
 
