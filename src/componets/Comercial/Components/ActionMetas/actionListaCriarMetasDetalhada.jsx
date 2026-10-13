@@ -473,7 +473,7 @@ export const ActionListaCriarMetasDetalhadas = ({
       DTMETAINICIO: dataPesquisaInicio || dados[0]?.DTMETAINICIO,
       DTMETAFIM: dataPesquisaFim || dados[0]?.DTMETAFIM,
     };
-    
+    console.log(periodo,'periodo')
     handleCadastrar(periodo, dados, metas);
   };
 
