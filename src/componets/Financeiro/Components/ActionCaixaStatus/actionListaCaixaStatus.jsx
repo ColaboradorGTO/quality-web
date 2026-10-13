@@ -86,7 +86,7 @@ export const ActionListaCaixaStatus = ({ dadosCaixaStatus }) => {
       DTHORAFECHAMENTOCAIXA: item.DTHORAFECHAMENTOCAIXA,
       OPERADORFECHAMENTO: item.OPERADORFECHAMENTO,
       STFECHADO: item.STFECHADO,
-      STCONFERIDO: item.STCONFERIDO,
+      STCONFERIDO: item.STCONFERIDO > 0 ? 'Conferido' : 'Sem Conferir',
       totalQuebraCaixa: totalQuebraCaixa,
       TOTALFECHAMENTODINHEIRO:  item.TOTALFECHAMENTODINHEIRO,
       TOTALFECHAMENTODINHEIROFISICO: item.TOTALFECHAMENTODINHEIROFISICO
@@ -141,7 +141,7 @@ export const ActionListaCaixaStatus = ({ dadosCaixaStatus }) => {
     {
       field: 'STCONFERIDO',
       header: 'Conferido',
-      body: row => <th style={{ color: row.STCONFERIDO > 0 ? 'blue' : 'black' }}>{row.STCONFERIDO > 0 ? 'Conferido' : 'Sem Conferir'}</th>,
+      body: row => <th style={{ color: row.STCONFERIDO > 0 ? 'blue' : 'black' }}>{row.STCONFERIDO}</th>,
       sortable: true,
     },
     {
@@ -189,6 +189,7 @@ export const ActionListaCaixaStatus = ({ dadosCaixaStatus }) => {
             filterDisplay="menu"
             showGridlines
             stripedRows
+            cellMemo={false}
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado </div>}
           >
             {colunasCaixaStatus.map(coluna => (

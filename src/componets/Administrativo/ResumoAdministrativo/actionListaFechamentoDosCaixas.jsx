@@ -132,7 +132,7 @@ export const ActionListaFechamentoDosCaixas = ({
       TOTALFECHAMENTOPOS: item.TOTALFECHAMENTOPOS,
       TOTALFECHAMENTOVOUCHER: item.TOTALFECHAMENTOVOUCHER,
       TOTALFECHAMENTOFATURA: item.TOTALFECHAMENTOFATURA,
-      STCONFERIDO: item.STCONFERIDO > 0 ? 'Conferido' : 'Sem Conferir',
+      STCONFERIDO: item.STCONFERIDO,
 
       // DSCAIXAFECHAMENTO: item.DSCAIXAFECHAMENTO,
 
@@ -268,7 +268,7 @@ export const ActionListaFechamentoDosCaixas = ({
     {
       field: 'STCONFERIDO',
       header: 'Situação',
-      body: row => <th style={{ color: row.STCONFERIDO == 'Conferido' ? 'blue' : 'red' }} >{row.STCONFERIDO}</th>,
+      body: row => <th style={{ color: row.STCONFERIDO == 'Conferido' ? 'blue' : 'red' }} >{row.STCONFERIDO > 0 ? 'Conferido' : 'Sem Conferir'}</th>,
       sortable: true,
     },
     {
