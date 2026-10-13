@@ -351,7 +351,7 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao, usuarioLogado, optionsMo
       const data = await processFile(file);
 
       // ✅ VALIDAÇÃO: Limite de produtos
-      if (data.length > 1000) {
+      if (data.length > 30000) {
         // ✅ LIMPA ARQUIVO quando excede limite
         clearFileError(isOrigem);
 
@@ -359,7 +359,7 @@ export const useUpdatePromocaoAtiva = ({ dadosPromocao, usuarioLogado, optionsMo
           icon: 'warning',
           title: 'Limite Excedido',
           html: `
-            Limite máximo permitido: 1.000 produtos por promoção.<br>
+            Limite máximo permitido: 30000 produtos por promoção.<br>
             Produtos encontrados: ${data.length}<br>
             Caso contrário, os produtos não serão inseridos na promoção.
           `,
