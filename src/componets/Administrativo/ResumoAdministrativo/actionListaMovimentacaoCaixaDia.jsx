@@ -85,8 +85,8 @@ export const ActionListaMovimentacaoCaixaDia = ({
   const quebraCaixa = dadosQuebraCaixa.map((item) => {
 
     const quebraCaixaDinheiro = () => {
-      if (item.VRAJUSTDINHEIRO > 0) {
-        return toFloat(item.VRAJUSTDINHEIRO);
+      if (toFloat(item.VRRECDINHEIROAJUSTE) > 0) {
+        return toFloat(item.VRRECDINHEIROAJUSTE);
       } else {
         return toFloat(item.VRRECDINHEIRO);
       }
@@ -171,9 +171,11 @@ export const ActionListaMovimentacaoCaixaDia = ({
     const vrPCJ18 = toFloat(item.vendapcj?.[0]?.['venda-pcj']?.TOTALPCJ18);
     const vrPCJ78 = toFloat(item.vendapcj?.[0]?.['venda-pcj']?.TOTALPCJ78);
     const totalPCJ = (vrPCJ78 / vrPCJ18) * 100;
+
     return toFloat(totalPCJ);
 
   }
+
 
   const calcularValorTotalFatura = (item) => {
     return (
@@ -189,9 +191,11 @@ export const ActionListaMovimentacaoCaixaDia = ({
     const vrTotalFatura = calcularValorTotalFatura(item);
     const vrTotalCaixa = calcularTotalCaixa(item);
 
+
     const vrPCJ18 = toFloat(item.vendapcj?.[0]?.['venda-pcj']?.TOTALPCJ18);
     const vrPCJ78 = toFloat(item.vendapcj?.[0]?.['venda-pcj']?.TOTALPCJ78);
     const totalPCJ = (vrPCJ78 / vrPCJ18) * 100;
+
 
     return {
       IDCAIXAWEB: item.caixa?.IDCAIXAWEB,
@@ -228,6 +232,8 @@ export const ActionListaMovimentacaoCaixaDia = ({
       vrTotalCaixa: vrTotalCaixa,
     };
   });
+
+  //console.log(dadosMovimentacaoCaixaDoDia, "dadosMovimentacaoCaixaDoDia")
 
   const colunaCaixaDoDia = [
     {
@@ -375,6 +381,20 @@ export const ActionListaMovimentacaoCaixaDia = ({
     return total
   }
 
+
+/*   const calcularTotalVendidoCartao = () => {
+    let total = 0
+    for (let dados of dadosMovLojaDia) {
+      total += toFloat(dados.TOTALVENDIDOCARTAO)
+    }
+    return total
+  }
+ */
+/*   const calcularTotalQuebra = () => {
+    const total = calcularTotal('quebraCaixaOP');
+    return total;
+  } */
+
   const calcularTotalvrPCJ18 = () => {
     const total = calcularTotal('TOTALPCJ18');
     return total;
@@ -473,7 +493,6 @@ export const ActionListaMovimentacaoCaixaDia = ({
         <Column footer={''} footerStyle={{ textAlign: 'center', color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem', fontWeight: 'bold' }} />
       </Row>
 
-
       <Row>
         <Column footer="Total Despesas: (-)" colSpan={4} style={{ textAlign: 'center' }} footerStyle={{ textAlign: 'center', color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem', fontWeight: 'bold' }} />
         <Column footer={""} colSpan={10} footerStyle={{ textAlign: 'center', color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem', fontWeight: 'bold' }} />
@@ -501,34 +520,7 @@ export const ActionListaMovimentacaoCaixaDia = ({
         <Column
           footer={malotes[0]?.statusFormatado}
           colSpan={10}
-          footerStyle={
-            malotes[0]?.statusFormatado === 'Pendente de Envio'
-              ? {
-                textAlign: 'center',
-                color: '#239cff',
-                backgroundColor: "#e9e9e9",
-                border: '1px solid #ccc',
-                fontSize: '1rem',
-                fontWeight: 'bold'
-              }
-              : malotes[0]?.statusFormatado === 'Conferido'
-                ? {
-                  textAlign: 'center',
-                  color: '#56ffc1',
-                  backgroundColor: "#e9e9e9",
-                  border: '1px solid #ccc',
-                  fontSize: '1rem',
-                  fontWeight: 'bold'
-                }
-                : {
-                  textAlign: 'center',
-                  color: '#f72cb0',
-                  backgroundColor: "#e9e9e9",
-                  border: '1px solid #ccc',
-                  fontSize: '1rem',
-                  fontWeight: 'bold'
-                }
-          }
+          footerStyle={{ textAlign: 'center', color: '#0D6EFD', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem', fontWeight: 'bold' }}
         />
         <Column
           footer={
@@ -549,7 +541,6 @@ export const ActionListaMovimentacaoCaixaDia = ({
                   width="85px"
                   height="40px"
                   textButton={malotes[0]?.STATUSMALOTE === 'Recepcionado' ? "Conferir" : "Detalhes"}
-                  disabledBTN={optionsModulos[0]?.ALTERAR == 'False' ? true : false}
                 />
               ) : null}
             </Fragment>
@@ -559,8 +550,8 @@ export const ActionListaMovimentacaoCaixaDia = ({
         />
       </Row>
     </ColumnGroup>
-
   )
+
   return (
     <Fragment>
       <div className="row" >
@@ -582,7 +573,6 @@ export const ActionListaMovimentacaoCaixaDia = ({
                   rows={true}
                   tableStyle={{ marginBottom: '1rem' }}
                   showGridlines
-                  cellMemo={false}
                   stripedRows
                   emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
                 >
