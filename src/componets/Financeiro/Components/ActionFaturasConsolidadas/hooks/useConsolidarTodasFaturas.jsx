@@ -4,9 +4,10 @@ import axios from 'axios'
 import Swal from "sweetalert2";
 
 export const useConsolidarTodasFaturas = ({
-    optionsModulos, 
-    usuarioLogado, 
+    optionsModulos,
+    usuarioLogado,
     handleClickConciliar,
+    handleClick,
     selectedItems,
 }) => {
     const [ipUsuario, setIpUsuario] = useState('');
@@ -15,26 +16,26 @@ export const useConsolidarTodasFaturas = ({
         let usuarioIP = null;
 
         try {
-        const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-        usuarioIP = ipWhoisData?.ip;
+            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
+            usuarioIP = ipWhoisData?.ip;
         } catch (error) {
-        console.error("Erro ao buscar IP via ifconfig.me:", error);
+            console.error("Erro ao buscar IP via ifconfig.me:", error);
         }
 
         if (!usuarioIP) {
-        try {
-            const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-            usuarioIP = ipifyData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ipify.org:", error);
-        }
+            try {
+                const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
+                usuarioIP = ipifyData?.ip;
+            } catch (error) {
+                console.error("Erro ao buscar IP via ipify.org:", error);
+            }
         }
         setIpUsuario(usuarioIP);
         return usuarioIP;
     };
 
     const conferirTodas = async (rowData) => {
-        if(optionsModulos[0]?.ALTERAR == 'False') {
+        if (optionsModulos[0]?.ALTERAR == 'False') {
             Swal.fire({
                 position: 'center',
                 icon: 'error',
@@ -42,7 +43,7 @@ export const useConsolidarTodasFaturas = ({
                 showConfirmButton: true,
                 timer: 3000,
                 customClass: {
-                    container: 'custom-swal', 
+                    container: 'custom-swal',
                 },
             });
             return;
@@ -69,21 +70,21 @@ export const useConsolidarTodasFaturas = ({
         }).then(async (result) => {
 
             if (result.isConfirmed) {
-            
-                
+
+
                 try {
-                    for(let i = 0; i < selectedItems.length; i++) {
+                    for (let i = 0; i < selectedItems.length; i++) {
                         const rowData = selectedItems[i];
-                        const putData = {   
+                        const putData = {
                             IDEMPRESA: Number(rowData.IDEMPRESA),
                             DTPROCESSAMENTO: rowData.DTPROCESSAMENTO,
                             QTDTOTALFATURAS: Number(rowData.QTDFATURAS),
-                            VRTOTALRECEBIDO: Number(rowData.VRTOTALRECEBIDO),
+                            VRTOTALRECEBIDO: Number(rowData.VRTOTAL),
                             IDFUNCIONARIO: Number(usuarioLogado.id),
-                 
+
                         };
 
-                        
+
                         const response = await post('/criar-consolidacao-faturas', putData)
                         const textDados = JSON.stringify(putData)
                         await getIPUsuario();
@@ -91,12 +92,12 @@ export const useConsolidarTodasFaturas = ({
                             IDFUNCIONARIO: String(usuarioLogado.id),
                             PATHFUNCAO: ``,
                             DADOS: textDados,
-                            IP: ipUsuario || 'IP não disponível'
+                            IP: ipUsuario || 'INDISPONIVEL'
                         }
-                        
+
                         await post('/log-web', postData)
                     }
-        
+
                     Swal.fire({
                         position: 'center',
                         icon: 'success',
@@ -104,12 +105,16 @@ export const useConsolidarTodasFaturas = ({
                         showConfirmButton: false,
                         timer: 3000,
                         customClass: {
-                            container: 'custom-swal', 
+                            container: 'custom-swal',
                         },
                     })
-        
-                    handleClickConciliar();
-                   
+
+                    if (typeof handleClickConciliar === 'function') {
+                        handleClickConciliar();
+                    } else if (typeof handleClick === 'function') {
+                        handleClick();
+                    }
+
                 } catch (error) {
                     // const textDados = JSON.stringify(putData)
                     // const ipUsuario = await getIPUsuario();
@@ -119,10 +124,10 @@ export const useConsolidarTodasFaturas = ({
                     //     DADOS: textDados,
                     //     IP: ipUsuario || 'IP não disponível'
                     // }
-                    
+
                     // const responsePost = await post('/log-web', postData)
-        
-        
+
+
                     Swal.fire({
                         position: 'center',
                         icon: 'error',
@@ -130,7 +135,7 @@ export const useConsolidarTodasFaturas = ({
                         showConfirmButton: false,
                         timer: 3000,
                         customClass: {
-                            container: 'custom-swal', 
+                            container: 'custom-swal',
                         },
                     });
                     console.error('Erro Conferir Todas Faturas:', error);
@@ -140,10 +145,10 @@ export const useConsolidarTodasFaturas = ({
                 return;
             }
         });
-        
+
     }
 
-    
+
     return {
         conferirTodas,
     }

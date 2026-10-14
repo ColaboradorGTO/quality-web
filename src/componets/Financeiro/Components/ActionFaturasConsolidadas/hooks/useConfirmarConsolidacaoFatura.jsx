@@ -3,26 +3,26 @@ import { post } from "../../../../../api/funcRequest";
 import axios from 'axios'
 import Swal from "sweetalert2";
 
-export const useConfirmarConsolidacaoFatura = ({optionsModulos, usuarioLogado, handleClickConciliar}) => {
+export const useConfirmarConsolidacaoFatura = ({ optionsModulos, usuarioLogado, handleClickConciliar }) => {
     const [ipUsuario, setIpUsuario] = useState('');
 
     const getIPUsuario = async () => {
         let usuarioIP = null;
 
         try {
-        const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-        usuarioIP = ipWhoisData?.ip;
+            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
+            usuarioIP = ipWhoisData?.ip;
         } catch (error) {
-        console.error("Erro ao buscar IP via ifconfig.me:", error);
+            console.error("Erro ao buscar IP via ifconfig.me:", error);
         }
 
         if (!usuarioIP) {
-        try {
-            const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-            usuarioIP = ipifyData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ipify.org:", error);
-        }
+            try {
+                const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
+                usuarioIP = ipifyData?.ip;
+            } catch (error) {
+                console.error("Erro ao buscar IP via ipify.org:", error);
+            }
         }
         setIpUsuario(usuarioIP);
         return usuarioIP;
@@ -74,7 +74,7 @@ export const useConfirmarConsolidacaoFatura = ({optionsModulos, usuarioLogado, h
                 }
 
                 try {
-        
+
                     const response = await post('/criar-consolidacao-faturas', putData)
                     const textDados = JSON.stringify(putData)
                     const ipUsuario = await getIPUsuario();
@@ -82,7 +82,7 @@ export const useConfirmarConsolidacaoFatura = ({optionsModulos, usuarioLogado, h
                         IDFUNCIONARIO: String(usuarioLogado.id),
                         PATHFUNCAO: `FINANCEIRO/INTEGRAR CONSOLIDACAO FATURAS`,
                         DADOS: textDados,
-                        IP: ipUsuario || 'IP não disponível'
+                        IP: ipUsuario || 'INDIDISPONIVEL'
                     }
 
                     await post('/log-web', postData)
@@ -96,8 +96,11 @@ export const useConfirmarConsolidacaoFatura = ({optionsModulos, usuarioLogado, h
                             container: 'custom-swal',
                         },
                     })
-        
-                    handleClickConciliar();
+                    if (typeof handleClickConciliar === 'function') {
+                        handleClickConciliar();
+                    } else if (typeof handleClick === 'function') {
+                        handleClick();
+                    }
                     return response.data;
                 } catch (error) {
                     const textDados = JSON.stringify(putData)
@@ -106,7 +109,7 @@ export const useConfirmarConsolidacaoFatura = ({optionsModulos, usuarioLogado, h
                         IDFUNCIONARIO: String(usuarioLogado.id),
                         PATHFUNCAO: `FINANCEIRO/ERRO AO INTEGRAR CONSOLIDACAO FATURAS`,
                         DADOS: textDados,
-                        IP: ipUsuario || 'IP não disponível'
+                        IP: ipUsuario || 'INDIDISPONIVEL'
                     }
 
                     const responsePost = await post('/log-web', postData)

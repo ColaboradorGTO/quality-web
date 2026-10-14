@@ -3,33 +3,33 @@ import { post, put } from "../../../../../api/funcRequest";
 import axios from 'axios'
 import Swal from "sweetalert2";
 
-export const useCancelarConsolidacaoFatura = ({optionsModulos, usuarioLogado, selectedItems, handleClickConciliar}) => {
+export const useCancelarConsolidacaoFatura = ({ optionsModulos, usuarioLogado, selectedItems, handleClickConciliar }) => {
     const [ipUsuario, setIpUsuario] = useState('');
 
     const getIPUsuario = async () => {
         let usuarioIP = null;
 
         try {
-        const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-        usuarioIP = ipWhoisData?.ip;
+            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
+            usuarioIP = ipWhoisData?.ip;
         } catch (error) {
-        console.error("Erro ao buscar IP via ifconfig.me:", error);
+            console.error("Erro ao buscar IP via ifconfig.me:", error);
         }
 
         if (!usuarioIP) {
-        try {
-            const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-            usuarioIP = ipifyData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ipify.org:", error);
-        }
+            try {
+                const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
+                usuarioIP = ipifyData?.ip;
+            } catch (error) {
+                console.error("Erro ao buscar IP via ipify.org:", error);
+            }
         }
         setIpUsuario(usuarioIP);
         return usuarioIP;
     };
 
     const cancelar = async (rowData) => {
-        if(optionsModulos[0]?.ALTERAR == 'False') {
+        if (optionsModulos[0]?.ALTERAR == 'False') {
             Swal.fire({
                 position: 'center',
                 icon: 'error',
@@ -37,7 +37,7 @@ export const useCancelarConsolidacaoFatura = ({optionsModulos, usuarioLogado, se
                 showConfirmButton: true,
                 timer: 3000,
                 customClass: {
-                    container: 'custom-swal', 
+                    container: 'custom-swal',
                 },
             });
             return;
@@ -62,10 +62,10 @@ export const useCancelarConsolidacaoFatura = ({optionsModulos, usuarioLogado, se
                 document.head.appendChild(style);
             }
         })
-     
+
         if (!confirmacao.isConfirmed) return;
-     
-        const {value: motivoCancelamento} = await Swal.fire({
+
+        const { value: motivoCancelamento } = await Swal.fire({
             title: 'Motivo do Cancelamento',
             input: 'text',
             inputLabel: 'Digite o motivo',
@@ -97,7 +97,7 @@ export const useCancelarConsolidacaoFatura = ({optionsModulos, usuarioLogado, se
                 }
             }
         });
-        
+
         if (!motivoCancelamento) return;
         const motivo = motivoCancelamento.trim();
 
@@ -107,7 +107,7 @@ export const useCancelarConsolidacaoFatura = ({optionsModulos, usuarioLogado, se
             TXTMOTIVOCANCELAMENTO: motivo,
             IDFUNCIONARIO: parseInt(usuarioLogado.id),
         }
-    
+
         try {
 
             const response = await put('/consolidacao-faturas/:id', putData)
@@ -119,7 +119,7 @@ export const useCancelarConsolidacaoFatura = ({optionsModulos, usuarioLogado, se
                 DADOS: textDados,
                 IP: ipUsuario || 'IP não disponível'
             }
-            
+
             await post('/log-web', postData)
             Swal.fire({
                 position: 'center',
@@ -128,11 +128,13 @@ export const useCancelarConsolidacaoFatura = ({optionsModulos, usuarioLogado, se
                 showConfirmButton: false,
                 timer: 3000,
                 customClass: {
-                    container: 'custom-swal', 
+                    container: 'custom-swal',
                 },
             })
 
-            handleClickConciliar();
+            if (typeof handleClickConciliar === 'function') {
+                handleClickConciliar();
+            }
             return response.data;
         } catch (error) {
             const textDados = JSON.stringify(putData)
@@ -143,7 +145,7 @@ export const useCancelarConsolidacaoFatura = ({optionsModulos, usuarioLogado, se
                 DADOS: textDados,
                 IP: ipUsuario || 'IP não disponível'
             }
-            
+
             const responsePost = await post('/log-web', postData)
 
 
@@ -154,15 +156,15 @@ export const useCancelarConsolidacaoFatura = ({optionsModulos, usuarioLogado, se
                 showConfirmButton: false,
                 timer: 3000,
                 customClass: {
-                    container: 'custom-swal', 
+                    container: 'custom-swal',
                 },
             });
             console.error('Erro Confirmar Consolidação Faturas:', error);
             return responsePost.data;
-        }   
+        }
     }
 
-    
+
     return {
         cancelar
     }

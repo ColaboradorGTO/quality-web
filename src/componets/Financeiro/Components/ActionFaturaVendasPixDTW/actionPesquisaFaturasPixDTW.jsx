@@ -117,7 +117,7 @@ export const ActionPesquisaFaturasVendasPixDTW = ({ usuarioLogado }) => {
   const { data: dadosFaturaVendasPix = [], error: errorVendasPix, isLoading: isLoadingVendasPix, refetch: refetchVendasPix } = useQuery(
     ['venda-total-fatura-pix-empresa'],
     () => fetchListaVendasPix(),
-    { enabled: false}
+    { enabled: false }
   );
 
   const fetchListaVendasPixCompensacao = async () => {
@@ -168,28 +168,23 @@ export const ActionPesquisaFaturasVendasPixDTW = ({ usuarioLogado }) => {
 
   const handleClickVendasPix = () => {
 
-    if (marcaSelecionada) {
+   
       setTabelaVendasPixVisivel(true)
       setTabelaVendasPixCompensacao(false)
       setPixCompensacaoCapa(false)
       setPixCompensacaoCredito(false)
       refetchVendasPix()
-    } else {
-      Swal.fire('Erro', 'Por favor, selecione uma Marca e datas válidas.', 'error');
-    }
+    
   }
 
   const handleClickVendasPixCompensacao = () => {
-    if (marcaSelecionada) {
       setTabelaVendasPixCompensacao(true)
       setTabelaVendasPixVisivel(false)
       setPixCompensacaoCapa(false)
       setPixCompensacaoCredito(false)
       refetchVendasPixCompensacao()
 
-    } else {
-      Swal.fire('Erro', 'Por favor, selecione uma Marca e datas válidas.', 'error')
-    }
+
   }
 
 
@@ -271,7 +266,8 @@ export const ActionPesquisaFaturasVendasPixDTW = ({ usuarioLogado }) => {
       )}
 
       {tabelaVendasPixCompensacao && (
-        <ActionFaturaListaVendasPIXCompensacao dadosFaturaVendasPixCompensacao={dadosFaturaVendasPixCompensacao} />
+        <ActionFaturaListaVendasPIXCompensacao
+         dadosFaturaVendasPixCompensacao={dadosFaturaVendasPixCompensacao} />
       )}
 
     </Fragment>

@@ -101,7 +101,7 @@ export const ActionListaConsolidacaoFaturas = ({
       ERROR_LOG_SAP: item.ERROR_LOG_SAP,
       STCANCELADO: item.STCANCELADO,
       TXTMOTIVOCANCELAMENTO: item.TXTMOTIVOCANCELAMENTO,
-      
+
     }
   });
 
@@ -113,75 +113,132 @@ export const ActionListaConsolidacaoFaturas = ({
     return total;
   }
 
+  const podeSelecionar = (item) => {
+    const stMigrado = Number(item.DOCENTRY_SAP_CONTAS_A_RECEBER || 0) > 0;
+    const stEmAndamento = item.STATUS_BLOQUEIO_ATUALIZACAO === 'True';
+    const stCancelado = item.STCANCELADO === 'True';
+    return !stMigrado && !stEmAndamento && !stCancelado && Boolean(item.IDCONSOLIDACAOFATURA);
+  };
+
   useEffect(() => {
-      const itensSelecionaveis = dados.filter(item =>
-        item.STCANCELADO === 'False' && item.STCONFERIDOFATURA !== 'True' && item.IDDETALHEFATURA
-      );
-  
-      const dadosPaginaAtual = dados.slice(first, first + rows);
-      const itensSelecionaveisPaginaAtual = dadosPaginaAtual.filter(item =>
-        item.STCANCELADO === 'False' && item.STCONFERIDOFATURA !== 'True' && item.IDDETALHEFATURA
-      );
-  
-      if (selectedItems.length === 0) {
-        setSelectAllChecked(false);
-      } else if (
-        selectedItems.length === itensSelecionaveis.length ||
-        (selectedItems.length === itensSelecionaveisPaginaAtual.length &&
-          itensSelecionaveisPaginaAtual.length > 0 &&
-          itensSelecionaveisPaginaAtual.every(item =>
-            selectedItems.some(selected => selected.IDDETALHEFATURA === item.IDDETALHEFATURA)
-          ))
-      ) {
-        setSelectAllChecked(true);
+    const itensSelecionaveis = dados.filter(podeSelecionar);
+
+    const dadosPaginaAtual = dados.slice(first, first + rows);
+    const itensSelecionaveisPaginaAtual = dadosPaginaAtual.filter(podeSelecionar);
+
+    if (selectedItems.length === 0) {
+      setSelectAllChecked(false);
+    } else if (
+      selectedItems.length === itensSelecionaveis.length ||
+      (selectedItems.length === itensSelecionaveisPaginaAtual.length &&
+        itensSelecionaveisPaginaAtual.length > 0 &&
+        itensSelecionaveisPaginaAtual.every(item =>
+          selectedItems.some(selected => selected.IDCONSOLIDACAOFATURA === item.IDCONSOLIDACAOFATURA)
+        ))
+    ) {
+      setSelectAllChecked(true);
+    } else {
+      setSelectAllChecked(false);
+    }
+  }, [selectedItems, dados, first, rows]);
+
+
+  const onSelectAllChange = (e) => {
+    const checked = e?.checked ?? e?.target?.checked ?? false;
+    if (!checked) {
+      setSelectedItems([]);
+      return;
+    }
+
+    const itensSelecionaveis = dados.filter(podeSelecionar);
+
+    if (itensSelecionaveis.length === 0) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Não há registros para serem selecionados.',
+        showConfirmButton: true,
+        showCloseButton: true,
+        allowOutsideClick: false,
+        confirmButtonText: 'Entendi',
+        confirmButtonColor: '#2196F3',
+      });
+      return;
+    }
+
+    const todosRegistrosNaTela =
+      first === 0 &&
+      rows >= dados.length;
+
+    if (todosRegistrosNaTela) {
+      setSelectedItems([...itensSelecionaveis]);
+      return;
+    }
+
+    Swal.fire({
+      icon: 'question',
+      title: 'Selecione o modo de seleção',
+      html: `
+        <div>
+          <p>Você pode selecionar apenas os registros exibidos nesta página.</p>
+          <small>
+            Para habilitar <b>Todos os registros</b>, exiba todos os registros da tabela.
+          </small>
+        </div>
+      `,
+      showConfirmButton: true,
+      showCancelButton: true,
+      showCloseButton: true,
+      confirmButtonText: 'Todos os registros',
+      cancelButtonText: 'Apenas o que está em tela',
+      confirmButtonColor: '#6c757d',
+      cancelButtonColor: '#2196F3',
+      didOpen: () => {
+        const btnTodos = Swal.getConfirmButton();
+        btnTodos.disabled = true;
+        btnTodos.style.cursor = 'not-allowed';
+        btnTodos.style.opacity = '0.6';
+      },
+      allowOutsideClick: false,
+    }).then((result) => {
+      if (result.dismiss === Swal.DismissReason.cancel) {
+        const dadosPaginaAtual = dados.slice(
+          first,
+          first + rows
+        );
+
+        const itensSelecionaveisPaginaAtual = dadosPaginaAtual.filter(podeSelecionar);
+
+        if (itensSelecionaveisPaginaAtual.length === 0) {
+          Swal.fire({
+            icon: 'info',
+            title: 'Não há registros selecionáveis nesta página.',
+            confirmButtonText: 'Entendi',
+            confirmButtonColor: '#2196F3',
+          });
+          return;
+        }
+
+        setSelectedItems([...itensSelecionaveisPaginaAtual]);
       } else {
-        setSelectAllChecked(false);
-      }
-  
-    }, [selectedItems, dados, first, rows]);
-  
-    const onSelectAllChange = (e) => {
-      if (e.checked) {
-        Swal.fire({
-          icon: 'question',
-          title: 'Selecione o modo de seleção',
-          text: 'Deseja selecionar todos da tabela ou somente o que está em tela?',
-          showConfirmButton: true,
-          showCancelButton: true,
-          showCloseButton: true,
-          confirmButtonText: 'Todos os registros',
-          cancelButtonText: 'Apenas o que está tela',
-          cancelButtonColor: '#2196F3',
-          allowOutsideClick: false,
-        }).then((result) => {
-          if (result.isConfirmed) {
-            const itensSelecionaveis = dados.filter(item =>
-              item.STCANCELADO === 'False' && item.STCONFERIDOFATURA !== 'True' && item.IDDETALHEFATURA
-            );
-            // setBtnVisivel(true);
-            setSelectedItems([...itensSelecionaveis]);
-          } else if (result.dismiss === Swal.DismissReason.cancel) {
-            const dadosPaginaAtual = dados.slice(first, first + rows);
-  
-            const itensSelecionaveisPaginaAtual = dadosPaginaAtual.filter(item =>
-              item.STCANCELADO === 'False' && item.STCONFERIDOFATURA !== 'True' && item.IDDETALHEFATURA
-            );
-            // setBtnVisivel(true);
-            setSelectedItems([...itensSelecionaveisPaginaAtual]);
-          } else {
-            // setBtnVisivel(false);
-            setSelectedItems([]);
-          }
-        });
-      } else {
-        // setBtnVisivel(false);
         setSelectedItems([]);
       }
-    };
+    });
+  };
+
+
   const colunasListaFatura = [
+
     {
       field: 'Selecao',
-      header: 'Seleção',
+      header: (
+        <div className="custom-control custom-checkbox">
+          <Checkbox
+            checked={selectAllChecked}
+            onChange={onSelectAllChange}
+          />
+          <span style={{ fontSize: '1rem', marginLeft: '5px' }}>Seleção</span>
+        </div>
+      ),
       body: (rowData) => {
         const stMigrado = rowData.DOCENTRY_SAP_CONTAS_A_RECEBER > 0;
         const stEmAndamento = rowData.STATUS_BLOQUEIO_ATUALIZACAO === 'True';
@@ -300,22 +357,22 @@ export const ActionListaConsolidacaoFaturas = ({
 
         // Botão Visualizar Status - sempre aparece
         const btnVisualizarStatus = (
-           <div className="p-1">
+          <div className="p-1">
 
-             <ButtonTable
-               key="status"
-               titleButton="Visualizar Status Consolidação"
-               // className={"btn-sm"}
-               textButton={"Status"}
-               textFontSize="11px"
-               cor="primary"
-               Icon={BsEye}
-               iconSize={15}
-               onClickButton={() => handleVisualizarStatus(txtSituacao, msgStatus)}
-               width="50px"
-               height="40px"
-             />
-           </div>
+            <ButtonTable
+              key="status"
+              titleButton="Visualizar Status Consolidação"
+              // className={"btn-sm"}
+              textButton={"Status"}
+              textFontSize="11px"
+              cor="primary"
+              Icon={BsEye}
+              iconSize={15}
+              onClickButton={() => handleVisualizarStatus(txtSituacao, msgStatus)}
+              width="50px"
+              height="40px"
+            />
+          </div>
         );
 
         // Se migrado OU em andamento OU cancelado: só mostra botão de status
@@ -329,19 +386,19 @@ export const ActionListaConsolidacaoFaturas = ({
 
         // Caso contrário, mostra todos os botões
         const btnIntegrar = (
-           <div className="p-1">
+          <div className="p-1">
 
-             <ButtonTable
-               key="integrar"
-               titleButton="Integrar Consolidação Fatura no SAP"
-               textButton={"Integrar"}
-               cor="info"
-               Icon={BsCloudUpload}
-               onClickButton={() => confirmar(rowData)}
-               width="50px"
-               height="40px"
-             />
-           </div>
+            <ButtonTable
+              key="integrar"
+              titleButton="Integrar Consolidação Fatura no SAP"
+              textButton={"Integrar"}
+              cor="info"
+              Icon={BsCloudUpload}
+              onClickButton={() => confirmar(rowData)}
+              width="50px"
+              height="40px"
+            />
+          </div>
         );
 
         const btnCancelar = (
@@ -358,7 +415,7 @@ export const ActionListaConsolidacaoFaturas = ({
               height="40px"
             />
           </div>
-        
+
         );
 
         return (
@@ -411,7 +468,7 @@ export const ActionListaConsolidacaoFaturas = ({
             exportToPDF={exportToPDF}
           />
         </div>
-         <div style={{ width: "100%", display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <div style={{ width: "100%", display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
 
           <div className="custom-control custom-checkbox">
             <Checkbox
@@ -439,7 +496,12 @@ export const ActionListaConsolidacaoFaturas = ({
             sortOrder={-1}
             paginator={true}
             cellMemo={false}
-            rows={10}
+            first={first}
+            rows={rows}
+            onPage={(e) => {
+              setFirst(e.first);
+              setRows(e.rows);
+            }}
             rowsPerPageOptions={[10, 20, 50, 100, 200, 300, 500, dados.length]}
             showGridlines
             stripedRows

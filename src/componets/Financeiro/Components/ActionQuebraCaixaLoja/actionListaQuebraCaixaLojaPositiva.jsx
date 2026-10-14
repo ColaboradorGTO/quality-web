@@ -23,13 +23,13 @@ import { useEffect } from "react";
 import { FaCheck } from "react-icons/fa6";
 import { FaRegTrashAlt } from "react-icons/fa";
 
-export const ActionListaQuebraCaixaLojaPositiva = ({ 
-  dadosQuebraDeCaixaPositiva, 
-  usuarioLogado, 
+export const ActionListaQuebraCaixaLojaPositiva = ({
+  dadosQuebraDeCaixaPositiva,
+  usuarioLogado,
   optionsModulos,
   selectedItems,
   setSelectedItems,
-  handleClick 
+  handleClick
 }) => {
   const [globalFilterValue, setGlobalFilterValue] = useState('');
   const [modalVisivel, setModalVisivel] = useState(false);
@@ -40,14 +40,14 @@ export const ActionListaQuebraCaixaLojaPositiva = ({
   const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(10);
   const dataTableRef = useRef();
-  
+
   const {
     handleCancelar
   } = useAtivarCancelar({ usuarioLogado, optionsModulos });
 
   const {
     conferir
-  } = useConferirQuebra({ optionsModulos, usuarioLogado, selectedItems, handleClick }); 
+  } = useConferirQuebra({ optionsModulos, usuarioLogado, selectedItems, handleClick });
 
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
@@ -93,8 +93,8 @@ export const ActionListaQuebraCaixaLojaPositiva = ({
       { wpx: 150, caption: 'Vr. Quebra Lançado' },
       { wpx: 200, caption: 'Historíco' },
       { wpx: 50, caption: 'Situação' }
-      
-    ]; 
+
+    ];
     XLSX.utils.sheet_add_aoa(worksheet, [header], { origin: 'A1' });
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Quebra de Caixas Positivas');
     XLSX.writeFile(workbook, 'quebra_caixa_positiva.xlsx');
@@ -115,13 +115,13 @@ export const ActionListaQuebraCaixaLojaPositiva = ({
   });
 
   const calcularTotalVrQuebraSistema = () => {
-    return dadosPositiva.reduce((total, item) => 
+    return dadosPositiva.reduce((total, item) =>
       total + parseFloat(item.VRQUEBRASISTEMA), 0
     );
   };
 
   const calcularTotalVrQuebraEfetivado = () => {
-    return dadosPositiva.reduce((total, item) => 
+    return dadosPositiva.reduce((total, item) =>
       total + parseFloat(item.VRQUEBRAEFETIVADO), 0
     );
   };
@@ -150,12 +150,12 @@ export const ActionListaQuebraCaixaLojaPositiva = ({
     } else {
       setSelectAllChecked(false);
     }
-    
+
   }, [selectedItems, dadosPositiva, first, rows]);
 
   const onSelectAllChange = (e) => {
     if (e.checked) {
-      
+
       Swal.fire({
         icon: 'question',
         title: 'Selecione o modo de seleção',
@@ -170,7 +170,7 @@ export const ActionListaQuebraCaixaLojaPositiva = ({
       }).then((result) => {
         if (result.isConfirmed) {
           const itensSelecionaveis = dadosPositiva.filter(item =>
-            item.STATIVO  === 'True' && item.STCONFERIDO !== 'True' && item.IDQUEBRACAIXA
+            item.STATIVO === 'True' && item.STCONFERIDO !== 'True' && item.IDQUEBRACAIXA
           );
           setBtnVisivel(true);
           setSelectedItems([...itensSelecionaveis]);
@@ -178,7 +178,7 @@ export const ActionListaQuebraCaixaLojaPositiva = ({
           const dadosPaginaAtual = dadosPositiva.slice(first, first + rows);
 
           const itensSelecionaveisPaginaAtual = dadosPaginaAtual.filter(item =>
-            item.STATIVO  === 'True' && item.STCONFERIDO !== 'True' && item.IDQUEBRACAIXA
+            item.STATIVO === 'True' && item.STCONFERIDO !== 'True' && item.IDQUEBRACAIXA
           );
           setBtnVisivel(true);
           setSelectedItems([...itensSelecionaveisPaginaAtual]);
@@ -194,7 +194,7 @@ export const ActionListaQuebraCaixaLojaPositiva = ({
   };
 
   const colunasQuebraDeCaixaPositiva = [
-     {
+    {
       field: 'Selecione',
       selectionMode: 'multiple',
       body: (rowData) => {
@@ -291,7 +291,7 @@ export const ActionListaQuebraCaixaLojaPositiva = ({
       field: 'STATIVO',
       header: 'Situação',
       body: (row) => {
-     
+
         const situacaoQuebraLoja = row.STATIVO == 'True';
         const situacaoConferido = row.STCONFERIDO == 'True';
         let tagQuebraAtivo = null;
@@ -344,7 +344,7 @@ export const ActionListaQuebraCaixaLojaPositiva = ({
               </div>
             );
           } else {
-          
+
             containerButtons = (
               <div className="d-flex" style={{ justifyContent: "space-between" }}>
                 <div className="mr-2">
@@ -387,7 +387,7 @@ export const ActionListaQuebraCaixaLojaPositiva = ({
             );
           }
         } else {
-        
+
           containerButtons = (
             <div>
               <ButtonTable
@@ -440,7 +440,7 @@ export const ActionListaQuebraCaixaLojaPositiva = ({
   };
 
   const handleClickCancelar = (row) => {
-    if(optionsModulos[0]?.ALTERAR == 'True') {
+    if (optionsModulos[0]?.ALTERAR == 'True') {
       if (row && row.IDQUEBRACAIXA) {
         handleCancelar(row.IDQUEBRACAIXA, row.STATIVO);
       }
@@ -463,17 +463,17 @@ export const ActionListaQuebraCaixaLojaPositiva = ({
     <ColumnGroup>
       <Row>
         <Column footer="" colSpan={3} />
-        <Column footer="Totais" colSpan={4} style={{fontSize: '1rem', fontWeight: 'bold' }}/>
-        <Column 
-          footer={formatMoeda(calcularTotalVrQuebraSistema())} 
+        <Column footer="Totais" colSpan={4} style={{ fontSize: '1rem', fontWeight: 'bold' }} />
+        <Column
+          footer={formatMoeda(calcularTotalVrQuebraSistema())}
           style={{ color: calcularTotalVrQuebraSistema() >= 0 ? 'blue' : 'red', fontSize: '0.8rem' }}
           colSpan={1}
-        /> 
-        <Column 
+        />
+        <Column
           footer={formatMoeda(calcularTotalVrQuebraEfetivado())}
           style={{ color: calcularTotalVrQuebraEfetivado() >= 0 ? 'blue' : 'red', fontSize: '0.8rem' }}
           colSpan={1}
-       /> 
+        />
         <Column footer="" colSpan={3} />
       </Row>
     </ColumnGroup>
@@ -513,6 +513,7 @@ export const ActionListaQuebraCaixaLojaPositiva = ({
             filterDisplay="menu"
             showGridlines
             stripedRows
+            cellMemo={false}
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado positiva</div>}
           >
             {colunasQuebraDeCaixaPositiva.map(coluna => (
@@ -534,11 +535,11 @@ export const ActionListaQuebraCaixaLojaPositiva = ({
         </div>
       </div>
 
-       <ModalImprimirQuebra
-          show={modalVisivel}
-          handleClose={() => setModalVisivel(false)}
-          dadosQuebraCaixasModal={dadosQuebraCaixasModal}
-        />
+      <ModalImprimirQuebra
+        show={modalVisivel}
+        handleClose={() => setModalVisivel(false)}
+        dadosQuebraCaixasModal={dadosQuebraCaixasModal}
+      />
     </Fragment>
   )
 }

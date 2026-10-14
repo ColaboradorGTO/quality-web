@@ -354,7 +354,7 @@ export const ActionListaQuebraCaixaLojaNegativa = ({
 
         if (situacaoQuebraLoja) {
           if (situacaoConferido) {
-            
+
             containerButtons = (
               <div className="mr-2">
                 <ButtonTable
@@ -489,17 +489,17 @@ export const ActionListaQuebraCaixaLojaNegativa = ({
     <ColumnGroup>
       <Row>
         <Column footer="" colSpan={3} />
-        <Column footer="Totais" colSpan={4} style={{fontSize: '1rem', fontWeight: 'bold' }}/>
-        <Column 
-          footer={formatMoeda(calcularTotalVrQuebraSistema())} 
+        <Column footer="Totais" colSpan={4} style={{ fontSize: '1rem', fontWeight: 'bold' }} />
+        <Column
+          footer={formatMoeda(calcularTotalVrQuebraSistema())}
           style={{ color: calcularTotalVrQuebraSistema() >= 0 ? 'blue' : 'red', fontSize: '0.8rem' }}
           colSpan={1}
-        /> 
-        <Column 
+        />
+        <Column
           footer={formatMoeda(calcularTotalVrQuebraEfetivado())}
           style={{ color: calcularTotalVrQuebraEfetivado() >= 0 ? 'blue' : 'red', fontSize: '0.8rem' }}
           colSpan={1}
-       /> 
+        />
         <Column footer="" colSpan={3} />
       </Row>
     </ColumnGroup>
@@ -535,7 +535,7 @@ export const ActionListaQuebraCaixaLojaNegativa = ({
           </div>
 
         </div>
-        
+
         <div className="card" ref={dataTableRef}>
           <DataTable
             title="Quebra Negativas de Caixa das Lojas"
@@ -555,6 +555,7 @@ export const ActionListaQuebraCaixaLojaNegativa = ({
             filterDisplay="menu"
             showGridlines
             stripedRows
+            cellMemo={false}
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado negativa</div>}
           >
             {colunasQuebraDeCaixaNegativa.map(coluna => (

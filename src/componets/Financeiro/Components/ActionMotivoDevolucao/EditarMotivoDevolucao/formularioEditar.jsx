@@ -21,7 +21,7 @@ export const FomularioEditar = ({ dadosDetalheMotivoDevolucao, optionsModulos, u
         setMotivo,
         onSubmit,
         optionsStatus
-    } = useEditarMotivoDevolucao({ dadosDetalheMotivoDevolucao, optionsModulos, usuarioLogado, handleClose, handleClick })
+    } = useEditarMotivoDevolucao({ dadosDetalheMotivoDevolucao, optionsModulos, usuarioLogado, handleClick, handleClose })
 
     return (
         <Fragment>

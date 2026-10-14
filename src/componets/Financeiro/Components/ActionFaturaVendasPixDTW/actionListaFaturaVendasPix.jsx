@@ -2,28 +2,31 @@ import { Fragment, useEffect, useRef, useState } from "react"
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { formatMoeda } from "../../../../utils/formatMoeda";
-import { formatarDataDTW } from "../../../../utils/dataFormatada";
+import { dataFormatada, dataHoraFormatada, formatarDataDTW } from "../../../../utils/dataFormatada";
 import { useReactToPrint } from "react-to-print";
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import HeaderTable from "../../../Tables/headerTable";
+import Swal from 'sweetalert2';
 import { ColumnGroup } from "primereact/columngroup";
 import { Row } from "react-bootstrap";
 import { toFloat } from "../../../../utils/toFloat";
 import { useCompensacaoData } from "./hooks/useCompensacaoData";
 
 
-export const ActionFaturaListaVendasPIX = ({ 
-  dadosFaturaVendasPix, 
-  optionsModulos, 
-  usuarioLogado, 
-  handleClickVendasPix 
+export const ActionFaturaListaVendasPIX = ({
+  dadosFaturaVendasPix,
+  optionsModulos,
+  usuarioLogado,
+  handleClickVendasPix
 }) => {
   const [globalFilterValue, setGlobalFilterValue] = useState('');
   const [selectAll, setSelectAll] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
   const [rowSelection, setRowSelection] = useState(null);
+  const [first, setFirst] = useState(0);
+  const [rows, setRows] = useState(10);
   const dataTableRef = useRef();
   const { handleDetalhar } = useCompensacaoData({ usuarioLogado, optionsModulos, handleClickVendasPix });
 
@@ -109,13 +112,13 @@ export const ActionFaturaListaVendasPIX = ({
     {
       field: 'DTPROCESSAMENTO',
       header: 'Data',
-      body: row => <th style={{ color: '#212529', width: 100 }}>{row.DTPROCESSAMENTO}</th>,
+      body: row => <th style={{ color: '#212529', width: 100 }}>{dataHoraFormatada(row.DTPROCESSAMENTO)}</th>,
       sortable: true,
     },
     {
       field: 'DATA_COMPENSACAO',
       header: 'Data Compensação',
-      body: row => <th style={{ color: '#212529', width: 100 }}>{row.DATA_COMPENSACAO || 'NÃO INFORMADO'}</th>,
+      body: row => <th style={{ color: '#212529', width: 100 }}>{dataHoraFormatada(row.DATA_COMPENSACAO) || 'NÃO INFORMADO'}</th>,
       sortable: true,
     },
     {
@@ -194,15 +197,87 @@ export const ActionFaturaListaVendasPIX = ({
 
 
   const handleSelectAll = (isChecked) => {
-    setSelectAll(isChecked);
-
-    const updatedSelectedIds = isChecked ? dadosListaVendasPix.map(item => item.IDDETALHEFATURA) : [];
-    setSelectedIds(updatedSelectedIds);
-   
-    if (updatedSelectedIds.length > 0) {
-      handleDetalhar(updatedSelectedIds);
+    if (!isChecked) {
+      setSelectAll(false);
+      setSelectedIds([]);
+      return;
     }
+
+    if (dadosListaVendasPix.length === 0) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Não há registros para serem selecionados.',
+        showConfirmButton: true,
+        showCloseButton: true,
+        allowOutsideClick: false,
+        confirmButtonText: 'Entendi',
+        confirmButtonColor: '#2196F3',
+      });
+      setSelectAll(false);
+      return;
+    }
+
+    const todosRegistrosNaTela = first === 0 && rows >= dadosListaVendasPix.length;
+
+    if (todosRegistrosNaTela) {
+      setSelectAll(true);
+      const updatedSelectedIds = dadosListaVendasPix.map(item => item.IDDETALHEFATURA);
+      setSelectedIds(updatedSelectedIds);
+      handleDetalhar(updatedSelectedIds);
+      return;
+    }
+
+    Swal.fire({
+      icon: 'question',
+      title: 'Selecione o modo de seleção',
+      html: `
+        <div>
+          <p>Você pode selecionar apenas os registros exibidos nesta página.</p>
+          <small>
+            Para habilitar <b>Todos os registros</b>, exiba todos os registros da tabela.
+          </small>
+        </div>
+      `,
+      showConfirmButton: true,
+      showCancelButton: true,
+      showCloseButton: true,
+      confirmButtonText: 'Todos os registros',
+      cancelButtonText: 'Apenas o que está em tela',
+      confirmButtonColor: '#6c757d',
+      cancelButtonColor: '#2196F3',
+      didOpen: () => {
+        const btnTodos = Swal.getConfirmButton();
+        btnTodos.disabled = true;
+        btnTodos.style.cursor = 'not-allowed';
+        btnTodos.style.opacity = '0.6';
+      },
+      allowOutsideClick: false,
+    }).then((result) => {
+      if (result.dismiss === Swal.DismissReason.cancel) {
+        const dadosPaginaAtual = dadosListaVendasPix.slice(first, first + rows);
+        const itensSelecionaveisPaginaAtual = dadosPaginaAtual.map(item => item.IDDETALHEFATURA);
+
+        if (itensSelecionaveisPaginaAtual.length === 0) {
+          Swal.fire({
+            icon: 'info',
+            title: 'Não há registros selecionáveis nesta página.',
+            confirmButtonText: 'Entendi',
+            confirmButtonColor: '#2196F3',
+          });
+          setSelectAll(false);
+          return;
+        }
+
+        setSelectAll(true);
+        setSelectedIds(itensSelecionaveisPaginaAtual);
+        handleDetalhar(itensSelecionaveisPaginaAtual);
+      } else {
+        setSelectAll(false);
+        setSelectedIds([]);
+      }
+    });
   };
+
 
   const footerGroup = (
     <ColumnGroup>
@@ -249,13 +324,19 @@ export const ActionFaturaListaVendasPIX = ({
                     onSelectionChange={(e) => setRowSelection(e.value)}
                     sortOrder={-1}
                     paginator={true}
-                    rows={10}
+                    first={first}
+                    rows={rows}
+                    onPage={(e) => {
+                      setFirst(e.first);
+                      setRows(e.rows);
+                    }}
                     footerColumnGroup={footerGroup}
                     rowsPerPageOptions={[10, 20, 50, 100, dadosListaVendasPix.length]}
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                     currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
                     filterDisplay="menu"
                     showGridlines
+                    cellMemo={false}
                     stripedRows
                     emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
 

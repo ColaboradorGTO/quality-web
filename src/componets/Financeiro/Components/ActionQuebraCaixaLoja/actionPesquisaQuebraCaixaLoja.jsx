@@ -14,9 +14,9 @@ import { animacaoCarregamento, fecharAnimacaoCarregamento, foiCancelado } from "
 import { IoMdCheckmark } from "react-icons/io";
 import Swal from "sweetalert2";
 import { useConferirTodasQuebras } from "./hooks/useConfeririTodasQuebras";
-import {optionsQuebraDeCaixa, optionsUF} from "../../../../../parceiro.json";
+import { optionsQuebraDeCaixa, optionsUF } from "../../../../../parceiro.json";
 
-export const ActionPesquisaQuebraCaixaLoja = ({usuarioLogado }) => {
+export const ActionPesquisaQuebraCaixaLoja = ({ usuarioLogado }) => {
   const [tabelaVisivel, setTabelaVisivel] = useState(false);
   const [tabelaVisivelPositiva, setTabelaVisivelPositiva] = useState(false);
   const [tabelaVisivelNegativa, setTabelaVisivelNegativa] = useState(false);
@@ -81,10 +81,10 @@ export const ActionPesquisaQuebraCaixaLoja = ({usuarioLogado }) => {
   );
 
 
-  const fetchQuebra = async () => {  
+  const fetchQuebra = async () => {
     const urlBase = `/quebra-caixa-loja?idEmpresa=${empresaSelecionada}&idMarca=${marcaSelecionada}&cpfOperadorQuebra=${cpfOperadorQuebra}&stQuebraPositivaNegativa=${quebraSelecionada}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&uf=${ufSelecionado}`;
     let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
-    urlApi = urlApi.replace('&page=1', '').replace('page=1', ''); 
+    urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
     const controller = new AbortController();
     let allData = [];
 
@@ -128,7 +128,7 @@ export const ActionPesquisaQuebraCaixaLoja = ({usuarioLogado }) => {
   );
 
 
-  const  getListaQuebraDeCaixaPositiva = async () => {
+  const getListaQuebraDeCaixaPositiva = async () => {
     const urlBase = `/quebra-caixa-loja?idEmpresa=${empresaSelecionada}&idMarca=${marcaSelecionada}&cpfOperadorQuebra=${cpfOperadorQuebra}&stQuebraPositivaNegativa=${quebraSelecionada}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}`;
     let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
     urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
@@ -167,8 +167,8 @@ export const ActionPesquisaQuebraCaixaLoja = ({usuarioLogado }) => {
       fecharAnimacaoCarregamento();
     }
   }
-  
-  const {data: dadosQuebraDeCaixaPositiva = [], error: erroQuebraPositiva, isLoading: isLoadingQuebraPositiva, refetch: refetchQuebraPositiva} = useQuery(
+
+  const { data: dadosQuebraDeCaixaPositiva = [], error: erroQuebraPositiva, isLoading: isLoadingQuebraPositiva, refetch: refetchQuebraPositiva } = useQuery(
     'quebra-caixa-loja-Positiva',
     () => getListaQuebraDeCaixaPositiva(),
     { enabled: false, staleTime: 60 * 60 * 1000 }
@@ -215,7 +215,7 @@ export const ActionPesquisaQuebraCaixaLoja = ({usuarioLogado }) => {
     }
   }
 
-  const {data: dadosQuebraDeCaixaNegativa = [], error: erroQuebraNegativa, isLoading: isLoadingQuebraNegativa, refetch: refetchQuebraNegativa} = useQuery(
+  const { data: dadosQuebraDeCaixaNegativa = [], error: erroQuebraNegativa, isLoading: isLoadingQuebraNegativa, refetch: refetchQuebraNegativa } = useQuery(
     'lista-Quebra-Caixa-Negativa',
     () => getListaQuebraDeCaixaNegativa(),
     { enabled: false, staleTime: 60 * 60 * 1000 }
@@ -227,7 +227,7 @@ export const ActionPesquisaQuebraCaixaLoja = ({usuarioLogado }) => {
 
 
   const handleChangeEmpresa = (e) => {
-    if( e.value === '') {
+    if (e.value === '') {
       setEmpresaSelecionada('');
     } else {
       const empresa = optionsEmpresas.find((item) => item.IDEMPRESA === e.value);
@@ -247,19 +247,19 @@ export const ActionPesquisaQuebraCaixaLoja = ({usuarioLogado }) => {
       setTabelaVisivelPositiva(true);
       setTabelaVisivelNegativa(false);
       setTabelaVisivel(false);
-      
+
       await refetchQuebraPositiva();
     } else if (quebraSelecionada === "Negativa") {
       setTabelaVisivelNegativa(true);
       setTabelaVisivelPositiva(false);
       setTabelaVisivel(false);
-      
+
       await refetchQuebraNegativa();
     } else {
       setTabelaVisivel(true);
       setTabelaVisivelNegativa(false);
       setTabelaVisivelPositiva(false);
-      
+
       await refetchQuebra();
     }
   };
@@ -267,10 +267,10 @@ export const ActionPesquisaQuebraCaixaLoja = ({usuarioLogado }) => {
 
   const {
     conferirTodas
-  } = useConferirTodasQuebras({ optionsModulos, usuarioLogado, selectedItems, handleClick }); 
+  } = useConferirTodasQuebras({ optionsModulos, usuarioLogado, selectedItems, handleClick });
 
   const conferirTodasSelecionadas = () => {
-  
+
     if (selectedItems.length === 0) {
       Swal.fire({
         position: 'center',
@@ -300,7 +300,7 @@ export const ActionPesquisaQuebraCaixaLoja = ({usuarioLogado }) => {
       conferirTodas();
     }
   }
-  
+
   return (
 
     <Fragment>
@@ -356,7 +356,7 @@ export const ActionPesquisaQuebraCaixaLoja = ({usuarioLogado }) => {
         InputSelectQuebraComponent={InputSelectAction}
         labelSelectQuebra={"Quebra"}
         optionsQuebra={[
-       
+
           ...optionsQuebraDeCaixa.map((empresa) => ({
             value: empresa.value,
             label: empresa.label,
@@ -385,15 +385,15 @@ export const ActionPesquisaQuebraCaixaLoja = ({usuarioLogado }) => {
         onButtonClickCancelar={conferirTodasSelecionadas}
         corCancelar={"warning"}
         IconCancelar={IoMdCheckmark}
-        styleCancelar
+        styleCancelar={{ display: selectedItems.length > 0 ? 'block' : 'none' }}
       />
 
-       
+
       {tabelaVisivel && (
-        <ActionListaQuebraCaixaLoja 
-          dadosQuebraDeCaixa={dadosQuebraDeCaixa} 
+        <ActionListaQuebraCaixaLoja
+          dadosQuebraDeCaixa={dadosQuebraDeCaixa}
           optionsModulos={optionsModulos}
-          usuarioLogado={usuarioLogado}   
+          usuarioLogado={usuarioLogado}
           selectedItems={selectedItems}
           setSelectedItems={setSelectedItems}
           handleClick={handleClick}
@@ -404,10 +404,10 @@ export const ActionPesquisaQuebraCaixaLoja = ({usuarioLogado }) => {
       <div>
         {tabelaVisivelNegativa && (
 
-          <ActionListaQuebraCaixaLojaNegativa 
-            dadosQuebraDeCaixaNegativa={dadosQuebraDeCaixaNegativa} 
+          <ActionListaQuebraCaixaLojaNegativa
+            dadosQuebraDeCaixaNegativa={dadosQuebraDeCaixaNegativa}
             optionsModulos={optionsModulos}
-            usuarioLogado={usuarioLogado}   
+            usuarioLogado={usuarioLogado}
             selectedItems={selectedItems}
             setSelectedItems={setSelectedItems}
             handleClick={handleClick}
@@ -417,10 +417,10 @@ export const ActionPesquisaQuebraCaixaLoja = ({usuarioLogado }) => {
       <div>
         {tabelaVisivelPositiva && (
 
-          <ActionListaQuebraCaixaLojaPositiva 
-            dadosQuebraDeCaixaPositiva={dadosQuebraDeCaixaPositiva} 
+          <ActionListaQuebraCaixaLojaPositiva
+            dadosQuebraDeCaixaPositiva={dadosQuebraDeCaixaPositiva}
             optionsModulos={optionsModulos}
-            usuarioLogado={usuarioLogado}              
+            usuarioLogado={usuarioLogado}
             selectedItems={selectedItems}
             setSelectedItems={setSelectedItems}
             handleClick={handleClick}

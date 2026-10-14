@@ -44,7 +44,7 @@ export const ActionListaAdiantamentoSalarioLoja = ({
 
   const {
     confirmar
-  } = useIntegrarAdiantamento({optionsModulos, usuarioLogado, handleClick, setSelectedItems}) 
+  } = useIntegrarAdiantamento({ optionsModulos, usuarioLogado, handleClick, setSelectedItems })
 
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
@@ -110,11 +110,11 @@ export const ActionListaAdiantamentoSalarioLoja = ({
   }) : [];
 
   const arraySituacao = [
-    {color: '#2196F3', txt: 'Pronto para Integrar SAP'},
-    {color: '#886ab5', txt: 'Em Fila'},
-    {color: 'success', txt: 'Integrado'},
-    {color: '#fd3995', txt: 'Erro ao Tentar Integrar'},
-    {color: '#fd3995', txt: 'Cancelado'}
+    { color: '#2196F3', txt: 'Pronto para Integrar SAP' },
+    { color: '#886ab5', txt: 'Em Fila' },
+    { color: 'success', txt: 'Integrado' },
+    { color: '#fd3995', txt: 'Erro ao Tentar Integrar' },
+    { color: '#fd3995', txt: 'Cancelado' }
   ]
 
   const arrayMsgStatusIntegracao = [
@@ -134,7 +134,7 @@ export const ActionListaAdiantamentoSalarioLoja = ({
     const stAguardandoEmFila = item?.STATUS_BLOQUEIO_ATUALIZACAO === 'True';
     const indexSituacao = !stAdiantamento ? 4 : logErrorIntegracao.length ? 3 : stMigrado ? 2 : stAguardandoEmFila ? 1 : 0;
     const colorSitucao = arraySituacao[indexSituacao].color;
-    
+
     const msgTitleIntegracao = (logErrorIntegracao.length) ? 'MOTIVO:' : arraySituacao[indexSituacao].txt
     const msgTextIntegracao = logErrorIntegracao || arrayMsgStatusIntegracao[indexSituacao];
     const txtSituacao = arraySituacao[indexSituacao].txt;
@@ -203,48 +203,96 @@ export const ActionListaAdiantamentoSalarioLoja = ({
     }
 
   }, [selectedItems, dados, first, rows]);
-
   const onSelectAllChange = (e) => {
-    if (e.checked) {
-
-      Swal.fire({
-        icon: 'question',
-        title: 'Selecione o modo de seleção',
-        text: 'Deseja selecionar todos da tabela ou somente o que está em tela?',
-        showConfirmButton: true,
-        showCancelButton: true,
-        showCloseButton: true,
-        confirmButtonText: 'Todos os registros',
-        cancelButtonText: 'Apenas o que está tela',
-        cancelButtonColor: '#2196F3',
-        allowOutsideClick: false,
-      }).then((result) => {
-        if (result.isConfirmed) {
-          const itensSelecionaveis = dados.filter(item =>
-            item.stAdiantamento && !item.stAguardandoEmFila && !item.stMigrado && item.IDADIANTAMENTOSALARIO
-          );
-          setBtnVisivel(true);
-          setSelectedItems([...itensSelecionaveis]);
-        } else if (result.dismiss === Swal.DismissReason.cancel) {
-          const dadosPaginaAtual = dados.slice(first, first + rows);
-
-          const itensSelecionaveisPaginaAtual = dadosPaginaAtual.filter(item =>
-            item.stAdiantamento && !item.stAguardandoEmFila && !item.stMigrado && item.IDADIANTAMENTOSALARIO
-          );
-          setBtnVisivel(true);
-          setSelectedItems([...itensSelecionaveisPaginaAtual]);
-        } else {
-          setBtnVisivel(false);
-          setSelectedItems([]);
-        }
-      });
-    } else {
+    if (!e.checked) {
       setBtnVisivel(false);
       setSelectedItems([]);
+      return;
     }
+
+    const itensSelecionaveis = dados.filter(item =>
+      item.stAdiantamento && !item.stAguardandoEmFila && !item.stMigrado && item.IDADIANTAMENTOSALARIO
+    );
+
+    if (itensSelecionaveis.length === 0) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Não há registros para serem selecionados.',
+        showConfirmButton: true,
+        showCloseButton: true,
+        allowOutsideClick: false,
+        confirmButtonText: 'Entendi',
+        confirmButtonColor: '#2196F3',
+      });
+      return;
+    }
+
+    const todosRegistrosNaTela =
+      first === 0 &&
+      rows >= dados.length;
+
+    if (todosRegistrosNaTela) {
+      setBtnVisivel(true);
+      setSelectedItems([...itensSelecionaveis]);
+      return;
+    }
+
+    Swal.fire({
+      icon: 'question',
+      title: 'Selecione o modo de seleção',
+      html: `
+        <div>
+          <p>Você pode selecionar apenas os registros exibidos nesta página.</p>
+          <small>
+            Para habilitar <b>Todos os registros</b>, exiba todos os registros da tabela.
+          </small>
+        </div>
+      `,
+      showConfirmButton: true,
+      showCancelButton: true,
+      showCloseButton: true,
+      confirmButtonText: 'Todos os registros',
+      cancelButtonText: 'Apenas o que está em tela',
+      confirmButtonColor: '#6c757d',
+      cancelButtonColor: '#2196F3',
+      didOpen: () => {
+        const btnTodos = Swal.getConfirmButton();
+        btnTodos.disabled = true;
+        btnTodos.style.cursor = 'not-allowed';
+        btnTodos.style.opacity = '0.6';
+      },
+      allowOutsideClick: false,
+    }).then((result) => {
+      if (result.dismiss === Swal.DismissReason.cancel) {
+        const dadosPaginaAtual = dados.slice(
+          first,
+          first + rows
+        );
+
+        const itensSelecionaveisPaginaAtual = dadosPaginaAtual.filter(item =>
+          item.stAdiantamento && !item.stAguardandoEmFila && !item.stMigrado && item.IDADIANTAMENTOSALARIO
+        );
+
+        if (itensSelecionaveisPaginaAtual.length === 0) {
+          Swal.fire({
+            icon: 'info',
+            title: 'Não há registros selecionáveis nesta página.',
+            confirmButtonText: 'Entendi',
+            confirmButtonColor: '#2196F3',
+          });
+          return;
+        }
+
+        setBtnVisivel(true);
+        setSelectedItems([...itensSelecionaveisPaginaAtual]);
+      } else {
+        setBtnVisivel(false);
+        setSelectedItems([]);
+      }
+    });
   };
 
-  
+
   const colunasAdiantamentos = [
     {
       field: 'contador',
@@ -327,7 +375,7 @@ export const ActionListaAdiantamentoSalarioLoja = ({
       header: 'Situação',
       body: row => (
         <th style={{ color: row.colorSitucao, fontWeight: 'bold' }}>
-      
+
           {row.txtSituacao}
         </th>
       ),
@@ -515,7 +563,12 @@ export const ActionListaAdiantamentoSalarioLoja = ({
             footerColumnGroup={footerGroup}
             sortOrder={-1}
             paginator={true}
-            rows={10}
+            first={first}
+            rows={rows}
+            onPage={(e) => {
+              setFirst(e.first);
+              setRows(e.rows);
+            }}
             cellMemo={false}
             selectionMode="single"
             selection={rowSelection}

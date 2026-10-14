@@ -10,7 +10,7 @@ import { ActionListaFaturasPix } from "./actionListaFaturasPix"
 import { ActionListaVendasPixConsolidado } from "./actionListaVendasPixConsolidado"
 import { ActionListaFaturasPixConsolidado } from "./actionListaFaturasPixConsolidado"
 import { ActionListaVendasPixConsolidadoEmpresa } from "./actionListaVendasPixConsolidadoEmpresa"
-import { ActionListaVendasPixConsolidadoLoja,  } from "./actionListaVendasPixConsolidadoLoja"
+import { ActionListaVendasPixConsolidadoLoja, } from "./actionListaVendasPixConsolidadoLoja"
 import { getDataAtual } from "../../../../utils/dataAtual"
 import { InputSelectAction } from "../../../Inputs/InputSelectAction"
 import { useQuery } from 'react-query';
@@ -21,8 +21,8 @@ import { useFetchData, useFetchEmpresas } from "../../../../hooks/useFetchData"
 
 export const ActionPesquisaVendasPix = () => {
   const [marcaSelecionada, setMarcaSelecionada] = useState('');
-  const [empresaSelecionada, setEmpresaSelecionada] = useState([]); 
-  const [empresaSelecionadaNome, setEmpresaSelecionadaNome] = useState(''); 
+  const [empresaSelecionada, setEmpresaSelecionada] = useState([]);
+  const [empresaSelecionadaNome, setEmpresaSelecionadaNome] = useState('');
   const [dataPesquisaInicio, setDataPesquisaInicio] = useState('');
   const [dataPesquisaFim, setDataPesquisaFim] = useState('');
   const [empresaLivre, setEmpresaLivre] = useState('');
@@ -38,9 +38,9 @@ export const ActionPesquisaVendasPix = () => {
     const dataFinal = getDataAtual();
     setDataPesquisaInicio(dataInicial);
     setDataPesquisaFim(dataFinal);
-   
+
   }, [])
-  
+
   const { data: optionsMarcas = [], error: errorMarcas, isLoading: isLoadingMarcas, refetch: refetchMarcas } = useQuery(
     'marcasLista',
     async () => {
@@ -62,7 +62,7 @@ export const ActionPesquisaVendasPix = () => {
   );
 
 
-  const fetchListaVendasPix = async ( ) => {
+  const fetchListaVendasPix = async () => {
     const urlBase = `/venda-pix-periodo?idMarca=${marcaSelecionada}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idLoja=${empresaSelecionada}&listaEmpresas=${empresaLivre}`;
     let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
     urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
@@ -101,15 +101,15 @@ export const ActionPesquisaVendasPix = () => {
       fecharAnimacaoCarregamento();
     }
   }
-  
-  
+
+
   const { data: dadosVendasPix = [], error: errorVendasPix, isLoading: isLoadingVendasPix, refetch: refetchVendasPix } = useQuery(
     ['venda-pix-periodo'],
     () => fetchListaVendasPix(),
     { enabled: false, staleTime: 60 * 60 * 1000 }
   );
-  
-  
+
+
   const fetchListaVendasPixConsolidado = async () => {
     const urlBase = `/venda-pix-consolidado-loja?idMarca=${marcaSelecionada}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idLoja=${empresaSelecionada}&listaEmpresas=${empresaLivre}`;
     let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
@@ -196,10 +196,10 @@ export const ActionPesquisaVendasPix = () => {
     }
   }
 
-  const {data: dadosVendasFaturasPix = [], error: errorVendasFaturaPix, isLoading: isLoadingVendasFaturaPix, refetch: refetchVendasFaturaPix} = useQuery(
+  const { data: dadosVendasFaturasPix = [], error: errorVendasFaturaPix, isLoading: isLoadingVendasFaturaPix, refetch: refetchVendasFaturaPix } = useQuery(
     ['fatura-pix-periodo'],
     () => fetchVendasFaturaPix(),
-    {enabled: false, staleTime: 60 * 60 * 1000}
+    { enabled: false, staleTime: 60 * 60 * 1000 }
   );
 
 
@@ -243,12 +243,12 @@ export const ActionPesquisaVendasPix = () => {
     }
   }
 
-  const {data: dadosVendasPixConsolidadoMarca = [], error: errorVendasPixConsolidadoMarca, isLoading: isLoadingVendasPixConsolidadoMarca, refetch: refetchVendasPixConsolidadoMarca} = useQuery(
+  const { data: dadosVendasPixConsolidadoMarca = [], error: errorVendasPixConsolidadoMarca, isLoading: isLoadingVendasPixConsolidadoMarca, refetch: refetchVendasPixConsolidadoMarca } = useQuery(
     ['venda-pix-consolidado'],
     () => fetchVendasPixConsolidadoMarca(),
-    {enabled: false, staleTime: 60 * 60 * 1000}
+    { enabled: false, staleTime: 60 * 60 * 1000 }
   );
-  
+
   const fetchVendasFaturasPixConsolidadoPeriodo = async () => {
     const urlBase = `fatura-pix-periodo-consolidado?idMarca=${marcaSelecionada}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idLoja=${empresaSelecionada}&listaEmpresas=${empresaLivre}`;
     let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
@@ -289,10 +289,10 @@ export const ActionPesquisaVendasPix = () => {
     }
   }
 
-  const {data: dadosFaturasPixConsolidadoPeriodo = [], error: errorFaturasPixConsolidadoPeriodo, isLoading: isLoadingFaturasPixConsolidadoPeriodo, refetch: refetchVendasFaturasPixConsolidadoPeriodo} = useQuery(
+  const { data: dadosFaturasPixConsolidadoPeriodo = [], error: errorFaturasPixConsolidadoPeriodo, isLoading: isLoadingFaturasPixConsolidadoPeriodo, refetch: refetchVendasFaturasPixConsolidadoPeriodo } = useQuery(
     ['fatura-pix-periodo-consolidado'],
     () => fetchVendasFaturasPixConsolidadoPeriodo(),
-    {enabled: false, staleTime: 60 * 60 * 1000}
+    { enabled: false, staleTime: 60 * 60 * 1000 }
   );
 
   const fetchFaturasPixConsolidadoLoja = async () => {
@@ -335,12 +335,12 @@ export const ActionPesquisaVendasPix = () => {
     }
   }
 
-  const {data: dadosFaturasPixConsolidadoLoja = [], error: errorFaturasPixConsolidadoLoja, isLoading: isLoadingFaturasPixConsolidadoLoja, refetch: refetchFaturasPixConsolidadoLoja} = useQuery(
+  const { data: dadosFaturasPixConsolidadoLoja = [], error: errorFaturasPixConsolidadoLoja, isLoading: isLoadingFaturasPixConsolidadoLoja, refetch: refetchFaturasPixConsolidadoLoja } = useQuery(
     ['faturaPixConsolidadoLoja'],
     () => fetchFaturasPixConsolidadoLoja(),
-    {enabled: false, staleTime: 60 * 60 * 1000}
+    { enabled: false, staleTime: 60 * 60 * 1000 }
   );
-  
+
 
   const handleSelectMarca = (e) => {
     const selectedId = e.value;
@@ -350,27 +350,25 @@ export const ActionPesquisaVendasPix = () => {
   const handleChangeEmpresa = (selectedOptions) => {
     const selectedValues = selectedOptions.map(option => option.value);
     setEmpresaSelecionada(selectedValues);
-    
+
   }
 
   const handleClickVendasPix = () => {
-   
-    if (marcaSelecionada) {
-      setTabelaVendasPixVisivel(true)
-      setTabelaVendasFaturaPixVisivel(false)
-      setTabelaVendasPixConsolidadoVisivel(false)
-      setTabelaVendasPixConsolidadoEmpresa(false)
-      setTabelaFaturaPixConsolidadoVisivel(false)
-      setTabelaFaturaPixConsolidadoLoja(false)
-      
-      refetchVendasPix()
-    }  else {
-      Swal.fire('Erro', 'Por favor, selecione uma Marca e datas válidas.', 'error');
-    }
+
+
+    setTabelaVendasPixVisivel(true)
+    setTabelaVendasFaturaPixVisivel(false)
+    setTabelaVendasPixConsolidadoVisivel(false)
+    setTabelaVendasPixConsolidadoEmpresa(false)
+    setTabelaFaturaPixConsolidadoVisivel(false)
+    setTabelaFaturaPixConsolidadoLoja(false)
+
+    refetchVendasPix()
+
   }
 
 
-  const handleClickVendasPixConsolidadoMarca = () => { 
+  const handleClickVendasPixConsolidadoMarca = () => {
     setTabelaVendasPixConsolidadoVisivel(true)
     setTabelaVendasPixVisivel(false)
     setTabelaVendasFaturaPixVisivel(false)
@@ -378,7 +376,7 @@ export const ActionPesquisaVendasPix = () => {
     setTabelaVendasPixConsolidadoEmpresa(false)
     setTabelaFaturaPixConsolidadoLoja(false)
 
-    refetchVendasPixConsolidadoMarca()    
+    refetchVendasPixConsolidadoMarca()
   }
 
   const handleClickVendasPixConsolidadoEmpresa = () => {
@@ -395,58 +393,49 @@ export const ActionPesquisaVendasPix = () => {
 
 
   const handleClickVendasFaturaPix = () => {
-    if(marcaSelecionada) {
 
-      setTabelaVendasFaturaPixVisivel(true)
-      setTabelaVendasPixVisivel(false)
-      setTabelaVendasPixConsolidadoVisivel(false)
-      setTabelaFaturaPixConsolidadoVisivel(false)
-      setTabelaVendasPixConsolidadoEmpresa(false)
-      setTabelaFaturaPixConsolidadoLoja(false)
-    
-      
-      
-      refetchVendasFaturaPix()  
-    } else {
-        Swal.fire('Erro', 'Por favor, selecione uma Marca e datas válidas.', 'error')
-    }
+
+    setTabelaVendasFaturaPixVisivel(true)
+    setTabelaVendasPixVisivel(false)
+    setTabelaVendasPixConsolidadoVisivel(false)
+    setTabelaFaturaPixConsolidadoVisivel(false)
+    setTabelaVendasPixConsolidadoEmpresa(false)
+    setTabelaFaturaPixConsolidadoLoja(false)
+
+
+
+    refetchVendasFaturaPix()
+
   }
 
 
   const handleClickVendasFaturaPixConsolidado = () => {
-    if(marcaSelecionada) {
-      setTabelaFaturaPixConsolidadoVisivel(true)
-      setTabelaVendasPixVisivel(false)
-      setTabelaVendasPixConsolidadoVisivel(false)
-      setTabelaVendasPixConsolidadoEmpresa(false)
-      setTabelaVendasFaturaPixVisivel(false)
-      setTabelaFaturaPixConsolidadoLoja(false)
-      
-      refetchVendasFaturasPixConsolidadoPeriodo()
+    setTabelaFaturaPixConsolidadoVisivel(true)
+    setTabelaVendasPixVisivel(false)
+    setTabelaVendasPixConsolidadoVisivel(false)
+    setTabelaVendasPixConsolidadoEmpresa(false)
+    setTabelaVendasFaturaPixVisivel(false)
+    setTabelaFaturaPixConsolidadoLoja(false)
 
-    } else {
-      Swal.fire('Erro', 'Por favor, selecione uma Marca e datas válidas.', 'error')
-    }
-    
+    refetchVendasFaturasPixConsolidadoPeriodo()
+
   }
 
 
 
   const handleClickFaturaPixConsolidadoLoja = () => {
-    if(marcaSelecionada) {
-      setTabelaFaturaPixConsolidadoLoja(true)
-      setTabelaFaturaPixConsolidadoVisivel(false)
-      setTabelaVendasPixVisivel(false)
-      setTabelaVendasPixConsolidadoVisivel(false)
-      setTabelaVendasPixConsolidadoEmpresa(false)
-      setTabelaVendasFaturaPixVisivel(false)
-     
-      refetchFaturasPixConsolidadoLoja()
-      
-    } else {
-      Swal.fire('Erro', 'Por favor, selecione uma Marca e datas válidas.', 'error')
-    }
-  }  
+
+    setTabelaFaturaPixConsolidadoLoja(true)
+    setTabelaFaturaPixConsolidadoVisivel(false)
+    setTabelaVendasPixVisivel(false)
+    setTabelaVendasPixConsolidadoVisivel(false)
+    setTabelaVendasPixConsolidadoEmpresa(false)
+    setTabelaVendasFaturaPixVisivel(false)
+
+    refetchFaturasPixConsolidadoLoja()
+
+
+  }
 
 
 
@@ -542,28 +531,28 @@ export const ActionPesquisaVendasPix = () => {
 
 
       {tabelaVendasPixVisivel && (
-        <ActionListaVendasPIX dadosVendasPix={dadosVendasPix}/>
+        <ActionListaVendasPIX dadosVendasPix={dadosVendasPix} />
       )}
 
       {tabelaVendasFaturaPixVisivel && (
-        <ActionListaFaturasPix dadosVendasFaturasPix={dadosVendasFaturasPix}/>
+        <ActionListaFaturasPix dadosVendasFaturasPix={dadosVendasFaturasPix} />
       )}
 
       {tabelaVendasPixConsolidadoVisivel && (
-        <ActionListaVendasPixConsolidado dadosVendasPixConsolidadoMarca={dadosVendasPixConsolidadoMarca}/>
+        <ActionListaVendasPixConsolidado dadosVendasPixConsolidadoMarca={dadosVendasPixConsolidadoMarca} />
       )}
 
       {tabelaFaturaPixConsolidadoVisivel && (
 
-        <ActionListaFaturasPixConsolidado dadosVendasFaturasPixConsolidadoPeriodo={dadosFaturasPixConsolidadoPeriodo}/>
+        <ActionListaFaturasPixConsolidado dadosVendasFaturasPixConsolidadoPeriodo={dadosFaturasPixConsolidadoPeriodo} />
       )}
 
       {tabelaVendasPixConsolidadoEmpresa && (
-        <ActionListaVendasPixConsolidadoEmpresa dadosVendasPixConsolidado={dadosVendasPixConsolidado}/>
+        <ActionListaVendasPixConsolidadoEmpresa dadosVendasPixConsolidado={dadosVendasPixConsolidado} />
       )}
 
       {tabelaFaturaPixConsolidadoLoja && (
-        <ActionListaVendasPixConsolidadoLoja dadosFaturasPixConsolidadoLoja={dadosFaturasPixConsolidadoLoja}/>
+        <ActionListaVendasPixConsolidadoLoja dadosFaturasPixConsolidadoLoja={dadosFaturasPixConsolidadoLoja} />
       )}
     </Fragment>
   )

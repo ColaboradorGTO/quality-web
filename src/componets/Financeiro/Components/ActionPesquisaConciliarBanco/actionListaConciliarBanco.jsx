@@ -188,7 +188,6 @@ export const ActionListaConciliarPorBanco = ({
         confirmButtonText: 'Entendi',
         confirmButtonColor: '#2196F3',
       });
-
       return;
     }
 
@@ -196,69 +195,38 @@ export const ActionListaConciliarPorBanco = ({
       first === 0 &&
       rows >= dadosListaConciliarBanco.length;
 
-
     if (todosRegistrosNaTela) {
-      Swal.fire({
-        icon: 'question',
-        title: 'Selecionar todos os registros?',
-        text: 'Todos os registros estão sendo exibidos na tela.',
-        showConfirmButton: true,
-        showCancelButton: true,
-        confirmButtonText: 'Todos os registros',
-        cancelButtonText: 'Cancelar',
-        allowOutsideClick: false,
-      }).then((result) => {
-        if (result.isConfirmed) {
-          setBtnVisivel(true);
-          setSelectedItems([...itensSelecionaveis]);
-        } else {
-          setBtnVisivel(false);
-          setSelectedItems([]);
-        }
-      });
-
+      setBtnVisivel(true);
+      setSelectedItems([...itensSelecionaveis]);
       return;
     }
-
 
     Swal.fire({
       icon: 'question',
       title: 'Selecione o modo de seleção',
-
       html: `
-      <div>
-        <p>
-          Você pode selecionar apenas os registros exibidos nesta página.
-        </p>
-
-        <small>
-          Para habilitar <b>Todos os registros</b>,
-          exiba todos os registros da tabela.
-        </small>
-      </div>
-    `,
-
+        <div>
+          <p>Você pode selecionar apenas os registros exibidos nesta página.</p>
+          <small>
+            Para habilitar <b>Todos os registros</b>, exiba todos os registros da tabela.
+          </small>
+        </div>
+      `,
       showConfirmButton: true,
       showCancelButton: true,
       showCloseButton: true,
-
       confirmButtonText: 'Todos os registros',
       cancelButtonText: 'Apenas o que está em tela',
-
       confirmButtonColor: '#6c757d',
       cancelButtonColor: '#2196F3',
-
       didOpen: () => {
         const btnTodos = Swal.getConfirmButton();
-
         btnTodos.disabled = true;
         btnTodos.style.cursor = 'not-allowed';
         btnTodos.style.opacity = '0.6';
       },
-
       allowOutsideClick: false,
     }).then((result) => {
-
       if (result.dismiss === Swal.DismissReason.cancel) {
         const dadosPaginaAtual = dadosListaConciliarBanco.slice(
           first,
@@ -278,15 +246,12 @@ export const ActionListaConciliarPorBanco = ({
             confirmButtonText: 'Entendi',
             confirmButtonColor: '#2196F3',
           });
-
           return;
         }
 
         setBtnVisivel(true);
         setSelectedItems([...itensSelecionaveisPaginaAtual]);
-
       } else {
-
         setBtnVisivel(false);
         setSelectedItems([]);
       }

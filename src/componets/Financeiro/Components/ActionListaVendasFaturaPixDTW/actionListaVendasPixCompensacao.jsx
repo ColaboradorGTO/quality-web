@@ -21,7 +21,7 @@ import { useIntegrarPagamentoPix } from "./hooks/useIntegrarPagamentoPixSAP";
 
 export const ActionListaVendasPIXCompensacao = ({
   dadosVendasPixCompensacao,
-  selectedItems, 
+  selectedItems,
   setSelectedItems,
   usuarioLogado,
   optionsModulos,
@@ -36,7 +36,7 @@ export const ActionListaVendasPIXCompensacao = ({
   const [rowSelection, setRowSelection] = useState(null);
   const dataTableRef = useRef();
 
-  const { handleClickIntegrar } = useIntegrarPagamentoPix({optionsModulos, usuarioLogado, handleClickVendasPixCompensacao, setSelectedItems})
+  const { handleClickIntegrar } = useIntegrarPagamentoPix({ optionsModulos, usuarioLogado, handleClickVendasPixCompensacao, setSelectedItems })
 
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
@@ -119,7 +119,7 @@ export const ActionListaVendasPIXCompensacao = ({
     let contador = index + 1;
     var contaDebitoSap = '1.01.01.02.0003';
     var contaCreditoSap = '1.01.01.01.9998';
- 
+
     return {
       Numero: contador,
       NOFANTASIA: item.NOFANTASIA,
@@ -210,7 +210,7 @@ export const ActionListaVendasPIXCompensacao = ({
 
   const handleClickStatusIntegracao = (row) => {
     const opcoes = obterOpcoesDisponiveis(row);
-    
+
     if (opcoes.tipoStatus === 'info') {
       Swal.fire({
         icon: 'info',
@@ -230,21 +230,21 @@ export const ActionListaVendasPIXCompensacao = ({
 
 
   useEffect(() => {
-    const itensSelecionaveis = dadosListaVendasPix.filter(item => 
+    const itensSelecionaveis = dadosListaVendasPix.filter(item =>
       item.DOCENTRY_SAP_CONTAS_A_RECEBER_PGTO_PIX === 0
     );
 
     const dadosPaginaAtual = dadosListaVendasPix.slice(first, first + rows);
-    const itensSelecionaveisPaginaAtual = dadosPaginaAtual.filter(item => 
+    const itensSelecionaveisPaginaAtual = dadosPaginaAtual.filter(item =>
       item.DOCENTRY_SAP_CONTAS_A_RECEBER_PGTO_PIX === 0
     );
 
-    if(selectedItems.length == 0) {
+    if (selectedItems.length == 0) {
       setSelectAllChecked(false);
     } else if (
-      selectedItems.length === itensSelecionaveis.length || 
-       (selectedItems.length === itensSelecionaveisPaginaAtual.length &&
-        itensSelecionaveisPaginaAtual.length > 0 && 
+      selectedItems.length === itensSelecionaveis.length ||
+      (selectedItems.length === itensSelecionaveisPaginaAtual.length &&
+        itensSelecionaveisPaginaAtual.length > 0 &&
         itensSelecionaveisPaginaAtual.every(item =>
           selectedItems.some(selected => selected.IDVENDAPAGAMENTO === item.IDVENDAPAGAMENTO)
         ))
@@ -257,49 +257,109 @@ export const ActionListaVendasPIXCompensacao = ({
   }, [selectedItems, dadosListaVendasPix, first, rows]);
 
   const onSelectAllChange = (e) => {
-    if (e.checked) {
-      Swal.fire({
-        icon: 'question',
-        title: 'Selecione o modo de seleção',
-        text: 'Deseja selecionar todos da tabela ou somente o que está em tela?',
-        showConfirmButton: true,
-        showCancelButton: true,
-        showCloseButton: true,
-        confirmButtonText: 'Todos os registros',
-        cancelButtonText: 'Apenas o que está tela',
-        cancelButtonColor: '#2196F3',
-        allowOutsideClick: false,
-      }).then((result) => {
-        if (result.isConfirmed) {
-          const itensSelecionaveis = dadosListaVendasPix.filter(item => 
-            item.DOCENTRY_SAP_CONTAS_A_RECEBER_PGTO_PIX === 0
-          );
-          setBtnVisivel(true);
-          setSelectedItems([...itensSelecionaveis]);
-        } else if (result.dismiss === Swal.DismissReason.cancel) {
-          const dadosPaginaAtual = dadosListaVendasPix.slice(first, first + rows);
-          const itensSelecionaveisPaginaAtual = dadosPaginaAtual.filter(item => 
-            item.DOCENTRY_SAP_CONTAS_A_RECEBER_PGTO_PIX === 0
-          );
-          setBtnVisivel(true);
-          setSelectedItems([...itensSelecionaveisPaginaAtual]);
-        } else {
-          setBtnVisivel(false);
-          setSelectedItems([]);
-        }
-      });
-    } else {
+    const checked = e?.checked ?? e?.target?.checked ?? false;
+    if (!checked) {
       setBtnVisivel(false);
       setSelectedItems([]);
+      return;
     }
+
+    const itensSelecionaveis = dadosListaVendasPix.filter(item =>
+      item.DOCENTRY_SAP_CONTAS_A_RECEBER_PGTO_PIX === 0
+    );
+
+    if (itensSelecionaveis.length === 0) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Não há registros para serem selecionados.',
+        showConfirmButton: true,
+        showCloseButton: true,
+        allowOutsideClick: false,
+        confirmButtonText: 'Entendi',
+        confirmButtonColor: '#2196F3',
+      });
+      return;
+    }
+
+    const todosRegistrosNaTela =
+      first === 0 &&
+      rows >= dadosListaVendasPix.length;
+
+    if (todosRegistrosNaTela) {
+      setBtnVisivel(true);
+      setSelectedItems([...itensSelecionaveis]);
+      return;
+    }
+
+    Swal.fire({
+      icon: 'question',
+      title: 'Selecione o modo de seleção',
+      html: `
+        <div>
+          <p>Você pode selecionar apenas os registros exibidos nesta página.</p>
+          <small>
+            Para habilitar <b>Todos os registros</b>, exiba todos os registros da tabela.
+          </small>
+        </div>
+      `,
+      showConfirmButton: true,
+      showCancelButton: true,
+      showCloseButton: true,
+      confirmButtonText: 'Todos os registros',
+      cancelButtonText: 'Apenas o que está em tela',
+      confirmButtonColor: '#6c757d',
+      cancelButtonColor: '#2196F3',
+      didOpen: () => {
+        const btnTodos = Swal.getConfirmButton();
+        btnTodos.disabled = true;
+        btnTodos.style.cursor = 'not-allowed';
+        btnTodos.style.opacity = '0.6';
+      },
+      allowOutsideClick: false,
+    }).then((result) => {
+      if (result.dismiss === Swal.DismissReason.cancel) {
+        const dadosPaginaAtual = dadosListaVendasPix.slice(
+          first,
+          first + rows
+        );
+
+        const itensSelecionaveisPaginaAtual = dadosPaginaAtual.filter(item =>
+          item.DOCENTRY_SAP_CONTAS_A_RECEBER_PGTO_PIX === 0
+        );
+
+        if (itensSelecionaveisPaginaAtual.length === 0) {
+          Swal.fire({
+            icon: 'info',
+            title: 'Não há registros selecionáveis nesta página.',
+            confirmButtonText: 'Entendi',
+            confirmButtonColor: '#2196F3',
+          });
+          return;
+        }
+
+        setBtnVisivel(true);
+        setSelectedItems([...itensSelecionaveisPaginaAtual]);
+      } else {
+        setBtnVisivel(false);
+        setSelectedItems([]);
+      }
+    });
   };
-  
+
   const colunasVendasPix = [
     {
       field: 'Selecione',
       selectionMode: 'multiple',
+      header: (
+        <div className="custom-control custom-checkbox">
+          <Checkbox
+            checked={selectAllChecked}
+            onChange={onSelectAllChange}
+          />
+        </div>
+      ),
       body: (rowData) => {
-      
+
         if (rowData.DOCENTRY_SAP_CONTAS_A_RECEBER_PGTO_PIX !== 0) {
           return <th></th>;
         }
@@ -323,7 +383,7 @@ export const ActionListaVendasPIXCompensacao = ({
                 }
                 setSelectedItems(_selectedItems);
               }}
-              />
+            />
           </div>
         );
       },
@@ -395,9 +455,9 @@ export const ActionListaVendasPIXCompensacao = ({
       body: (row) => {
         const status = obterStatusIntegracao(row);
         return (
-          <span 
-            className={`${status.cor} fw-900`} 
-            style={{ fontSize: '12px', cursor: 'pointer' }} 
+          <span
+            className={`${status.cor} fw-900`}
+            style={{ fontSize: '12px', cursor: 'pointer' }}
             title={status.titulo}
           >
             <b>{status.texto}</b>
@@ -515,7 +575,12 @@ export const ActionListaVendasPIXCompensacao = ({
                     sortField="VRTOTALPAGO"
                     sortOrder={-1}
                     paginator={true}
-                    rows={10}
+                    first={first}
+                    rows={rows}
+                    onPage={(e) => {
+                      setFirst(e.first);
+                      setRows(e.rows);
+                    }}
                     rowsPerPageOptions={[10, 20, 50, 100, dadosListaVendasPix.length]}
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                     currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
@@ -523,6 +588,7 @@ export const ActionListaVendasPIXCompensacao = ({
                     footerColumnGroup={footerGroup}
                     showGridlines
                     stripedRows
+                    cellMemo={false}
                     emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
                   >
                     {colunasVendasPix.map(coluna => (

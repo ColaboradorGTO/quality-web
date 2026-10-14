@@ -68,7 +68,7 @@ export const ActionPesquisaVendasPixDTW = ({ usuarioLogado }) => {
     'marcasLista',
     async () => {
       const response = await get(`/marcasLista`);
-    
+
       return response.data;
     },
     { staleTime: 60 * 60 * 1000, cacheTime: 60 * 60 * 1000 }
@@ -87,7 +87,7 @@ export const ActionPesquisaVendasPixDTW = ({ usuarioLogado }) => {
     { enabled: false, staleTime: 60 * 60 * 1000 }
   );
 
- 
+
   useEffect(() => {
     if (marcaSelecionada) {
       refetchEmpresas();
@@ -204,35 +204,29 @@ export const ActionPesquisaVendasPixDTW = ({ usuarioLogado }) => {
 
   const handleClickVendasPix = () => {
 
-    if (marcaSelecionada) {
-      setTabelaVendasPixVisivel(true)
-      setTabelaVendasPixCompensacao(false)
-      setPixCompensacaoCapa(false)
-      setPixCompensacaoCredito(false)
-      refetchVendasPix()
-    } else {
-      Swal.fire('Erro', 'Por favor, selecione uma Marca e datas válidas.', 'error');
-    }
+
+    setTabelaVendasPixVisivel(true)
+    setTabelaVendasPixCompensacao(false)
+    setPixCompensacaoCapa(false)
+    setPixCompensacaoCredito(false)
+    refetchVendasPix()
+
   }
 
 
   const handleClickVendasPixCompensacao = () => {
-    if (marcaSelecionada) {
-      setTabelaVendasPixCompensacao(true)
-      setTabelaVendasPixVisivel(false)
-      setPixCompensacaoCapa(false)
-      setPixCompensacaoCredito(false)
-      setPixCompensacaoDebito(false)
 
-      refetchVendasPixCompensacao()
+    setTabelaVendasPixCompensacao(true)
+    setTabelaVendasPixVisivel(false)
+    setPixCompensacaoCapa(false)
+    setPixCompensacaoCredito(false)
+    setPixCompensacaoDebito(false)
 
-    } else {
-      Swal.fire('Erro', 'Por favor, selecione uma Marca e datas válidas.', 'error')
-    }
+    refetchVendasPixCompensacao()
+
   }
 
   const handleClickPixCompensacaoCapa = () => {
-    if (marcaSelecionada) {
       setPixCompensacaoCapa(true)
       setPixCompensacaoCredito(false)
       setTabelaVendasPixCompensacao(false)
@@ -240,12 +234,9 @@ export const ActionPesquisaVendasPixDTW = ({ usuarioLogado }) => {
       setPixCompensacaoDebito(false)
       refetchVendasPixCompensacao()
 
-    } else {
-      Swal.fire('Erro', 'Por favor, selecione uma Marca e datas válidas.', 'error')
-    }
   }
   const handleClickPixCompensacaoCredito = () => {
-    if (marcaSelecionada) {
+
       setPixCompensacaoCredito(true)
       setPixCompensacaoCapa(false)
       setTabelaVendasPixCompensacao(false)
@@ -253,12 +244,9 @@ export const ActionPesquisaVendasPixDTW = ({ usuarioLogado }) => {
       setPixCompensacaoDebito(false)
       refetchVendasPixCompensacao()
 
-    } else {
-      Swal.fire('Erro', 'Por favor, selecione uma Marca e datas válidas.', 'error')
-    }
   }
   const handleClickPixCompensacaoDebito = () => {
-    if (marcaSelecionada) {
+ 
       setPixCompensacaoDebito(true)
       setPixCompensacaoCredito(false)
       setPixCompensacaoCapa(false)
@@ -267,9 +255,6 @@ export const ActionPesquisaVendasPixDTW = ({ usuarioLogado }) => {
       setPixCompensacaoDebito(true)
       refetchVendasPixCompensacao()
 
-    } else {
-      Swal.fire('Erro', 'Por favor, selecione uma Marca e datas válidas.', 'error')
-    }
   }
 
   const { integrarTodos } = useIntegrarTodosPagamentosPix({
@@ -277,6 +262,7 @@ export const ActionPesquisaVendasPixDTW = ({ usuarioLogado }) => {
     usuarioLogado,
     handleClickVendasPixCompensacao,
     selectedItems,
+    setSelectedItems
   })
 
   return (
@@ -373,7 +359,7 @@ export const ActionPesquisaVendasPixDTW = ({ usuarioLogado }) => {
         onButtonClickProdutoVendido={integrarTodos}
         corProdutoVendido={"primary"}
         iconProdutoVendido={BsCloudUpload}
-        styleProdutoVendido={{ display: btnVisivel ? 'block' : 'none' }}
+        styleProdutoVendido={{ display: selectedItems.length > 1 ? 'block' : 'none' }}
       />
 
       {tabelaVendasPixVisivel && (
@@ -386,8 +372,8 @@ export const ActionPesquisaVendasPixDTW = ({ usuarioLogado }) => {
       )}
 
       {tabelaVendasPixCompensacao && (
-        <ActionListaVendasPIXCompensacao 
-          dadosVendasPixCompensacao={dadosVendasPixCompensacao} 
+        <ActionListaVendasPIXCompensacao
+          dadosVendasPixCompensacao={dadosVendasPixCompensacao}
           selectedItems={selectedItems}
           setSelectedItems={setSelectedItems}
           optionsModulos={optionsModulos}
