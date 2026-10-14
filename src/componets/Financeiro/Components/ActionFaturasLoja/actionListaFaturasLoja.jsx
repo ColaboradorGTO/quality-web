@@ -24,7 +24,6 @@ export const ActionListaFaturasLoja = ({
   handleClick,
   selectedItems,
   setSelectedItems,
-  setSelectedItems,
   situacao
 
 }) => {
