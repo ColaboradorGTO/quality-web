@@ -20,7 +20,8 @@ import HeaderTable from "../../Tables/headerTable";
 export const ActionListaFechamentoDosCaixas = ({
   dadosCaixaFechados,
   usuarioLogado,
-  optionsModulos
+  optionsModulos,
+  handleClick
 }) => {
   const [globalFilterValue, setGlobalFilterValue] = useState('');
   const dataTableRef = useRef();
@@ -369,6 +370,7 @@ export const ActionListaFechamentoDosCaixas = ({
             }
           });
 
+          await handleClick()
           responsePost.data;
         } catch (error) {
           Swal.fire({
