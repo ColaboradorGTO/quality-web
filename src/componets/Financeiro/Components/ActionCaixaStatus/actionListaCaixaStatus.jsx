@@ -86,7 +86,11 @@ export const ActionListaCaixaStatus = ({ dadosCaixaStatus }) => {
       DTHORAFECHAMENTOCAIXA: item.DTHORAFECHAMENTOCAIXA,
       OPERADORFECHAMENTO: item.OPERADORFECHAMENTO,
       STFECHADO: item.STFECHADO,
-      STCONFERIDO: item.STCONFERIDO > 0 ? 'Conferido' : 'Sem Conferir',
+      STCONFERIDO: item.STCONFERIDO,
+      DSCONFERIDO:
+          Number(item.STCONFERIDO) > 0
+            ? 'Conferido'
+            : 'Sem Conferir',
       totalQuebraCaixa: totalQuebraCaixa,
       TOTALFECHAMENTODINHEIRO:  item.TOTALFECHAMENTODINHEIRO,
       TOTALFECHAMENTODINHEIROFISICO: item.TOTALFECHAMENTODINHEIROFISICO
@@ -139,9 +143,9 @@ export const ActionListaCaixaStatus = ({ dadosCaixaStatus }) => {
       sortable: true,
     },
     {
-      field: 'STCONFERIDO',
+      field: 'DSCONFERIDO',
       header: 'Conferido',
-      body: row => <th style={{ color: row.STCONFERIDO > 0 ? 'blue' : 'black' }}>{row.STCONFERIDO}</th>,
+      body: row => <th style={{ color: row.STCONFERIDO > 0 ? 'blue' : 'black' }}>{row.DSCONFERIDO}</th>,
       sortable: true,
     },
     {
