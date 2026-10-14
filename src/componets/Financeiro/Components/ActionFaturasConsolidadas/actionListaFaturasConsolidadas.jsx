@@ -20,6 +20,7 @@ export const ActionListaFaturasConsolidadas = ({
   optionsModulos,
   usuarioLogado,
   handleClick,
+  handleClickConciliar,
   selectedItems,
   setSelectedItems,
 }) => {
@@ -27,33 +28,59 @@ export const ActionListaFaturasConsolidadas = ({
   const [rowSelection, setRowSelection] = useState(null);
   const [first, setFirst] = useState(0);
   const [rowState, setRowState] = useState(10);
+  const [rows, setRows] = useState(10);
+  const [selectAllChecked, setSelectAllChecked] = useState(false);
   const [btnVisivel, setBtnVisivel] = useState(false);
   const dataTableRef = useRef();
 
   const {
     confirmar
-  } = useConfirmarConsolidacaoFatura({ optionsModulos, usuarioLogado, handleClick });
+  } = useConfirmarConsolidacaoFatura({
+    optionsModulos,
+    usuarioLogado,
+    handleClickConciliar: handleClickConciliar || handleClick,
+    handleClick
+  });
 
-  const onGlobalFilterChange = (e) => {
-    setGlobalFilterValue(e.target.value);
-  };
+  const dados = (dadosDetalheFatura || []).map((item, index) => {
+    let contador = index + 1;
 
-  const onPage = (event) => {
-    setFirst(event.first);
-    setRowState(event.rows)
-  }
+    return {
+      contador,
+      NOFANTASIA: item.NOFANTASIA,
+      DTPROCESSAMENTO: item.DTPROCESSAMENTO,
+      VRTOTALRECEBIDO: toFloat(item.VRTOTALRECEBIDO),
+      QTDFATURAS: item.QTDFATURAS,
+      QTDFATURASCONFERIDAS: item.QTDFATURASCONFERIDAS,
+      IDEMPRESA: item.IDEMPRESA,
+    }
+  });
 
-  const getVisibleItems = () => {
-    const start = Number.isInteger(first) ? first : 0;
-    const cnt = Number.isInteger(rowState) ? rowState : 10;
-    return dados.slice(start, start + cnt)
-  };
+  useEffect(() => {
+    const itensSelecionaveis = dados.filter(item =>
+      item.QTDFATURAS === item.QTDFATURASCONFERIDAS
+    );
 
-  const isAllVisibleSelected = () => {
-    const visiveis = getVisibleItems();
-    if (!visiveis || visiveis.length === 0) return false;
-    return visiveis.every(v => selectedItems.some(s => s.IDPERFIL === v.IDPERFIL));
-  }
+    const dadosPaginaAtual = dados.slice(first, first + rows);
+    const itensSelecionaveisPaginaAtual = dadosPaginaAtual.filter(item =>
+      item.QTDFATURAS === item.QTDFATURASCONFERIDAS
+    );
+
+    if (selectedItems.length === 0) {
+      setSelectAllChecked(false);
+    } else if (
+      selectedItems.length === itensSelecionaveis.length ||
+      (selectedItems.length === itensSelecionaveisPaginaAtual.length &&
+        itensSelecionaveisPaginaAtual.length > 0 &&
+        itensSelecionaveisPaginaAtual.every(item =>
+          selectedItems.some(selected => selected.IDEMPRESA === item.IDEMPRESA)
+        ))
+    ) {
+      setSelectAllChecked(true);
+    } else {
+      setSelectAllChecked(false);
+    }
+  }, [selectedItems, dados, first, rows]);
 
   const onSelectAllChange = (e) => {
     const checked = e?.checked ?? e?.target?.checked ?? false;
@@ -62,43 +89,87 @@ export const ActionListaFaturasConsolidadas = ({
       setSelectedItems([]);
       return;
     }
+
+    const itensSelecionaveis = dados.filter(item =>
+      item.QTDFATURAS === item.QTDFATURASCONFERIDAS
+    );
+
+    if (itensSelecionaveis.length === 0) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Não há registros para serem selecionados.',
+        showConfirmButton: true,
+        showCloseButton: true,
+        allowOutsideClick: false,
+        confirmButtonText: 'Entendi',
+        confirmButtonColor: '#2196F3',
+      });
+      return;
+    }
+
+    const todosRegistrosNaTela =
+      first === 0 &&
+      rows >= dados.length;
+
+    if (todosRegistrosNaTela) {
+      setBtnVisivel(true);
+      setSelectedItems([...itensSelecionaveis]);
+      return;
+    }
+
     Swal.fire({
       icon: 'question',
       title: 'Selecione o modo de seleção',
-      text: 'Deseja selecionar todos da tabela ou somente o que está em tela?',
+      html: `
+        <div>
+          <p>Você pode selecionar apenas os registros exibidos nesta página.</p>
+          <small>
+            Para habilitar <b>Todos os registros</b>, exiba todos os registros da tabela.
+          </small>
+        </div>
+      `,
       showConfirmButton: true,
       showCancelButton: true,
       showCloseButton: true,
       confirmButtonText: 'Todos os registros',
-      cancelButtonText: 'Apenas o que está tela',
+      cancelButtonText: 'Apenas o que está em tela',
+      confirmButtonColor: '#6c757d',
       cancelButtonColor: '#2196F3',
+      didOpen: () => {
+        const btnTodos = Swal.getConfirmButton();
+        btnTodos.disabled = true;
+        btnTodos.style.cursor = 'not-allowed';
+        btnTodos.style.opacity = '0.6';
+      },
       allowOutsideClick: false,
     }).then((result) => {
-
-      if (result.isConfirmed) {
-        // setBtnVisivel(true);
-        // setSelectedItems([...dados]);
-
-        const filtrados = dados.filter(item => item.QTDFATURAS === item.QTDFATURASCONFERIDAS);
-        setBtnVisivel(true);
-        setSelectedItems([...filtrados]);
-        return;
-      }
-
       if (result.dismiss === Swal.DismissReason.cancel) {
-        const visiveis = getVisibleItems();
-        const visivelFiltrados = visiveis.filter(item => item.QTDFATURAS === item.QTDFATURASCONFERIDAS);
+        const dadosPaginaAtual = dados.slice(
+          first,
+          first + rows
+        );
+
+        const itensSelecionaveisPaginaAtual = dadosPaginaAtual.filter(item =>
+          item.QTDFATURAS === item.QTDFATURASCONFERIDAS
+        );
+
+        if (itensSelecionaveisPaginaAtual.length === 0) {
+          Swal.fire({
+            icon: 'info',
+            title: 'Não há registros selecionáveis nesta página.',
+            confirmButtonText: 'Entendi',
+            confirmButtonColor: '#2196F3',
+          });
+          return;
+        }
+
         setBtnVisivel(true);
-        setSelectedItems([...visivelFiltrados]);
-        // setBtnVisivel(true);
-        // setSelectedItems([...visiveis]);
-        return;
+        setSelectedItems([...itensSelecionaveisPaginaAtual]);
+      } else {
+        setBtnVisivel(false);
+        setSelectedItems([]);
       }
-      setBtnVisivel(false); setSelectedItems([]);
-      return;
-
-    })
-
+    });
   };
 
   const handlePrint = useReactToPrint({
@@ -143,20 +214,6 @@ export const ActionListaFaturasConsolidadas = ({
     XLSX.writeFile(workbook, 'consolidacao_faturas.xlsx');
   };
 
-  const dados = dadosDetalheFatura.map((item, index) => {
-    let contador = index + 1;
-
-    return {
-      contador,
-      NOFANTASIA: item.NOFANTASIA,
-      DTPROCESSAMENTO: item.DTPROCESSAMENTO,
-      VRTOTALRECEBIDO: toFloat(item.VRTOTALRECEBIDO),
-      QTDFATURAS: item.QTDFATURAS,
-      QTDFATURASCONFERIDAS: item.QTDFATURASCONFERIDAS,
-      IDEMPRESA: item.IDEMPRESA,
-    }
-  });
-
   const calcularTotalValorRecebido = () => {
     let total = 0;
     for (let result of dados) {
@@ -172,10 +229,10 @@ export const ActionListaFaturasConsolidadas = ({
       header: (
         <div className="custom-control custom-checkbox">
           <Checkbox
-            checked={isAllVisibleSelected()}
+            checked={selectAllChecked}
             onChange={onSelectAllChange}
           />
-          <p style={{  fontSize: '1rem' }}>Marcar Todos</p>
+          <p style={{ fontSize: '1rem' }}>Marcar Todos</p>
         </div>
       ),
       body: (rowData) => {
@@ -316,7 +373,13 @@ export const ActionListaFaturasConsolidadas = ({
             filterDisplay="menu"
             sortOrder={-1}
             paginator={true}
-            rows={10}
+            first={first}
+            rows={rows}
+            onPage={(e) => {
+              setFirst(e.first);
+              setRows(e.rows);
+            }}
+            cellMemo={false}
             rowsPerPageOptions={[10, 20, 50, 100, 200, 300, 500, dados.length]}
             showGridlines
             stripedRows

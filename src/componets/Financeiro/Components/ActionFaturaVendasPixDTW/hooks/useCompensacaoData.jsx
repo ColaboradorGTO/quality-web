@@ -5,30 +5,32 @@ import { post, put } from "../../../../../api/funcRequest";
 
 export const useCompensacaoData = ({ usuarioLogado, optionsModulos, handleClickVendasPix }) => {
     const [ipUsuario, setIpUsuario] = useState('');
+    const [dadosPut, setDadosPut] = useState([]);
+
 
     const getIPUsuario = async () => {
         let usuarioIP = null;
 
         try {
-        const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-        usuarioIP = ipWhoisData?.ip;
+            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
+            usuarioIP = ipWhoisData?.ip;
         } catch (error) {
-        console.error("Erro ao buscar IP via ifconfig.me:", error);
+            console.error("Erro ao buscar IP via ifconfig.me:", error);
         }
 
         if (!usuarioIP) {
-        try {
-            const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-            usuarioIP = ipifyData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ipify.org:", error);
-        }
+            try {
+                const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
+                usuarioIP = ipifyData?.ip;
+            } catch (error) {
+                console.error("Erro ao buscar IP via ipify.org:", error);
+            }
         }
         setIpUsuario(usuarioIP);
         return usuarioIP;
     };
 
-    
+
     const handleDetalhar = async (updatedSelectedIds, IDDETALHEFATURA) => {
         if (optionsModulos[0]?.ALTERAR == 'False') {
             Swal.fire({
@@ -44,7 +46,7 @@ export const useCompensacaoData = ({ usuarioLogado, optionsModulos, handleClickV
             });
             return
         }
-        
+
         try {
             if (typeof IDDETALHEFATURA === 'string') {
                 IDDETALHEFATURA = [IDDETALHEFATURA];
@@ -69,22 +71,32 @@ export const useCompensacaoData = ({ usuarioLogado, optionsModulos, handleClickV
                                 DATA_COMPENSACAO: dtCompensacao
                             };
                             await put("/atualizar-status-fatura-pix", dados);
+                            setDadosPut(dados);
+
                         }
+
                     }
 
-                    const textdados = JSON.stringify(dados);
+                    const textdados = JSON.stringify(dadosPut);
                     const textoFuncao = 'FINANCEIRO/CONFIRMADA CONFERENCIA DA VENDA';
                     const ipUsuario = await getIPUsuario();
                     const dadosConfirmaDep = {
                         "IDFUNCIONARIO": String(usuarioLogado.id),
                         "PATHFUNCAO": textoFuncao,
                         "DADOS": textdados,
-                        "IP": ipUsuario || 'IP não disponível'
+                        "IP": ipUsuario || 'INDISPONIVEL'
                     };
 
                     await post("/log-web", dadosConfirmaDep);
                     handleClickVendasPix();
-                    Swal.fire('Sucesso!', 'Venda detalhada com sucesso.', 'success');
+                    Swal.fire({
+                        position: 'center',
+                        icon: 'success',
+                        title: 'Ajuste realizado com sucesso!',
+                        showConfirmButton: false,
+                        timer: 4000
+
+                    });
                 } else if (result.dismiss === Swal.DismissReason.cancel) {
                     console.log('Ação cancelada pelo usuário.');
                 }

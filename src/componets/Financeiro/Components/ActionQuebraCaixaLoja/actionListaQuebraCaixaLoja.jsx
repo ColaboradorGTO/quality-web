@@ -21,13 +21,13 @@ import { useConferirQuebra } from "./hooks/useConferirQuebra";
 import { mascaraCPF } from "../../../../utils/formatCPF";
 
 
-export const ActionListaQuebraCaixaLoja = ({ 
-  dadosQuebraDeCaixa, 
-  usuarioLogado, 
+export const ActionListaQuebraCaixaLoja = ({
+  dadosQuebraDeCaixa,
+  usuarioLogado,
   optionsModulos,
   selectedItems,
   setSelectedItems,
-  handleClick 
+  handleClick
 }) => {
   const [modalVisivel, setModalVisivel] = useState(false);
   const [dadosQuebraCaixasModal, setDadosQuebraCaixasModal] = useState([])
@@ -45,7 +45,7 @@ export const ActionListaQuebraCaixaLoja = ({
 
   const {
     conferir
-  } = useConferirQuebra({ optionsModulos, usuarioLogado, selectedItems, handleClick }); 
+  } = useConferirQuebra({ optionsModulos, usuarioLogado, selectedItems, handleClick });
 
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
@@ -120,13 +120,13 @@ export const ActionListaQuebraCaixaLoja = ({
   });
 
   const calcularTotalVrQuebraSistema = () => {
-    return dados.reduce((total, item) => 
+    return dados.reduce((total, item) =>
       total + parseFloat(item.VRQUEBRASISTEMA), 0
     );
   };
 
   const calcularTotalVrQuebraEfetivado = () => {
-    return dados.reduce((total, item) => 
+    return dados.reduce((total, item) =>
       total + parseFloat(item.VRQUEBRAEFETIVADO), 0
     );
   };
@@ -155,48 +155,109 @@ export const ActionListaQuebraCaixaLoja = ({
     } else {
       setSelectAllChecked(false);
     }
-    
+
   }, [selectedItems, dados, first, rows]);
 
   const onSelectAllChange = (e) => {
-    if (e.checked) {
-     
-      Swal.fire({
-        icon: 'question',
-        title: 'Selecione o modo de seleção',
-        text: 'Deseja selecionar todos da tabela ou somente o que está em tela?',
-        showConfirmButton: true,
-        showCancelButton: true,
-        showCloseButton: true,
-        confirmButtonText: 'Todos os registros',
-        cancelButtonText: 'Apenas o que está tela',
-        cancelButtonColor: '#2196F3',
-        allowOutsideClick: false,
-      }).then((result) => {
-        if (result.isConfirmed) {
-          const itensSelecionaveis = dados.filter(item =>
-            item.STATIVO  === 'True' && item.STCONFERIDO !== 'True' && item.IDQUEBRACAIXA
-          );
-          setBtnVisivel(true);
-          setSelectedItems([...itensSelecionaveis]);
-        } else if (result.dismiss === Swal.DismissReason.cancel) {
-          const dadosPaginaAtual = dados.slice(first, first + rows);
-
-          const itensSelecionaveisPaginaAtual = dadosPaginaAtual.filter(item =>
-            item.STATIVO  === 'True' && item.STCONFERIDO !== 'True' && item.IDQUEBRACAIXA
-          );
-          setBtnVisivel(true);
-          setSelectedItems([...itensSelecionaveisPaginaAtual]);
-        } else {
-          setBtnVisivel(false);
-          setSelectedItems([]);
-        }
-      });
-    } else {
+    if (!e.checked) {
       setBtnVisivel(false);
       setSelectedItems([]);
+      return;
     }
+
+    const itensSelecionaveis = dados.filter(item =>
+      item.STATIVO === 'True' &&
+      item.STCONFERIDO !== 'True' &&
+      item.IDQUEBRACAIXA
+    );
+
+    if (itensSelecionaveis.length === 0) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Não há registros para serem selecionados.',
+        showConfirmButton: true,
+        showCloseButton: true,
+        allowOutsideClick: false,
+        confirmButtonText: 'Entendi',
+        confirmButtonColor: '#2196F3',
+      });
+
+      return;
+    }
+
+    const todosRegistrosNaTela =
+      first === 0 &&
+      rows >= dados.length;
+
+    if (todosRegistrosNaTela) {
+      setBtnVisivel(true);
+      setSelectedItems([...itensSelecionaveis]);
+      return;
+    }
+
+    Swal.fire({
+      icon: 'question',
+      title: 'Selecione o modo de seleção',
+      html: `
+        <div>
+          <p>Você pode selecionar apenas os registros exibidos nesta página.</p>
+          <small>
+            Para habilitar <b>Todos os registros</b>, exiba todos os registros da tabela.
+          </small>
+        </div>
+      `,
+      showConfirmButton: true,
+      showCancelButton: true,
+      showCloseButton: true,
+      confirmButtonText: 'Todos os registros',
+      cancelButtonText: 'Apenas o que está em tela',
+      confirmButtonColor: '#6c757d',
+      cancelButtonColor: '#2196F3',
+
+      didOpen: () => {
+        const btnTodos = Swal.getConfirmButton();
+
+        btnTodos.disabled = true;
+        btnTodos.style.cursor = 'not-allowed';
+        btnTodos.style.opacity = '0.6';
+      },
+
+      allowOutsideClick: false,
+    }).then((result) => {
+
+      if (result.dismiss === Swal.DismissReason.cancel) {
+        const dadosPaginaAtual = dados.slice(
+          first,
+          first + rows
+        );
+
+        const itensSelecionaveisPaginaAtual =
+          dadosPaginaAtual.filter(item =>
+            item.STATIVO === 'True' &&
+            item.STCONFERIDO !== 'True' &&
+            item.IDQUEBRACAIXA
+          );
+
+        if (itensSelecionaveisPaginaAtual.length === 0) {
+          Swal.fire({
+            icon: 'info',
+            title: 'Não há registros selecionáveis nesta página.',
+            confirmButtonText: 'Entendi',
+            confirmButtonColor: '#2196F3',
+          });
+
+          return;
+        }
+
+        setBtnVisivel(true);
+        setSelectedItems([...itensSelecionaveisPaginaAtual]);
+      } else {
+        setBtnVisivel(false);
+        setSelectedItems([]);
+      }
+    });
   };
+
 
   const colunasQuebraDeCaixa = [
     {
@@ -311,7 +372,7 @@ export const ActionListaQuebraCaixaLoja = ({
       field: 'STATIVO',
       header: 'Situação',
       body: (row) => {
-     
+
         const situacaoQuebraLoja = row.STATIVO == 'True';
         const situacaoConferido = row.STCONFERIDO == 'True';
         let tagQuebraAtivo = null;
@@ -364,7 +425,7 @@ export const ActionListaQuebraCaixaLoja = ({
               </div>
             );
           } else {
-         
+
             containerButtons = (
               <div className="d-flex" style={{ justifyContent: "space-between" }}>
                 <div className="mr-2">
@@ -407,7 +468,7 @@ export const ActionListaQuebraCaixaLoja = ({
             );
           }
         } else {
-       
+
           containerButtons = (
             <div>
               <ButtonTable
@@ -486,17 +547,17 @@ export const ActionListaQuebraCaixaLoja = ({
     <ColumnGroup>
       <Row>
         <Column footer="" colSpan={3} />
-        <Column footer="Totais" colSpan={4} style={{fontSize: '1rem', fontWeight: 'bold' }}/>
-        <Column 
-          footer={formatMoeda(calcularTotalVrQuebraSistema())} 
+        <Column footer="Totais" colSpan={4} style={{ fontSize: '1rem', fontWeight: 'bold' }} />
+        <Column
+          footer={formatMoeda(calcularTotalVrQuebraSistema())}
           style={{ color: calcularTotalVrQuebraSistema() >= 0 ? 'blue' : 'red', fontSize: '0.8rem' }}
           colSpan={1}
-        /> 
-        <Column 
+        />
+        <Column
           footer={formatMoeda(calcularTotalVrQuebraEfetivado())}
           style={{ color: calcularTotalVrQuebraEfetivado() >= 0 ? 'blue' : 'red', fontSize: '0.8rem' }}
           colSpan={1}
-       /> 
+        />
         <Column footer="" colSpan={3} />
       </Row>
     </ColumnGroup>
@@ -520,7 +581,7 @@ export const ActionListaQuebraCaixaLoja = ({
             exportToPDF={exportToPDF}
           />
         </div>
-        
+
         <div style={{ width: "100%", display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
 
           <div className="custom-control custom-checkbox">
@@ -549,7 +610,12 @@ export const ActionListaQuebraCaixaLoja = ({
             footerColumnGroup={footerGroup}
             sortOrder={-1}
             paginator={true}
-            rows={10}
+            first={first}
+            rows={rows}
+            onPage={(e) => {
+              setFirst(e.first);
+              setRows(e.rows);
+            }}
             cellMemo={false}
             rowsPerPageOptions={[10, 20, 50, 100, dados.length]}
             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
@@ -557,6 +623,7 @@ export const ActionListaQuebraCaixaLoja = ({
             filterDisplay="menu"
             showGridlines
             stripedRows
+
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado negativa</div>}
           >
             {colunasQuebraDeCaixa.map(coluna => (

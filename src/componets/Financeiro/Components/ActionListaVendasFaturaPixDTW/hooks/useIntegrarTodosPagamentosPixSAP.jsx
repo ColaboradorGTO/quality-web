@@ -8,26 +8,27 @@ export const useIntegrarTodosPagamentosPix = ({
     usuarioLogado,
     handleClickVendasPixCompensacao,
     selectedItems,
+    setSelectedItems
 }) => {
     const [ipUsuario, setIpUsuario] = useState('');
- 
+
     const getIPUsuario = async () => {
         let usuarioIP = null;
 
         try {
-        const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-        usuarioIP = ipWhoisData?.ip;
+            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
+            usuarioIP = ipWhoisData?.ip;
         } catch (error) {
-        console.error("Erro ao buscar IP via ipwho.is:", error);
+            console.error("Erro ao buscar IP via ipwho.is:", error);
         }
 
         if (!usuarioIP) {
-        try {
-            const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-            usuarioIP = ipifyData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ipify.org:", error);
-        }
+            try {
+                const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
+                usuarioIP = ipifyData?.ip;
+            } catch (error) {
+                console.error("Erro ao buscar IP via ipify.org:", error);
+            }
         }
         setIpUsuario(usuarioIP);
         return usuarioIP;
@@ -87,7 +88,7 @@ export const useIntegrarTodosPagamentosPix = ({
                         const putData = {
                             IDVENDAPAGAMENTO: rowData.IDVENDAPAGAMENTO,
                         };
-                        
+
                         document.getElementById('progressoIntegracao').innerText = i + 1;
 
 
@@ -98,7 +99,7 @@ export const useIntegrarTodosPagamentosPix = ({
                             IDFUNCIONARIO: String(usuarioLogado.id),
                             PATHFUNCAO: `FINANCEIRO/INTEGRAR TODOS PAGAMENTOS PIX SELECIONADOS`,
                             DADOS: textDados,
-                            IP: ipUsuario || 'IP não disponível'
+                            IP: ipUsuario || 'INDISPONIVEL'
                         }
 
                         await post('/log-web', postData)
@@ -114,17 +115,18 @@ export const useIntegrarTodosPagamentosPix = ({
                         },
                     })
 
+                    setSelectedItems([]);
                     handleClickVendasPixCompensacao();
-                    
-                  
+
+
                 } catch (error) {
-                    
+
                     const ipUsuario = await getIPUsuario();
                     const postData = {
                         IDFUNCIONARIO: String(usuarioLogado.id),
                         PATHFUNCAO: `FINANCEIRO/ERRO AO INTEGRAR TODOS PAGAMENTOS PIX SELECIONADOS`,
                         DADOS: '',
-                        IP: ipUsuario || 'IP não disponível'
+                        IP: ipUsuario || 'INDISPONIVEL'
                     }
 
                     const responsePost = await post('/log-web', postData)

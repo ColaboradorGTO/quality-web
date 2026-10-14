@@ -33,7 +33,7 @@ export const useEditarMotivoDevolucao = ({ dadosDetalheMotivoDevolucao, optionsM
     return usuarioIP;
   };
 
-    const optionsStatus = [
+  const optionsStatus = [
     { value: 'True', label: 'ATIVO' },
     { value: 'False', label: 'INATIVO' },
   ]
@@ -66,7 +66,7 @@ export const useEditarMotivoDevolucao = ({ dadosDetalheMotivoDevolucao, optionsM
 
     const putData = {
       DSMOTIVO: motivo,
-      STATIVO: statusSelecionado,
+      STATIVO: statusSelecionado?.value,
       IDUSUARIO: usuarioLogado.id,
       IDMOTIVODEVOLUCAO: dadosDetalheMotivoDevolucao[0]?.IDMOTIVODEVOLUCAO,
     }

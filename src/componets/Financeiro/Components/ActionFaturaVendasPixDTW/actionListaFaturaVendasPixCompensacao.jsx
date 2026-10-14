@@ -2,7 +2,7 @@ import { Fragment, useRef, useState } from "react"
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { formatMoeda } from "../../../../utils/formatMoeda";
-import { formatarDataDTW } from "../../../../utils/dataFormatada";
+import { dataHoraFormatada, formatarDataDTW } from "../../../../utils/dataFormatada";
 import { useReactToPrint } from "react-to-print";
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
@@ -96,13 +96,13 @@ export const ActionFaturaListaVendasPIXCompensacao = ({ dadosFaturaVendasPixComp
     {
       field: 'DTPROCESSAMENTO',
       header: 'Data',
-      body: row => <p style={{ color: '#212529', width: 100 }}>{row.DTPROCESSAMENTO}</p>,
+      body: row => <p style={{ color: '#212529', width: 100 }}>{dataHoraFormatada(row.DTPROCESSAMENTO)}</p>,
       sortable: true,
     },
     {
       field: 'DATA_COMPENSACAO',
       header: 'Data Compensação',
-      body: row => <p style={{ color: '#212529', width: 100 }}>{row.DATA_COMPENSACAO || 'NÃO INFORMADO'}</p>,
+      body: row => <p style={{ color: '#212529', width: 100 }}>{dataHoraFormatada(row.DATA_COMPENSACAO) || 'NÃO INFORMADO'}</p>,
       sortable: true,
     },
     {
@@ -180,6 +180,7 @@ export const ActionFaturaListaVendasPIXCompensacao = ({ dadosFaturaVendasPixComp
                     filterDisplay="menu"
                     showGridlines
                     stripedRows
+                    cellMemo={false}
                     emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
 
                   >

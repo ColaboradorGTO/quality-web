@@ -9,6 +9,7 @@ import { getDataAtual } from "../../../../utils/dataAtual";
 import { ActionListaVendasLoja } from "./actionListaVendasLoja";
 import { InputSelectAction } from "../../../Inputs/InputSelectAction";
 import { animacaoCarregamento, fecharAnimacaoCarregamento, foiCancelado } from "../../../../utils/animationCarregamento";
+import Swal from "sweetalert2";
 
 
 export const ActionPesquisaVendasLoja = () => {
@@ -93,6 +94,14 @@ export const ActionPesquisaVendasLoja = () => {
   }
 
   const handleClick = () => {
+    if (!empresaSelecionada) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Atenção',
+        text: 'Selecione uma empresa',
+      })
+      return
+    }
     refetch();
     setTabelaVisivel(true);
   };
@@ -126,7 +135,7 @@ export const ActionPesquisaVendasLoja = () => {
 
         InputSelectEmpresaComponent={InputSelectAction}
         optionsEmpresas={[
-          { value: '', label: 'Todas' },
+        /*   { value: '', label: 'Todas' }, */
           ...optionsEmpresas.map((empresa) => ({
             value: empresa.IDEMPRESA,
             label: empresa.NOFANTASIA,

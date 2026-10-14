@@ -93,11 +93,11 @@ export const ActionPesquisaDescontoVendas = () => {
   };
 
   const { data: dadosDescontoVendas = [], error: errorDescontoVendas, isLoading: isLoadingDescontoVendas, refetch: refetchDescontoVendas } = useQuery(
-    ['desconto-vendas', ],
+    ['desconto-vendas',],
     () => fetchDescontoVendas(),
     { enabled: false, staleTime: 5 * 60 * 1000 }
   );
-  
+
   const fetchDescontoVendasSimplificada = async () => {
     const urlBase = `/desconto-vendas-simplificado?idEmpresa=${empresaSelecionada}&idMarca=${marcaSelecionada}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}`;
     let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
@@ -139,14 +139,14 @@ export const ActionPesquisaDescontoVendas = () => {
   };
 
   const { data: dadosDescontoVendasSimplificado = [], error: errorDescontoVendasSimplificada, isLoading: isLoadingDescontoVendasSimplificada, refetch: refetchDescontoVendasSimplificada } = useQuery(
-    ['desconto-vendas-simplificado', ],
+    ['desconto-vendas-simplificado',],
     () => fetchDescontoVendasSimplificada(),
     { enabled: false, staleTime: 5 * 60 * 1000 }
   );
 
   const fetchDescontoMotivoVendas = async () => {
-    
-    const urlBase = `/desconto-motivo-vendas-adm?idEmpresa=${empresaSelecionada}&idMarca=${marcaSelecionada}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}`;
+
+    const urlBase = `/desconto-motivo-vendas-adm?idEmpresa=${empresaSelecionada}&idMarca=${marcaSelecionada}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&motivoDesconto=${descontoSelecionado}`;
     let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
     urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
     const controller = new AbortController();
@@ -186,14 +186,14 @@ export const ActionPesquisaDescontoVendas = () => {
   };
 
   const { data: dadosDescontoMotivoVendas = [], error: errorDescontoMotivoVendas, isLoading: isLoadingDescontoMotivoVendas, refetch: refetchDescontoMotivoVendas } = useQuery(
-    ['desconto-motivo-vendas-adm', ],
+    ['desconto-motivo-vendas-adm',],
     () => fetchDescontoMotivoVendas(),
     { enabled: false, staleTime: 5 * 60 * 1000 }
   );
 
 
   const handleChangeEmpresa = (e) => {
-    if( e.value === '') {
+    if (e.value === '') {
       setEmpresaSelecionada('');
     } else {
       const empresa = optionsEmpresas.find((item) => item.IDEMPRESA === e.value);
@@ -231,23 +231,34 @@ export const ActionPesquisaDescontoVendas = () => {
   }
 
   const handleClickPesquisaMotivo = () => {
-    refetchDescontoMotivoVendas(); 
+    if (!descontoSelecionado) {
+      Swal.fire({
+        position: 'center',
+        icon: 'info',
+        title: 'Selecione um motivo de desconto',
+        text: 'Selecione um motivo de desconto',
+        showConfirmButton: false,
+        timer: 1500
+      })
+      return
+    }
+    refetchDescontoMotivoVendas();
     setTabelaMotivo(true)
     setTabelaSimplificada(false)
     setTabelaDetalhada(false)
   }
 
-  const optionsMotivoDesconto = [ 
-    { value: '', label: 'Todas'},
-    { value: 'Ação Comercial', label: 'Ação Comercial'},
-    { value: 'Alçada Gerente', label: 'Alçada Gerente'},
-    { value: 'Cartão PL - Ativação Novos', label: 'Cartão PL - Ativação Novos'},
-    { value: 'Produtos - Defeitos', label: 'Produtos - Defeitos'},
-    { value: 'Produtos - Divergência de Preço', label: 'Produtos - Divergência de Preço'},
-    { value: 'Desconto efetuado por Colaborador CPF', label: 'Desconto efetuado por Colaborador CPF'},
-    { value: 'Convenio', label: 'Convenio'},
-    { value: 'Desconto Funcionario', label: 'Desconto Funcionario'},
-    { value: 'Outros', label: 'Outros'},
+  const optionsMotivoDesconto = [
+    { value: '', label: 'Todas' },
+    { value: 'Ação Comercial', label: 'Ação Comercial' },
+    { value: 'Alçada Gerente', label: 'Alçada Gerente' },
+    { value: 'Cartão PL - Ativação Novos', label: 'Cartão PL - Ativação Novos' },
+    { value: 'Produtos - Defeitos', label: 'Produtos - Defeitos' },
+    { value: 'Produtos - Divergência de Preço', label: 'Produtos - Divergência de Preço' },
+    { value: 'Desconto efetuado por Colaborador CPF', label: 'Desconto efetuado por Colaborador CPF' },
+    { value: 'Convenio', label: 'Convenio' },
+    { value: 'Desconto Funcionario', label: 'Desconto Funcionario' },
+    { value: 'Outros', label: 'Outros' },
   ]
 
   return (
@@ -259,7 +270,7 @@ export const ActionPesquisaDescontoVendas = () => {
         linkComponent={["Desconto Vendas por Loja e Período"]}
         title="Desconto Vendas por Loja e Período"
         subTitle={empresaSelecionadaNome}
-        
+
         InputFieldDTInicioComponent={InputField}
         valueInputFieldDTInicio={dataPesquisaInicio}
         labelInputFieldDTInicio={"Data Início"}
@@ -288,7 +299,7 @@ export const ActionPesquisaDescontoVendas = () => {
         optionsMarcas={optionsMotivoDesconto}
         valueSelectMarca={descontoSelecionado}
         onChangeSelectMarcas={handleSelectDesconto}
-        
+
         InputSelectGrupoComponent={InputSelectAction}
         labelSelectGrupo={"Marca"}
         optionsGrupos={[

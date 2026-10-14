@@ -25,6 +25,8 @@ export const ActionMain = ({
   iconSizeHeader,
   iconHeader,
   corHeader,
+  disabledCadastro,
+
 
   readOnlyDescricao,
   readOnlyPendencia,
@@ -1899,6 +1901,7 @@ export const ActionMain = ({
                         iconColor="#fff"
                         iconSize={iconSizeCadastro || 16}
                         style={styleCadastro}
+                        disabledBTN={disabledCadastro}
                       />
                     )}
 
@@ -2071,7 +2074,7 @@ export const ActionMain = ({
                         // nome="Vendas por Produto"
                         textButton={linkImportar}
                         onClickButtonType={onButtonClickImportar}
-                        cor= { corImportar || '"success"'}
+                        cor={corImportar || '"success"'}
                         tipo="button"
                         Icon={GoUpload}
                         iconColor="#fff"

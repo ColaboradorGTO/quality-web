@@ -26,8 +26,9 @@ export const ActionPesquisaFaturasLoja = ({ usuarioLogado, ID }) => {
   const [codigoFatura, setCodigoFatura] = useState('')
   const [isLoadingPesquisa, setIsLoadingPesquisa] = useState(true)
   const [selectedItems, setSelectedItems] = useState([]);
+  const [situacao, setSituacao] = useState('');
   const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
-  
+
   useEffect(() => {
     const dataInicial = getDataAtual();
     const dataFinal = getDataAtual();
@@ -205,6 +206,34 @@ export const ActionPesquisaFaturasLoja = ({ usuarioLogado, ID }) => {
 
   }
 
+  const OptionSituacao = [
+    { value: '', label: 'Todas' },
+    { value: 'Ativo', label: 'Ativo' },
+    { value: 'Cancelada', label: 'Cancelada' },
+  ];
+
+  const handleChangeSituacao = (e) => {
+    setSituacao(e?.value || 'Todas');
+    setSelectedItems([]);
+  };
+
+  const dadosDetalheFaturaFiltrados = dadosDetalheFatura.filter((item) => {
+    const isAtivo = String(item.STCANCELADO).toLowerCase() === 'false' || item.STCANCELADO === false;
+    const isCancelado = !isAtivo;
+    const isConferido = String(item.STCONFERIDOFATURA).toLowerCase() === 'true' || item.STCONFERIDOFATURA === true;
+    const isConsolidado = Boolean(item.IDCONSOLIDACAOFATURA) && item.IDCONSOLIDACAOFATURA !== '0' && item.IDCONSOLIDACAOFATURA !== 0;
+
+    if (situacao === 'Ativo') {
+      return isAtivo && isConsolidado && isConferido;
+    }
+
+    if (situacao === 'Cancelada' || situacao === 'Cancelado' || situacao === 'Canceladas') {
+      return isCancelado;
+    }
+
+    return true;
+  });
+
   return (
 
     <Fragment>
@@ -229,7 +258,7 @@ export const ActionPesquisaFaturasLoja = ({ usuarioLogado, ID }) => {
           InputSelectEmpresaComponent={InputSelectAction}
           labelSelectEmpresa={"Empresa"}
           optionsEmpresas={[
-            {value: '', label: 'Selecione uma empresa'},
+            { value: '', label: 'Selecione uma empresa' },
             ...optionsEmpresas.map((empresa) => ({
               value: empresa.IDEMPRESA,
               label: empresa.NOFANTASIA,
@@ -237,6 +266,12 @@ export const ActionPesquisaFaturasLoja = ({ usuarioLogado, ID }) => {
           ]}
           valueSelectEmpresa={empresaSelecionada}
           onChangeSelectEmpresa={handleChangeEmpresa}
+
+          InputSelectComissoesComponent={InputSelectAction}
+          labelSelectComissoes={"Situação"}
+          optionsComissoes={OptionSituacao}
+          valueSelectComissoes={OptionSituacao.find(opt => opt.value === situacao) || OptionSituacao[0]}
+          onChangeSelectComissoes={handleChangeSituacao}
 
           InputFieldComponent={InputField}
           labelInputField={"Código Fatura"}
@@ -261,18 +296,21 @@ export const ActionPesquisaFaturasLoja = ({ usuarioLogado, ID }) => {
           onButtonClickCancelar={conferirTodasSelecionadas}
           corCancelar={"warning"}
           IconCancelar={IoMdCheckmark}
-          styleCancelar
+          styleCancelar={{ display: selectedItems.length > 0 ? 'block' : 'none' }}
+
         />
       )}
 
       {tabelaVisivel && (
         <ActionListaFaturasLoja
-          dadosDetalheFatura={dadosDetalheFatura}
+          dadosDetalheFatura={dadosDetalheFaturaFiltrados}
           optionsModulos={optionsModulos}
           usuarioLogado={usuarioLogado}
           handleClick={handleClick}
           selectedItems={selectedItems}
           setSelectedItems={setSelectedItems}
+          situacao={situacao}
+
         />
 
       )}
@@ -286,7 +324,7 @@ export const ActionPesquisaFaturasLoja = ({ usuarioLogado, ID }) => {
           setActionMain={setActionMain}
         />
       )}
-    
+
     </Fragment>
   )
 }

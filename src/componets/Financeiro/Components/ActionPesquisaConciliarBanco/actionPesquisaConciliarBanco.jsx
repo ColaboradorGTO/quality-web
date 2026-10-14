@@ -196,7 +196,7 @@ export const ActionPesquisaConciliarBanco = ({ usuarioLogado }) => {
     setTabelaVisivel(false)
     refetchBancoConsolidado()
   }
-//console.log(btnVisivel, 'btnVisivel');
+  //console.log(btnVisivel, 'btnVisivel');
 
   const {
     handleSubmit,
@@ -274,7 +274,7 @@ export const ActionPesquisaConciliarBanco = ({ usuarioLogado }) => {
         linkImportar={"Integrar Todos"}
         corImportar={"info"}
         onButtonClickImportar={handleSubmit}
-        styleImportar={{ display: btnVisivel ? 'block' : 'none' }}
+        styleImportar={{ display: selectedItems.length > 1 ? 'block' : 'none' }}
 
       />
 

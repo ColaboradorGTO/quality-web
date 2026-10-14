@@ -90,7 +90,7 @@ export const useIntegrarPagamentoPix = ({optionsModulos, usuarioLogado, handleCl
                         IDFUNCIONARIO: String(usuarioLogado.id),
                         PATHFUNCAO: `FINANCEIRO/INTEGRACAO DO PAGAMENTO PIX VENDA`,
                         DADOS: textDados,
-                        IP: ipUsuario || 'IP não disponível'
+                        IP: ipUsuario || 'INDISPONIVEL'
                     }
 
                     await post('/log-web', postData)
@@ -115,7 +115,7 @@ export const useIntegrarPagamentoPix = ({optionsModulos, usuarioLogado, handleCl
                         IDFUNCIONARIO: String(usuarioLogado.id),
                         PATHFUNCAO: `FINANCEIRO/ERRO AO INTEGRAR PAGAMENTO PIX VENDA`,
                         DADOS: textDados,
-                        IP: ipUsuario || 'IP não disponível'
+                        IP: ipUsuario || 'INDISPONIVEL'
                     }
 
                     const responsePost = await post('/log-web', postData)

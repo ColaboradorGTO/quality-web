@@ -39,17 +39,17 @@ export const ActionPesquisaFaturasConsolidadas = ({ usuarioLogado }) => {
   useEffect(() => {
     const menuSalvo = localStorage.getItem('menuFilhoSelecionado');
     if (menuSalvo) {
-    const menuParsed = JSON.parse(menuSalvo);
-    setMenuFilhoAtual(menuParsed);
+      const menuParsed = JSON.parse(menuSalvo);
+      setMenuFilhoAtual(menuParsed);
     }
   }, []);
 
   const { data: optionsModulos = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
     ['menus-usuario-excecao', menuFilhoAtual?.ID],
     async () => {
-    const response = await get(`/menus-usuario-excecao?idUsuario=${usuarioLogado?.id}&idMenuFilho=${menuFilhoAtual?.ID}`);
+      const response = await get(`/menus-usuario-excecao?idUsuario=${usuarioLogado?.id}&idMenuFilho=${menuFilhoAtual?.ID}`);
 
-    return response.data;
+      return response.data;
     },
     { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000, }
   );
@@ -179,7 +179,7 @@ export const ActionPesquisaFaturasConsolidadas = ({ usuarioLogado }) => {
 
   const {
     conferirTodas
-  } = useConsolidarTodasFaturas({ optionsModulos, usuarioLogado, handleClickConciliar, selectedItems });
+  } = useConsolidarTodasFaturas({ optionsModulos, usuarioLogado, handleClickConciliar, handleClick, selectedItems });
 
   const conferirTodasSelecionadas = () => {
 
@@ -269,7 +269,7 @@ export const ActionPesquisaFaturasConsolidadas = ({ usuarioLogado }) => {
           onButtonClickCancelar={conferirTodasSelecionadas}
           corCancelar={"warning"}
           IconCancelar={MdOutlineCloudUpload}
-          styleCancelar
+          styleCancelar={{ display: selectedItems.length > 0 ? 'block' : 'none' }}
         />
       )}
 
@@ -279,6 +279,7 @@ export const ActionPesquisaFaturasConsolidadas = ({ usuarioLogado }) => {
           optionsModulos={optionsModulos}
           usuarioLogado={usuarioLogado}
           handleClick={handleClick}
+          handleClickConciliar={handleClickConciliar}
           selectedItems={selectedItems}
           setSelectedItems={setSelectedItems}
         />
