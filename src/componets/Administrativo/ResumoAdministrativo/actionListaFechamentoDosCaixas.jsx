@@ -277,10 +277,7 @@ export const ActionListaFechamentoDosCaixas = ({
       body: row => {
         if (row.STCONFERIDO > 0) {
           return (
-
-
             <div>
-
               <ButtonTable
                 onClickButton={() => handleConferir(row)}
                 titleButton="Abertura do Caixa na Web"
@@ -291,15 +288,12 @@ export const ActionListaFechamentoDosCaixas = ({
                 height="40px"
                 disabledBTN={optionsModulos[0]?.ALTERAR == 'False' ? true : false}
               />
-
             </div>
           )
 
         } else {
           return (
             <div>
-
-
               <ButtonTable
                 onClickButton={() => handleConferir(row)}
                 titleButton="Confirmar Conferencia do Caixa"
@@ -310,7 +304,6 @@ export const ActionListaFechamentoDosCaixas = ({
                 height="40px"
                 disabledBTN={optionsModulos[0]?.ALTERAR == 'False' ? true : false}
               />
-
             </div>
           )
         }
@@ -320,11 +313,11 @@ export const ActionListaFechamentoDosCaixas = ({
   ]
 
   const handleConferir = async (row) => {
-
+    const conferido = row.STCONFERIDO > 0;
 
     Swal.fire({
       icon: 'question',
-      title: `Confimar Conferencia do Caixa `,
+      title: conferido ? 'Confirmar Abertura do Caixa na Web?' : 'Confirmar Conferência do Caixa?',
       showCloseButton: true,
       showCancelButton: true,
       cancelButtonColor: '#FD1381',
@@ -339,12 +332,12 @@ export const ActionListaFechamentoDosCaixas = ({
           let stConferidoValue;
           let textoFuncao = '';
 
-          if (row.STCONFERIDO == 0) {
+          if (!conferido) {
             stConferidoValue = 1;
-            textoFuncao = 'ADMINISTRATIVO/ABERTURA DO MOVIMENTO DE CAIXA';
+            textoFuncao = 'ADMINISTRATIVO/CONFIMAR CONFERENCIA DO MOVIMENTO DE CAIXA';
           } else {
             stConferidoValue = 0;
-            textoFuncao = 'ADMINISTRATIVO/CONFIMAR CONFERENCIA DO MOVIMENTO DE CAIXA';
+            textoFuncao = 'ADMINISTRATIVO/ABERTURA DO MOVIMENTO DE CAIXA';
           }
           const putData = {
             IDSUPERVISOR: usuarioLogado.id,
@@ -366,17 +359,32 @@ export const ActionListaFechamentoDosCaixas = ({
 
           const responsePost = await post('/log-web', postData)
 
-          Swal.fire('Sucesso!', 'Recompra atualizada com sucesso.', 'success');
+          Swal.fire({
+            icon: 'success',
+            title: conferido ? 'Caixa aberto com sucesso!' : 'Caixa conferido com sucesso!',
+            showConfirmButton: false,
+            timer: 5000,
+            customClass: {
+                container: 'custom-swal',
+            }
+          });
 
           responsePost.data;
         } catch (error) {
-          Swal.fire('Erro!', 'Erro ao atualizar recompra.', 'error');
+          Swal.fire({
+            icon: 'error',
+            title: conferido ? 'Erro ao abrir o Caixa!' : 'Erro ao conferir o Caixa!',
+            showConfirmButton: false,
+            timer: 5000,
+            customClass: {
+                container: 'custom-swal',
+            }
+          });
         }
       }
     });
-
-
   };
+ 
 
 
   const footerGroup = (
