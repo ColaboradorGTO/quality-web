@@ -139,7 +139,7 @@ export const ActionPesquisaDepositosLoja = () => {
           }))
         ]}
         valueSelectEmpresa={empresaSelecionada}
-        onChangeSelectEmpresa={(e) => handleChangeEmpresa(e)}
+        onChangeSelectEmpresa={(e) => setEmpresaSelecionada(e.value)}
 
         ButtonSearchComponent={ButtonType}
         linkNomeSearch={"Pesquisar"}
