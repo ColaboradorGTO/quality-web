@@ -252,6 +252,7 @@ export const ActionImportArquivo = ({
                                                 <td style={{ ...tdStyle, textAlign: 'center' }}>{row.codEstabelecimento}</td>
                                                 <td style={{ ...tdStyle, textAlign: 'center' }}>{row.empresa}</td>
                                                 <td style={{ ...tdStyle, textAlign: 'right' }}>{row.valorRecebido}</td>
+                                                <td style={{ ...tdStyle, textAlign: 'right' }}>{row.valorArquivo}</td>
                                                 <td style={{ ...tdStyle, textAlign: 'right', color: row.statusColor, fontWeight: 'bold' }}>
                                                     {row.valorDivergente}
                                                 </td>
