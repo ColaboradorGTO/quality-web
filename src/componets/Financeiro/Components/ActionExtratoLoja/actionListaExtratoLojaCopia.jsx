@@ -43,7 +43,7 @@ export const ActionListaExtratoContaCorrenteLoja = ({
 
   const {
     handleCancelar
-  } = useUpdateStatusDeposito({ optionsModulos, usuarioLogado })
+  } = useUpdateStatusDeposito({ optionsModulos, usuarioLogado, handleClick })
 
 
   const onGlobalFilterChange = (e) => {
@@ -619,6 +619,7 @@ export const ActionListaExtratoContaCorrenteLoja = ({
         optionsModulos={optionsModulos}
         usuarioLogado={usuarioLogado}
         dadosDeposito={dadosDeposito}
+        handleClick={handleClick}
       />
 
       <ModalCadastroDeDepositoDaLoja
@@ -627,6 +628,7 @@ export const ActionListaExtratoContaCorrenteLoja = ({
           optionsModulos={optionsModulos}
           usuarioLogado={usuarioLogado}
           empresaSelecionada={empresaSelecionada}
+          handleClick={handleClick}
         />
   
         <ModalAjusteExtratoModal
@@ -635,6 +637,7 @@ export const ActionListaExtratoContaCorrenteLoja = ({
           optionsModulos={optionsModulos}
           usuarioLogado={usuarioLogado}
           empresaSelecionada={empresaSelecionada}
+          handleClick={handleClick}
         />
     </Fragment>
 

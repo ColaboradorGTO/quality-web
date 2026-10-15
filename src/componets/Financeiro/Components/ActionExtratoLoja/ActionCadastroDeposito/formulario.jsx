@@ -3,14 +3,22 @@ import { FooterModal } from "../../../../Modais/FooterModal/footerModal";
 import { ButtonTypeModal } from "../../../../Buttons/ButtonTypeModal";
 import { InputFieldModal } from "../../../../Buttons/InputFieldModal";
 import { useCreateDeposito } from "../hooks/useCreateDeposito";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import Select from 'react-select';
+import { schema } from "./schema/useDepositoSchema"
+import { formatarMoeda } from "../../../../../utils/formatMoeda";
 
-import { useEffect } from "react"
-import { mascaraValor } from "../../../../../utils/mascaraValor";
+export const FormularioCadastroDeposito = ({ 
+    handleClose, 
+    optionsModulos, 
+    usuarioLogado, 
+    empresaSelecionada, 
+    handleClick 
+}) => {
+    const { register, handleSubmit, formState: { errors }, clearErrors, setError, control } = useForm({
+        mode: "onChange"
+    });
 
-export const FormularioCadastroDeposito = ({ handleClose, optionsModulos, usuarioLogado, empresaSelecionada }) => {
-    const { register, handleSubmit, formState: { errors } } = useForm();
     const {
         dataMovimento,
         hora,
@@ -29,27 +37,40 @@ export const FormularioCadastroDeposito = ({ handleClose, optionsModulos, usuari
         setData,
         horaMovimento,
         dadosContaBanco,
-        submit,
-    } = useCreateDeposito({ handleClose, optionsModulos, usuarioLogado, empresaSelecionada });
+        onSubmit,
+    } = useCreateDeposito({ handleClose, optionsModulos, usuarioLogado, empresaSelecionada, handleClick });
 
+    const handleValidatedSubmit = async () => {
+        try {
+            const dadosParaValidar = {
+                valorDeposito: vrDeposito,
+            }
 
-    useEffect(() => {
-        if (!hora) {
-            const now = new Date();
-            const formatted = now.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:mm"
-            setHora(formatted);
+            await schema.validate(dadosParaValidar, { abortEarly: false });
+
+            await onSubmit();
+        } catch (validationError) {
+            clearErrors();
+
+            if (validationError.inner && validationError.inner.length > 0) {
+                validationError.inner.forEach(error => {
+                    if (error.path) {
+                        setError(error.path, {
+                            type: 'manual',
+                            message: error.message
+                        });
+                    }
+                });
+            }
+
+            const errorMessages = validationError.errors || [validationError.message];
+            console.log(`Erro de validação:\n${errorMessages.join('\n')}`);
         }
-    }, [hora, setHora]);
+    }
 
-    const handleValorDepositoChange = (e) => {
-        const valor = e.target.value.replace(/,/g, '.');
-        setVrDeposito(valor);
-    };
     return (
         <Fragment>
-            <form onSubmit={handleSubmit(submit)}>
-
-        
+            <form onSubmit={handleSubmit(handleValidatedSubmit)}>
 
                 <div className="form-group">
                     <div className="row">
@@ -58,7 +79,7 @@ export const FormularioCadastroDeposito = ({ handleClose, optionsModulos, usuari
                             <InputFieldModal
                                 label={"Empresa"}
                                 type="text"
-                                value={usuarioLogado?.NOFANTASIA ?? empresa}
+                                value={usuarioLogado?.NOFANTASIA ?? empresaSelecionada?.NOFANTASIA ?? ''}
                                 onChangeModal={(e) => setEmpresa(e.target.value)}
                                 readOnly={true}
                             />
@@ -88,12 +109,12 @@ export const FormularioCadastroDeposito = ({ handleClose, optionsModulos, usuari
                                 onChangeModal={(e) => setHora(e.target.value)}
                                 readOnly={true}
                             />
+                            
                         </div>
                         <div className="col-sm-6 col-xl-6">
 
                             <label htmlFor="">Conta *</label>
                             <Select
-                                defaultValue={contaSelecionada}
                                 options={[
                                     { value: '', label: 'Selecione...' },
                                     ...dadosContaBanco.map((item) => {
@@ -101,8 +122,9 @@ export const FormularioCadastroDeposito = ({ handleClose, optionsModulos, usuari
                                             value: item.IDCONTABANCO,
                                             label: `${item.DSCONTABANCO} `
                                         }
-                                    })]}
-                                onChange={(e => setContaSelecionada(e.value))}
+                                })]}
+                                value={contaSelecionada}
+                                onChange={(e => setContaSelecionada(e))}
                             />
                         </div>
                     </div>
@@ -142,12 +164,8 @@ export const FormularioCadastroDeposito = ({ handleClose, optionsModulos, usuari
                                 label={"Valor Depósito"}
                                 type="text"
                                 id="vrDeposito"
-                                value={mascaraValor(vrDeposito)}
-                                onChangeModal={(e) => {
-                                    const valor = e.target.value.replace(".", "").replace(".", ",");
-                                    setVrDeposito(valor);
-                                }}
-                       
+                                value={vrDeposito}
+                                onChangeModal={(e) => setVrDeposito(formatarMoeda(e.target.value))}     
                                 {...register("vrDeposito", { required: "Campo obrigatório Informe o Valor do Depósito" })}
                                 readOnly={false}
                             />
@@ -183,9 +201,11 @@ export const FormularioCadastroDeposito = ({ handleClose, optionsModulos, usuari
 
                 <FooterModal
                     ButtonTypeCadastrar={ButtonTypeModal}
-                    onClickButtonCadastrar={submit}
+                    onClickButtonCadastrar={handleValidatedSubmit}
                     textButtonCadastrar={"Cadastrar Depósito"}
                     corCadastrar={"success"}
+                    loadingTextCadastrar={"Cadastrando..."}
+                    autoLoadingCadastrar={true}
 
                     ButtonTypeFechar={ButtonTypeModal}
                     onClickButtonFechar={handleClose}

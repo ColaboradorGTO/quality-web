@@ -120,7 +120,7 @@ const fetchExtratoLoja = async () => {
       <ActionMain
         linkComponentAnterior={["Home"]}
         linkComponent={["Extrato de Contas Correntes das Lojas"]}
-        title="Extrato de Contas Correntes das Lojas "
+        title="Extrato de Contas Correntes das Lojas"
         subTitle="Nome da Loja"
         InputFieldDTInicioComponent={InputField}
         labelInputFieldDTInicio={"Data Início"}
@@ -151,11 +151,7 @@ const fetchExtratoLoja = async () => {
         corSearch={"primary"}
         IconSearch={AiOutlineSearch}
 
-        ButtonTypeCadastro={ButtonType}
-        linkNome={"Cadastrar Depósitos"}
-        onButtonClickCadastro
-        corCadastro={"success"}
-        IconCadastro={IoMdAdd}
+
       />
 
       {tabelaVisivel && (

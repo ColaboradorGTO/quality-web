@@ -430,6 +430,7 @@ export const ActionListaExtratoLoja = ({
         optionsModulos={optionsModulos}
         usuarioLogado={usuarioLogado}
         empresaSelecionada={empresaSelecionada}
+        handleClick={handleClick}
       />
 
       <ModalAjusteExtratoModal

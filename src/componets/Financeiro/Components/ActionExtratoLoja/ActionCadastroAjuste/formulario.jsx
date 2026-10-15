@@ -5,7 +5,14 @@ import { InputFieldModal } from "../../../../Buttons/InputFieldModal"
 import { useCreateAjusteExtrato } from "../hooks/useCreateAjusteExtrato"
 import { useForm } from "react-hook-form"
 
-export const Formulario = ({ show, handleClose, optionsModulos, usuarioLogado, empresaSelecionada }) => {
+export const Formulario = ({ 
+    show, 
+    handleClose, 
+    optionsModulos, 
+    usuarioLogado, 
+    empresaSelecionada,
+    handleClick 
+}) => {
     const { register, handleSubmit, errors } = useForm();
     const  {
         dataMovimento,
@@ -19,7 +26,7 @@ export const Formulario = ({ show, handleClose, optionsModulos, usuarioLogado, e
         setDataMovimento,
         setHoraMovimento,
         submit,
-    } = useCreateAjusteExtrato({ show, handleClose, optionsModulos, usuarioLogado, empresaSelecionada })
+    } = useCreateAjusteExtrato({ show, handleClose, optionsModulos, usuarioLogado, empresaSelecionada, handleClick })
     return (
         <Fragment>
             <form onSubmit={handleSubmit(submit)}>

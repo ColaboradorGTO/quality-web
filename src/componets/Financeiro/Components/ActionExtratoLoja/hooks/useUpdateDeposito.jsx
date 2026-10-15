@@ -1,12 +1,37 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import Swal from "sweetalert2";
-import { get, post, put } from "../../../../../api/funcRequest";
+import { get, put } from "../../../../../api/funcRequest";
 import { toFloat } from "../../../../../utils/toFloat";
 import { useQuery } from "react-query";
+import { removerFormatacaoMoeda } from "../../../../../utils/formatMoeda";
+import { registrarLogAuditoria } from "../../../../../services/auditLog";
 
+const extrairDataHora = (valor) => {
+    if (!valor) {
+        return { data: '', hora: '' };
+    }
 
-export const useUpdateDeposito = ({ handleClose, optionsModulos, usuarioLogado, dadosDeposito }) => {
+    const dataCompleta = new Date(valor);
+
+    if (Number.isNaN(dataCompleta.getTime())) {
+        return { data: '', hora: '' };
+    }
+
+    const data = [
+        dataCompleta.getFullYear(),
+        String(dataCompleta.getMonth() + 1).padStart(2, '0'),
+        String(dataCompleta.getDate()).padStart(2, '0')
+    ].join('-');
+
+    const hora = [
+        String(dataCompleta.getHours()).padStart(2, '0'),
+        String(dataCompleta.getMinutes()).padStart(2, '0')
+    ].join(':');
+
+    return { data, hora };
+};
+
+export const useUpdateDeposito = ({ handleClose, optionsModulos, usuarioLogado, dadosDeposito, handleClick }) => {
     const [empresa, setEmpresa] = useState('')
     const [data, setData] = useState('')
     const [hora, setHora] = useState('')
@@ -16,29 +41,7 @@ export const useUpdateDeposito = ({ handleClose, optionsModulos, usuarioLogado, 
     const [vrDeposito, setVrDeposito] = useState('')
     const [dataMovimento, setDataMovimento] = useState('')
     const [horaMovimento, setHoraMovimento] = useState('')
-    const [ipUsuario, setIpUsuario] = useState('');
 
-    const getIPUsuario = async () => {
-        let usuarioIP = null;
-
-        try {
-        const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-        usuarioIP = ipWhoisData?.ip;
-        } catch (error) {
-        console.error("Erro ao buscar IP via ipwho.is:", error);
-        }
-
-        if (!usuarioIP) {
-        try {
-            const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-            usuarioIP = ipifyData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ipify.org:", error);
-        }
-        }
-        setIpUsuario(usuarioIP);
-        return usuarioIP;
-    };
 
     const { data: dadosContaBanco = [], error: errorContaBanco, isLoading: isLoadingContaBanco } = useQuery(
         'contaBanco',
@@ -50,34 +53,50 @@ export const useUpdateDeposito = ({ handleClose, optionsModulos, usuarioLogado, 
     );
 
     useEffect(() => {
-        if (dadosDeposito) {
-            setEmpresa(dadosDeposito[0]?.NOFANTASIA)
-            setData(dadosDeposito[0]?.DTDEP)
-            setDataMovimento(dadosDeposito[0]?.DTMOVDEP)
-            setContaSelecionada({
-                value: dadosDeposito[0]?.IDCONTABANCO,
-                label: dadosDeposito[0]?.DSCONTABANCO
-            })
-            setHistorico(dadosDeposito[0]?.DSHISTORIO)
-            setDocumento(dadosDeposito[0]?.NUDOCDEPOSITO)
-            setVrDeposito(toFloat(dadosDeposito[0]?.VRDEPOSITO))
-        }
-    }, [])
+        const deposito = dadosDeposito?.[0];
 
-    const submit = async () => {
+        if (deposito) {
+            const depositoDataHora = extrairDataHora(
+                deposito.DTDEPCOMPLETA
+            );
+
+            const movimentoDataHora = extrairDataHora(
+                deposito.DTMOVDEPCOMPLETA
+            );
+
+            setEmpresa(deposito.NOFANTASIA);
+
+            setData(depositoDataHora.data);
+            setHora(depositoDataHora.hora);
+            
+            setDataMovimento(movimentoDataHora.data);
+            setHoraMovimento(movimentoDataHora.hora);
+
+            setContaSelecionada({
+                value: deposito.IDCONTABANCO,
+                label: deposito.DSCONTABANCO
+            });
+
+            setHistorico(deposito.DSHISTORIO);
+            setDocumento(deposito.NUDOCDEPOSITO);
+            setVrDeposito(toFloat(deposito.VRDEPOSITO));
+        }
+    }, [dadosDeposito]);
+
+    const onSubmit = async () => {
         if (optionsModulos[0]?.CRIAR == 'False') {
             Swal.fire({
                 position: 'center',
-                icon: 'error',
-                title: 'Erro!',
-                text: 'Você não tem permissão para criar ajuste de extrato!',
+                icon: 'warning',
+                title: 'Acesso Negado!',
+                html: `${usuarioLogado?.NOFUNCIONARIO} <br/> Você não tem permissão para Editar Depósito!.`,
                 customClass: {
                     container: 'custom-swal',
                 },
                 showConfirmButton: false,
-                timer: 4000
+                timer: 5000
             });
-            return
+            return;
         }
 
         if(historico == '') {
@@ -125,21 +144,6 @@ export const useUpdateDeposito = ({ handleClose, optionsModulos, usuarioLogado, 
             return
         }
 
-        if(hora == '') {
-            Swal.fire({
-                position: 'center',
-                icon: 'error',
-                title: 'Erro!',
-                text: 'Campo obrigatório Informe a Hora',
-                customClass: {
-                    container: 'custom-swal',
-                },
-                showConfirmButton: false,
-                timer: 4000
-            });
-            return
-        }
-
         if(vrDeposito == '') {
             Swal.fire({
                 position: 'center',
@@ -170,50 +174,31 @@ export const useUpdateDeposito = ({ handleClose, optionsModulos, usuarioLogado, 
             return
         }
 
-        if(horaMovimento == '') {
-            Swal.fire({
-                position: 'center',
-                icon: 'error',
-                title: 'Erro!',
-                text: 'Campo obrigatório Informe a Hora Movimento',
-                customClass: {
-                    container: 'custom-swal',
-                },
-                showConfirmButton: false,
-                timer: 4000
-            });
-            return
-        }
-
         
         const putData = {
             IDDEPOSITOLOJA: parseInt(dadosDeposito[0]?.IDDEPOSITOLOJA),
             IDEMPRESA: parseInt(empresa),
             IDUSR: parseInt(usuarioLogado.id),
             IDCONTABANCO: parseInt(contaSelecionada.value),
-            DTDEPOSITO: data + ' ' + hora,
-            DTMOVIMENTOCAIXA: dataMovimento + ' ' + horaMovimento,
+            DTDEPOSITO: `${data} ${hora}:00`,
+            DTMOVIMENTOCAIXA: `${dataMovimento} ${horaMovimento}:00`,
             DSHISTORIO: historico,
             NUDOCDEPOSITO: documento,
-            VRDEPOSITO: parseFloat(vrDeposito),
+            VRDEPOSITO: removerFormatacaoMoeda(vrDeposito),
             STATIVO: 'True',
             STCANCELADO: 'False',
         }
+        
         try {
 
             const response = await put('/deposito-loja/:id', putData)
-            const textDados = JSON.stringify(putData)
-            const textoFuncao = 'FINANCEIRO/EDIÇÃO DEPOSITO PELO EXTRATO DE CONTAS';
-            const ipUsuario = await getIPUsuario();
 
-            const postLogData = {
-                IDFUNCIONARIO: String(usuarioLogado.id),
-                PATHFUNCAO: textoFuncao,
-                DADOS: textDados,
-                IP: ipUsuario || 'Indisponível'
-            }
+            await registrarLogAuditoria({
+                idFuncionario: usuarioLogado?.id,
+                pathFuncao: 'FINANCEIRO/EDIÇÃO DEPOSITO PELO EXTRATO DE CONTAS',
+                dados: putData
+            })
 
-            await post('/log-web', postLogData)
 
             Swal.fire({
                 position: 'center',
@@ -225,21 +210,19 @@ export const useUpdateDeposito = ({ handleClose, optionsModulos, usuarioLogado, 
                     container: 'custom-swal',
                 }
             })
+            handleClick()
             handleClose()
-            return response.data
+            return response.data;
         } catch (error) {
-            const textDados = JSON.stringify(putData)
-            const ipUsuario = await getIPUsuario();
-            const postLogData = {
-                IDFUNCIONARIO: String(usuarioLogado.id),
-                PATHFUNCAO: `FINANCEIRO/ERRO AO ATUALIZAR DEPOSITO`,
-                DADOS: textDados,
-                IP: ipUsuario || 'Indisponível'
-            }
 
-            const responsePost = await post('/log-web', postLogData)
+            await registrarLogAuditoria({
+                idFuncionario: usuarioLogado?.id,
+                pathFuncao: `FINANCEIRO/ERRO AO ATUALIZAR DEPOSITO`,
+                dados: putData
+            })
+
+            
             handleClose()
-
             Swal.fire({
                 position: 'center',
                 icon: 'error',
@@ -252,10 +235,8 @@ export const useUpdateDeposito = ({ handleClose, optionsModulos, usuarioLogado, 
                 timer: 4000
             });
 
-            return responsePost.data
-
+            return;
         }
-
     }
 
     return {
@@ -278,6 +259,6 @@ export const useUpdateDeposito = ({ handleClose, optionsModulos, usuarioLogado, 
         data,
         setData,
         dadosContaBanco,
-        submit,
+        onSubmit,
     }
 }

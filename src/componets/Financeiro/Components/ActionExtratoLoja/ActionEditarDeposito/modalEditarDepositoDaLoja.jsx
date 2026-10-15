@@ -8,7 +8,8 @@ export const ModalEditarDepositoDaLoja = ({
   handleClose,
   optionsModulos,
   usuarioLogado,
-  dadosDeposito
+  dadosDeposito,
+  handleClick
 }) => {
   return (
 
@@ -38,6 +39,7 @@ export const ModalEditarDepositoDaLoja = ({
             optionsModulos={optionsModulos}
             usuarioLogado={usuarioLogado}
             dadosDeposito={dadosDeposito}
+            handleClick={handleClick}
           />
         </Modal.Body>
 

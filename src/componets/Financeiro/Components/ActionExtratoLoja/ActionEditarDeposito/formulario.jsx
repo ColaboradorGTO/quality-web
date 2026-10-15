@@ -2,15 +2,18 @@ import { Fragment } from "react"
 import { FooterModal } from "../../../../Modais/FooterModal/footerModal";
 import { ButtonTypeModal } from "../../../../Buttons/ButtonTypeModal";
 import { InputFieldModal } from "../../../../Buttons/InputFieldModal";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import Select from 'react-select';
-
-import { useEffect } from "react"
 import { useUpdateDeposito } from "../hooks/useUpdateDeposito";
-import { mascaraValor } from "../../../../../utils/mascaraValor";
+import { formatarMoeda } from "../../../../../utils/formatMoeda";
+import { schema } from "./schema/useDepositoSchema"
+import FormField from "../../../../Formularios/FormField";
 
-export const FormularioEditarDeposito = ({ handleClose, optionsModulos, usuarioLogado, dadosDeposito }) => {
-    const { register, handleSubmit, formState: { errors } } = useForm();
+export const FormularioEditarDeposito = ({ handleClose, optionsModulos, usuarioLogado, dadosDeposito, handleClick }) => {
+    const { register, handleSubmit, formState: { errors }, clearErrors, setError, control } = useForm({
+        mode: "onChange"
+    });
+
     const {
         dataMovimento,
         hora,
@@ -31,21 +34,41 @@ export const FormularioEditarDeposito = ({ handleClose, optionsModulos, usuarioL
         setData,
         horaMovimento,
         dadosContaBanco,
-        submit,
-    } = useUpdateDeposito({ handleClose, optionsModulos, usuarioLogado, dadosDeposito });
+        onSubmit,
+    } = useUpdateDeposito({ handleClose, optionsModulos, usuarioLogado, dadosDeposito, handleClick });
 
+    const handleValidatedSubmit = async () => {
+        try {
+            const dadosParaValidar = {
+                valorDeposito: vrDeposito,
+            }
 
-    useEffect(() => {
-        if (!hora) {
-            const now = new Date();
-            const formatted = now.toISOString().slice(0, 16);
-            setHora(formatted);
+            await schema.validate(dadosParaValidar, { abortEarly: false });
+
+            await onSubmit();
+        } catch (validationError) {
+            clearErrors();
+
+            if (validationError.inner && validationError.inner.length > 0) {
+                validationError.inner.forEach(error => {
+                    if (error.path) {
+                        setError(error.path, {
+                            type: 'manual',
+                            message: error.message
+                        });
+                    }
+                });
+            }
+
+            const errorMessages = validationError.errors || [validationError.message];
+            console.log(`Erro de validação:\n${errorMessages.join('\n')}`);
         }
-    }, [hora, setHora]);
+    }
+
 
     return (
         <Fragment>
-            <form onSubmit={handleSubmit(submit)}>
+            <form onSubmit={handleSubmit(handleValidatedSubmit)}>
                 <div className="form-group">
                     <div className="row">
                         <div className="col-sm-6 col-xl-10">
@@ -106,26 +129,39 @@ export const FormularioEditarDeposito = ({ handleClose, optionsModulos, usuarioL
                 <div className="form-group">
                     <div className="row">
                         <div className="col-sm-6 col-xl-8">
-
-                            <InputFieldModal
-                                label={"Histórico"}
-                                type="text"
-                                id="historico"
-                                value={historico}
-                                onChangeModal={(e) => setHistorico(e.target.value)}
-                                {...register("historico", { required: "Campo obrigatório Informe o Histórico", })}
+                            <Controller
+                                name="depHistorico"
+                                control={control}
+                                render={({ field }) => (
+                                    <FormField
+                                        label={"Histórico"}
+                                        name="depHistorico"
+                                        type="text"
+                                        value={historico}
+                                        onChange={(e) => setHistorico(e.target.value)}
+                                        errors={errors}
+                                        clearErrors={clearErrors}
+                                        
+                                    />
+                                )}
                             />
                         </div>
                         <div className="col-sm-6 col-xl-4">
-
-                            <InputFieldModal
-                                label={"Nº Doc Depósito"}
-                                type="text"
-                                id="docDeposito"
-                                readOnly={false}
-                                value={documento}
-                                onChangeModal={(e) => setDocumento(e.target.value)}
-                                {...register("docDeposito", { required: "Campo obrigatório Informe o Nº Doc Depósito", })}
+                            <Controller
+                                name="docDeposito"
+                                control={control}
+                                render={({ field }) => (
+                                    <FormField
+                                        label={"Nº Doc Depósito"}
+                                        name="docDeposito"
+                                        type="text"
+                                        value={documento}
+                                        onChange={(e) => setDocumento(e.target.value)}
+                                        errors={errors}
+                                        clearErrors={clearErrors}
+                                        
+                                    />
+                                )}
                             />
                         </div>
                     </div>
@@ -133,19 +169,21 @@ export const FormularioEditarDeposito = ({ handleClose, optionsModulos, usuarioL
                 <div className="form-group">
                     <div className="row">
                         <div className="col-sm-6 col-xl-4">
-
-                            <InputFieldModal
-                                label={"Valor Depósito"}
-                                type="text"
-                                id="vrDeposito"
-                                value={mascaraValor(vrDeposito)}
-                                onChangeModal={(e) => {
-                                    const valor = e.target.value.replace(",", ".");
-                                    setVrDeposito(valor);
-                                }}
-                       
-                                {...register("vrDeposito", { required: "Campo obrigatório Informe o Valor do Depósito" })}
-                                readOnly={false}
+                            <Controller
+                                name="valorDeposito"
+                                control={control}
+                                render={({ field }) => (
+                                    <FormField
+                                        label={"Valor Depósito"}
+                                        name="valorDeposito"
+                                        type="text"
+                                        value={vrDeposito}
+                                        onChange={(e) => setVrDeposito(formatarMoeda(e.target.value))}
+                                        errors={errors}
+                                        clearErrors={clearErrors}
+                                     
+                                    />
+                                )}
                             />
                         </div>
                         <div className="col-sm-6 col-xl-4">
@@ -179,9 +217,11 @@ export const FormularioEditarDeposito = ({ handleClose, optionsModulos, usuarioL
 
                 <FooterModal
                     ButtonTypeCadastrar={ButtonTypeModal}
-                    onClickButtonCadastrar={submit}
+                    onClickButtonCadastrar={handleValidatedSubmit}
                     textButtonCadastrar={"Editar Depósito"}
                     corCadastrar={"success"}
+                    loadingTextCadastrar={"Atualizando..."}
+                    autoLoadingCadastrar={true}
 
                     ButtonTypeFechar={ButtonTypeModal}
                     onClickButtonFechar={handleClose}

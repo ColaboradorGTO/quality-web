@@ -4,7 +4,14 @@ import { HeaderModal } from "../../../../Modais/HeaderModal/HeaderModal";
 import { Formulario } from "./formulario";
 
 
-export const ModalAjusteExtratoModal = ({ show, handleClose, optionsModulos, usuarioLogado, empresaSelecionada }) => {
+export const ModalAjusteExtratoModal = ({ 
+  show, 
+  handleClose, 
+  optionsModulos, 
+  usuarioLogado, 
+  empresaSelecionada,
+  handleClick 
+}) => {
 
   return (
 
@@ -28,7 +35,13 @@ export const ModalAjusteExtratoModal = ({ show, handleClose, optionsModulos, usu
       
           <Modal.Body>
             
-            <Formulario handleClose={handleClose} optionsModulos={optionsModulos} usuarioLogado={usuarioLogado} empresaSelecionada={empresaSelecionada} />
+            <Formulario 
+              handleClose={handleClose} 
+              optionsModulos={optionsModulos} 
+              usuarioLogado={usuarioLogado} 
+              empresaSelecionada={empresaSelecionada} 
+              handleClick={handleClick}  
+            />
 
           </Modal.Body>
 
