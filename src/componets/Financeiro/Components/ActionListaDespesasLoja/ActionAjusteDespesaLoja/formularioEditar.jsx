@@ -10,11 +10,13 @@ import { schema } from "./useSchemaDespesa"
 import { AlertError } from "../../../../Inputs/alertError"
 import { formatarMoeda } from "../../../../../utils/formatMoeda"
 
-export const FormularioEditar = ({dadosDespesasLojaDetalhe, handleClose, usuarioLogado, optionsModulos}) => {
+export const FormularioEditar = ({dadosDespesasLojaDetalhe, handleClose, usuarioLogado, optionsModulos, handleClick}) => {
     const { register, handleSubmit, formState: { errors }, clearErrors, setError, control } = useForm({
         mode: "onChange"
     });
     const {
+        empresa,
+        setEmpresa,
         despesaSelecionada,
         dsHistorio,
         dsPagoA,
@@ -23,6 +25,9 @@ export const FormularioEditar = ({dadosDespesasLojaDetalhe, handleClose, usuario
         nuNotaFiscal,
         isSubmitting,
         horarioAtual,
+        setHorarioAtual,
+        dataDespesa,
+        setDataDespesa,
         onSubmit,
         setVrDespesa,
         setDespesaSelecionada,
@@ -31,7 +36,7 @@ export const FormularioEditar = ({dadosDespesasLojaDetalhe, handleClose, usuario
         setTpNota,
         Options,
         dadosReceitaDespesa
-    } = useAjusteDespesa({dadosDespesasLojaDetalhe, usuarioLogado, handleClose, optionsModulos});
+    } = useAjusteDespesa({dadosDespesasLojaDetalhe, usuarioLogado, handleClose, optionsModulos, handleClick});
 
     const handleValidatedSubmit = async () => {
         try {
@@ -79,7 +84,8 @@ export const FormularioEditar = ({dadosDespesasLojaDetalhe, handleClose, usuario
                                 className="form-control input"
                                 readOnly={true}
                                 label="Empresa"
-                                value={usuarioLogado?.NOFANTASIA}
+                                value={empresa}
+                                onChangeModal={(e) => setEmpresa(e.target.value)}
                             />
 
                         </div>
@@ -95,11 +101,12 @@ export const FormularioEditar = ({dadosDespesasLojaDetalhe, handleClose, usuario
                                 <FormField
                                     label={"Data Despesa"}
                                     name="date"
-                                    type="datetime"
-                                    value={usuarioLogado?.DATA_HORA_SESSAO}
+                                    type="date"
+                                    value={dataDespesa}
+                                    onChange={(e) => setDataDespesa(e.target.value)}
                                     errors={errors}
                                     clearErrors={clearErrors}
-                                    readOnly={true}
+                                    // readOnly={true}
                                 />
                                 )}
                             />
@@ -114,11 +121,12 @@ export const FormularioEditar = ({dadosDespesasLojaDetalhe, handleClose, usuario
                                     <FormField
                                         label={"Hora Despesa"}
                                         name="time"
-                                        type="datetime"
+                                        type="time"
                                         value={horarioAtual}
+                                        onChange={(e) => setHorarioAtual(e.target.value)}
                                         errors={errors}
                                         clearErrors={clearErrors}
-                                        readOnly={true}
+                                        // readOnly={true}
                                     />
                                 )}
                             />
@@ -254,6 +262,7 @@ export const FormularioEditar = ({dadosDespesasLojaDetalhe, handleClose, usuario
                     textButtonCadastrar={"Editar Despesa"}
                     corCadastrar={"success"}
                     disabled={isSubmitting}
+                    loadingTextCadastrar={"Atualizando..."}
                 />
             </form>
 
