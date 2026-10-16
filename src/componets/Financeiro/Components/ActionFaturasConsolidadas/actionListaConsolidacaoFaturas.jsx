@@ -21,8 +21,8 @@ export const ActionListaConsolidacaoFaturas = ({
   optionsModulos,
   usuarioLogado,
   handleClickConciliar,
-  selectedItems,
-  setSelectedItems
+  selectedItemsConciliar,
+  setSelectedItemsConciliar
 }) => {
   const [globalFilterValue, setGlobalFilterValue] = useState('');
   const [rowSelection, setRowSelection] = useState(null);
@@ -32,8 +32,9 @@ export const ActionListaConsolidacaoFaturas = ({
   const dataTableRef = useRef();
 
   const {
-    confirmar
-  } = useConfirmarConsolidacaoFatura({ optionsModulos, usuarioLogado, handleClickConciliar });
+    confirmar,
+    consolidacoes
+  } = useConfirmarConsolidacaoFatura({ optionsModulos, usuarioLogado, handleClickConciliar, selectedItemsConciliar, setSelectedItemsConciliar });
 
   const {
     cancelar
@@ -126,27 +127,27 @@ export const ActionListaConsolidacaoFaturas = ({
     const dadosPaginaAtual = dados.slice(first, first + rows);
     const itensSelecionaveisPaginaAtual = dadosPaginaAtual.filter(podeSelecionar);
 
-    if (selectedItems.length === 0) {
+    if (selectedItemsConciliar.length === 0) {
       setSelectAllChecked(false);
     } else if (
-      selectedItems.length === itensSelecionaveis.length ||
-      (selectedItems.length === itensSelecionaveisPaginaAtual.length &&
+      selectedItemsConciliar.length === itensSelecionaveis.length ||
+      (selectedItemsConciliar.length === itensSelecionaveisPaginaAtual.length &&
         itensSelecionaveisPaginaAtual.length > 0 &&
         itensSelecionaveisPaginaAtual.every(item =>
-          selectedItems.some(selected => selected.IDCONSOLIDACAOFATURA === item.IDCONSOLIDACAOFATURA)
+          selectedItemsConciliar.some(selected => selected.IDCONSOLIDACAOFATURA === item.IDCONSOLIDACAOFATURA)
         ))
     ) {
       setSelectAllChecked(true);
     } else {
       setSelectAllChecked(false);
     }
-  }, [selectedItems, dados, first, rows]);
+  }, [selectedItemsConciliar, dados, first, rows]);
 
 
   const onSelectAllChange = (e) => {
     const checked = e?.checked ?? e?.target?.checked ?? false;
     if (!checked) {
-      setSelectedItems([]);
+      setSelectedItemsConciliar([]);
       return;
     }
 
@@ -170,7 +171,7 @@ export const ActionListaConsolidacaoFaturas = ({
       rows >= dados.length;
 
     if (todosRegistrosNaTela) {
-      setSelectedItems([...itensSelecionaveis]);
+      setSelectedItemsConciliar([...itensSelecionaveis]);
       return;
     }
 
@@ -218,9 +219,9 @@ export const ActionListaConsolidacaoFaturas = ({
           return;
         }
 
-        setSelectedItems([...itensSelecionaveisPaginaAtual]);
+        setSelectedItemsConciliar([...itensSelecionaveisPaginaAtual]);
       } else {
-        setSelectedItems([]);
+        setSelectedItemsConciliar([]);
       }
     });
   };
@@ -248,15 +249,15 @@ export const ActionListaConsolidacaoFaturas = ({
         if (!stMigrado && !stEmAndamento && !stCancelado) {
           return (
             <Checkbox
-              checked={selectedItems.some(item => item.IDCONSOLIDACAOFATURA === rowData.IDCONSOLIDACAOFATURA)}
+              checked={selectedItemsConciliar.some(item => item.IDCONSOLIDACAOFATURA === rowData.IDCONSOLIDACAOFATURA)}
               onChange={(e) => {
-                let _selectedItems = [...selectedItems];
+                let _selectedItemsConciliar = [...selectedItemsConciliar];
                 if (e.checked) {
-                  _selectedItems.push(rowData);
+                  _selectedItemsConciliar.push(rowData);
                 } else {
-                  _selectedItems = _selectedItems.filter(item => item.IDCONSOLIDACAOFATURA !== rowData.IDCONSOLIDACAOFATURA);
+                  _selectedItemsConciliar = _selectedItemsConciliar.filter(item => item.IDCONSOLIDACAOFATURA !== rowData.IDCONSOLIDACAOFATURA);
                 }
-                setSelectedItems(_selectedItems);
+                setSelectedItemsConciliar(_selectedItemsConciliar);
               }}
             />
           );
@@ -394,7 +395,7 @@ export const ActionListaConsolidacaoFaturas = ({
               textButton={"Integrar"}
               cor="info"
               Icon={BsCloudUpload}
-              onClickButton={() => confirmar(rowData)}
+              onClickButton={() => consolidacoes(rowData)}
               width="50px"
               height="40px"
             />
@@ -456,7 +457,7 @@ export const ActionListaConsolidacaoFaturas = ({
       <div className="panel">
 
         <div className="panel-hdr">
-          <h2>Lista de Consolidação de Faturas </h2>
+          <h2>Lista de Consolidação de Faturas</h2>
         </div>
         <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
 

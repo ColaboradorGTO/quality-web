@@ -196,11 +196,11 @@ export const ActionPesquisaConciliarBanco = ({ usuarioLogado }) => {
     setTabelaVisivel(false)
     refetchBancoConsolidado()
   }
-  //console.log(btnVisivel, 'btnVisivel');
+
 
   const {
     handleSubmit,
-  } = useIntegrarTodasConciliacoesDepositosNoSAP({ optionsModulos, usuarioLogado, handleClick, selectedItems });
+  } = useIntegrarTodasConciliacoesDepositosNoSAP({ optionsModulos, usuarioLogado, handleClick, selectedItems, setSelectedItems });
 
 
   return (

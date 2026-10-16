@@ -1,4 +1,4 @@
-import { Fragment, useRef, useState } from "react"
+import { Fragment, useEffect, useRef, useState } from "react"
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { formatMoeda } from "../../../../utils/formatMoeda";
@@ -31,6 +31,7 @@ export const ActionListaFaturasConsolidadas = ({
   const [rows, setRows] = useState(10);
   const [selectAllChecked, setSelectAllChecked] = useState(false);
   const [btnVisivel, setBtnVisivel] = useState(false);
+  const [onGlobalFilterChange , setOnGlobalFilterChange ] = useState(false);
   const dataTableRef = useRef();
 
   const {
@@ -38,10 +39,12 @@ export const ActionListaFaturasConsolidadas = ({
   } = useConfirmarConsolidacaoFatura({
     optionsModulos,
     usuarioLogado,
-    handleClickConciliar: handleClickConciliar || handleClick,
-    handleClick
+    handleClickConciliar,
+    handleClick,
+    setSelectedItems
   });
 
+  
   const dados = (dadosDetalheFatura || []).map((item, index) => {
     let contador = index + 1;
 

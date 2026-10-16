@@ -26,6 +26,7 @@ export const ActionPesquisaFaturasConsolidadas = ({ usuarioLogado }) => {
   const [empresaSelecionadaNome, setEmpresaSelecionadaNome] = useState('')
   const [codigoFatura, setCodigoFatura] = useState('')
   const [selectedItems, setSelectedItems] = useState([]);
+  const [selectedItemsConciliar, setSelectedItemsConciliar] = useState([]);
   const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
 
   useEffect(() => {
@@ -178,8 +179,9 @@ export const ActionPesquisaFaturasConsolidadas = ({ usuarioLogado }) => {
   }
 
   const {
-    conferirTodas
-  } = useConsolidarTodasFaturas({ optionsModulos, usuarioLogado, handleClickConciliar, handleClick, selectedItems });
+    conferirTodas,
+    conferirTodasConsolidadas
+  } = useConsolidarTodasFaturas({ optionsModulos, usuarioLogado, handleClickConciliar, handleClick, selectedItems, setSelectedItems, selectedItemsConciliar, setSelectedItemsConciliar });
 
   const conferirTodasSelecionadas = () => {
 
@@ -210,6 +212,39 @@ export const ActionPesquisaFaturasConsolidadas = ({ usuarioLogado }) => {
       return;
     } else {
       conferirTodas();
+    }
+
+  }
+
+    const conferirTodasSelecionadasConsolidacoes = () => {
+
+    if (selectedItemsConciliar.length === 0) {
+      Swal.fire({
+        position: 'center',
+        icon: 'warning',
+        title: 'Nenhuma fatura selecionada, selecione e tente novamente!',
+        text: 'Nenhuma fatura selecionada, selecione e tente novamente!',
+        showConfirmButton: true,
+        timer: 6000,
+        customClass: {
+          container: 'custom-swal',
+        },
+      });
+      return;
+    } else if (optionsModulos[0]?.ALTERAR == 'False') {
+      Swal.fire({
+        position: 'center',
+        icon: 'error',
+        html: `${usuarioLogado?.NOFUNCIONARIO} <br/> você não tem permissão para conferir a fatura.`,
+        showConfirmButton: true,
+        timer: 3000,
+        customClass: {
+          container: 'custom-swal',
+        },
+      });
+      return;
+    } else {
+      conferirTodasConsolidadas();
     }
 
   }
@@ -253,13 +288,13 @@ export const ActionPesquisaFaturasConsolidadas = ({ usuarioLogado }) => {
           onChangeInputField={(e) => setCodigoFatura(e.target.value)}
 
           ButtonSearchComponent={ButtonType}
-          linkNomeSearch={"Pesquisar"}
+          linkNomeSearch={"Prévias Consolidações"}
           onButtonClickSearch={handleClick}
           IconSearch={AiOutlineSearch}
           corSearch={"primary"}
 
           ButtonTypeCadastro={ButtonType}
-          linkNome={"Conciliar"}
+          linkNome={"Consolidações"}
           onButtonClickCadastro={handleClickConciliar}
           corCadastro={"info"}
           IconCadastro={AiOutlineSearch}
@@ -270,6 +305,13 @@ export const ActionPesquisaFaturasConsolidadas = ({ usuarioLogado }) => {
           corCancelar={"warning"}
           IconCancelar={MdOutlineCloudUpload}
           styleCancelar={{ display: selectedItems.length > 0 ? 'block' : 'none' }}
+
+          ButtonTypeSalvar={ButtonType}
+          linkSalvar={"Integrar Todos"}
+          onButtonClickSalvar={conferirTodasSelecionadasConsolidacoes}
+          corSalvar={"success"}
+          IconSalvar={MdOutlineCloudUpload}
+          styleSalvar={{ display: selectedItemsConciliar.length > 0 ? 'block' : 'none' }}
         />
       )}
 
@@ -291,8 +333,8 @@ export const ActionPesquisaFaturasConsolidadas = ({ usuarioLogado }) => {
           optionsModulos={optionsModulos}
           usuarioLogado={usuarioLogado}
           handleClickConciliar={handleClickConciliar}
-          selectedItems={selectedItems}
-          setSelectedItems={setSelectedItems}
+          selectedItemsConciliar={selectedItemsConciliar}
+          setSelectedItemsConciliar={setSelectedItemsConciliar}
         />
       )}
 
