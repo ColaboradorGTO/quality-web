@@ -7,7 +7,8 @@ export const useIntegrarTodasConciliacoesDepositosNoSAP = ({
     optionsModulos,
     usuarioLogado,
     handleClick,
-    selectedItems
+    selectedItems,
+    setSelectedItems
 }) => {
     const [ipUsuario, setIpUsuario] = useState('');
 
@@ -101,8 +102,8 @@ export const useIntegrarTodasConciliacoesDepositosNoSAP = ({
 
                     await post('/log-web', postData)
 
-                    Swal.fire({
-                        title: 'Cancelado',
+                    await Swal.fire({
+                        title: 'Sucesso!',
                         text: 'Conciliação de Depósitos Integrada no SAP com Sucesso!',
                         icon: 'success',
                         customClass: {
@@ -111,7 +112,9 @@ export const useIntegrarTodasConciliacoesDepositosNoSAP = ({
                         showConfirmButton: false,
                         timer: 4000
                     })
+                    
                     handleClick()
+                    setSelectedItems([]);
 
                     return response.data;
                 } catch (error) {
@@ -143,6 +146,7 @@ export const useIntegrarTodasConciliacoesDepositosNoSAP = ({
                         timer: 4000
                     });
                     handleClick()
+                    setSelectedItems([]);
                     return responsePost.data;
                 }
             }

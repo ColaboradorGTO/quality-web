@@ -274,11 +274,6 @@ export const ActionListaConciliarPorBanco = ({
         }
 
 
-        console.log(podeMarcar, 'itensSelecionaveisPaginaAtual');
-        /*   if (itensSelecionaveisPaginaAtual.length > 1) {
-             setBtnVisivel(true);
-          }
-   */
         return (
           <div className="custom-control custom-checkbox">
             <Checkbox
