@@ -3,7 +3,6 @@ import Modal from 'react-bootstrap/Modal';
 import { HeaderModal } from "../../../../Modais/HeaderModal/HeaderModal";
 import { FormularioCadastro } from "./formularioCadastro";
 
-
 export const ActionCadastroClienteCPF = ({ show, handleClose, usuarioLogado, optionsModulos, optionsCPF }) => {
 
   return (

@@ -16,8 +16,6 @@ import { mascaraCNPJ } from "../../../../utils/mascaraCNPJ";
 import { mascaraCPF } from "../../../../utils/formatCPF";
 import { toFloat } from "../../../../utils/toFloat";
 
-
-
 export const ActionEditarStatusVoucherModal = ({ show, handleClose, dadosEditarVoucher, usuarioLogado, optionsModulos, refetchListaVouchers }) => {
   const {
     onSubmit,
@@ -34,7 +32,13 @@ export const ActionEditarStatusVoucherModal = ({ show, handleClose, dadosEditarV
     setMotivoTroca,
     statusFoiTrocado,
     setStatusFoiTrocado
-  } = useEditarStatusVoucher({ dadosEditarVoucher, optionsModulos, usuarioLogado, handleClose, refetchListaVouchers })
+  } = useEditarStatusVoucher({
+    dadosEditarVoucher,
+    optionsModulos,
+    usuarioLogado,
+    handleClose,
+    refetchListaVouchers
+  })
 
   let diasEmAposCompra = retornaDiasEntreDatas(dadosEditarVoucher[0]?.voucher.DTHORAFECHAMENTOVENDAORIGEM);
   let stEdicao = true;
@@ -119,13 +123,6 @@ export const ActionEditarStatusVoucherModal = ({ show, handleClose, dadosEditarV
 
         <Modal.Body>
           <div className="mb-3">
-
-            <Message
-              severity="error"
-              text={msgUser}
-            >
-
-            </Message>
           </div>
           <form onSubmit={onSubmit}>
 
@@ -202,10 +199,12 @@ export const ActionEditarStatusVoucherModal = ({ show, handleClose, dadosEditarV
               usuarioLogado={usuarioLogado}
             />
 
-            <ActionListaVendaDestino
-              dadosEditarVoucher={dadosEditarVoucher}
-              usuarioLogado={usuarioLogado}
-            />
+            {dadosEditarVoucher[0]?.detalhedestino?.length > 0 && (
+              <ActionListaVendaDestino
+                dadosEditarVoucher={dadosEditarVoucher}
+                usuarioLogado={usuarioLogado}
+              />
+            )}
           </div>
         </Modal.Body>
         {stEdicao && (
