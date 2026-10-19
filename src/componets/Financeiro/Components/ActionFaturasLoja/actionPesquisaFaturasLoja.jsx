@@ -24,7 +24,8 @@ export const ActionPesquisaFaturasLoja = ({ usuarioLogado, ID }) => {
   const [empresaSelecionadaNome, setEmpresaSelecionadaNome] = useState('')
   const [codigoFatura, setCodigoFatura] = useState('')
   const [selectedItems, setSelectedItems] = useState([]);
-  const [situacao, setSituacao] = useState('Todas');
+  const [situacao, setSituacao] = useState('');
+  const [disabledConciliar, setDisabledConciliar] = useState(false);
   const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
 
   useEffect(() => {
@@ -167,9 +168,8 @@ export const ActionPesquisaFaturasLoja = ({ usuarioLogado, ID }) => {
   }
 
   const {
-    conferirTodas,
-    isSubmitting
-  } = useConferirTodasFaturas({ optionsModulos, usuarioLogado, handleClick, selectedItems });
+    conferirTodas
+  } = useConferirTodasFaturas({ optionsModulos, usuarioLogado, handleClick, selectedItems, disabledConciliar, setDisabledConciliar });
 
   const conferirTodasSelecionadas = () => {
 
@@ -294,8 +294,9 @@ export const ActionPesquisaFaturasLoja = ({ usuarioLogado, ID }) => {
           onButtonClickCancelar={conferirTodasSelecionadas}
           corCancelar={"warning"}
           IconCancelar={IoMdCheckmark}
-          styleCancelar = {{ display: selectedItems.length > 0 ? 'block' : 'none' }}
-          disabledCancelar={isSubmitting}
+          styleCancelar={{ display: selectedItems.length > 0 ? 'block' : 'none' }}
+          disabledCancelar={disabledConciliar}
+
         />
       )}
 

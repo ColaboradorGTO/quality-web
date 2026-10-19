@@ -26,7 +26,7 @@ export const ActionMain = ({
   iconHeader,
   corHeader,
   disabledCadastro,
-
+  disabledCancelar,
 
   readOnlyDescricao,
   readOnlyPendencia,
