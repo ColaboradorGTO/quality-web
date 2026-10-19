@@ -26,7 +26,7 @@ export const ActionMain = ({
   iconHeader,
   corHeader,
   disabledCadastro,
-
+  disabledCancelar,
 
   readOnlyDescricao,
   readOnlyPendencia,
@@ -1916,6 +1916,7 @@ export const ActionMain = ({
                         iconColor="#fff"
                         iconSize={16}
                         style={styleCancelar}
+                        disabledBTN={disabledCancelar}
                       />
                     )}
                     {ButtonTypeVendasEstrutura && (

@@ -28,6 +28,7 @@ export const ActionPesquisaFaturasLoja = ({ usuarioLogado, ID }) => {
   const [isLoadingPesquisa, setIsLoadingPesquisa] = useState(true)
   const [selectedItems, setSelectedItems] = useState([]);
   const [situacao, setSituacao] = useState('');
+  const [disabledConciliar, setDisabledConciliar] = useState(false);
   const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
 
   useEffect(() => {
@@ -172,7 +173,7 @@ export const ActionPesquisaFaturasLoja = ({ usuarioLogado, ID }) => {
 
   const {
     conferirTodas
-  } = useConferirTodasFaturas({ optionsModulos, usuarioLogado, handleClick, selectedItems });
+  } = useConferirTodasFaturas({ optionsModulos, usuarioLogado, handleClick, selectedItems, disabledConciliar, setDisabledConciliar });
 
   const conferirTodasSelecionadas = () => {
 
@@ -298,6 +299,7 @@ export const ActionPesquisaFaturasLoja = ({ usuarioLogado, ID }) => {
           corCancelar={"warning"}
           IconCancelar={IoMdCheckmark}
           styleCancelar={{ display: selectedItems.length > 0 ? 'block' : 'none' }}
+          disabledCancelar={disabledConciliar}
 
         />
       )}
