@@ -10,8 +10,6 @@ import { useQuery } from 'react-query';
 import Swal from 'sweetalert2';
 import { animacaoCarregamento, fecharAnimacaoCarregamento, foiCancelado } from "../../../../utils/animationCarregamento"
 import { InputSelectAction } from "../../../Inputs/InputSelectAction"
-import { useFetchData } from "../../../../hooks/useFetchData"
-import { ActionImportacaoArquivo } from "./actionImportacaoArquivo"
 import { IoMdCheckmark } from "react-icons/io"
 import { useConferirTodasFaturas } from "./hooks/useConfeririTodasFaturas"
 import { ActionImportArquivo } from "./actionImportArquivo"
@@ -25,7 +23,6 @@ export const ActionPesquisaFaturasLoja = ({ usuarioLogado, ID }) => {
   const [empresaSelecionada, setEmpresaSelecionada] = useState('')
   const [empresaSelecionadaNome, setEmpresaSelecionadaNome] = useState('')
   const [codigoFatura, setCodigoFatura] = useState('')
-  const [isLoadingPesquisa, setIsLoadingPesquisa] = useState(true)
   const [selectedItems, setSelectedItems] = useState([]);
   const [situacao, setSituacao] = useState('');
   const [disabledConciliar, setDisabledConciliar] = useState(false);
@@ -161,7 +158,6 @@ export const ActionPesquisaFaturasLoja = ({ usuarioLogado, ID }) => {
 
   const handleClick = () => {
     setTabelaVisivel(true)
-    setIsLoadingPesquisa(true);
     refetchFatura()
   }
   const handleClickConciliar = () => {
@@ -244,7 +240,7 @@ export const ActionPesquisaFaturasLoja = ({ usuarioLogado, ID }) => {
         <ActionMain
           linkComponentAnterior={["Home"]}
           linkComponent={["Lista de Faturas"]}
-          title="Faturas por Lojas e Período"
+          title="Faturas por Lojas e Período aqui"
           subTitle={empresaSelecionadaNome}
 
           InputFieldDTInicioComponent={InputField}
@@ -269,11 +265,11 @@ export const ActionPesquisaFaturasLoja = ({ usuarioLogado, ID }) => {
           valueSelectEmpresa={empresaSelecionada}
           onChangeSelectEmpresa={handleChangeEmpresa}
 
-          InputSelectComissoesComponent={InputSelectAction}
-          labelSelectComissoes={"Situação"}
-          optionsComissoes={OptionSituacao}
-          valueSelectComissoes={OptionSituacao.find(opt => opt.value === situacao) || OptionSituacao[0]}
-          onChangeSelectComissoes={handleChangeSituacao}
+          // InputSelectComissoesComponent={InputSelectAction}
+          // labelSelectComissoes={"Situação"}
+          // optionsComissoes={OptionSituacao}
+          // valueSelectComissoes={OptionSituacao.find(opt => opt.value === situacao) || OptionSituacao[0]}
+          // onChangeSelectComissoes={handleChangeSituacao}
 
           InputFieldComponent={InputField}
           labelInputField={"Código Fatura"}
@@ -313,9 +309,7 @@ export const ActionPesquisaFaturasLoja = ({ usuarioLogado, ID }) => {
           selectedItems={selectedItems}
           setSelectedItems={setSelectedItems}
           situacao={situacao}
-
         />
-
       )}
 
       {actionArquivo && (

@@ -17,7 +17,7 @@ import { optionsParcelas } from "../../../../../parceiro.json"
 export const ActionPesquisaRecebimentosLoja = () => {
   const [dataPesquisaInicio, setDataPesquisaInicio] = useState('')
   const [dataPesquisaFim, setDataPesquisaFim] = useState('')
-  const [empresaSelecionada, setEmpresaSelecionada] = useState('')
+  const [empresaSelecionada, setEmpresaSelecionada] = useState('0')
   const [marcaSelecionada, setMarcaSelecionada] = useState('')
   const [colaboradorSelecionado, setColaboradorSelecionado] = useState('')
   const [parcelaSelecionada, setParcelaSelecionada] = useState([])

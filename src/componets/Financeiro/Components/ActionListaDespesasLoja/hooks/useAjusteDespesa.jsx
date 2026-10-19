@@ -65,7 +65,6 @@ export const useAjusteDespesa = ({ dadosDespesasLojaDetalhe, usuarioLogado, hand
     }
 
     const postData = {
-      IDDESPESASLOJA: parseInt(dadosDespesasLojaDetalhe[0]?.IDDESPESASLOJA),
       IDCATEGORIARECEITADESPESA: parseInt(despesaSelecionada?.value),
       VRDESPESA: removerFormatacaoMoeda(vrDespesa),
       DSPAGOA: dsPagoA,
@@ -75,6 +74,7 @@ export const useAjusteDespesa = ({ dadosDespesasLojaDetalhe, usuarioLogado, hand
       IDUSRCACELAMENTO: parseInt(usuarioLogado.id),
       DSMOTIVOCANCELAMENTO: 'Despesa Editada',
       DTDESPESA: dataDespesa + ' ' + horarioAtual,
+      IDDESPESASLOJA: parseInt(dadosDespesasLojaDetalhe[0]?.IDDESPESASLOJA),
     }
 
     try {

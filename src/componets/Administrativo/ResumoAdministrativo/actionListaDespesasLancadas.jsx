@@ -1,5 +1,4 @@
 import { Fragment, useRef, useState } from "react"
-import { dataFormatada } from "../../../utils/dataFormatada";
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { ColumnGroup } from "primereact/columngroup";
@@ -10,6 +9,7 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import HeaderTable from "../../Tables/headerTable";
+import { toFloat } from "../../../utils/toFloat";
 
 export const ActionListaDespesasLancada = ({ dadosDetalheDespesas }) => {
   const [globalFilterValue, setGlobalFilterValue] = useState('');
@@ -28,7 +28,7 @@ export const ActionListaDespesasLancada = ({ dadosDetalheDespesas }) => {
     const doc = new jsPDF();
     doc.autoTable({
       head: [['Nº', 'Data Mov.', 'Descrição', 'Valor', 'Pago a', 'Historíco', 'Nota Fiscal', 'Situação']],
-      body: dadosDespesasDetalhe.map(item => [
+      body: dadosDespesasDetalhe?.map(item => [
         item.contador,
         item.DTDESPESA,
         item.DSCATEGORIA,
@@ -45,7 +45,7 @@ export const ActionListaDespesasLancada = ({ dadosDetalheDespesas }) => {
   };
 
   const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(dadosDespesasDetalhe.map(item => ({
+    const worksheet = XLSX.utils.json_to_sheet(dadosDespesasDetalhe?.map(item => ({
       'Nº': item.contador,
       'Data Mov.': item.DTDESPESA,
       'Descrição': item.DSCATEGORIA,
@@ -72,11 +72,11 @@ export const ActionListaDespesasLancada = ({ dadosDetalheDespesas }) => {
     XLSX.writeFile(workbook, 'despesas_lancadas.xlsx');
   };
 
-  const dadosDespesasDetalhe = dadosDetalheDespesas.map((item, index) => {
+  const dadosDespesasDetalhe = dadosDetalheDespesas?.map((item, index) => {
     let contador = index + 1;
     let vrTotalFaturaLoja = 0;
     vrTotalFaturaLoja + item.TOTALVENDAPROD;
-
+    
     return {
       contador,
       DTDESPESA: item?.DTDESPESA,
@@ -88,7 +88,7 @@ export const ActionListaDespesasLancada = ({ dadosDetalheDespesas }) => {
       DSPAGOA: item?.DSPAGOA,
       DSHISTORIO: item?.DSHISTORIO,
       NUNOTAFISCA: item?.NUNOTAFISCA,
-
+      DSCATEGORIA: item.DSCATEGORIA,
       STATIVO: item?.STATIVO,
       STCANCELADO: item?.STCANCELADO == 'False' ? 'Ativo' : 'Cancelado',
       vrTotalFaturaLoja
@@ -106,7 +106,7 @@ export const ActionListaDespesasLancada = ({ dadosDetalheDespesas }) => {
     {
       field: 'IDDESPESASLOJA',
       header: 'Data Mov.',
-      body: row => <th> {dataFormatada(row.DTDESPESA)}</th>,
+      body: row => <th> {row.DTDESPESA}</th>,
       sortable: true,
     },
     {
@@ -152,13 +152,15 @@ export const ActionListaDespesasLancada = ({ dadosDetalheDespesas }) => {
     },
 
   ]
+  const calcularTotal = (field) => {
+    return dadosDespesasDetalhe?.reduce((total, item) => total + toFloat(item[field]), 0);
+  };
+
   const calcularValor = () => {
-    let total = 0;
-    for (let dados of dadosDespesasDetalhe) {
-      total += parseFloat(dados.VRDESPESA);
-    }
+    const total = calcularTotal('VRDESPESA');
     return total;
   }
+
 
   const footerGroup = (
     <ColumnGroup>
@@ -200,12 +202,13 @@ export const ActionListaDespesasLancada = ({ dadosDetalheDespesas }) => {
             sortOrder={-1}
             paginator={true}
             rows={10}
-            rowsPerPageOptions={[10, 20, 50, 100, dadosDespesasDetalhe.length]}
+            rowsPerPageOptions={[10, 20, 50, 100, dadosDespesasDetalhe?.length]}
             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
             filterDisplay="menu"
             showGridlines
             stripedRows
+            cellMemo={false}
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
           >
             {colunaDetalheDespesas.map(coluna => (

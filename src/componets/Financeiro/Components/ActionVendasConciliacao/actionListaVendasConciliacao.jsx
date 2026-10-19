@@ -10,6 +10,7 @@ import HeaderTable from "../../../Tables/headerTable";
 import { ButtonType } from "../../../Buttons/ButtonType";
 import { BiSolidFileTxt } from "react-icons/bi";
 import { CSVLink } from "react-csv";
+import { toFloat } from "../../../../utils/toFloat";
 
 export const ActionListaVendasConciliacao = ({ dadosVendasConciliacao }) => {
   const [globalFilterValue, setGlobalFilterValue] = useState('');
@@ -76,9 +77,9 @@ export const ActionListaVendasConciliacao = ({ dadosVendasConciliacao }) => {
         item.NOFANTASIA,
         item.IDVENDA,
         item.DATA,
-        formatMoeda(item.VRTOTALPAGO),
-        formatMoeda(item.VRTOTALDESCONTO),
-        formatMoeda(item.VRPAGO),
+        toFloat(item.VRTOTALPAGO),
+        toFloat(item.VRTOTALDESCONTO),
+        toFloat(item.VRPAGO),
         item.DSTIPOPAGAMENTO,
         item.NSU,
         item.NUAUTORIZACAO,
@@ -91,7 +92,20 @@ export const ActionListaVendasConciliacao = ({ dadosVendasConciliacao }) => {
   };
 
   const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(dados);
+    const worksheet = XLSX.utils.json_to_sheet(dados.map(item => ({
+      "Nº": item.contador,
+      "ID EMPRESA": item.IDEMPRESA,
+      "EMPRESA": item.NOFANTASIA, 
+      "ID VENDA": item.IDVENDA, 
+      "DT VENDA": item.DATA, 
+      "VR TOTAL": toFloat(item.VRTOTALPAGO),
+      "DESCONTO": toFloat(item.VRTOTALDESCONTO),
+      "VR PAGO": toFloat(item.VRPAGO),
+      "TP PAGAMENTO": item.DSTIPOPAGAMENTO,
+      "NSU": item.NSU,
+      "Nº AUTORIZAÇÃO": item.NUAUTORIZACAO,
+      "ADQUIRENTE": item.DSADQUIRENTE,
+    })));
     const workbook = XLSX.utils.book_new();
 
     const header = ['Nº', 'ID EMPRESA', 'EMPRESA', 'ID VENDA', 'DT VENDA', 'VR TOTAL', 'DESCONTO', 'VR PAGO', 'TP PAGAMENTO', 'NSU', 'Nº AUTORIZÇÃO', 'ADQUIRENTE'];
@@ -141,9 +155,9 @@ export const ActionListaVendasConciliacao = ({ dadosVendasConciliacao }) => {
       "EMPRESA": item.NOFANTASIA,
       "ID VENDA": item.IDVENDA,
       "DT VENDA": item.DATA,
-      "VR TOTAL": formatMoeda(item.VRTOTALPAGO),
-      "DESCONTO": formatMoeda(item.VRTOTALDESCONTO),
-      "VR PAGO": formatMoeda(item.VRPAGO),
+      "VR TOTAL": toFloat(item.VRTOTALPAGO),
+      "DESCONTO": toFloat(item.VRTOTALDESCONTO),
+      "VR PAGO": toFloat(item.VRPAGO),
       "TP PAGAMENTO": item.DSTIPOPAGAMENTO,
       "NSU": item.NSU,
       "Nº AUTORIZAÇÃO": item.NUAUTORIZACAO,

@@ -2,7 +2,6 @@ import axios from "axios";
 import { useState } from "react";
 import Swal from "sweetalert2";
 import { post } from "../../../../../api/funcRequest";
-import { animationLodadingStart } from "../../../../../utils/animationCarregamento";
 
 export const useIntegrarConciliarDepositoNoSAP = ({ optionsModulos, usuarioLogado, handleClick }) => {
     const [ipUsuario, setIpUsuario] = useState('');
@@ -72,22 +71,19 @@ export const useIntegrarConciliarDepositoNoSAP = ({ optionsModulos, usuarioLogad
                     }
                 })
                 try {
-
                     const putData = {
-                        IDDEPOSITOLOJA: IDDEPOSITOLOJA,
+                        IDDEPOSITOLOJA: parseInt(IDDEPOSITOLOJA),
                     }
 
                     const response = await post('/deposito-integracao', putData)
-
                     const textDados = JSON.stringify(putData)
                     let textoFuncao = 'FINANCEIRO/INTEGRACAO CONCILIAÇÃO DO DEPOSITO'
                     const ipUsuario = await getIPUsuario()
-
                     const postData = {
                         IDFUNCIONARIO: String(usuarioLogado.id),
                         PATHFUNCAO: textoFuncao,
                         DADOS: textDados,
-                        IP: ipUsuario || 'INDISPOSIVEL',
+                        IP: ipUsuario || 'INDISPONIVEL',
                     }
 
 
@@ -103,17 +99,13 @@ export const useIntegrarConciliarDepositoNoSAP = ({ optionsModulos, usuarioLogad
                         showConfirmButton: false,
                         timer: 4000
                     })
-
                     handleClick()
 
                     return response.data;
-
                 } catch (error) {
-
                     const putData = {
                         IDDEPOSITOLOJA: IDDEPOSITOLOJA,
                     }
-
                     const textDados = JSON.stringify(putData)
                     const ipUsuario = await getIPUsuario()
                     const textoFuncao = 'FINANCEIRO/ERRO AO CANCELAR CONCILIAÇÃO DO DEPOSITO';
@@ -122,7 +114,7 @@ export const useIntegrarConciliarDepositoNoSAP = ({ optionsModulos, usuarioLogad
                         IDFUNCIONARIO: String(usuarioLogado.id),
                         PATHFUNCAO: textoFuncao,
                         DADOS: textDados,
-                        IP: ipUsuario || 'IP não disponível',
+                        IP: ipUsuario || 'INDISPONIVEL',
                     }
 
                     const responsePost = await post('/log-web', postData)
@@ -138,7 +130,6 @@ export const useIntegrarConciliarDepositoNoSAP = ({ optionsModulos, usuarioLogad
                         showConfirmButton: false,
                         timer: 4000
                     });
-
                     return responsePost.data;
                 }
             }
@@ -148,8 +139,5 @@ export const useIntegrarConciliarDepositoNoSAP = ({ optionsModulos, usuarioLogad
 
     return {
         handleConciliar,
-        ipUsuario,
-        getIPUsuario,
-        setIpUsuario,
     }
 }

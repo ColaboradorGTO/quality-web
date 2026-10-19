@@ -348,6 +348,7 @@ export const ActionListaConciliarPorBanco = ({
     {
       field: 'STCANCELADO',
       header: 'Status',
+      sortable: true,
       body: row => (
         <p style={{ fontWeight: 900, margin: "0px", width: "100px", color: row.STCANCELADO === 'False' ? 'blue' : 'red' }}>
           {row.STCANCELADO === 'False' ? 'Dep. Ativo' : 'Dep. Cancelado'}
@@ -357,6 +358,7 @@ export const ActionListaConciliarPorBanco = ({
     {
       field: 'STCONFERIDO',
       header: 'Situação',
+      sortable: true,
       body: (row) => {
         if (row.STCONFERIDO == 'True') {
 
