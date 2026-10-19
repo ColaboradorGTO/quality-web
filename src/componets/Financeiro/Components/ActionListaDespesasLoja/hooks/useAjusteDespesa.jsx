@@ -120,8 +120,8 @@ export const useAjusteDespesa = ({ dadosDespesasLojaDetalhe, usuarioLogado, hand
 }
 
   const Options = [
-    { id: 0, value: "NFCe", label: "NFCe" },
-    { id: 1, value: "NFe", label: "NFe" },
+    { id: 0, value: "2", label: "NFCe" },
+    { id: 1, value: "1", label: "NFe" },
   ]
 
   return {
