@@ -129,16 +129,7 @@ export const ActionListaFaturasLoja = ({
     }
   });
 
-  const calcularTotalValorRecebido = () => {
-    let total = 0;
-    for (let result of dados) {
-      total += parseFloat(result.VRRECEBIDO);
-    }
-    return total;
-  }
 
-    return valorTotalGeral - valorTotalCanceladas;
-  };
   const podeSelecionar = (item) => {
     return item.STCANCELADO === 'False' && item.STCONFERIDOFATURA !== 'True' && Boolean(item.IDDETALHEFATURA);
   };
