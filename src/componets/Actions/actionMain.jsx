@@ -594,7 +594,6 @@ export const ActionMain = ({
   btnVisivelEstrutura,
 
   styleCancelar,
-  disabledCancelar,
   styleVendasEstrutura,
   stylePendencia,
   styleEmpresa,
