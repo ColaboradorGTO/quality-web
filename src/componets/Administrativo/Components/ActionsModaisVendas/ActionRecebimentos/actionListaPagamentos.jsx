@@ -68,7 +68,7 @@ export const ActionListaPagamentos = ({ dadosDetalheRecebimentos, dados }) => {
             DSTIPOPAGAMENTO: pagamento.pag.DSTIPOPAGAMENTO,
             NPARCELAS: pagamento.pag.NPARCELAS,
             NUOPERACAO: pagamento.pag.NUOPERACAO,
-            NSUAUTORIZADORA: pagamento.pag.NUAUTORIZACAO,
+            NUAUTORIZACAO: pagamento.pag.NUAUTORIZACAO,
             VALORRECEBIDO: pagamento.pag.VALORRECEBIDO
         }))
     );
@@ -93,9 +93,9 @@ export const ActionListaPagamentos = ({ dadosDetalheRecebimentos, dados }) => {
             sortable: true,
         },
         {
-            field: 'NSUAUTORIZADORA',
+            field: 'NUAUTORIZACAO',
             header: 'Autorização',
-            body: row => <th>{toFloat(row.NSUAUTORIZADORA)}</th>,
+            body: row => <th>{row.NUAUTORIZACAO}</th>,
             sortable: true,
         },
         {

@@ -17,14 +17,13 @@ import { useConferirFatura } from "./hooks/useConfeririFatura";
 import { IoMdCheckmark } from "react-icons/io";
 
 
-export const ActionListaFaturasLoja = ({
-  dadosDetalheFatura,
-  optionsModulos,
-  usuarioLogado,
-  handleClick,
+export const ActionListaFaturasLoja = ({ 
+  dadosDetalheFatura, 
+  optionsModulos, 
+  usuarioLogado, 
+  handleClick, 
   selectedItems,
-  setSelectedItems,
-  situacao
+  setSelectedItems
 
 }) => {
   const [modalFaturaVisivel, setModalFaturaVisivel] = useState(false);
@@ -40,7 +39,7 @@ export const ActionListaFaturasLoja = ({
   const {
     conferir
   } = useConferirFatura({ optionsModulos, usuarioLogado, handleClick, selectedItems });
-
+  
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
   };
@@ -130,24 +129,14 @@ export const ActionListaFaturasLoja = ({
     }
   });
 
-  const valorTotalCanceladas = dados.reduce((total, item) => {
-    const isCancelado = item.STCANCELADO !== 'False' && item.STCANCELADO !== false && String(item.STCANCELADO).toLowerCase() !== 'false';
-    return isCancelado ? total + (parseFloat(item.VRRECEBIDO) || 0) : total;
-  }, 0);
-
-  const valorTotalGeral = dados.reduce((total, item) => {
-    return total + (parseFloat(item.VRRECEBIDO) || 0);
-  }, 0);
-
   const calcularTotalValorRecebido = () => {
-    const isFiltroCanceladas = situacao === 'Cancelada' || situacao === 'Cancelado' || situacao === 'Canceladas';
-
-    if (isFiltroCanceladas) {
-      return valorTotalCanceladas;
+    let total = 0;
+    for (let result of dados) {
+      total += parseFloat(result.VRRECEBIDO);
     }
+    return total;
+  }
 
-    return valorTotalGeral - valorTotalCanceladas;
-  };
   useEffect(() => {
     const itensSelecionaveis = dados.filter(item =>
       item.STCANCELADO === 'False' && item.STCONFERIDOFATURA !== 'True' && item.IDDETALHEFATURA
@@ -259,19 +248,19 @@ export const ActionListaFaturasLoja = ({
     {
       field: 'NOFANTASIA',
       header: 'Empresa',
-      body: row => <p style={{ width: '180px', margin: 0, padding: 0, fontWeight: 600 }}>  {row.NOFANTASIA} </p>,
+      body: row => <p style={{width: '180px', margin: 0, padding: 0, fontWeight: 600}}>  {row.NOFANTASIA} </p>,
       sortable: true,
     },
     {
       field: 'DTPROCESSAMENTO',
       header: 'Data Recebimento',
-      body: row => <p style={{ width: '150px', margin: 0, padding: 0, fontWeight: 600 }}>  {row.DTPROCESSAMENTO}  </p>,
+      body: row => <p style={{width: '150px', margin: 0, padding: 0, fontWeight: 600}}>  {row.DTPROCESSAMENTO}  </p>,
       sortable: true,
     },
     {
       field: 'IDMOVIMENTOCAIXAWEB',
       header: 'Nº Movimento Caixa',
-      body: row => <p style={{ width: '150px', margin: 0, padding: 0, fontWeight: 600 }}>  {row.IDMOVIMENTOCAIXAWEB}</p>,
+      body: row => <p style={{width: '150px', margin: 0, padding: 0, fontWeight: 600}}>  {row.IDMOVIMENTOCAIXAWEB}</p>,
       sortable: true,
     },
     {
@@ -297,7 +286,7 @@ export const ActionListaFaturasLoja = ({
     {
       field: 'NOFUNCIONARIO',
       header: 'Recebedor',
-      body: row => <p style={{ width: '150px', margin: 0, padding: 0, fontWeight: 600 }}>  {row.NOFUNCIONARIO} </p>,
+      body: row => <p style={{width: '150px', margin: 0, padding: 0, fontWeight: 600}}>  {row.NOFUNCIONARIO} </p>,
       sortable: true,
     },
     {
@@ -306,7 +295,7 @@ export const ActionListaFaturasLoja = ({
       sortable: true,
       body: row => {
         if (row.STCANCELADO == 'False') {
-          return <p style={{ color: 'blue', width: '150px', margin: 0, padding: 0, fontWeight: 600 }}>ATIVO / {row.STCONFERIDOFATURA == 'True' ? 'CONFERIDO' : <p style={{ color: 'red', width: '150px', margin: 0, padding: 0, fontWeight: 600 }}>NÃO CONFERIDO</p>} {row.IDCONSOLIDACAOFATURA ? ' / CONSOLIDADO' : ''}</p>
+          return <p style={{ color: 'blue', width: '150px', margin: 0, padding: 0, fontWeight: 600 }}>ATIVO / {row.STCONFERIDOFATURA == 'True' ? 'CONFERIDO' : <p style={{ color: 'red',width: '150px', margin: 0, padding: 0, fontWeight: 600 }}>NÃO CONFERIDO</p>} {row.IDCONSOLIDACAOFATURA ? ' / CONSOLIDADO' : ''}</p>
 
         } else {
           return (
@@ -366,7 +355,7 @@ export const ActionListaFaturasLoja = ({
               />
             </div>
 
-
+           
             <div className="p-1">
               <ButtonTable
                 titleButton="Conferir Fatura"
@@ -460,8 +449,8 @@ export const ActionListaFaturasLoja = ({
         <div className="card" ref={dataTableRef}>
           <DataTable
             title="Vendas por Loja"
+            dataKey="IDDETALHEFATURA"
             value={dados}
-            pageKey="IDDETALHEFATURA"
             globalFilter={globalFilterValue}
             size="small"
             selectionMode="single"
@@ -471,8 +460,8 @@ export const ActionListaFaturasLoja = ({
             currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
             filterDisplay="menu"
             sortOrder={-1}
-            cellMemo={false}
             paginator={true}
+            cellMemo={false}
             rows={10}
             rowsPerPageOptions={[10, 20, 50, 100, 200, 300, 500, dados.length]}
             showGridlines

@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useRef, useState } from "react"
+import React, { Fragment, useRef, useState } from "react"
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import Accordion from 'react-bootstrap/Accordion';
@@ -114,7 +114,7 @@ export const ActionListaFechamentoDosCaixas = ({
     return numero > 0 ? numero : 0;
   }
 
-  // Mesma regra do jQuery: se houver ajuste (> 0), ele substitui o dinheiro informado
+  
   const calcularDinheiroInformado = (item) => {
     const ajuste = toFloat(item.TOTALFECHAMENTODINHEIROAJUSTE);
     return ajuste > 0 ? ajuste : positivoOuZero(item.TOTALFECHAMENTODINHEIRO);

@@ -39,9 +39,9 @@ export const ActionListaVendasConciliacao = ({ dadosVendasConciliacao }) => {
     item.NOFANTASIA,
     item.IDVENDA,
     item.DATA,
-    toFloat(item.VRTOTALPAGO),
-    toFloat(item.VRTOTALDESCONTO),
-    toFloat(item.VRPAGO),
+    formatMoeda(item.VRTOTALPAGO),
+    formatMoeda(item.VRTOTALDESCONTO),
+    formatMoeda(item.VRPAGO),
     item.DSTIPOPAGAMENTO,
     item.NSU,
     item.NUAUTORIZACAO,
@@ -92,7 +92,20 @@ export const ActionListaVendasConciliacao = ({ dadosVendasConciliacao }) => {
   };
 
   const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(dados);
+    const worksheet = XLSX.utils.json_to_sheet(dados.map(item => ({
+      "Nº": item.contador,
+      "ID EMPRESA": item.IDEMPRESA,
+      "EMPRESA": item.NOFANTASIA, 
+      "ID VENDA": item.IDVENDA, 
+      "DT VENDA": item.DATA, 
+      "VR TOTAL": toFloat(item.VRTOTALPAGO),
+      "DESCONTO": toFloat(item.VRTOTALDESCONTO),
+      "VR PAGO": toFloat(item.VRPAGO),
+      "TP PAGAMENTO": item.DSTIPOPAGAMENTO,
+      "NSU": item.NSU,
+      "Nº AUTORIZAÇÃO": item.NUAUTORIZACAO,
+      "ADQUIRENTE": item.DSADQUIRENTE,
+    })));
     const workbook = XLSX.utils.book_new();
 
     const header = ['Nº', 'ID EMPRESA', 'EMPRESA', 'ID VENDA', 'DT VENDA', 'VR TOTAL', 'DESCONTO', 'VR PAGO', 'TP PAGAMENTO', 'NSU', 'Nº AUTORIZÇÃO', 'ADQUIRENTE'];

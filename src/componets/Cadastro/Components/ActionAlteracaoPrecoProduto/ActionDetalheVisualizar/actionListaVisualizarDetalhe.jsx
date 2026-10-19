@@ -52,7 +52,7 @@ export const ActionListaVisualizarDetalhe = ({ dadosVisualizarDetalhe }) => {
             horizontalPageBreakBehaviour: 'immediately'
         });
         doc.save('lista_alteracao_preco_detalhes.pdf');
-    };
+    }; 
 
     const exportToExcel = () => {
         const worksheet = XLSX.utils.json_to_sheet(dados.map(item => ({

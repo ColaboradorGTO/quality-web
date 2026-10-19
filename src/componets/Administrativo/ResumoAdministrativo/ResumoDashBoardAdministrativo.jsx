@@ -31,7 +31,6 @@ export const ResumoDashBoardAdministrativo = ({ usuarioLogado }) => {
   const [resumoVisivel, setResumoVisivel] = useState(false);
   const [empresaSelecionada, setEmpresaSelecionada] = useState('');
   const [empresaSelecionadaNome, setEmpresaSelecionadaNome] = useState('');
-  const [dadosDetalheDespesas, setDadosDetalheDespesas] = useState([])
   const [dataPesquisa, setDataPesquisa] = useState('')
   const [dadosExtratoLojaPeriodo, setDadosExtratoLojaPeriodo] = useState([])
   const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
@@ -69,6 +68,7 @@ export const ResumoDashBoardAdministrativo = ({ usuarioLogado }) => {
     },
     { enabled: false, staleTime: 60 * 60 * 1000, }
   );
+
 
   const { data: dadosQuebraCaixa = [], error: errorQuebra, isLoading: isLoadingQuebra, refetch: refetchQuebra } = useQuery(
     'quebra-caixa-loja-resumo',
@@ -117,7 +117,7 @@ export const ResumoDashBoardAdministrativo = ({ usuarioLogado }) => {
   );
 
   const { data: dadosVendasConvenioDesconto = [], error: errorConvenio, isLoading: isLoadingConvenio, refetch: refetchConvenio } = useQuery(
-    ['resumo-venda-convenio', 'convenio'],
+    'resumo-venda-convenio',
     async () => {
       const response = await get(`/resumoVendaConvenio?idEmpresa=${empresaSelecionada}&datapesq=${dataPesquisa}&statusCancelado=False`);
       return response.data;
@@ -125,8 +125,7 @@ export const ResumoDashBoardAdministrativo = ({ usuarioLogado }) => {
     { enabled: false, staleTime: 60 * 60 * 1000, }
   );
 
-
-   const { data: dadosVendasConvenioFuncionario = [], error: errorConvenioFuncionario, isLoading: isLoadingConvenioFuncionario, refetch: refetchConvenioFuncionario } = useQuery(
+  const { data: dadosVendasConvenioFuncionario = [], error: errorConvenioFuncionario, isLoading: isLoadingConvenioFuncionario, refetch: refetchConvenioFuncionario } = useQuery(
     'resumo-venda-convenio-desconto',
     async () => {
       const response = await get(`/resumo-venda-convenio-desconto?idEmpresa=${empresaSelecionada}&dataPesquisaInicio=${dataPesquisa}&dataPesquisaFim=${dataPesquisa}&statusCancelado=False`);
@@ -180,6 +179,7 @@ export const ResumoDashBoardAdministrativo = ({ usuarioLogado }) => {
     { enabled: false, staleTime: 60 * 60 * 1000, }
   );
 
+
   const { data: dadosVendasPCJ = [], error: errorVendasPCJ, isLoading: isLoadingVendasPCJ, refetch: refetchVendasPCJ } = useQuery(
     'listaCaixasMovimento',
     async () => {
@@ -196,6 +196,16 @@ export const ResumoDashBoardAdministrativo = ({ usuarioLogado }) => {
     },
     { enabled: false, staleTime: 60 * 60 * 1000, }
   );
+
+  const { data: dadosDetalheDespesas = [], error: errorDetalheDespesas, isLoading: isLoadingDetalheDespesas, refetch: refetchDetalheDespesas } = useQuery(
+    'detalheDespesas',
+    async () => {
+      const response = await get(`/detalheDespesas?idEmpresa=${empresaSelecionada}&dataPesquisa=${dataPesquisa}`);
+      return response.data;
+    },
+    { enabled: false, staleTime: 60 * 60 * 1000, }
+  );
+
 
   const getListaSaldoExtratoLoja = async () => {
     try {
@@ -252,6 +262,7 @@ export const ResumoDashBoardAdministrativo = ({ usuarioLogado }) => {
 
       setResumoVisivel(true)
       getListaSaldoExtratoLoja()
+
       refetchResumoVendas()
 
       refetchDespesaLoja()
@@ -269,16 +280,18 @@ export const ResumoDashBoardAdministrativo = ({ usuarioLogado }) => {
       refetchVendasCanceladas()
       refetchDetalheVouche()
       refetchVendasVendedor()
+      refetchDetalheDespesas()
     }
 
   }
 
-   const handleKeyPress = (e) => {
+  const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleClick();
     }
   };
+
 
   return (
     <Fragment>
@@ -297,6 +310,7 @@ export const ResumoDashBoardAdministrativo = ({ usuarioLogado }) => {
           label: empresa.NOFANTASIA,
         }))}
         labelSelectEmpresa={"Empresa"}
+        onKeyDownSelectEmpresa={handleKeyPress}
 
         InputFieldDTConsultaComponent={InputField}
         labelInputFieldDTConsulta="Data Consulta"
@@ -364,7 +378,7 @@ export const ResumoDashBoardAdministrativo = ({ usuarioLogado }) => {
             dadosCaixaFechados={dadosCaixaFechados}
             usuarioLogado={usuarioLogado}
             optionsModulos={optionsModulos}
-            handleClick={handleClick}
+             handleClick={handleClick}
           />
 
           <ActionListaVendasVendedor dadosVendasVendedor={dadosVendasVendedor} />
