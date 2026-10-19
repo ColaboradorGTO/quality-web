@@ -1,11 +1,18 @@
 import { Fragment, useState, useRef } from "react";
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import { Button } from 'primereact/button';
 import { FileUpload } from 'primereact/fileupload';
 import { Toast } from 'primereact/toast';
+import { useReactToPrint } from "react-to-print";
+import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
-
+import * as XLSX from 'xlsx';
+import HeaderTable from "../../../Tables/headerTable";
 
 import { ButtonType } from "../../../Buttons/ButtonType";
 import { IoMdReturnLeft } from "react-icons/io";
+import { toFloat } from "../../../../utils/toFloat";
 
 export const ActionImportArquivo = ({ 
     dadosVendaMarcaPeriodo,
@@ -104,8 +111,8 @@ export const ActionImportArquivo = ({
                         data: dadoslinha[0],
                         codEstabelecimento: dadoslinha[3],
                         empresa: NoEmpFatura,
-                        valorRecebido: mascaraValor(vrConcFaturaTotal.toFixed(2)),
-                        valorArquivo: mascaraValor(Number(dadoslinha[5]?.replace(/\./g, "").replace(",", ".")).toFixed(2)),
+                        valorRecebido: toFloat(vrConcFaturaTotal.toFixed(2)),
+                        valorArquivo: toFloat(Number(dadoslinha[5]?.replace(/\./g, "").replace(",", ".")).toFixed(2)),
                         valorDivergente: QtdDiverg.toFixed(0),
                         observacao: obsdiverg,
                         statusColor: statusColor
@@ -156,7 +163,10 @@ export const ActionImportArquivo = ({
     };
 
 
-    const thStyle = {  border: '1px solid #000', width: "5px", textAlign: "center", fontSize: "12px" };
+    const formatDecimal = (valor) =>
+        Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    const thStyle ={  border: '1px solid #000', width: "5px", textAlign: "center", fontSize: "12px" };
     const tdStyle = { border: '1px solid #000', padding: '6px' };
 
     const customUpload = (event) => {
@@ -251,8 +261,8 @@ export const ActionImportArquivo = ({
                                                 <td style={{ ...tdStyle, textAlign: 'center' }}>{row.data}</td>
                                                 <td style={{ ...tdStyle, textAlign: 'center' }}>{row.codEstabelecimento}</td>
                                                 <td style={{ ...tdStyle, textAlign: 'center' }}>{row.empresa}</td>
-                                                <td style={{ ...tdStyle, textAlign: 'right' }}>{row.valorRecebido}</td>
-                                                <td style={{ ...tdStyle, textAlign: 'right' }}>{row.valorArquivo}</td>
+                                                <td style={{ ...tdStyle, textAlign: 'right' }}>{formatDecimal(row.valorRecebido)}</td>
+                                                <td style={{ ...tdStyle, textAlign: 'right' }}>{formatDecimal(row.valorArquivo)}</td>
                                                 <td style={{ ...tdStyle, textAlign: 'right', color: row.statusColor, fontWeight: 'bold' }}>
                                                     {row.valorDivergente}
                                                 </td>
