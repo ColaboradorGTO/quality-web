@@ -1,4 +1,4 @@
-import { Fragment } from "react"
+import { Fragment, useEffect } from "react"
 import { FooterModal } from "../../../../Modais/FooterModal/footerModal"
 import { ButtonTypeModal } from "../../../../Buttons/ButtonTypeModal"
 import { Controller, useForm } from "react-hook-form"
@@ -8,10 +8,11 @@ import { schema } from "./schemaValidationCNPJ"
 import FormField from "../../../../Formularios/FormField"
 import { AlertError } from "../../../../Inputs/alertError"
 import { useCadastrarClienteCNPJVoucher } from "../hooks/useCadastroClienteCNPJVoucher"
+import { mascaraCNPJ } from "../../../../../utils/mascaraCNPJ"
 
-export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos, onCpf }) => {
+export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos, onCpf, cpfCliente }) => {
     const { handleSubmit, formState: { errors }, clearErrors, control, setError, setValue } = useForm({
-        mode: "onChange" 
+        mode: "onChange"
     });
     const {
         idCliente,
@@ -68,7 +69,7 @@ export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos,
 
     const handleValidatedSubmit = async () => {
         try {
-          
+
             const dadosParaValidar = {
                 cnpjCliente: cnpj,
                 nomeClienteRazaoCliente: nomeClienteRazao,
@@ -88,15 +89,15 @@ export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos,
 
 
             await schema.validate(dadosParaValidar, { abortEarly: false });
-            
-            
+
+
             onSubmit();
-            
+
         } catch (validationError) {
             console.error('❌ Erro de validação:', validationError);
-            
+
             clearErrors();
-    
+
 
             if (validationError.inner && validationError.inner.length > 0) {
                 validationError.inner.forEach(error => {
@@ -137,6 +138,12 @@ export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos,
         setTelefoneComercial('');
         handleClose();
     }
+
+    useEffect(() => {
+        setCnpj(cpfCliente ?? '');
+    }, [cpfCliente, cnpj]);
+
+
     return (
         <Fragment>
             <form onSubmit={handleSubmit(onSubmit)}>
@@ -210,7 +217,8 @@ export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos,
                                         type="text"
                                         errors={errors}
                                         clearErrors={clearErrors}
-                                        value={cnpj}
+                                        value={mascaraCNPJ(cnpj)}
+                                        readOnly={cnpj.length === 14 ? true : false}
                                         onChange={(e) => setCnpj(e.target.value)}
                                     />
                                 )}
@@ -231,7 +239,7 @@ export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos,
                                         errors={errors}
                                         clearErrors={clearErrors}
                                         value={IE}
-                                        onChange={(e) =>  setIE(e.target.value)}
+                                        onChange={(e) => setIE(e.target.value)}
                                     />
                                 )}
                             />
@@ -363,8 +371,8 @@ export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos,
                                         onChange={(e) => setTelefoneComercial(e.target.value)}
                                     />
                                 )}
-                                />
-                                
+                            />
+
                         </div>
 
                         <div className="col-sm-4 col-md-3 col-xl-3">
@@ -386,16 +394,16 @@ export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos,
                         </div>
                         <div className="col-sm-5 col-md-3 col-xl-4">
                             <label className="form-label" htmlFor={""}>Tipo Indicação IE</label>
-                             <Select
+                            <Select
                                 label={"Despesa"}
                                 options={optionsIndicacaoIE.map((item) => ({
                                     value: item.value,
                                     label: item.label
                                 }))}
                                 value={optionsIndicacaoIE.find(option => option.value === tipoIndicacaoIE) || null}
-                                onChange={(e) =>  setTipoIndicacaoIE(e?.value || null)}
+                                onChange={(e) => setTipoIndicacaoIE(e?.value || null)}
                             />
-                   
+
                             {errors.tipoIndicacaoIE && (
                                 <AlertError
                                     error={errors.tipoIndicacaoIE}
@@ -558,7 +566,7 @@ export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos,
                     </div>
                 </div>
             </form>
-    
+
             <FooterModal
                 ButtonTypeConfirmar={ButtonTypeModal}
                 textButtonConfirmar={'Cadastrar'}

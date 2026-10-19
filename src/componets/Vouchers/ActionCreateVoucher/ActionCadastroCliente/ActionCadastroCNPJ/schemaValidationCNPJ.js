@@ -1,4 +1,5 @@
 import * as yup from "yup";
+import { validaEmail } from "../../../../../utils/validaEmail";
 
 export const schema = yup.object().shape({
         // Identificação

@@ -1,4 +1,4 @@
-import { Fragment } from "react"
+import { Fragment, useEffect } from "react"
 import { FooterModal } from "../../../../Modais/FooterModal/footerModal"
 import { ButtonTypeModal } from "../../../../Buttons/ButtonTypeModal"
 import { useForm, Controller } from "react-hook-form"
@@ -9,7 +9,7 @@ import { schema } from "./schemaValidationCPF"
 import { useCadastrarClienteCPFVoucher } from "../hooks/useCadastroClienteCPFVoucher"
 
 
-export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos, optionsCPF, onCpf }) => {
+export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos, optionsCPF, onCpf, cpfCliente }) => {
   const { register, handleSubmit, formState: { errors }, clearErrors, setError, control } = useForm({
     mode: "onChange"
   });
@@ -56,7 +56,7 @@ export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos,
     setCepDigitado
   } = useCadastrarClienteCPFVoucher({ usuarioLogado, optionsModulos, handleClose, onCpf });
 
-    const fecharModal = () => {
+  const fecharModal = () => {
     handleClose();
     setIdCliente('');
     setTipo('');
@@ -119,6 +119,10 @@ export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos,
       console.log(`Erro de validação:\n${errorMessages.join('\n')}`);
     }
   }
+
+  useEffect(() => {
+    setCpf(cpfCliente ?? '');
+  }, [cpfCliente, setCpf]);
 
   return (
     <Fragment>
@@ -200,7 +204,7 @@ export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos,
                     type="text"
                     value={mascaraCPF(cpf)}
                     onChange={(e) => setCpf(e.target.value)}
-                    readOnly={readOnlyCpf}
+                    readOnly={readOnlyCpf || cpf > 14}
                     maxLength={14}
                     errors={errors}
                     clearErrors={clearErrors}
@@ -276,15 +280,15 @@ export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos,
             <div className="col-sm-4 col-md-3 col-xl-3">
 
               <Controller
-                name="TelefoneCliente"
+                name="telefoneDoCliente"
                 control={control}
                 render={({ field }) => (
                   <FormField
-                    name="TelefoneDoCliente"
+                    name="telefoneDoCliente"
                     label={"Telefone"}
                     placeholder={"DIGITE O TELEFONE"}
                     type="text"
-                    id={"TelefoneDoCliente"}
+                    id={"telefoneDoCliente"}
                     value={mascaraTelefone(telefoneCliente)}
                     onChange={(e) => setTelefoneCliente(e.target.value)}
                     errors={errors}
@@ -347,7 +351,7 @@ export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos,
                     type="text"
                     id={"NuCEP"}
                     value={cep}
-                    onChange={(e) => { 
+                    onChange={(e) => {
                       setCepDigitado(true);
                       setCep(e.target.value)
                     }}
@@ -356,7 +360,7 @@ export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos,
                   />
                 )}
               />
-            
+
             </div>
             <div className="col-sm-4 cold-md-4 col-xl-4">
 
@@ -481,7 +485,7 @@ export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos,
                     errors={errors}
                     clearErrors={clearErrors}
                     readOnly={true}
-                     style={{ textTransform: 'uppercase' }}
+                    style={{ textTransform: 'uppercase' }}
                   />
                 )}
               />

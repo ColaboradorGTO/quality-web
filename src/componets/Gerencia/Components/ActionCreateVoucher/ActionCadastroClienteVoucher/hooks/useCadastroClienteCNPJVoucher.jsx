@@ -35,15 +35,15 @@ async function getDadosEnderecoViaCep_API_externa(cep) {
 
 async function validaCEP(cep, verificarNaApi = false) {
     const regex = /^[0-9]{5}-?[0-9]{3}$/;
-    
-    if (!regex.test(cep)){
+
+    if (!regex.test(cep)) {
         return false;
     }
 
-    if(verificarNaApi){
+    if (verificarNaApi) {
         let respCep = await getDadosEnderecoViaCep_API_externa(cep);
 
-        return !(respCep?.erro == 'true'); 
+        return !(respCep?.erro == 'true');
     }
 
     return true;
@@ -117,7 +117,7 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
 
     }, [usuarioLogado]);
 
- 
+
     const getIPUsuario = async () => {
         try {
             const { data: ipWhoisData } = await axios.get("http://ipwho.is/");
@@ -155,7 +155,7 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
     }
 
     async function getDadosCNPJComIE_API_externa(cnpj) {
-        console.log('🔥 CHAMADA API PUBLICA.WS - getDadosCNPJComIE_API_externa:', cnpj);
+        //console.log('🔥 CHAMADA API PUBLICA.WS - getDadosCNPJComIE_API_externa:', cnpj);
         try {
             const response = await axios.get(URL_PUBLICAWS.replace('{CNPJ}', cnpj));
             let status = response.data?.status || 200;
@@ -171,22 +171,22 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
     }
 
     async function getDadosExistenciaCNPJ_API_externa(cnpj) {
-        console.log('🔥 CHAMADA API RECEITA FEDERAL - getDadosExistenciaCNPJ_API_externa:', cnpj);
+        //console.log('🔥 CHAMADA API RECEITA FEDERAL - getDadosExistenciaCNPJ_API_externa:', cnpj);
         try {
             const response = await axios.get(URL_MINHA_RECEITA.replace('{CNPJ}', cnpj));
             response.data = "API-minhareceita";
-         
+
             return { status: 200, data: response.data };
-            
+
         } catch (error) {
             let status = error?.response?.data?.status || error?.status || 400;
             let message = error?.response?.data?.message;
             if (!message && error?.response?.data?.responseText) {
                 try {
                     message = JSON.parse(error.response.data.responseText)?.message;
-            } catch {}
+                } catch { }
             }
-          
+
             if (status !== 200 && status !== 400) {
                 return await getDadosCNPJRedundancia_API_externa(cnpj);
             }
@@ -198,28 +198,28 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
         cnpj = cnpj.replace(/\D/g, "");
         let objCliente = await getDadosExistenciaCNPJ_API_externa(cnpj);
 
-        if(objCliente.status == 200) {
-            const dadosComIE = await getDadosCNPJComIE_API_externa(cnpj); 
+        if (objCliente.status == 200) {
+            const dadosComIE = await getDadosCNPJComIE_API_externa(cnpj);
 
-            if(dadosComIE.status == 200) {
+            if (dadosComIE.status == 200) {
                 objCliente = dadosComIE;
             }
-            
+
             const dados = objCliente.data;
 
             const dadosMapeados = {
                 razao: dados.razao_social || '',
                 fantasia: dados?.estabelecimento?.nome_fantasia || dados?.fantasia || dados?.nome_fantasia || dados?.razao_social || '',
                 inscricaoEstadual: dados?.estabelecimento?.inscricoes_estaduais[0]?.inscricao_estadual || '',
-                cnae: dados.estabelecimento?.atividade_principal?.id  || dados?.cnae_fiscal || '',
-                dataCriacaoEmpresa: dados?.estabelecimento?.data_inicio_atividade || dados?.data_situacao ||  dados?.data_inicio_atividade || '',
-              
-                tel1: (dados?.estabelecimento?.ddd1 + dados?.estabelecimento?.telefone1) || dados?.telefone ||  (dados?.ddd_telefone || dados?.ddd_telefone_1.replace(/\D/g, "")) || '',
+                cnae: dados.estabelecimento?.atividade_principal?.id || dados?.cnae_fiscal || '',
+                dataCriacaoEmpresa: dados?.estabelecimento?.data_inicio_atividade || dados?.data_situacao || dados?.data_inicio_atividade || '',
+
+                tel1: (dados?.estabelecimento?.ddd1 + dados?.estabelecimento?.telefone1) || dados?.telefone || (dados?.ddd_telefone || dados?.ddd_telefone_1.replace(/\D/g, "")) || '',
                 tel2: (dados?.estabelecimento?.ddd2 + dados?.estabelecimento?.telefone2) || dados?.ddd_telefone_2 || '',
                 email: dados?.estabelecimento?.email || dados?.email || '',
                 cep: dados?.estabelecimento?.cep || dados?.cep || '',
                 endereco: dados?.estabelecimento?.logradouro || dados?.logradouro || '',
-                numeroEndereco: dados?.estabelecimento?.numero  || dados?.numero || '',
+                numeroEndereco: dados?.estabelecimento?.numero || dados?.numero || '',
                 complemento: dados?.estabelecimento?.complemento || dados?.complemento || '',
 
                 bairro: dados?.estabelecimento?.bairro || dados?.bairro || '',
@@ -248,7 +248,7 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
         async () => {
             const response = await get(`/clientes?cpfoucnpj=${removerMascaraCPF(cnpj)}`);
             setClienteExistente(response.data);
-          
+
             return response.data;
         },
         { enabled: cnpj?.length >= 14, staleTime: 5 * 60 * 1000 }
@@ -257,14 +257,14 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
     // Removido useEffect desnecessário que causava refetch múltiplo
 
     useEffect(() => {
-        console.log('DEBUG useEffect - CNPJ:', cnpj, 'Length:', cnpj?.length, 'optionsCNPJ:', optionsCNPJ?.length);
-        
+        //console.log('DEBUG useEffect - CNPJ:', cnpj, 'Length:', cnpj?.length, 'optionsCNPJ:', optionsCNPJ?.length);
+
         // Só chama APIs externas se o cliente NÃO existir no banco
         if (cnpj?.length >= 14 && optionsCNPJ && optionsCNPJ.length === 0) {
-            console.log('✅ Chamando API da Receita - Cliente NÃO encontrado no banco');
+            // console.log('✅ Chamando API da Receita - Cliente NÃO encontrado no banco');
             preenche_dados_registrados([], cnpj);
         } else if (cnpj?.length >= 14 && optionsCNPJ && optionsCNPJ.length > 0) {
-            console.log('❌ NÃO chamando API da Receita - Cliente JÁ existe no banco:', optionsCNPJ[0]);
+            // console.log('❌ NÃO chamando API da Receita - Cliente JÁ existe no banco:', optionsCNPJ[0]);
             // Cliente existe no banco - não chama APIs externas
         }
 
@@ -272,8 +272,8 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
 
     async function preenche_cadastro_empresa_com_dados_de_API_externa(cnpj, stUltimaInstancia = false) {
         const dadosAPI = await busca_e_valida_dados_empresa_com_API_externa(cnpj, stUltimaInstancia);
- 
-        if(!dadosAPI) {
+
+        if (!dadosAPI) {
             return false;
         }
 
@@ -296,13 +296,13 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
             codigoIbge
         } = dadosAPI;
 
-        if(razao) {
+        if (razao) {
             setCNAE(cnae || '');
             setTelefoneCliente(tel1 || '');
             setTelefoneComercial(tel2 || '');
             setCep(cep || '');
             setIE(inscricaoEstadual || '');
-            setDataCriacao(dataCriacaoEmpresa || ''); 
+            setDataCriacao(dataCriacaoEmpresa || '');
             setNomeClienteRazao(razao || '');
             setSobrenome(fantasia || '');
             setEndereco(endereco || '');
@@ -315,20 +315,20 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
             setNuIBGE(codigoIbge || '');
 
 
-            if(cep) {
+            if (cep) {
                 await valida_e_preenche_cep_empresa_com_API_externa(cep, stUltimaInstancia);
             }
             return true;
         }
-        
+
         return false;
     }
 
     async function preenche_dados_registrados(response, cnpj, stUltimaInstancia = false) {
         let cnpjEmpresaVoucher = cnpj.replace(/\D/g, "");
-        
+
         // Só executa se for CNPJ válido E se o cliente não existir no banco
-        if(validarCNPJ(cnpj) && optionsCNPJ.length === 0) {
+        if (validarCNPJ(cnpj) && optionsCNPJ.length === 0) {
             await Swal.fire({
                 title: 'Deseja Autocompletar ou Atualizar as Informações deste Cliente Automaticamente de Acordo Com o Cadastro na Receita Federal?',
                 showCancelButton: true,
@@ -339,10 +339,10 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
                 customClass: { container: 'custom-swal' }
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    console.log('🔄 Buscando dados na Receita Federal para CNPJ:', cnpjEmpresaVoucher);
-    
+                    //console.log('🔄 Buscando dados na Receita Federal para CNPJ:', cnpjEmpresaVoucher);
+
                     let status = await preenche_cadastro_empresa_com_dados_de_API_externa(cnpjEmpresaVoucher);
-    
+
                     if (status) {
                         await Swal.fire({
                             title: 'Sucesso!',
@@ -356,7 +356,7 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
                 }
             });
         } else if (optionsCNPJ.length > 0) {
-            console.log('❌ Cliente já existe no banco - não consultando Receita Federal');
+            //console.log('❌ Cliente já existe no banco - não consultando Receita Federal');
             return; // Não executa busca na API se cliente já existe
         }
     }
@@ -366,11 +366,11 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
 
         try {
 
-            if(cep) {
+            if (cep) {
 
-                if(await validaCEP(cep)) {
+                if (await validaCEP(cep)) {
                     let dadosCep = await getDadosEnderecoViaCep_API_externa(cep).then(async (response) => {
-                        if(response.status !== 200) {
+                        if (response.status !== 200) {
                             return await getDadosEnderecoViaCep_API_redundancia(cep).then(response => response.data)
                         }
                         return response.data;
@@ -392,7 +392,7 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
                 }
             }
         } catch (e) {
-            console.log("Erro ao retornar o autocomplete pelo CEP, ERROR: " + (e?.message || e));
+            //console.log("Erro ao retornar o autocomplete pelo CEP, ERROR: " + (e?.message || e));
 
             !stUltimaInstancia && Swal.fire({
                 title: 'Erro',
@@ -403,13 +403,13 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
         }
     }
 
-  
+
     useEffect(() => {
         if (optionsCNPJ.length > 0) {
             const cliente = optionsCNPJ[0];
-            
-            console.log('📝 Preenchendo dados do cliente existente no banco:', cliente);
-            
+
+            //console.log('📝 Preenchendo dados do cliente existente no banco:', cliente);
+
             // Preenche com dados do banco - sem chamar APIs externas
             setIdCliente(cliente?.IDCLIENTE);
             setEmpresa(cliente?.IDEMPRESA);
@@ -457,10 +457,16 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
         { value: 9, label: 'Não Contribuinte Com ou Sem IE' },
     ]
 
+    const cliente = optionsCNPJ?.[0] || null;
+
+    const isClienteExistente = !!cliente?.IDCLIENTE;
+    const isCnpj = cnpj.replace(/\D/g, '').length > 11;
+
+    const exibirBotaoReceita = isClienteExistente && isCnpj;
 
     const onSubmit = async () => {
-        
-        if(optionsModulos[0]?.CRIAR == 'False') {
+
+        if (optionsModulos[0]?.CRIAR == 'False') {
             Swal.fire({
                 title: 'Erro!',
                 text: `${usuarioLogado?.NOFUNCIONARIO},\nVocê não tem permissão para criar um novo Cliente!`,
@@ -470,13 +476,13 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
             });
             return;
         }
-        
+
         try {
 
             let IEFinal = tipoIndicacaoIE?.value == 2 ? 'ISENTO' : (IE || 'ISENTO');
-            
+
             const isUpdate = clienteExistente.length > 0 && idCliente;
-   
+
             const postData = {
                 ...(isUpdate && { IDCLIENTE: idCliente }),
                 NUCPFCNPJ: cnpj.replace(/\D/g, ""),
@@ -519,12 +525,15 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
             await post('/log-web', postDataLog)
 
 
-            Swal.fire({
+            await Swal.fire({
                 title: isUpdate ? 'Atualização' : 'Cadastrado!',
                 text: isUpdate
                     ? `Cliente ${nomeClienteRazao} atualizado com sucesso!`
                     : `Cliente ${nomeClienteRazao} cadastrado com sucesso!`,
                 icon: 'success',
+                timer: 1500,
+                timerProgressBar: true,
+                showConfirmButton: false,
                 customClass: {
                     container: 'custom-swal',
                 }
@@ -532,14 +541,15 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
 
             handleClose();
 
-            await onCpf();
+            // Reabre o Swal de CPF/CNPJ já preenchido com o CNPJ recém-cadastrado
+            await onCpf(postData.NUCPFCNPJ);
             return response.data;
         } catch (error) {
             console.error('Erro ao cadastrar cliente:', error);
             const ipUsuario = await getIPUsuario();
             const isUpdate = optionsCNPJ.length > 0 && idCliente;
-            let textoFuncao = isUpdate 
-                ? 'GERENCIA/ATUALIZACAO DE CLIENTE' 
+            let textoFuncao = isUpdate
+                ? 'GERENCIA/ATUALIZACAO DE CLIENTE'
                 : 'GERENCIA/CADASTRO DE CLIENTE';
             const createLog = {
                 IDFUNCIONARIO: String(usuarioLogado.id),
@@ -548,7 +558,7 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
                 IP: ipUsuario
             }
             const responseLog = await post('/log-web', createLog)
-            
+
 
             Swal.fire({
                 title: 'Erro',
@@ -614,6 +624,8 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
         setEstado,
         setTelefoneComercial,
         optionsIndicacaoIE,
-        onSubmit
+        onSubmit,
+        preenche_dados_registrados,
+        exibirBotaoReceita
     }
 }

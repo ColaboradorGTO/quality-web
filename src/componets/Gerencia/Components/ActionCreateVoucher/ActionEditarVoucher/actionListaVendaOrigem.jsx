@@ -88,43 +88,43 @@ export const ActionListaVendaOrigem = ({ dadosEditarVoucher, usuarioLogado }) =>
     {
       field: 'NUCODBARRAS',
       header: 'Código Barras',
-      body: row => <th>{row.NUCODBARRAS}</th>,
+      body: row => <th style={{ color: 'blue' }}>{row.NUCODBARRAS}</th>,
       sortable: true,
     },
     {
       field: 'DSPRODUTO',
       header: 'Descrição',
-      body: row => <th>{row.DSPRODUTO}</th>,
+      body: row => <th style={{ color: 'blue' }}>{row.DSPRODUTO}</th>,
       sortable: true,
     },
     {
       field: 'VRUNIT',
       header: 'Vr Unit',
-      body: row => <th>{formatMoeda(row.VRUNIT)}</th>,
+      body: row => <th style={{ color: 'blue' }}>{formatMoeda(row.VRUNIT)}</th>,
       sortable: true,
     },
     {
       field: 'QTD',
       header: 'QTD',
-      body: row => <th>{row.QTD}</th>,
+      body: row => <th style={{ color: 'blue' }}>{row.QTD}</th>,
       sortable: true,
     },
     {
       field: 'VRTOTALBRUTO',
       header: 'Vr Bruto',
-      body: row => <th>{formatMoeda(row.VRTOTALBRUTO)}</th>,
+      body: row => <th style={{ color: 'blue' }}>{formatMoeda(row.VRTOTALBRUTO)}</th>,
       sortable: true,
     },
     {
       field: 'VRDESCONTO',
       header: 'Vr Desconto',
-      body: row => <th>{formatMoeda(row.VRDESCONTO)}</th>,
+      body: row => <th style={{ color: 'blue' }}>{formatMoeda(row.VRDESCONTO)}</th>,
       sortable: true,
     },
     {
       field: 'VRTOTALLIQUIDO',
       header: 'Vr Líquido',
-      body: row => <th>{formatMoeda(row.VRTOTALLIQUIDO)}</th>,
+      body: row => <th style={{ color: 'green' }}>{formatMoeda(row.VRTOTALLIQUIDO)}</th>,
       sortable: true,
     },
   ]
@@ -166,6 +166,7 @@ export const ActionListaVendaOrigem = ({ dadosEditarVoucher, usuarioLogado }) =>
             filterDisplay="menu"
             showGridlines
             stripedRows
+            cellMemo={false}
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado </div>}
           >
             {colunasOrigem.map(coluna => (
