@@ -3,10 +3,10 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { ButtonTable } from "../../../ButtonsTabela/ButtonTable";
 import { FaBalanceScale, FaBalanceScaleLeft } from "react-icons/fa";
-import { FaScaleUnbalanced } from "react-icons/fa6";
+import { GrFormView, GrList } from "react-icons/gr";
+import { FaCheck, FaScaleUnbalanced } from "react-icons/fa6";
 import { FcCurrencyExchange } from "react-icons/fc";
 import HeaderTable from "../../../Tables/headerTable";
-import { GrFormView, GrList } from "react-icons/gr";
 import { useReactToPrint } from "react-to-print";
 import { jsPDF } from 'jspdf';
 import * as XLSX from 'xlsx';
@@ -16,11 +16,17 @@ import { ActionColetorBalancoModal } from "./ActionColetorBalanco/actionColetorB
 import { ActionPreviaBalancoModal } from "./ActionPreviaBalanco/actionPreviaBalancoModal";
 import { ActionVisualizarImprimirPrestacaoContas } from "./ActionPrestacaoContasBalanco/actionVisualizarImprimirPrestacaoContas";
 import { toFloat } from "../../../../utils/toFloat";
+import Swal from "sweetalert2";
 import { animacaoCarregamento, fecharAnimacaoCarregamento } from "../../../../utils/animationCarregamento";
 import { useQuery } from "react-query";
-import Swal from "sweetalert2";
+import { inativarBalanco } from "./hooks/useInativarBalanco";
 
-export const ActionListaBalancoPorLoja = ({ dadosBalanco, optionsModulos, usuarioLogado }) => {
+export const ActionListaBalancoPorLoja = ({ 
+  dadosBalanco, 
+  optionsModulos, 
+  usuarioLogado,
+  handleClick
+ }) => {
   const [modalResumoBalanco, setModalResumoBalanco] = useState(false)
   const [dadosColetorBalanco, setDadosColetorBalanco] = useState([])
   const [dadosPreviaBalancoModal, setDadosPreviaBalancoModal] = useState([])
@@ -28,9 +34,13 @@ export const ActionListaBalancoPorLoja = ({ dadosBalanco, optionsModulos, usuari
   const [modalImprimirVisivel, setModalImprimirVisivel] = useState(false)
   const [dadosListaContasBalanco, setDadosListaContasBalanco] = useState([])
   const [globalFilterValue, setGlobalFilterValue] = useState('');
-  const [paramsResumo, setParamsResumo] = useState(null);
   const [rowSelection, setRowSelection] = useState(null);
+  const [paramsResumo, setParamsResumo] = useState(null);
   const dataTableRef = useRef();
+
+  const {
+    handleInativar
+  } = inativarBalanco({optionsModulos, usuarioLogado, handleClick})
 
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
@@ -54,7 +64,7 @@ export const ActionListaBalancoPorLoja = ({ dadosBalanco, optionsModulos, usuari
         item.QTDTOTALANTERIOR,
         item.QTDTOTALCONTAGEM,
         item.diferenca,
-        item.STCONCLUIDO == 'False' ? 'Concluído' : 'Em Aberto',
+        item.status,
 
       ]),
       horizontalPageBreak: true,
@@ -82,9 +92,20 @@ export const ActionListaBalancoPorLoja = ({ dadosBalanco, optionsModulos, usuari
     XLSX.writeFile(workbook, 'balanco_loja.xlsx');
   };
 
+  const getStatusBalanco = (item) => {
+    const stCancelado = item?.STCANCELADO == 'True';
+    const stConcluido = item?.STCONCLUIDO == 'True';
+    const stAtivo = item?.STATIVO == 'True';
+
+    if (stCancelado) return { texto: 'Cancelado', className: 'text-danger fw-900' };
+    if (stConcluido) return { texto: 'Concluído', className: 'text-success fw-700' };
+    if (!stAtivo) return { texto: 'Inativado', className: 'text-danger fw-700' };
+    return { texto: 'Aberto', className: 'text-info fw-700' };
+  };
+
   const dadosExcel = dadosBalanco.map((item) => {
     const diferenca = item.QTDTOTALCONTAGEM - item.QTDTOTALANTERIOR;
-    const status = item.STCONCLUIDO == 'False' ? 'Concluído' : 'Em Aberto';
+    const status = getStatusBalanco(item).texto;
     return {
       IDEMPRESA: item.IDEMPRESA,
       NOFANTASIA: item.NOFANTASIA,
@@ -100,7 +121,7 @@ export const ActionListaBalancoPorLoja = ({ dadosBalanco, optionsModulos, usuari
 
   const dados = dadosBalanco.map((item) => {
     const diferenca = item.QTDTOTALCONTAGEM - item.QTDTOTALANTERIOR;
-
+    const stConcluido = getStatusBalanco(item).texto;
     return {
       IDEMPRESA: item.IDEMPRESA,
       NOFANTASIA: item.NOFANTASIA,
@@ -109,12 +130,15 @@ export const ActionListaBalancoPorLoja = ({ dadosBalanco, optionsModulos, usuari
       QTDTOTALANTERIOR: item.QTDTOTALANTERIOR,
       QTDTOTALCONTAGEM: item.QTDTOTALCONTAGEM,
       diferenca: diferenca,
-      status: status,
+      status: stConcluido,
       STCONCLUIDO: item.STCONCLUIDO,
+      STATIVO: item.STATIVO,
+      STCANCELADO: item.STCANCELADO,
       IDRESUMOBALANCO: item.IDRESUMOBALANCO,
 
       DSRESUMOBALANCO: item.DSRESUMOBALANCO,
       STCONSOLIDADO: item.STCONSOLIDADO,
+      stConcluido
     }
   });
 
@@ -165,29 +189,41 @@ export const ActionListaBalancoPorLoja = ({ dadosBalanco, optionsModulos, usuari
     {
       field: 'STCONCLUIDO',
       header: 'Status',
-      body: row => <p style={{ fontWeight: 600, width: '100px', margin: '0px' }}>{row.STCONCLUIDO == 'True' ? 'Concluído' : 'Em Aberto'}</p>,
+      body: row => {
+        const { texto, className } = getStatusBalanco(row);
+        return <span className={className}>{texto}</span>;
+      },
       sortable: true,
     },
     {
       field: 'IDRESUMOBALANCO',
       header: 'Opções',
-      body: row => (
-        <div className="p-1 "
-          style={{ justifyContent: "space-between", display: "flex" }}
-        >
-          <div className="p-1">
+      body: row => {
+        const stCancelado = row.STCANCELADO == 'True';
+        const stConcluido = row.STCONCLUIDO == 'True';
+        const stAtivo = row.STATIVO == 'True';
+        const stInativo = !stAtivo;
+        const stConsolidado = row.STCONSOLIDADO == 'True';
+
+        // Cancelado ou Inativado (e não concluído): sem botões
+        if (stCancelado || (!stConcluido && stInativo)) return null;
+
+        const mostrarInativar = !stConcluido && !stConsolidado && stAtivo;
+
+        return (
+          <div className="p-1 "
+            style={{ display: "flex", gap: "4px" }}
+          >
             <ButtonTable
               titleButton={"Detalhar Balanço"}
               cor={"primary"}
-              //Icon={GrFormView}
               Icon={GrList}
               iconSize={20}
               width="32px"
               height="32px"
               onClickButton={() => handleClickResumoBalanco(row)}
             />
-          </div>
-          <div className="p-1">
+
             <ButtonTable
               titleButton={"Prévia Balanço"}
               cor={"success"}
@@ -197,8 +233,7 @@ export const ActionListaBalancoPorLoja = ({ dadosBalanco, optionsModulos, usuari
               height="32px"
               onClickButton={() => handleClickPrevialanco(row)}
             />
-          </div>
-          <div className="p-1">
+
             <ButtonTable
               titleButton={"Prévia Balanço Diferença"}
               cor={"warning"}
@@ -208,11 +243,7 @@ export const ActionListaBalancoPorLoja = ({ dadosBalanco, optionsModulos, usuari
               height="32px"
               onClickButton={() => handleClickPrevialanco(row)}
             />
-          </div>
-          <div className="p-1">
-            {/* {row.STCONSOLIDADO == 'True' && row.STCONCLUIDO == 'Aberto' && (
-              
-            )} */}
+
             <ButtonTable
               titleButton={"Prévia Balanço Geral"}
               cor={"danger"}
@@ -222,22 +253,33 @@ export const ActionListaBalancoPorLoja = ({ dadosBalanco, optionsModulos, usuari
               height="32px"
               onClickButton={() => handleClickPreviaGeral(row)}
             />
-          </div>
 
-          <div className="p-1">
-            <ButtonTable
-              titleButton={"Prestação de Contas"}
-              cor={"info"}
-              Icon={FcCurrencyExchange}
-              iconSize={20}
-              width="32px"
-              height="32px"
-              onClickButton={() => handleClickContaBalanco(row)}
-              disabledBTN={optionsModulos[0]?.ALTERAR == 'False' ? true : false}
-            />
+            {stConsolidado && (
+              <ButtonTable
+                titleButton={"Prestação de Contas"}
+                cor={"info"}
+                Icon={FcCurrencyExchange}
+                iconSize={20}
+                width="32px"
+                height="32px"
+                onClickButton={() => handleClickContaBalanco(row)}
+              />
+            )}
+
+            {mostrarInativar && (
+              <ButtonTable
+                titleButton={"Inativar Balanço"}
+                cor={"danger"}
+                Icon={FaCheck}
+                iconSize={20}
+                width="32px"
+                height="32px"
+                onClickButton={() => handleInativar(row)}
+              />
+            )}
           </div>
-        </div>
-      ),
+        )
+      },
       sortable: true,
     },
   ]
@@ -324,7 +366,7 @@ export const ActionListaBalancoPorLoja = ({ dadosBalanco, optionsModulos, usuari
     }
   );
 
-const handleClickPrevialanco = async (row) => {
+  const handleClickPrevialanco = async (row) => {
     if (optionsModulos[0]?.ALTERAR == 'True') {
       if (!row.IDRESUMOBALANCO || !row.IDEMPRESA) return;
       const diferenca = 1;
@@ -363,7 +405,7 @@ const handleClickPrevialanco = async (row) => {
     }
   };
 
- const handleClickPreviaGeral = async (row) => {
+  const handleClickPreviaGeral = async (row) => {
     if (optionsModulos[0]?.ALTERAR == 'True') {
       if (!row.IDRESUMOBALANCO || !row.IDEMPRESA) return;
       const diferenca = 0;
@@ -401,7 +443,7 @@ const handleClickPrevialanco = async (row) => {
     }
   };
 
- const handleClickResumoBalanco = async (row) => {
+  const handleClickResumoBalanco = async (row) => {
     if (optionsModulos[0]?.ALTERAR == 'True') {
       if (!row.IDRESUMOBALANCO || !row.IDEMPRESA) return;
       const diferenca = 1;
@@ -420,8 +462,8 @@ const handleClickPrevialanco = async (row) => {
         const data = await fetchListaColetor(row.IDRESUMOBALANCO, row.IDEMPRESA, diferenca, processa);
 
         if (data?.length) {
-           setDadosColetorBalanco(data)
-        setModalResumoBalanco(true)
+          setDadosColetorBalanco(data)
+          setModalResumoBalanco(true)
 
         }
 
@@ -451,7 +493,6 @@ const handleClickPrevialanco = async (row) => {
       if (response.data && response.data.length > 0) {
         Swal.close();
         setDadosListaContasBalanco(response.data)
-
         setModalImprimirVisivel(true)
         return response.data;
       } else {
@@ -513,7 +554,7 @@ const handleClickPrevialanco = async (row) => {
         </div>
         <div className="card" ref={dataTableRef}>
           <DataTable
-            title="Vendas por Loja"
+            title="Balanço por Loja"
             value={dados}
             globalFilter={globalFilterValue}
             size="small"
@@ -527,9 +568,9 @@ const handleClickPrevialanco = async (row) => {
             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
             filterDisplay="menu"
-            cellMemo={false}
             showGridlines
             stripedRows
+            cellMemo={false}
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
           >
             {colunasVendas.map(coluna => (

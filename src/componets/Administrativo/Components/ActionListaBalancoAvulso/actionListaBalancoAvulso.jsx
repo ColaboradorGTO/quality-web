@@ -95,28 +95,25 @@ export const ActionListaBalancoAvulso = ({ dadosBalancoAvulso, usuarioLogado, op
       return usuarioIP;
   };
 
-  const calcularTotalCusto = () => {
-    let total = 0;
-    for (let dados of dadosBalancoAvulso) {
-      total += parseFloat(dados.PRECOCUSTO);
-    }
-    return total;
-  }
-
-  const calcularTotalVenda = () => {
-    let total = 0;
-    for (let dados of dadosBalancoAvulso) {
-      total += parseFloat(dados.PRECOVENDA);
-    }
-    return total;
-  }
+  const calcularTotal = (field) => {
+    return dadosBalancoAvulso.reduce((total, item) => total + parseFloat(item[field]), 0);
+  };
 
   const calcularTotalQtd = () => {
-    let total = 0;
-    for (let dados of dadosBalancoAvulso) {
-      total += parseFloat(dados.TOTALCONTAGEMGERAL);
-    }
+    const total = calcularTotal('TOTALCONTAGEMGERAL');
     return total;
+  }
+  
+  const calcularTotalVenda = () => {
+    const total = calcularTotal('PRECOVENDA');
+    const totalQtd = calcularTotal('TOTALCONTAGEMGERAL');
+    return totalQtd * total;
+  }
+
+  const calcularTotalCusto = () => {
+    const total = calcularTotal('PRECOCUSTO');
+    const totalQtd = calcularTotal('TOTALCONTAGEMGERAL');
+    return totalQtd * total;
   }
 
   const dados = dadosBalancoAvulso.map((item) => {
@@ -330,6 +327,7 @@ export const ActionListaBalancoAvulso = ({ dadosBalancoAvulso, usuarioLogado, op
             filterDisplay="menu"
             showGridlines
             stripedRows
+            cellMemo={false}
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
           >
             {colunasVendas.map(coluna => (

@@ -54,7 +54,7 @@ export const ActionPesquisaBalancoPorLoja = ({ usuarioLogado }) => {
     { staleTime: 60 * 60 * 1000 }
   );
 
-  const fetchListaBalanco = async () => {
+const fetchListaBalanco = async () => {
     const urlBase = `/balanco-loja?idEmpresa=${empresaSelecionada}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&dsDescricao=${descricao}`;
     let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
     urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
@@ -126,7 +126,6 @@ export const ActionPesquisaBalancoPorLoja = ({ usuarioLogado }) => {
   return (
 
     <Fragment>
-
       <ActionMain
         linkComponentAnterior={["Home"]}
         linkComponent={["Balanço por Loja"]}
@@ -164,6 +163,7 @@ export const ActionPesquisaBalancoPorLoja = ({ usuarioLogado }) => {
         placeHolderInputFieldComponent={"Descrição"}
         valueInputField={descricao}
         onChangeInputField={e => setDescricao(e.target.value)}
+        onKeyDownInputField={handleKeyPress}
 
         ButtonSearchComponent={ButtonType}
         linkNomeSearch={"Pesquisar"}
@@ -178,6 +178,7 @@ export const ActionPesquisaBalancoPorLoja = ({ usuarioLogado }) => {
           dadosBalanco={dadosBalanco}
           optionsModulos={optionsModulos}
           usuarioLogado={usuarioLogado}
+          handleClick={handleClick}
         />
       }
 

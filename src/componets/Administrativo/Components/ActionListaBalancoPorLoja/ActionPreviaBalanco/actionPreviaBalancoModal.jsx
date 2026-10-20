@@ -70,7 +70,7 @@ export const ActionPreviaBalancoModal = ({
                   Icon={FaCheck}
                   iconColor="#fff"
                   iconSize={12}
-                  disabledBTN={dados[0]?.STCONSOLIDADO == 'True' ? true : false}
+                  disabledBTN={dados[0]?.STCONSOLIDADO != 'True' ? true : false}
                 />
                 <ActionListaPreviaBalanco dadosPreviaBalancoModal={dadosPreviaBalancoModal} />
               </div>
