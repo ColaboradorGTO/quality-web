@@ -13,6 +13,8 @@ import { get } from '../../../api/funcRequest';
 import { retornaDiasEntreDatas } from '../../../utils/retornoEntreDias';
 import { Checkbox } from "primereact/checkbox";
 import Swal from 'sweetalert2';
+import { IoListOutline } from "react-icons/io5";
+
 
 export const ActionListaVendaCLiente = ({
   dadosVendasClientes,
@@ -23,12 +25,15 @@ export const ActionListaVendaCLiente = ({
   setDadosVisualizarProdutos,
   tipoTrocaSelecionada,
   setTipoTrocaSelecionada,
+  dadosProdutosVendas,
+  setDadosProdutosVendas,
   quantidadesProdutos,
   setQuantidadesProdutos,
   tabelaSecundaria,
   setTabelaSecundaria,
   tabelaVenda,
   setTabelaVenda,
+
 }) => {
   const [rowClick, setRowClick] = useState(true);
   const [globalFilterValue, setGlobalFilterValue] = useState('');
@@ -51,17 +56,32 @@ export const ActionListaVendaCLiente = ({
   };
 
 
-  const handleQuantidadeChange = (contadorIndex, novaQuantidade) => {
-    const quantidade = Math.max(1, parseInt(novaQuantidade) || 1);
+  /*   const handleQuantidadeChange = (contadorIndex, novaQuantidade) => {
+      const quantidade = Math.max(1, parseInt(novaQuantidade) || 1);
+      setQuantidadesProdutos(prev => ({
+        ...prev,
+        [contadorIndex]: quantidade
+      }));
+    }; */
+
+  const handleQuantidadeChange = (contadorIndex, novaQuantidade, quantidadeMaxima) => {
+    const quantidadeInformada = Math.max(1, parseInt(novaQuantidade) || 1);
+    const quantidade = Math.min(quantidadeInformada, quantidadeMaxima);
+
     setQuantidadesProdutos(prev => ({
       ...prev,
       [contadorIndex]: quantidade
     }));
   };
 
+  /*   const getQuantidadeProduto = (contadorIndex, quantidadeOriginal) => {
+      return quantidadesProdutos[contadorIndex] || quantidadeOriginal;
+    }; */
+
   const getQuantidadeProduto = (contadorIndex, quantidadeOriginal) => {
-    return quantidadesProdutos[contadorIndex] || quantidadeOriginal;
+    return quantidadesProdutos?.[contadorIndex] ?? quantidadeOriginal;
   };
+
 
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
@@ -186,10 +206,10 @@ export const ActionListaVendaCLiente = ({
           <div>
 
             <ButtonTable
-              titleButton={"Visualizar Detalhes"}
+              titleButton={"Detalhar Produtos"}
               onClickButton={() => handleTipoTroca(row)}
-              Icon={GrFormView}
-              iconSize={30}
+              Icon={IoListOutline}
+              iconSize={18}
               width="35px"
               height="35px"
               iconColor={"#fff"}
@@ -222,10 +242,26 @@ export const ActionListaVendaCLiente = ({
       allowOutsideClick: false,
       allowEscapeKey: false,
 
-      preConfirm: () => {
-        if (row.IDVENDA) {
-          handleDetalhar(row.IDVENDA)
+      /*       preConfirm: () => {
+              if (row.IDVENDA) {
+                handleDetalhar(row.IDVENDA)
+              }
+            }
+          }); */
+
+      preConfirm: async (tipoTrocaSelecionado) => {
+        if (!tipoTrocaSelecionado) {
+          Swal.showValidationMessage(
+            'Selecione o Tipo da Troca Antes de Prosseguir',
+          );
+          return false;
         }
+
+        if (row.IDVENDA) {
+          await handleDetalhar(row.IDVENDA);
+        }
+
+        return tipoTrocaSelecionado;
       }
     });
 
@@ -237,11 +273,26 @@ export const ActionListaVendaCLiente = ({
     return false;
   };
 
+  /*   const handleDetalhar = async (IDVENDA) => {
+      try {
+        const response = await get(`/lista-venda-cliente?idVenda=${IDVENDA}`)
+        if (response.data) {
+          setDadosVisualizarProdutos(response.data)
+          setTabelaVenda(false)
+          setTabelaSecundaria(true)
+        }
+      } catch (error) {
+        console.log(error, "não foi possivel pegar os dados da tabela ")
+      }
+    } */
+
   const handleDetalhar = async (IDVENDA) => {
     try {
       const response = await get(`/lista-venda-cliente?idVenda=${IDVENDA}`)
-      if (response.data) {
+      const response2 = await get(`/lista-produtos-venda?idProduto=${IDVENDA}`)
+      if (response.data && response2.data) {
         setDadosVisualizarProdutos(response.data)
+        setDadosProdutosVendas(response2.data)
         setTabelaVenda(false)
         setTabelaSecundaria(true)
       }
@@ -253,26 +304,43 @@ export const ActionListaVendaCLiente = ({
   const dadosProdutos = dadosVisualizarProdutos.flatMap((item) => {
     const { venda, detalhe } = item;
 
+
     return detalhe.map((detalheItem, index) => {
       const contadorIndex = index + 1;
+      const dadosVendaDetalhe = dadosProdutosVendas.find(
+        (produtoVenda) =>
+          String(produtoVenda.IDVENDADETALHE) === String(detalheItem.det.IDVENDADETALHE)
+      );
+      const quantidadeVendida = Number(
+        dadosVendaDetalhe?.QUANTIDADE_VENDIDA ?? detalheItem.det.QTD
+      ) || 0;
+      const quantidadeTrocada = Number(dadosVendaDetalhe?.QUANTIDADE_TROCADA) || 0;
+      const quantidadeDisponivel = Math.max(quantidadeVendida - quantidadeTrocada, 0);
+
+
       return {
 
         CPROD: detalheItem.det.CPROD,
         IDVENDADETALHE: detalheItem.det.IDVENDADETALHE,
         XPROD: detalheItem.det.XPROD,
         NUCODBARRAS: detalheItem.det.NUCODBARRAS,
-        QTD: detalheItem.det.QTD,
-        VRTOTALLIQUIDO: detalheItem.det.VRTOTALLIQUIDO,
+        QTD: quantidadeDisponivel,
+        VRUNIT: detalheItem.det.VRTOTALLIQUIDO,
+        VRTOTALLIQUIDO: detalheItem.det.VRTOTALLIQUIDO * detalheItem.det.QTD,
         VUNTRIB: detalheItem.det.VUNTRIB,
         VPROD: detalheItem.det.VPROD,
         STTROCA: detalheItem.det.STTROCA,
         VENDEDOR_MATRICULA: detalheItem.det.VENDEDOR_MATRICULA,
         STCANCELADO: detalheItem.det.STCANCELADO,
         contadorIndex: contadorIndex,
+        QUANTIDADE_TROCADA: quantidadeTrocada,
+        QUANTIDADE_VENDIDA: quantidadeVendida,
+        contadorIndex,
 
       };
     });
   });
+
 
   const dadosProdutosVenda = dadosVisualizarProdutos.flatMap((item) => {
     let diferenciaDias;
@@ -300,8 +368,10 @@ export const ActionListaVendaCLiente = ({
             onRowSelect(row, e.checked);
             setBtnVisivel(e.checked);
           }}
-          checked={selectedRows.some(selectedRow => selectedRow.contadorIndex === row.contadorIndex)}
-          disabled={row.STTROCA == 'True' ? true : false}
+          /* checked={selectedRows.some(selectedRow => selectedRow.contadorIndex === row.contadorIndex)}
+          disabled={row.STTROCA == 'True' ? true : false} */
+          checked={row.QTD <= 0 || selectedRows.some(selectedRow => selectedRow.contadorIndex === row.contadorIndex)}
+          disabled={!vendaDentroDoPrazo || row.QTD <= 0}
         />
       ),
       sortable: true,
@@ -325,23 +395,38 @@ export const ActionListaVendaCLiente = ({
       sortable: true,
     },
     {
+      field: 'QUANTIDADE_VENDIDA',
+      header: 'Qtd.Venda',
+      body: row => <th >{row.QUANTIDADE_VENDIDA}</th>,
+      sortable: true,
+    },
+    {
+      field: 'QUANTIDADE_TROCADA',
+      header: 'Qtd.Troca',
+      body: row => <th >{row.QUANTIDADE_TROCADA}</th>,
+      sortable: true,
+    },
+    {
       field: 'QTD',
-      header: 'Quantidade',
+      header: 'Qtd.Disponivel',
       body: row => {
         const isCheckboxChecked = selectedRows.some(selectedRow => selectedRow.contadorIndex === row.contadorIndex);
-        const isDisabled = row.STTROCA == "True" || row.QTD <= 1 || isCheckboxChecked;
+        const isDisabled = !vendaDentroDoPrazo || row.QTD <= 1 || isCheckboxChecked;
+        //const isDisabled = row.STTROCA == "True" || row.QTD <= 1 || isCheckboxChecked;
         const quantidadeAtual = getQuantidadeProduto(row.contadorIndex, row.QTD);
 
         return (
           <div >
             <input
+              type="number"
               value={quantidadeAtual}
               min={1}
               max={row.QTD}
               step={1}
               style={{ width: '100px', textAlign: 'center' }}
               onChange={e => {
-                handleQuantidadeChange(row.contadorIndex, e.value);
+                handleQuantidadeChange(row.contadorIndex, e.target.value, row.QTD);
+                //handleQuantidadeChange(row.contadorIndex, e.value);
               }}
               disabled={isDisabled}
             />
@@ -351,8 +436,14 @@ export const ActionListaVendaCLiente = ({
       sortable: true,
     },
     {
+      field: 'VRUNIT',
+      header: 'Vr.Unit.Produto',
+      body: row => <th style={{}} >{formatMoeda(row.VRUNIT)} </th>,
+      sortable: true,
+    },
+    {
       field: 'VRTOTALLIQUIDO',
-      header: 'Valor',
+      header: 'Vr.Total',
       body: row => <th style={{}} >{formatMoeda(row.VRTOTALLIQUIDO)} </th>,
       sortable: true,
     },
@@ -367,7 +458,8 @@ export const ActionListaVendaCLiente = ({
 
   const calcularProdutosTrocados = (dadosProdutos) => {
     const produtosAtivos = dadosProdutos.filter(produto => produto.STCANCELADO === 'False');
-    const produtosTrocados = produtosAtivos.filter(produto => produto.STTROCA === 'True');
+    //const produtosTrocados = produtosAtivos.filter(produto => produto.STTROCA === 'True');
+    const produtosTrocados = produtosAtivos.filter(produto => produto.QTD <= 0);
 
     return {
       qtdTotalProdutos: produtosAtivos.length,
@@ -377,6 +469,24 @@ export const ActionListaVendaCLiente = ({
   };
 
   const produtosInfo = calcularProdutosTrocados(dadosProdutos);
+
+
+  const diferencaEmDias = dadosProdutosVenda[0]?.diferenciaDias;
+  const limiteDias = tipoTrocaSelecionada === 'CORTESIA' ? 32 : 90;
+  const vendaDentroDoPrazo = diferencaEmDias != null && diferencaEmDias <= limiteDias;
+
+  const quantidadeTotal = selectedRows.reduce((total, row) => {
+    const quantidade = getQuantidadeProduto(row.contadorIndex, row.QTD);
+
+    return total + (Number(quantidade) || 0);
+  }, 0);
+
+  const totalVenda = selectedRows.reduce((total, row) => {
+    const quantidade = Number(getQuantidadeProduto(row.contadorIndex, row.QTD)) || 0;
+    const valorUnitario = Number(row.VRUNIT) || 0;
+
+    return total + (valorUnitario * quantidade);
+  }, 0);
 
   const calcularDataAutorizada = (tipoTroca) => {
     return tipoTroca === 'CORTESIA' ? 32 : 90;
@@ -391,7 +501,7 @@ export const ActionListaVendaCLiente = ({
       {tabelaVenda && (
         <div className="panel">
           <div className="panel-hdr">
-            <h2>Vendas </h2>
+            <h2>Vendas</h2>
           </div>
           <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
             <HeaderTable
@@ -442,6 +552,75 @@ export const ActionListaVendaCLiente = ({
 
       {tabelaSecundaria && (
         <Fragment>
+
+          {vendaDentroDoPrazo && (
+            <div className="panel">
+
+              <div className="d-flex flex-column p-3">
+
+                <span style={{ fontSize: "20px" }} className="mb-3 fw-bold">
+                  Voucher em Andamento...
+                </span>
+
+                <div className="row ">
+
+                  <div className="col-md-2">
+                    <small className="h5 d-block fw-bold">
+                      Id.Venda:
+                    </small>
+
+                    <strong className="h4 fw-bold">
+                      {dadosProdutosVenda[0]?.IDVENDA}
+                    </strong>
+                  </div>
+
+                  <div className="col-md-2">
+                    <small className="h5 d-block fw-bold">
+                      Tipo do Voucher:
+                    </small>
+
+                    <strong style={{ color: tipoTrocaSelecionada === 'DEFEITO' ? 'red' : 'blue' }} className="h4 fw-bold">
+                      {tipoTrocaSelecionada}
+                    </strong>
+                  </div>
+
+                  <div className="col-md-2">
+                    <small className="h5 d-block fw-bold">
+                      Produtos Selecionados:
+                    </small>
+
+                    <strong className="h4 fw-bold">
+                      {selectedRows.length}
+                    </strong>
+                  </div>
+
+                  <div className="col-md-2">
+                    <small className="h5 d-block fw-bold">
+                      Quantidade Total:
+                    </small>
+
+                    <strong className="h4 fw-bold">
+                      {quantidadeTotal}
+                    </strong>
+                  </div>
+
+                  <div className="col-md-2">
+                    <small className="h5 d-block fw-bold">
+                      Valor do Voucher:
+                    </small>
+
+                    <strong className="h4 fw-bold text-success">
+                      {totalVenda.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </strong>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+          )}
+
           <div className="panel">
             <div className="panel-hdr">
               {produtosInfo.todosTrocados ? (
@@ -452,14 +631,17 @@ export const ActionListaVendaCLiente = ({
                     <i className="text-danger h4">Todos os Produtos Desta Venda Já Foram Trocados</i>
                   </span>
                 </h2>
-              ) : dadosProdutosVenda[0]?.diferenciaDias > calcularDataAutorizada(tipoTrocaSelecionada || 'DEFEITO') ? (
+                /* ) : dadosProdutosVenda[0]?.diferenciaDias > calcularDataAutorizada(tipoTrocaSelecionada || 'DEFEITO') ? ( */
+              ) : diferencaEmDias > limiteDias ? (
                 <h2>
                   <span className="fw-500">
                     <i>Produtos - Venda: {dadosProdutosVenda[0]?.IDVENDA}</i>
                     &nbsp;&nbsp;
                     <i className="text-danger h4">
-                      Venda Fora do Prazo de <u><b>{calcularDataAutorizada(tipoTrocaSelecionada || 'DEFEITO')} DIAS</b></u> Para Troca do Tipo <u><b>{tipoTrocaSelecionada || 'DEFEITO'}</b></u>.
-                      Dias Passados Após a Compra: <u><b>{dadosProdutosVenda[0]?.diferenciaDias} DIAS</b></u>
+                      {/*  Venda Fora do Prazo de <u><b>{calcularDataAutorizada(tipoTrocaSelecionada || 'DEFEITO')} DIAS</b></u> Para Troca do Tipo <u><b>{tipoTrocaSelecionada || 'DEFEITO'}</b></u>.
+                      Dias Passados Após a Compra: <u><b>{dadosProdutosVenda[0]?.diferenciaDias} DIAS</b></u> */}
+                      Venda Fora do Prazo de <u><b>{limiteDias} DIAS</b></u> Para Troca do Tipo <u><b>{tipoTrocaSelecionada || 'DEFEITO'}</b></u>.
+                      Dias Passados Após a Compra: <u><b>{diferencaEmDias} DIAS</b></u>
                     </i>
                   </span>
                 </h2>
@@ -482,6 +664,7 @@ export const ActionListaVendaCLiente = ({
               <DataTable
                 key={"IDVENDA"}
                 title="Vendas Voucher por Loja"
+                className={!vendaDentroDoPrazo ? 'p-disabled' : ''}
                 value={dadosProdutos}
                 globalFilter={globalFilterValue}
                 size="small"
@@ -495,10 +678,9 @@ export const ActionListaVendaCLiente = ({
                 rowsPerPageOptions={[10, 20, 50, 100, dadosProdutos.length]}
                 showGridlines
                 stripedRows
-                cellMemo={false}
-                rowClassName={(row) => row.STTROCA == 'True' ? 'row-disabled' : ''}
-         
-                
+                //rowClassName={(row) => row.STTROCA == 'True' ? 'row-disabled' : ''}
+                rowClassName={(row) => row.QTD <= 0 ? 'row-disabled' : ''}
+
                 emptyMessage={<div className="dataTables_empty">Não há Produtos Na Venda</div>}
               >
                 {colunasVouchers2.map(coluna => (

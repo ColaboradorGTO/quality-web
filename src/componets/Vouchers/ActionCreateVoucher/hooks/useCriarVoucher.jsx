@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { get, post } from "../../../../api/funcRequest";
@@ -6,10 +6,14 @@ import { mascaraCPF } from "../../../../utils/formatCPF";
 
 export const useCriarVoucher = ({
     usuarioLogado,
-    dadosVisualizarProdutos, 
+    selectedRows,
+    dadosVisualizarProdutos,
     quantidadesProdutos,
     setModalCadastroClienteCPFVoucher,
     setModalCadastroClienteCNPJVoucher,
+    dadosProdutosVendas,
+    setDadosProdutosVendas,
+    tipoTrocaSelecionada,
     handleClick
 }) => {
     const [ipUsuario, setIpUsuario] = useState('');
@@ -20,6 +24,9 @@ export const useCriarVoucher = ({
     const [modalCliente, setModalCliente] = useState(false);
     const [optionsCPF, setOptionsCPF] = useState([]);
     const [validaDados, setValidaDados] = useState([]);
+    const motivoTrocaRef = useRef('');
+
+
 
     const getIPUsuario = async () => {
         let usuarioIP = null;
@@ -158,21 +165,43 @@ export const useCriarVoucher = ({
             },
         });
 
+        /*    if (motivo) {
+               setMotivoTroca(motivo);
+   
+               const cpf = dadosVisualizarProdutos[0]?.venda.DEST_CPF || dadosVisualizarProdutos[0]?.venda.DEST_CNPJ;
+               if (cpf == '') {
+                   await onCpf(callback, row);
+               }
+           } */
+
         if (motivo) {
+            motivoTrocaRef.current = motivo;
             setMotivoTroca(motivo);
 
-            const cpf = dadosVisualizarProdutos[0]?.venda.DEST_CPF || dadosVisualizarProdutos[0]?.venda.DEST_CNPJ;
-            if (cpf == '') {
-                await onCpf(callback, row);
+            const cpf =
+                dadosVisualizarProdutos[0]?.venda.DEST_CPF ||
+                dadosVisualizarProdutos[0]?.venda.DEST_CNPJ;
+
+            if (!cpf) {
+                await onCpf();
             }
         }
 
     };
 
-    const onCpf = async (callback, response) => {
-        const cpfVenda = optionsCPF?.[0]?.NUCPFCNPJ || '';
+    const onCpf = async (cpfInformado = null) => {
+        // Quando vem do modal de cadastro, recebe o CPF/CNPJ recém-cadastrado
+        // para já deixar o campo preenchido; o usuário confirma manualmente.
+        const cpfRecemCadastrado = typeof cpfInformado === 'string' ? cpfInformado.replace(/\D/g, '') : '';
+        const cpfVenda = cpfRecemCadastrado || optionsCPF?.[0]?.NUCPFCNPJ || '';
+        const formatarDocumento = (doc) => doc.length === 11 ? mascaraCPF(doc) : doc;
+        const textoAuxiliar = cpfRecemCadastrado
+            ? `Cliente cadastrado: ${formatarDocumento(cpfRecemCadastrado)}`
+            : cpfVenda
+                ? `CPF da venda: ${mascaraCPF(cpfVenda)}`
+                : 'Digite o CPF do cliente';
         const { value: cpfConfirmado } = await Swal.fire({
-            title: 'Insira o CPF  ou CNPJ do Cliente',
+            title: 'Insira o CPF ou CNPJ do Cliente ',
             html: `          
                 <div>
                     <input 
@@ -184,7 +213,7 @@ export const useCriarVoucher = ({
                         value="${cpfVenda || ''}"
                         maxlength="18"
                     >
-                    <small class="fw-700 text-muted">${cpfVenda ? `CPF da venda: ${mascaraCPF(cpfVenda)}` : 'Digite o CPF do cliente'}</small>
+                    <small class="fw-700 text-muted">${textoAuxiliar}</small>
                 </div>    
             `,
             width: '25rem',
@@ -200,21 +229,21 @@ export const useCriarVoucher = ({
             didOpen: () => {
                 const swalContainer = Swal.getPopup();
                 const cpfInput = document.getElementById('cpf');
-                
+
                 // Se CPF estiver vazio, focar no input para facilitar digitação
                 if (!cpfVenda || cpfVenda === '') {
                     cpfInput.focus();
                 }
-                
+
                 // Aplicar máscara de CPF em tempo real E verificar cliente automaticamente
                 cpfInput.addEventListener('input', async (e) => {
                     e.target.value = e.target.value.replace(/[^0-9]/g, '').substring(0, 18);
-                    
+
                     const cpfDigitado = e.target.value;
                     if (cpfDigitado.length == 11 || cpfDigitado.length == 14) {
                         try {
                             const response = await get(`/cliente-todos?numeroCpfCnpj=${cpfDigitado}`)
-                            
+
                             if (response && response.data && response.data.length > 0) {
                                 // Cliente existe - pode prosseguir
                                 const confirmButton = swalContainer.querySelector('.swal2-confirm');
@@ -225,7 +254,7 @@ export const useCriarVoucher = ({
                             } else {
                                 // Cliente não existe - fechar SweetAlert e abrir modal automaticamente
                                 Swal.close();
-                                
+
                                 // Mostrar mensagem de cliente não encontrado
                                 await Swal.fire({
                                     title: 'Cliente não encontrado',
@@ -238,10 +267,11 @@ export const useCriarVoucher = ({
                                         container: 'custom-swal',
                                     }
                                 });
-                                
+
                                 setCpfCliente(cpfDigitado);
                                 if (cpfDigitado.length >= 14) {
                                     setModalCadastroClienteCNPJVoucher(true);
+
                                 } else if (cpfDigitado.length == 11) {
                                     setModalCadastroClienteCPFVoucher(true);
                                 }
@@ -250,7 +280,7 @@ export const useCriarVoucher = ({
                         } catch (error) {
                             // Em caso de erro, também redirecionar automaticamente
                             Swal.close();
-                            
+
                             // Mostrar mensagem de cliente não encontrado
                             await Swal.fire({
                                 title: 'Cliente não encontrado',
@@ -263,7 +293,7 @@ export const useCriarVoucher = ({
                                     container: 'custom-swal',
                                 }
                             });
-                            
+
                             setCpfCliente(cpfDigitado);
                             if (cpfDigitado.length >= 14) {
                                 setModalCadastroClienteCNPJVoucher(true);
@@ -281,7 +311,7 @@ export const useCriarVoucher = ({
                         }
                     }
                 });
-                
+
                 swalContainer.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') {
                         Swal.clickConfirm();
@@ -292,11 +322,11 @@ export const useCriarVoucher = ({
                 const valorOriginal = document.getElementById('cpf').value;
 
                 const cpf = valorOriginal.replace(/\D/g, '');
-                
+
                 if (!cpf || cpf.length === 0) {
                     return Swal.showValidationMessage('CPF/CNPJ é obrigatório');
                 }
-                
+
                 if (cpf.length !== 11 && cpf.length !== 14) {
                     return Swal.showValidationMessage('CPF deve ter 11 dígitos ou CNPJ deve ter 14 dígitos');
                 }
@@ -314,7 +344,7 @@ export const useCriarVoucher = ({
                     if (clienteData && clienteData.length > 0) {
                         // Unificar dados do cliente em uma única fonte
                         const dadosCliente = clienteData[0];
-                        
+
                         setUsuarioAutorizado(prev => ({
                             ...prev,
                             cpf: cpfConfirmado,
@@ -323,8 +353,8 @@ export const useCriarVoucher = ({
                         setCpfCliente(cpfConfirmado);
                         setOptionsCPF(clienteData); // Atualiza optionsCPF com os dados da API
                         await onSubmitVoucher(dadosCliente); // Passa os dados diretamente
-                 
-                    } else {                        
+
+                    } else {
                         // Mostrar mensagem de cliente não encontrado
                         await Swal.fire({
                             title: 'Cliente não encontrado',
@@ -337,7 +367,6 @@ export const useCriarVoucher = ({
                                 container: 'custom-swal',
                             }
                         });
-                        
                         setCpfCliente(cpfConfirmado);
                         if (cpfConfirmado.length >= 14) {
                             setModalCadastroClienteCNPJVoucher(true);
@@ -346,10 +375,10 @@ export const useCriarVoucher = ({
                         }
                     }
                 } else {
-                    console.log('❌ Resposta da API inválida (sem response.data)');
+                    // console.log('❌ Resposta da API inválida (sem response.data)');
                     throw new Error('Erro ao buscar dados do cliente');
                 }
-            } catch (error) {                
+            } catch (error) {
                 // Mostrar mensagem de cliente não encontrado
                 await Swal.fire({
                     title: 'Cliente não encontrado',
@@ -362,7 +391,7 @@ export const useCriarVoucher = ({
                         container: 'custom-swal',
                     }
                 });
-                
+
                 setCpfCliente(cpfConfirmado);
                 if (cpfConfirmado.length >= 14) {
                     setModalCadastroClienteCNPJVoucher(true);
@@ -371,19 +400,24 @@ export const useCriarVoucher = ({
                 }
             }
         } else {
-            console.log('❌ CPF não confirmado (usuário cancelou ou validação falhou)');
+            //  console.log('❌ CPF não confirmado (usuário cancelou ou validação falhou)');
         }
 
     };
 
-    const onSubmitVoucher = async (dadosClienteParam = null) => {
+
+    const onSubmitVoucher = async (dadosClienteParam = null, motivoTrocaParam = null) => {
+        const motivoFinal = motivoTrocaParam || motivoTrocaRef.current || motivoTroca;
+
+        console.log(motivoFinal, 'motivoFinal submit no inicio ')
+
         // Determinar fonte dos dados do cliente (priorizar parâmetro, depois optionsCPF)
         const dadosCliente = dadosClienteParam || optionsCPF?.[0];
         setValidaDados(dadosCliente);
         if (!dadosCliente) {
             throw new Error('Dados do cliente não encontrados');
         }
-        
+
         // Função para obter quantidade modificada ou original
         const getQuantidadeFinal = (contadorIndex, quantidadeOriginal) => {
             return quantidadesProdutos?.[contadorIndex] || quantidadeOriginal;
@@ -391,23 +425,54 @@ export const useCriarVoucher = ({
 
         // Calcular VRVOUCHER total baseado nas quantidades modificadas
         let valorTotalVoucher = 0;
-        const detVoucherCalculado = dadosVisualizarProdutos[0]?.detalhe.map((item, index) => {
-            const contadorIndex = index + 1;
-            const quantidadeFinal = getQuantidadeFinal(contadorIndex, item.det.QTD);
-            const valorUnitario = Number(parseFloat(item.det.VUNTRIB).toFixed(2));
+        /*         const detVoucherCalculado = dadosVisualizarProdutos[0]?.detalhe.map((item, index) => {
+                    const contadorIndex = index + 1;
+                    const quantidadeFinal = getQuantidadeFinal(contadorIndex, item.det.QTD);
+                    const valorUnitario = Number(parseFloat(item.det.VUNTRIB).toFixed(2));
+                    const valorTotalItem = valorUnitario * quantidadeFinal;
+        
+                    valorTotalVoucher += valorTotalItem;
+        
+                    return {
+                        IDPRODUTO: item.det.CPROD,
+                        QTD: Number(quantidadeFinal),
+                        VRUNIT: valorUnitario,
+                        VRTOTALBRUTO: Number(parseFloat(valorTotalItem).toFixed(2)),
+                        VRDESCONTO: Number(parseFloat(item.det.VPROD - item.det.VRTOTALLIQUIDO).toFixed(2)),
+                        VRTOTALLIQUIDO: Number(parseFloat(valorTotalItem).toFixed(2)),
+                        STATIVO: 'True',
+                        STCANCELADO: 'False',
+                    };
+                }) || []; */
+
+
+        const detalhesVenda = dadosVisualizarProdutos.flatMap((item) => item.detalhe || []);
+
+        const DetalheVoucher = selectedRows.map((produtoSelecionado) => {
+            const itemOriginal = detalhesVenda.find(
+                (item) => String(item.det.IDVENDADETALHE) === String(produtoSelecionado.IDVENDADETALHE)
+            );
+
+            if (!itemOriginal) {
+                throw new Error(`Produto selecionado ${produtoSelecionado.IDVENDADETALHE} não encontrado na venda`);
+            }
+
+            const quantidadeFinal = getQuantidadeFinal(
+                produtoSelecionado.contadorIndex,
+                produtoSelecionado.QTD
+            );
+            const valorUnitario = Number(parseFloat(itemOriginal.det.VUNTRIB).toFixed(2));
             const valorTotalItem = valorUnitario * quantidadeFinal;
-            
+
             valorTotalVoucher += valorTotalItem;
 
             return {
-                IDPRODUTO: item.det.CPROD,
+                IDVENDA: itemOriginal.det.IDVENDA,
+                IDVENDADETALHE: itemOriginal.det.IDVENDADETALHE,
+                IDPRODUTO: itemOriginal.det.CPROD,
                 QTD: Number(quantidadeFinal),
                 VRUNIT: valorUnitario,
-                VRTOTALBRUTO: Number(parseFloat(valorTotalItem).toFixed(2)),
-                VRDESCONTO: Number(parseFloat(item.det.VPROD - item.det.VRTOTALLIQUIDO).toFixed(2)),
-                VRTOTALLIQUIDO: Number(parseFloat(valorTotalItem).toFixed(2)),
-                STATIVO: 'True',
-                STCANCELADO: 'False',
+                IDVENDEDOR: itemOriginal.det.IDVENDEDOR,
             };
         }) || [];
 
@@ -427,33 +492,49 @@ export const useCriarVoucher = ({
             };
         }) || [];
 
+        console.log(motivoTroca, 'motivoTroca dentro submit')
+
         let putData = {
+            /*   IDGRUPOEMPRESARIAL: usuarioLogado?.IDGRUPOEMPRESARIAL,
+              IDEMPRESAORIGEM: usuarioLogado?.IDEMPRESA,
+              IDCAIXAORIGEM: parseInt(99999),
+              IDNFEDEVOLUCAO: 0,
+              IDUSRINVOUCHER: usuarioLogado?.id,
+              IDVENDEDOR: dadosVisualizarProdutos[0]?.detalhe[0].det.VENDEDOR_MATRICULA,
+              IDCLIENTE: dadosCliente?.IDCLIENTE,
+              NUCPF: dadosCliente?.NUCPFCNPJ,
+              VRVOUCHER: Number(parseFloat(valorTotalVoucher).toFixed(2)),
+              IDRESUMOVENDAWEB: dadosVisualizarProdutos[0]?.venda.IDVENDA,
+              STTIPOTROCA: '',
+              MOTIVOTROCA: motivoTroca,
+              IDUSRLIBERACAOCRIACAO: usuarioLogado?.id,
+              detVoucher: detVoucherCalculado,
+              produtosVoucher: produtosVoucherCalculado */
+
             IDGRUPOEMPRESARIAL: usuarioLogado?.IDGRUPOEMPRESARIAL,
             IDEMPRESAORIGEM: usuarioLogado?.IDEMPRESA,
             IDCAIXAORIGEM: parseInt(99999),
-            IDNFEDEVOLUCAO: 0,
             IDUSRINVOUCHER: usuarioLogado?.id,
             IDVENDEDOR: dadosVisualizarProdutos[0]?.detalhe[0].det.VENDEDOR_MATRICULA,
             IDCLIENTE: dadosCliente?.IDCLIENTE,
             NUCPF: dadosCliente?.NUCPFCNPJ,
             VRVOUCHER: Number(parseFloat(valorTotalVoucher).toFixed(2)),
             IDRESUMOVENDAWEB: dadosVisualizarProdutos[0]?.venda.IDVENDA,
-            STTIPOTROCA: '',
-            MOTIVOTROCA: motivoTroca,
+            STTIPOTROCA: tipoTrocaSelecionada,
+            MOTIVOTROCA: motivoFinal,
             IDUSRLIBERACAOCRIACAO: usuarioLogado?.id,
-            detVoucher: detVoucherCalculado,
-            produtosVoucher: produtosVoucherCalculado
+            DETALHEVOUCHER: DetalheVoucher,
 
         }
         try {
             if (!putData.IDCLIENTE) {
                 throw new Error('ID do cliente não foi encontrado');
             }
-            
+
             if (!putData.NUCPF) {
                 throw new Error('CPF do cliente não foi encontrado');
             }
-            
+
             if (!putData.MOTIVOTROCA) {
                 throw new Error('Motivo da troca não foi informado');
             }
@@ -463,7 +544,7 @@ export const useCriarVoucher = ({
             const textDados = JSON.stringify(putData)
             let textoFuncao = 'VOUCHER /CADASTRO DE CLIENTE';
             const ipUsuario = await getIPUsuario();
-            
+
             const postData = {
                 IDFUNCIONARIO: String(usuarioLogado.id),
                 PATHFUNCAO: textoFuncao,
@@ -484,7 +565,7 @@ export const useCriarVoucher = ({
             return response.data;
 
         } catch (error) {
-            
+
             let textoFuncao = 'VOUCHER /ERRO AO CRIAR VOUCHER';
             const ipUsuario = await getIPUsuario();
             const postData = {

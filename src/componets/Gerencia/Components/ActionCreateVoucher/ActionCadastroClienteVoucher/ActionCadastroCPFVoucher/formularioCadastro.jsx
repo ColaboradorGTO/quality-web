@@ -1,4 +1,4 @@
-import { Fragment } from "react"
+import { Fragment, useEffect } from "react"
 import { FooterModal } from "../../../../../Modais/FooterModal/footerModal"
 import { ButtonTypeModal } from "../../../../../Buttons/ButtonTypeModal"
 import { useForm, Controller } from "react-hook-form"
@@ -9,7 +9,7 @@ import { useCadastrarClienteCPFVoucher } from "../hooks/useCadastroClienteCPFVou
 import { mascaraTelefone, removerMascaraTelefone } from "../../../../../../utils/mascaraTelefone"
 
 
-export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos, optionsCPF, onCpf }) => {
+export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos, optionsCPF, onCpf, cpfCliente }) => {
   const { register, handleSubmit, formState: { errors }, clearErrors, setError, control } = useForm({
     mode: "onChange"
   });
@@ -120,6 +120,10 @@ export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos,
     }
   }
 
+  useEffect(() => {
+  setCpf(cpfCliente ?? '');
+}, [cpfCliente, setCpf]);
+
   return (
     <Fragment>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -200,7 +204,7 @@ export const FormularioCadastro = ({ handleClose, usuarioLogado, optionsModulos,
                     type="text"
                     value={mascaraCPF(cpf)}
                     onChange={(e) => setCpf(e.target.value)}
-                    readOnly={readOnlyCpf}
+                    readOnly={readOnlyCpf || cpf > 14 }
                     maxLength={14}
                     errors={errors}
                     clearErrors={clearErrors}
