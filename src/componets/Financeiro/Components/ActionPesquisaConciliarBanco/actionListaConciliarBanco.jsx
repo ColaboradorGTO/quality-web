@@ -130,7 +130,18 @@ export const ActionListaConciliarPorBanco = ({
       DOCENTRY_SAP_CONTAS_A_RECEBER: toFloat(item.DOCENTRY_SAP_CONTAS_A_RECEBER),
       STATUS_BLOQUEIO_ATUALIZACAO: item.STATUS_BLOQUEIO_ATUALIZACAO == 'True',
       ERRORLOGSAP: item.ERRORLOGSAP,
+      STATUS_TEXTO: item.STCANCELADO === 'False' ? 'Dep. Ativo' : 'Dep. Cancelado',
 
+    SITUACAO_TEXTO:
+      item.STCONFERIDO !== 'True'
+        ? 'Não Conciliado'
+        : item.STINTEGRADOSAP === 'True' || item.STINTEGRADOSAP === true
+            ? 'Conciliado e Integrado'
+            : item.STATUS_BLOQUEIO_ATUALIZACAO === 'True' || item.STATUS_BLOQUEIO_ATUALIZACAO === true
+                ? 'Conciliado e Aguardando na Fila de Integração'
+                : item.ERRORLOGSAP?.length > 0
+                    ? 'Conciliado / Error ao integrar'
+                    : 'Conciliado',
     }
   })
 
@@ -346,7 +357,7 @@ export const ActionListaConciliarPorBanco = ({
       sortable: true
     },
     {
-      field: 'STCANCELADO',
+      field: 'STATUS_TEXTO',
       header: 'Status',
       sortable: true,
       body: row => (
@@ -356,7 +367,7 @@ export const ActionListaConciliarPorBanco = ({
       ),
     },
     {
-      field: 'STCONFERIDO',
+      field: 'SITUACAO_TEXTO',
       header: 'Situação',
       sortable: true,
       body: (row) => {
