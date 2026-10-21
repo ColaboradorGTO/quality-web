@@ -130,6 +130,16 @@ export const ActionListaFaturasLoja = ({
   });
 
 
+  // Soma apenas as faturas ativas (não canceladas), como na versão jQuery
+  function calcularTotalValorRecebido() {
+    return dados.reduce((total, item) => {
+      if (item.STCANCELADO == 'False') {
+        return total + (parseFloat(item.VRRECEBIDO) || 0);
+      }
+      return total;
+    }, 0);
+  }
+
   const podeSelecionar = (item) => {
     return item.STCANCELADO === 'False' && item.STCONFERIDOFATURA !== 'True' && Boolean(item.IDDETALHEFATURA);
   };
@@ -315,7 +325,7 @@ export const ActionListaFaturasLoja = ({
       field: 'VRRECEBIDO',
       header: 'Valor',
       body: row => <th style={{}}> {formatMoeda(row.VRRECEBIDO)} </th>,
-      // footer: formatMoeda(calcularTotalValorRecebido()),
+      footer: formatMoeda(calcularTotalValorRecebido()),
       sortable: true,
     },
     {
