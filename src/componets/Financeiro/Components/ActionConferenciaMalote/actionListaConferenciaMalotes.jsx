@@ -16,7 +16,7 @@ import { ActionConferirMaloteModal } from "./ActionAlterarMalote/actionConferirM
 import { GoDownload } from "react-icons/go";
 import Swal from "sweetalert2";
 
-export const ActionListaConferenciaMalotes = ({ dadosMalotes, handleClick, optionsModulos, usuarioLogado  }) => {
+export const ActionListaConferenciaMalotes = ({ dadosMalotes, handleClick, optionsModulos, usuarioLogado, modoPesquisa }) => {
   const [globalFilterValue, setGlobalFilterValue] = useState('');
   const [dadosDetalhesMalote, setDadosDetalhesMalote] = useState([]);
   const [dadosPendenciasMalotes, setDadosPendenciasMalotes] = useState([]);
@@ -132,6 +132,7 @@ export const ActionListaConferenciaMalotes = ({ dadosMalotes, handleClick, optio
       STATIVOMALOTE: item.STATIVOMALOTE,
       DATAHORACRIACAOMALOTE: item.DATAHORACRIACAOMALOTE,
       STATUSMALOTE: item.STATUSMALOTE || 'Pendente de Envio',
+      NOFUNCIONARIOCONFERENCIA: item.NOFUNCIONARIOCONFERENCIA,
       vrTotalDespesa: vrTotalDespesa,
       vrTotalVendido: vrTotalVendido,
       vrQuebraCaixa: vrQuebraCaixa,
@@ -303,6 +304,12 @@ export const ActionListaConferenciaMalotes = ({ dadosMalotes, handleClick, optio
       sortable: true
     },
     {
+      field: 'NOFUNCIONARIOCONFERENCIA',
+      header: 'Conferente',
+      body: (rowData) => <p style={{color: 'blue', fontWeight: 600, width: '200px'}} >{rowData.NOFUNCIONARIOCONFERENCIA}</p>,
+      sortable: true
+    },
+    {
       field: 'STATUSMALOTE',
       header: 'Ações',
       width: '300px',
@@ -453,7 +460,7 @@ export const ActionListaConferenciaMalotes = ({ dadosMalotes, handleClick, optio
       <div className="panel" >
         <div className="panel-hdr">
           <h2>
-           Lista de Malotes Enviados
+           Lista de Malotes Enviados AQUI
           </h2>
         </div>
         <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
@@ -482,9 +489,12 @@ export const ActionListaConferenciaMalotes = ({ dadosMalotes, handleClick, optio
             showGridlines
             stripedRows
             response
+            cellMemo={false}
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
           >
-            {colunasMovimentoCixa.map(coluna => (
+            {colunasMovimentoCixa
+              .filter(coluna => coluna.field !== 'NOFUNCIONARIOCONFERENCIA' || modoPesquisa === 'Conferido')
+              .map(coluna => (
               <Column
                 key={coluna.field}
                 field={coluna.field}
@@ -494,7 +504,7 @@ export const ActionListaConferenciaMalotes = ({ dadosMalotes, handleClick, optio
                 sortable={coluna.sortable}
                 headerStyle={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '1rem' }}
                 footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }}
-                bodyStyle={{ fontSize: '1rem' }}
+                bodyStyle={{ fontSize: '0.8rem' }}
 
               />
             ))}

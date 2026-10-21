@@ -22,6 +22,8 @@ export const ActionPesquisaConferenciaMalote = ({ usuarioLogado }) => {
     const [statusSelecionado, setStatusSelecionado] = useState("");
     const [pendenciaSelecionada, setPendenciaSelecionada] = useState("");
     const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
+    const [modoPesquisa, setModoPesquisa] = useState("Malote");
+    const [modoPesquisaConsulta, setModoPesquisaConsulta] = useState("Malote");
 
     useEffect(() => {
         const dataInicial = getDataAtual();
@@ -30,6 +32,8 @@ export const ActionPesquisaConferenciaMalote = ({ usuarioLogado }) => {
         setDataPesquisaFim(dataFinal);
 
     }, [])
+
+    const handleChangeModoPesquisa = (e) => setModoPesquisa(e.value);
 
     useEffect(() => {
         const menuSalvo = localStorage.getItem('menuFilhoSelecionado');
@@ -121,7 +125,12 @@ export const ActionPesquisaConferenciaMalote = ({ usuarioLogado }) => {
     
 const fetchListaMalotes = async () => {
         const idEmpresa = empresaSelecionada == '' ? usuarioLogado?.IDEMPRESA : empresaSelecionada;
-        const urlBase = `/malotes-por-loja?idEmpresa=${idEmpresa}&statusMalote=${statusSelecionado}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}`;
+        const conferido = modoPesquisa === "Conferido";
+        const dataPesquisaInicioParam = conferido ? "" : dataPesquisaInicio;
+        const dataPesquisaFimParam = conferido ? "" : dataPesquisaFim;
+        const dataConferenciaInicio = conferido ? dataPesquisaInicio : "";
+        const dataConferenciaFim = conferido ? dataPesquisaFim : "";
+        const urlBase = `/malotes-loja?idEmpresa=${empresaSelecionada}&statusMalote=${statusSelecionado}&dataPesquisaInicio=${dataPesquisaInicioParam}&dataPesquisaFim=${dataPesquisaFimParam}&dataConferenciaInicio=${dataConferenciaInicio}&dataConferenciaFim=${dataConferenciaFim}`;
         let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
         urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
 
@@ -177,6 +186,7 @@ const fetchListaMalotes = async () => {
       
     const handleClick = () => {
         setTabelaVisivel(true);
+        setModoPesquisaConsulta(modoPesquisa);
         refetch();
     }
 
@@ -273,8 +283,8 @@ const fetchListaMalotes = async () => {
 
                     }))
                 ]}
-                valueSelectPendencia={pendenciaSelecionada}
-                onChangeSelectPendencia={(e) => setPendenciaSelecionada(e.value)}
+                valueSelectPendencia={modoPesquisa}
+                onChangeSelectPendencia={handleChangeModoPesquisa}
 
                 ButtonSearchComponent={ButtonType}
                 linkNomeSearch={"Pesquisar"}
@@ -290,6 +300,7 @@ const fetchListaMalotes = async () => {
                     handleClick={handleClick} 
                     optionsModulos={optionsModulos}
                     usuarioLogado={usuarioLogado}
+                    modoPesquisa={modoPesquisaConsulta}
                 />
             )}
         </Fragment>
