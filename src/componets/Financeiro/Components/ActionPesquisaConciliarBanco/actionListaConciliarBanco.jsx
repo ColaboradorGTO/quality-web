@@ -27,7 +27,9 @@ export const ActionListaConciliarPorBanco = ({
   handleClick,
   selectedItems,
   setSelectedItems,
-  setBtnVisivel
+  setBtnVisivel,
+  resetPaginacaoKey
+
 }) => {
   const [globalFilterValue, setGlobalFilterValue] = useState('');
   const [first, setFirst] = useState(0);
@@ -35,6 +37,16 @@ export const ActionListaConciliarPorBanco = ({
   const [selectAllChecked, setSelectAllChecked] = useState(false);
   const [rowSelection, setRowSelection] = useState(null);
   const dataTableRef = useRef();
+
+  const resetPaginacao = () => {
+    setFirst(0);
+    setRows(10);
+  };
+
+  
+  useEffect(() => {
+    if (resetPaginacaoKey) resetPaginacao();
+  }, [resetPaginacaoKey]);
 
   const {
     handleCancelar
@@ -687,7 +699,7 @@ export const ActionListaConciliarPorBanco = ({
             selectionMode="single"
             selection={rowSelection}
             onSelectionChange={(e) => setRowSelection(e.value)}
-            sortOrder={-1}
+            sortOrder={1}
             paginator={true}
             rows={rows}
             cellMemo={false}
@@ -703,11 +715,7 @@ export const ActionListaConciliarPorBanco = ({
             showGridlines
             stripedRows
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado </div>}
-          // rowClassName={rowData =>
-          //   selectedItems.some(item => item.IDDEPOSITOLOJA === rowData.IDDEPOSITOLOJA)
-          //     ? 'p-highlight'
-          //     : ''
-          // }
+
           >
             {colunasConciliarBanco.map(coluna => (
               <Column

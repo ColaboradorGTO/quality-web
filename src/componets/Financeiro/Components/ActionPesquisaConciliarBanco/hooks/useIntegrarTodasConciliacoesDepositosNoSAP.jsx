@@ -8,7 +8,8 @@ export const useIntegrarTodasConciliacoesDepositosNoSAP = ({
     usuarioLogado,
     handleClick,
     selectedItems,
-    setSelectedItems
+    setSelectedItems,
+    onIntegrado
 }) => {
     const [ipUsuario, setIpUsuario] = useState('');
     const [isSubmitting, setisSubmitting] = useState(true)
@@ -169,7 +170,8 @@ export const useIntegrarTodasConciliacoesDepositosNoSAP = ({
                     
                     handleClick()
                     setSelectedItems([]);
-
+                    onIntegrado?.()
+                    
                     return response.data;
                 } catch (error) {
                     const putData = {
