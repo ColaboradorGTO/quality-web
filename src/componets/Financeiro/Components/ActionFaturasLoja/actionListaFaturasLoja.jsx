@@ -315,7 +315,7 @@ export const ActionListaFaturasLoja = ({
       field: 'VRRECEBIDO',
       header: 'Valor',
       body: row => <th style={{}}> {formatMoeda(row.VRRECEBIDO)} </th>,
-      footer: formatMoeda(calcularTotalValorRecebido()),
+      // footer: formatMoeda(calcularTotalValorRecebido()),
       sortable: true,
     },
     {
