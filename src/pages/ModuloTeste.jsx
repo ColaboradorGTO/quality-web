@@ -24,7 +24,7 @@ import voucherImg from '../../public/img/icons/voucher.png';
 import maloteImg from '../../public/img/icons/malote.png';
 import permissoesImg from '../../public/img/icons/permissoes.png';
 import promocaoImg from '../../public/img/icons/promocao.png';
-
+import provisaoFinanceiraImg from '../../public/img/icons/previsao-financeira.png';
 
 export const ModuloTeste = () => {
   const [selectedModule, setSelectedModule] = useState(null);
@@ -38,10 +38,6 @@ export const ModuloTeste = () => {
       setUsuarioLogado(parsedUsuario);
     }
   }, []);
-
-  // useEffect(() => {
-
-  // }, [usuarioLogado]);
 
  
   const navigate = useNavigate();
@@ -103,7 +99,8 @@ export const ModuloTeste = () => {
     16: voucherImg,
     17: maloteImg,
     18: permissoesImg,
-    19: promocaoImg
+    19: promocaoImg,
+    20: provisaoFinanceiraImg
   };
 
 

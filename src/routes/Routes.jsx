@@ -19,7 +19,7 @@ const DashBoardMarketing = lazy(() => import("../pages/DashBoardMarketing").then
 const DashBoardGerencia = lazy(() => import("../pages/DashBoardGerencia").then(module => ({ default: module.DashBoardGerencia })));
 const DashBoardEtiquetagem = lazy(() => import("../pages/DashBoardEtiquetagem").then(module => ({ default: module.DashBoardEtiquetagem })));
 const DashBoardConferenciaCega = lazy(() => import("../pages/DashBoardConferenciaCega").then(module => ({ default: module.DashBoardConferenciaCega })));
-
+const DashBoardProvisaoFinanceira = lazy(() => import("../pages/DashBoardProvisaoFinanceira").then(module => ({ default: module.DashBoardProvisaoFinanceira })));
 
 const DashBoardCompras = lazy(() => import("../pages/DashBoardCompras").then(module => ({ default: module.DashBoardCompras })));
 const DashBoardCadastro = lazy(() => import("../pages/DashBoardCadastro").then(module => ({ default: module.DashBoardCadastro })));
@@ -84,6 +84,7 @@ export const RoutesMain = () => {
         <Route path="/DashBoardCadastro" element={<DashBoardCadastro componentToShow={componentToShow} handleShowComponent={handleShowComponent}  /> } />
         <Route path="/DashBoardComercial" element={<DashBoardComercial componentToShow={componentToShow} handleShowComponent={handleShowComponent}  /> } />
         <Route path="/DashBoardEtiquetagem" element={<DashBoardEtiquetagem componentToShow={componentToShow} handleShowComponent={handleShowComponent}  /> } />
+        <Route path="/DashBoardProvisaoFinanceira" element={<DashBoardProvisaoFinanceira componentToShow={componentToShow} handleShowComponent={handleShowComponent} />} />
       </Routes>
     </Suspense>
   );
