@@ -23,8 +23,8 @@ export const ActionListaFaturasLoja = ({
   usuarioLogado, 
   handleClick, 
   selectedItems,
-  setSelectedItems
-
+  setSelectedItems,
+  resetPaginacaoKey
 }) => {
   const [modalFaturaVisivel, setModalFaturaVisivel] = useState(false);
   const [dadosDetalheFaturaCaixa, setDadosDetalheFaturaCaixa] = useState([]);
@@ -35,6 +35,15 @@ export const ActionListaFaturasLoja = ({
   const [rows, setRows] = useState(10);
   const [rowSelection, setRowSelection] = useState(null);
   const dataTableRef = useRef();
+
+  const resetPaginacao = () => {
+    setFirst(0);
+    setRows(10);
+  };
+  
+  useEffect(() => {
+    if (resetPaginacaoKey) resetPaginacao();
+  }, [resetPaginacaoKey]);
 
   const {
     conferir
@@ -129,8 +138,6 @@ export const ActionListaFaturasLoja = ({
     }
   });
 
-
-  // Soma apenas as faturas ativas (não canceladas), como na versão jQuery
   function calcularTotalValorRecebido() {
     return dados.reduce((total, item) => {
       if (item.STCANCELADO == 'False') {
@@ -506,6 +513,7 @@ export const ActionListaFaturasLoja = ({
             filterDisplay="menu"
             sortOrder={-1}
             paginator={true}
+            cellMemo={false}
             first={first}
             rows={rows}
             onPage={(e) => {

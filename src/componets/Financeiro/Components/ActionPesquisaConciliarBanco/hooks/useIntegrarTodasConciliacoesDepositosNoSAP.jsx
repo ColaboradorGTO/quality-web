@@ -144,7 +144,7 @@ export const useIntegrarTodasConciliacoesDepositosNoSAP = ({
                     }
 
                     await post('/log-web', postData)
-
+                    
                     if (falhas.length === 0) {
                         await Swal.fire({
                             title: 'Sucesso!',
@@ -171,7 +171,6 @@ export const useIntegrarTodasConciliacoesDepositosNoSAP = ({
                     handleClick()
                     setSelectedItems([]);
                     onIntegrado?.()
-                    
                     return response.data;
                 } catch (error) {
                     const putData = {

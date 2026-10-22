@@ -1,8 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from "react"
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { AiOutlineDelete } from "react-icons/ai"
-import { dataFormatada } from "../../../../utils/dataFormatada";
 import { formatMoeda } from "../../../../utils/formatMoeda";
 import { ButtonTable } from "../../../ButtonsTabela/ButtonTable";
 import { CiEdit } from "react-icons/ci";
@@ -27,9 +25,10 @@ export const ActionListaDespesaLoja = ({
   handleClick,
   selectedItems,
   setSelectedItems,
-  setBtnVisivel
+  setBtnVisivel,
+  resetPaginacaoKey
 }) => {
-  const { handleAtivar, handleCancelar } = useEditarDespesa(usuarioLogado, optionsModulos, handleClick);
+  const { handleAtivar, handleCancelar } = useEditarDespesa({usuarioLogado, optionsModulos, handleClick});
   const { handleMigrarDespesa } = useMigrarDespesaSAP({ optionsModulos, usuarioLogado, selectedItems, handleClick });
   const [modalDespesasVisivel, setModalDespesasVisivel] = useState(false);
   const [dadosDespesasLojaDetalhe, setDadosDespesasLojaDetalhe] = useState([]);
@@ -39,6 +38,17 @@ export const ActionListaDespesaLoja = ({
   const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(10);
   const dataTableRef = useRef();
+
+
+  const resetPaginacao = () => {
+    setFirst(0);
+    setRows(10);
+  };
+  
+  useEffect(() => {
+    if (resetPaginacaoKey) resetPaginacao();
+  }, [resetPaginacaoKey]);
+
   const arraySituacao = [
     { color: 'info', txt: 'Pronto para Integrar SAP' },
     { color: 'primary', txt: 'Em Fila' },
@@ -145,7 +155,7 @@ export const ActionListaDespesaLoja = ({
   }) : [];
 
 useEffect(() => {
-  const itensSelecionaveis = dados.filter(item =>
+  const itensSelecionaveis = dados.slice(first, first + rows).filter(item =>
     item.stDespesaLoja &&
     !item.stAguardandoEmFila &&
     !item.stMigrado &&
@@ -154,14 +164,8 @@ useEffect(() => {
 
   setBtnVisivel(selectedItems.length > 0);
 
-  const todosRegistrosNaTela =
-    first === 0 &&
-    rows >= dados.length;
-
   const todosSelecionados =
-    todosRegistrosNaTela &&
     itensSelecionaveis.length > 0 &&
-    selectedItems.length === itensSelecionaveis.length &&
     itensSelecionaveis.every(item =>
       selectedItems.some(
         selected =>
@@ -391,6 +395,7 @@ const onSelectAllChange = (e) => {
     {
       field: 'Situacao',
       header: 'Situação',
+      sortable: true,
       body: row => {
         return (
           <span style={{ color: getColorByClass(row.colorSituacao), fontWeight: 900 }}>
@@ -398,7 +403,6 @@ const onSelectAllChange = (e) => {
           </span>
         );
       },
-      sortable: true,
     },
     {
       field: 'Opcoes',

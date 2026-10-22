@@ -27,7 +27,8 @@ export const ActionListaVendasPIXCompensacao = ({
   optionsModulos,
   btnVisivel,
   setBtnVisivel,
-  handleClickVendasPixCompensacao
+  handleClickVendasPixCompensacao,
+  resetPaginacaoKey
 }) => {
   const [globalFilterValue, setGlobalFilterValue] = useState('');
   const [first, setFirst] = useState(0);
@@ -35,6 +36,15 @@ export const ActionListaVendasPIXCompensacao = ({
   const [selectAllChecked, setSelectAllChecked] = useState(false);
   const [rowSelection, setRowSelection] = useState(null);
   const dataTableRef = useRef();
+
+  const resetPaginacao = () => {
+    setFirst(0);
+    setRows(10);
+  };
+  
+  useEffect(() => {
+    if (resetPaginacaoKey) resetPaginacao();
+  }, [resetPaginacaoKey]);
 
   const { handleClickIntegrar } = useIntegrarPagamentoPix({ optionsModulos, usuarioLogado, handleClickVendasPixCompensacao, setSelectedItems })
 
@@ -139,7 +149,7 @@ export const ActionListaVendasPIXCompensacao = ({
   }) : [];
 
 
-  // Função para determinar o status de integração baseado na lógica do retornoListaVendasPixDTW
+  
   const obterStatusIntegracao = (row) => {
     const docEntryContasReceber = row.DOCENTRY_SAP_CONTAS_A_RECEBER_PGTO_PIX;
     const stEmFilaParaIntegracao = row.STATUS_BLOQUEIO_ATUALIZACAO;
@@ -176,7 +186,7 @@ export const ActionListaVendasPIXCompensacao = ({
     }
   };
 
-  // Função para determinar quais botões mostrar baseado na lógica do retornoListaVendasPixDTW
+  
   const obterOpcoesDisponiveis = (row) => {
     const docEntryContasReceber = row.DOCENTRY_SAP_CONTAS_A_RECEBER_PGTO_PIX;
     const stEmFilaParaIntegracao = row.STATUS_BLOQUEIO_ATUALIZACAO;

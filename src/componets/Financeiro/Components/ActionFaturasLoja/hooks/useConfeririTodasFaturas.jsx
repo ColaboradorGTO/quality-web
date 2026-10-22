@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { post, put } from "../../../../../api/funcRequest";
-import axios from 'axios'
+import { put } from "../../../../../api/funcRequest";
 import Swal from "sweetalert2";
+import { registrarLogAuditoria } from "../../../../../services/auditLog";
 
 export const useConferirTodasFaturas = ({
     optionsModulos,
@@ -10,46 +10,25 @@ export const useConferirTodasFaturas = ({
     selectedItems,
     disabledConferir,
     setDisabledConciliar,
+    onIntegrado
 }) => {
-    const [ipUsuario, setIpUsuario] = useState('');
-
-    const getIPUsuario = async () => {
-        let usuarioIP = null;
-
-        try {
-            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-            usuarioIP = ipWhoisData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ipwho.is:", error);
-        }
-
-        if (!usuarioIP) {
-            try {
-                const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-                usuarioIP = ipifyData?.ip;
-            } catch (error) {
-                console.error("Erro ao buscar IP via ipify.org:", error);
-            }
-        }
-        setIpUsuario(usuarioIP);
-        return usuarioIP;
-    };
+    const [isSubmitting, setisSubmitting] = useState(true)
 
     const conferirTodas = async (data) => {
         if (optionsModulos[0]?.ALTERAR == 'False') {
             Swal.fire({
                 position: 'center',
-                icon: 'error',
-                title: 'Você não tem permissão para alterar a fatura.',
+                icon: 'info',
+                title: 'Atenção!',
+                html: `${usuarioLogado?.NOFUNCIONARIO} <br/> Você não tem permissão para alterar a fatura.`,
                 showConfirmButton: false,
-                timer: 3000,
+                timer: 5000,
                 customClass: {
                     container: 'custom-swal',
                 },
             });
             return;
         }
-
 
         Swal.fire({
             title: 'Deseja confirmar a conferência destas faturas?',
@@ -72,7 +51,6 @@ export const useConferirTodasFaturas = ({
         }).then(async (result) => {
 
             if (result.isConfirmed) {
-
                 const idsFaturas = selectedItems.map(item => item.IDDETALHEFATURA).join(',');
                 const putData = {
                     IDS_FATURAS: idsFaturas.replace(/(^,|,$)/g, ''),
@@ -81,57 +59,49 @@ export const useConferirTodasFaturas = ({
                 }
 
                 try {
-                    setDisabledConciliar(true); 
+                    setDisabledConciliar(true);
                     const response = await put('/conferencia-fatura/:id', putData)
-                    const textDados = JSON.stringify(putData)
-                    const ipUsuario = await getIPUsuario();
-                    const postData = {
-                        IDFUNCIONARIO: String(usuarioLogado.id),
-                        PATHFUNCAO: `FINANCEIRO/CONFERIR TODAS FATURAS SELECIONADAS`,
-                        DADOS: textDados,
-                        IP: ipUsuario || 'IP não disponível'
-                    }
-
-                    await post('/log-web', postData)
+             
+                    await registrarLogAuditoria({
+                        idFuncionario: usuarioLogado?.id,
+                        pathFuncao: 'FINANCEIRO/CONFERIR TODAS FATURAS SELECIONADAS',
+                        dados: putData
+                    })
                     Swal.fire({
                         position: 'center',
                         icon: 'success',
                         title: 'Atualizado com sucesso!',
                         showConfirmButton: false,
-                        timer: 3000,
+                        timer: 5000,
                         customClass: {
                             container: 'custom-swal',
                         },
                     })
 
                     handleClick();
+                    onIntegrado?.()
                     return response.data;
                 } catch (error) {
-                    const textDados = JSON.stringify(putData)
-                    const ipUsuario = await getIPUsuario();
-                    const postData = {
-                        IDFUNCIONARIO: String(usuarioLogado.id),
-                        PATHFUNCAO: `FINANCEIRO/ERRO AO CONFERIR TODAS FATURAS SELECIONADAS`,
-                        DADOS: textDados,
-                        IP: ipUsuario || 'IP não disponível'
-                    }
-
-                    const responsePost = await post('/log-web', postData)
-
+               
+                    await registrarLogAuditoria({
+                        idFuncionario: usuarioLogado?.id,
+                        pathFuncao: `FINANCEIRO/ERRO AO CONFERIR TODAS FATURAS SELECIONADAS`,
+                        dados: putData
+                    })
 
                     Swal.fire({
                         position: 'center',
                         icon: 'error',
-                        title: 'Ocorreu um erro ao enviar o formulário. Por favor, tente novamente.',
+                        title: 'Ocorreu um erro ao enviar os dados. Por favor, tente novamente.',
                         showConfirmButton: false,
-                        timer: 3000,
+                        timer: 5000,
                         customClass: {
                             container: 'custom-swal',
                         },
                     });
                     console.error('Erro Conferir Todas Faturas:', error);
-                    return responsePost.data;
-                }
+                    return;
+                } 
                 finally {
                     setDisabledConciliar(false);
                 }
@@ -139,11 +109,10 @@ export const useConferirTodasFaturas = ({
                 return;
             }
         });
-
     }
-
 
     return {
         conferirTodas,
+        isSubmitting
     }
 }

@@ -1,47 +1,27 @@
 import { useState } from "react";
 import { post } from "../../../../../api/funcRequest";
-import axios from 'axios'
 import Swal from "sweetalert2";
+import { registrarLogAuditoria } from "../../../../../services/auditLog";
 
 export const useIntegrarTodosPagamentosPix = ({
     optionsModulos,
     usuarioLogado,
     handleClickVendasPixCompensacao,
     selectedItems,
-    setSelectedItems
+    setSelectedItems,
+    onIntegrado
 }) => {
-    const [ipUsuario, setIpUsuario] = useState('');
-
-    const getIPUsuario = async () => {
-        let usuarioIP = null;
-
-        try {
-            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-            usuarioIP = ipWhoisData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ipwho.is:", error);
-        }
-
-        if (!usuarioIP) {
-            try {
-                const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-                usuarioIP = ipifyData?.ip;
-            } catch (error) {
-                console.error("Erro ao buscar IP via ipify.org:", error);
-            }
-        }
-        setIpUsuario(usuarioIP);
-        return usuarioIP;
-    };
+    const [isSubmitting, setisSubmitting] = useState(false);
 
     const integrarTodos = async () => {
         if (optionsModulos[0]?.ALTERAR == 'False') {
             Swal.fire({
                 position: 'center',
                 icon: 'error',
-                title: 'Você não tem permissão para alterar o pagamento PIX.',
+                title: 'Atenção!',
+                html: `${usuarioLogado?.NOFUNCIONARIO} <br/> Você não tem permissão para alterar o pagamento PIX.`,
                 showConfirmButton: false,
-                timer: 3000,
+                timer: 5000,
                 customClass: {
                     container: 'custom-swal',
                 },
@@ -70,17 +50,60 @@ export const useIntegrarTodosPagamentosPix = ({
         }).then(async (result) => {
 
             if (result.isConfirmed) {
+                setisSubmitting(true)
+                const total = selectedItems.length;
+                let enviados = 0;
+                
+                const atualizarContador = () => {
+                    const container = Swal.getHtmlContainer();
+
+                    if (!container) return;
+
+                    const restantes = total - enviados;
+                    const percentual = total > 0
+                        ? (enviados / total) * 100
+                        : 0;
+
+                    container.innerHTML = `
+                        <div style="font-size:2rem;font-weight:bold;">
+                            ${enviados} / ${total}
+                        </div>
+
+                        <div style="
+                            margin:10px 0;
+                            background:#e9ecef;
+                            border-radius:6px;
+                            height:12px;
+                            overflow:hidden;
+                        ">
+                            <div style="
+                                width:${percentual}%;
+                                height:100%;
+                                background:#28a745;
+                                transition:width .2s;
+                            "></div>
+                        </div>
+
+                        <div>
+                            Enviados: <b>${enviados}</b>
+                            &nbsp;|&nbsp;
+                            Faltam: <b>${restantes}</b>
+                        </div>
+                    `;
+                };
+
                 Swal.fire({
                     position: 'center',
                     icon: 'info',
                     title: 'Integrando Pagamentos PIX',
-                    html: 'Aguarde... <br><small><strong id="progressoIntegracao">0</strong> de <strong id="totalIntegracao">' + selectedItems.length + '</strong></small>',
+                    html: 'Aguarde...',
                     showConfirmButton: false,
                     allowOutsideClick: false,
                     allowEscapeKey: false,
                     customClass: {
                         container: 'custom-swal',
-                    }
+                    },
+                    didOpen: atualizarContador
                 });
                 try {
                     for (let i = 0; i < selectedItems.length; i++) {
@@ -89,27 +112,24 @@ export const useIntegrarTodosPagamentosPix = ({
                             IDVENDAPAGAMENTO: rowData.IDVENDAPAGAMENTO,
                         };
 
-                        document.getElementById('progressoIntegracao').innerText = i + 1;
-
-
                         const response = await post('/pix-integracao', putData)
-                        const textDados = JSON.stringify(putData)
-                        await getIPUsuario();
-                        const postData = {
-                            IDFUNCIONARIO: String(usuarioLogado.id),
-                            PATHFUNCAO: `FINANCEIRO/INTEGRAR TODOS PAGAMENTOS PIX SELECIONADOS`,
-                            DADOS: textDados,
-                            IP: ipUsuario || 'INDISPONIVEL'
-                        }
+                        enviados++;
+                        atualizarContador();
 
-                        await post('/log-web', postData)
+                        await registrarLogAuditoria({
+                            idFuncionario: usuarioLogado?.id,
+                            pathFuncao: `FINANCEIRO/INTEGRAR TODOS PAGAMENTOS PIX SELECIONADOS`,
+                            dados: putData
+                        });
                     }
+
+
                     Swal.fire({
                         position: 'center',
                         icon: 'success',
-                        title: 'Atualizado com sucesso!',
+                        title: 'Integrado com sucesso!',
                         showConfirmButton: false,
-                        timer: 3000,
+                        timer: 5000,
                         customClass: {
                             container: 'custom-swal',
                         },
@@ -117,43 +137,46 @@ export const useIntegrarTodosPagamentosPix = ({
 
                     setSelectedItems([]);
                     handleClickVendasPixCompensacao();
-
-
+                    onIntegrado?.()
+                    return;
                 } catch (error) {
 
-                    const ipUsuario = await getIPUsuario();
-                    const postData = {
-                        IDFUNCIONARIO: String(usuarioLogado.id),
-                        PATHFUNCAO: `FINANCEIRO/ERRO AO INTEGRAR TODOS PAGAMENTOS PIX SELECIONADOS`,
-                        DADOS: '',
-                        IP: ipUsuario || 'INDISPONIVEL'
+                    for (let i = 0; i < selectedItems.length; i++) {
+                        const rowData = selectedItems[i];
+                        const putData = {
+                            IDVENDAPAGAMENTO: rowData.IDVENDAPAGAMENTO,
+                        };
+
+                        await registrarLogAuditoria({
+                            idFuncionario: usuarioLogado?.id,
+                            pathFuncao: `FINANCEIRO/ERRO AO INTEGRAR TODOS PAGAMENTOS PIX SELECIONADOS`,
+                            dados: putData
+                        });
                     }
-
-                    const responsePost = await post('/log-web', postData)
-
 
                     Swal.fire({
                         position: 'center',
                         icon: 'error',
-                        title: 'Ocorreu um erro ao enviar o formulário. Por favor, tente novamente.',
+                        title: 'Ocorreu um erro ao tentar integrar os pagamentos.',
                         showConfirmButton: false,
-                        timer: 3000,
+                        timer: 5000,
                         customClass: {
                             container: 'custom-swal',
                         },
                     });
                     console.error('Erro Integrar Todos Pagamentos PIX:', error);
-                    return responsePost.data;
+                    return;
+                } finally {
+                    setisSubmitting(false)
                 }
             } else {
                 return;
             }
         });
-
     }
-
 
     return {
         integrarTodos,
+        isSubmitting
     }
 }

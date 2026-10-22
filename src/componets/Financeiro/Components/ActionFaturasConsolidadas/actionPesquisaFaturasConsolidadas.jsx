@@ -28,6 +28,7 @@ export const ActionPesquisaFaturasConsolidadas = ({ usuarioLogado }) => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [selectedItemsConciliar, setSelectedItemsConciliar] = useState([]);
   const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
+  const [resetPaginacaoKey, setResetPaginacaoKey] = useState(0);
 
   useEffect(() => {
     const dataInicial = getDataAtual();
@@ -180,8 +181,22 @@ export const ActionPesquisaFaturasConsolidadas = ({ usuarioLogado }) => {
 
   const {
     conferirTodas,
-    conferirTodasConsolidadas
-  } = useConsolidarTodasFaturas({ optionsModulos, usuarioLogado, handleClickConciliar, handleClick, selectedItems, setSelectedItems, selectedItemsConciliar, setSelectedItemsConciliar });
+    conferirTodasConsolidadas,
+    isSubmitting
+  } = useConsolidarTodasFaturas({ 
+    optionsModulos, 
+    usuarioLogado, 
+    handleClickConciliar, 
+    handleClick, 
+    selectedItems, 
+    setSelectedItems, 
+    selectedItemsConciliar, 
+    setSelectedItemsConciliar, 
+    onIntegrado: () => {
+      setSelectedItems([]);
+      setResetPaginacaoKey((k) => k + 1);
+    }
+  });
 
   const conferirTodasSelecionadas = () => {
 
@@ -216,7 +231,7 @@ export const ActionPesquisaFaturasConsolidadas = ({ usuarioLogado }) => {
 
   }
 
-    const conferirTodasSelecionadasConsolidacoes = () => {
+  const conferirTodasSelecionadasConsolidacoes = () => {
 
     if (selectedItemsConciliar.length === 0) {
       Swal.fire({
@@ -305,6 +320,7 @@ export const ActionPesquisaFaturasConsolidadas = ({ usuarioLogado }) => {
           corCancelar={"warning"}
           IconCancelar={MdOutlineCloudUpload}
           styleCancelar={{ display: selectedItems.length > 0 ? 'block' : 'none' }}
+          disabledCancelar={isSubmitting}
 
           ButtonTypeSalvar={ButtonType}
           linkSalvar={"Integrar Todos"}
@@ -324,6 +340,7 @@ export const ActionPesquisaFaturasConsolidadas = ({ usuarioLogado }) => {
           handleClickConciliar={handleClickConciliar}
           selectedItems={selectedItems}
           setSelectedItems={setSelectedItems}
+          resetPaginacaoKey={resetPaginacaoKey}
         />
       )}
 

@@ -1,32 +1,8 @@
-import axios from "axios";
-import { put, post } from "../../../../../api/funcRequest";
+import { put } from "../../../../../api/funcRequest";
 import Swal from "sweetalert2";
-import { useState } from "react";
+import { registrarLogAuditoria } from "../../../../../services/auditLog";
 
-export const useEditarDespesa = (usuarioLogado,  optionsModulos, handleClick) => {
-  const [ipUsuario, setIpUsuario] = useState('');
-
-  const getIPUsuario = async () => {
-    let usuarioIP = null;
-
-    try {
-      const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-      usuarioIP = ipWhoisData?.ip;
-    } catch (error) {
-      console.error("Erro ao buscar IP via ipwho.is:", error);
-    }
-
-    if (!usuarioIP) {
-      try {
-        const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-        usuarioIP = ipifyData?.ip;
-      } catch (error) {
-        console.error("Erro ao buscar IP via ipify.org:", error);
-      }
-    }
-    setIpUsuario(usuarioIP);
-    return usuarioIP;
-  };
+export const useEditarDespesa = ({usuarioLogado,  optionsModulos, handleClick}) => {
 
   const handleAtivar = async (row, status) => {
     if (optionsModulos[0]?.ALTERAR !== 'True') {
@@ -51,51 +27,46 @@ export const useEditarDespesa = (usuarioLogado,  optionsModulos, handleClick) =>
     };
 
     try {
-      await put('/editar-status-despesa/:id', postData);
-      
-      const textDados = JSON.stringify(postData);
-      const textoFuncao = 'FINANCEIRO/ATIVAR DESPESA';
-      const ipUsuario = await getIPUsuario();
-      const createData = {
-        IDFUNCIONARIO: String(usuarioLogado.id),
-        PATHFUNCAO: textoFuncao,
-        DADOS: textDados,
-        IP: ipUsuario || 'Indisponível'
-      };
-      
-      await post('/log-web', createData);
+      const response = await put('/editar-status-despesa/:id', postData);
+
+      await registrarLogAuditoria({
+        idFuncionario: usuarioLogado?.id,
+        pathFuncao: 'FINANCEIRO/ATIVAR DESPESA',
+        dados: postData
+      })
+
       Swal.fire({
         title: 'Sucesso',
         text: 'Despesa ativada com Sucesso',
         icon: 'success',
-        timer: 3000,
+        timer: 5000,
         customClass: {
           container: 'custom-swal',
         }
       });
-      handleClick();
-    } catch (error) {
-      const textDados = JSON.stringify(postData);
-      const textoFuncao = 'FINANCEIRO/ERRO AO ATIVAR DESPESA';
-      const ipUsuario = await getIPUsuario();
-      const createData = {
-        IDFUNCIONARIO: String(usuarioLogado.id),
-        PATHFUNCAO: textoFuncao,
-        DADOS: textDados,
-        IP: ipUsuario || 'Indisponível'
-      };
 
-      await post('/log-web', createData);
+      handleClick();
+      return response.data;
+    } catch (error) {
+      console.log(error, 'erro ao ativar despesa')
+      
+      await registrarLogAuditoria({
+        idFuncionario: usuarioLogado?.id,
+        pathFuncao: 'FINANCEIRO/ERRO AO ATIVAR DESPESA',
+        dados: postData
+      })
 
       Swal.fire({
         title: 'Erro',
         text: 'Erro ao Tentar Ativar Despesa',
         icon: 'error',
-        timer: 3000,
+        timer: 5000,
         customClass: {
           container: 'custom-swal',
         }
       });
+
+      return;
     }
   };
 
@@ -122,42 +93,33 @@ export const useEditarDespesa = (usuarioLogado,  optionsModulos, handleClick) =>
     };
 
     try {
-      await put('/editar-status-despesa/:id', postData);
+      const response = await put('/editar-status-despesa/:id', postData);
       
-      const textDados = JSON.stringify(postData);
-      const textoFuncao = 'FINANCEIRO/CANCELAR DESPESA';
-      const ipUsuario = await getIPUsuario();
-      const createData = {
-        IDFUNCIONARIO: String(usuarioLogado.id),
-        PATHFUNCAO: textoFuncao,
-        DADOS: textDados,
-        IP: ipUsuario || 'Indisponível'
-      };
-      
-      await post('/log-web', createData);
+      await registrarLogAuditoria({
+        idFuncionario: usuarioLogado?.id,
+        pathFuncao: 'FINANCEIRO/CANCELAR DESPESA',
+        dados: postData
+      })
+
       Swal.fire({
         title: 'Sucesso',
         text: 'Despesa cancelada com Sucesso',
         icon: 'success',
-        timer: 3000,
+        timer: 5000,
         customClass: {
           container: 'custom-swal',
         }
       });
+
       handleClick();
+      return response.data;
     } catch (error) {
-      const textDados = JSON.stringify(postData);
-      const textoFuncao = 'FINANCEIRO/ERRO AO CANCELAR DESPESA';
-      const ipUsuario = await getIPUsuario();
-      const createData = {
-        IDFUNCIONARIO: String(usuarioLogado.id),
-        PATHFUNCAO: textoFuncao,
-        DADOS: textDados,
-        IP: ipUsuario || 'Indisponível'
-      };
-
-      await post('/log-web', createData);
-
+      console.log(error, 'erro ao tentar')
+      await registrarLogAuditoria({
+        idFuncionario: usuarioLogado?.id,
+        pathFuncao: 'FINANCEIRO/ERRO AO CANCELAR DESPESA',
+        dados: postData
+      })
       Swal.fire({
         title: 'Erro',
         text: 'Erro ao Tentar Cancelar Despesa',

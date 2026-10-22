@@ -23,6 +23,7 @@ export const ActionListaFaturasConsolidadas = ({
   handleClickConciliar,
   selectedItems,
   setSelectedItems,
+  resetPaginacaoKey
 }) => {
   const [globalFilterValue, setGlobalFilterValue] = useState('');
   const [rowSelection, setRowSelection] = useState(null);
@@ -33,6 +34,15 @@ export const ActionListaFaturasConsolidadas = ({
   const [btnVisivel, setBtnVisivel] = useState(false);
   const [onGlobalFilterChange , setOnGlobalFilterChange ] = useState(false);
   const dataTableRef = useRef();
+
+  const resetPaginacao = () => {
+    setFirst(0);
+    setRows(10);
+  };
+  
+  useEffect(() => {
+    if (resetPaginacaoKey) resetPaginacao();
+  }, [resetPaginacaoKey])
 
   const {
     confirmar

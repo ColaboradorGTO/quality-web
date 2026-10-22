@@ -1,32 +1,8 @@
-import axios from "axios";
-import { useState } from "react";
 import Swal from "sweetalert2";
 import { post } from "../../../../../api/funcRequest";
+import { registrarLogAuditoria } from "../../../../../services/auditLog";
 
-export const useIntegrarConciliarDepositoNoSAP = ({ optionsModulos, usuarioLogado, handleClick }) => {
-    const [ipUsuario, setIpUsuario] = useState('');
-
-    const getIPUsuario = async () => {
-        let usuarioIP = null;
-
-        try {
-            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-            usuarioIP = ipWhoisData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ifconfig.me:", error);
-        }
-
-        if (!usuarioIP) {
-            try {
-                const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-                usuarioIP = ipifyData?.ip;
-            } catch (error) {
-                console.error("Erro ao buscar IP via ipify.org:", error);
-            }
-        }
-        setIpUsuario(usuarioIP);
-        return usuarioIP;
-    };
+export const useIntegrarConciliarDepositoNoSAP = ({ optionsModulos, usuarioLogado, handleClick, onIntegrado }) => {
 
     const handleConciliar = async (IDDEPOSITOLOJA) => {
         if (optionsModulos[0]?.ALTERAR == 'False') {
@@ -34,12 +10,12 @@ export const useIntegrarConciliarDepositoNoSAP = ({ optionsModulos, usuarioLogad
                 position: 'center',
                 icon: 'error',
                 title: 'Erro!',
-                text: 'Você não tem permissão para cancelar a conciliação do depósito!',
+                html: `${usuarioLogado?.NOFUNCIONARIO} <br/>  Você não tem permissão para cancelar a conciliação do depósito!`,
                 customClass: {
                     container: 'custom-swal',
                 },
                 showConfirmButton: false,
-                timer: 4000
+                timer: 5000
             });
             return
         }
@@ -76,18 +52,12 @@ export const useIntegrarConciliarDepositoNoSAP = ({ optionsModulos, usuarioLogad
                     }
 
                     const response = await post('/deposito-integracao', putData)
-                    const textDados = JSON.stringify(putData)
-                    let textoFuncao = 'FINANCEIRO/INTEGRACAO CONCILIAÇÃO DO DEPOSITO'
-                    const ipUsuario = await getIPUsuario()
-                    const postData = {
-                        IDFUNCIONARIO: String(usuarioLogado.id),
-                        PATHFUNCAO: textoFuncao,
-                        DADOS: textDados,
-                        IP: ipUsuario || 'INDISPONIVEL',
-                    }
-
-
-                    await post('/log-web', postData)
+                
+                    await registrarLogAuditoria({
+                        idFuncionario: usuarioLogado?.id,
+                        pathFuncao: 'FINANCEIRO/INTEGRACAO CONCILIAÇÃO DO DEPOSITO',
+                        dados: putData
+                    });
 
                     Swal.fire({
                         title: 'Integrado',
@@ -100,25 +70,19 @@ export const useIntegrarConciliarDepositoNoSAP = ({ optionsModulos, usuarioLogad
                         timer: 4000
                     })
                     handleClick()
+                    onIntegrado?.()
 
                     return response.data;
                 } catch (error) {
                     const putData = {
                         IDDEPOSITOLOJA: IDDEPOSITOLOJA,
                     }
-                    const textDados = JSON.stringify(putData)
-                    const ipUsuario = await getIPUsuario()
-                    const textoFuncao = 'FINANCEIRO/ERRO AO CANCELAR CONCILIAÇÃO DO DEPOSITO';
-
-                    const postData = {
-                        IDFUNCIONARIO: String(usuarioLogado.id),
-                        PATHFUNCAO: textoFuncao,
-                        DADOS: textDados,
-                        IP: ipUsuario || 'INDISPONIVEL',
-                    }
-
-                    const responsePost = await post('/log-web', postData)
-
+                  
+                    await registrarLogAuditoria({
+                        idFuncionario: usuarioLogado?.id,
+                        pathFuncao: 'FINANCEIRO/ERRO AO CANCELAR CONCILIAÇÃO DO DEPOSITO',
+                        dados: putData
+                    });
 
                     Swal.fire({
                         icon: 'error',
@@ -128,9 +92,9 @@ export const useIntegrarConciliarDepositoNoSAP = ({ optionsModulos, usuarioLogad
                             container: 'custom-swal',
                         },
                         showConfirmButton: false,
-                        timer: 4000
+                        timer: 5000
                     });
-                    return responsePost.data;
+                    return;
                 }
             }
         })

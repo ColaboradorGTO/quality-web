@@ -14,11 +14,8 @@ import { toFloat } from "../../../../utils/toFloat";
 import { useEditarDeposito } from "./hooks/useEditarDeposito";
 import { Checkbox } from "primereact/checkbox";
 import { useIntegrarConciliarDepositoNoSAP } from "./hooks/useIntegrarConciliarDepositoNoSAP";
-//import { useIntegrarTodasConciliacoesDepositosNoSAP } from "./hooks/useIntegrarTodasConciliacoesDepositosNoSAP";
-import { ButtonType } from "../../../Buttons/ButtonType";
 import translateText from "../../../../utils/translateText";
 import { useCancelarConciliacaoDeposito } from "./hooks/useCancelarConciliacaoDeposito";
-import { set } from "date-fns";
 
 export const ActionListaConciliarPorBanco = ({
   dadosConciliarBanco,
@@ -43,7 +40,6 @@ export const ActionListaConciliarPorBanco = ({
     setRows(10);
   };
 
-  
   useEffect(() => {
     if (resetPaginacaoKey) resetPaginacao();
   }, [resetPaginacaoKey]);
@@ -57,8 +53,7 @@ export const ActionListaConciliarPorBanco = ({
   } = useEditarDeposito({ optionsModulos, usuarioLogado, handleClick })
   const {
     handleConciliar
-  } = useIntegrarConciliarDepositoNoSAP({ optionsModulos, usuarioLogado, handleClick });
-
+  } = useIntegrarConciliarDepositoNoSAP({ optionsModulos, usuarioLogado, handleClick, onIntegrado: resetPaginacao });
 
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
@@ -123,7 +118,8 @@ export const ActionListaConciliarPorBanco = ({
   }
 
   const dadosListaConciliarBanco = dadosConciliarBanco.map((item) => {
-
+    let STATUS_TEXTO = ''
+    let SITUACAO_TEXO = ''
     return {
       IDDEPOSITOLOJA: item.IDDEPOSITOLOJA,
       DTMOVIMENTOCAIXA: item.DTMOVIMENTOCAIXA,
@@ -144,16 +140,17 @@ export const ActionListaConciliarPorBanco = ({
       ERRORLOGSAP: item.ERRORLOGSAP,
       STATUS_TEXTO: item.STCANCELADO === 'False' ? 'Dep. Ativo' : 'Dep. Cancelado',
 
-    SITUACAO_TEXTO:
+      SITUACAO_TEXTO:
       item.STCONFERIDO !== 'True'
-        ? 'Não Conciliado'
-        : item.STINTEGRADOSAP === 'True' || item.STINTEGRADOSAP === true
-            ? 'Conciliado e Integrado'
-            : item.STATUS_BLOQUEIO_ATUALIZACAO === 'True' || item.STATUS_BLOQUEIO_ATUALIZACAO === true
-                ? 'Conciliado e Aguardando na Fila de Integração'
-                : item.ERRORLOGSAP?.length > 0
-                    ? 'Conciliado / Error ao integrar'
-                    : 'Conciliado',
+          ? 'Não Conciliado'
+          : item.STINTEGRADOSAP === 'True' || item.STINTEGRADOSAP === true
+              ? 'Conciliado e Integrado'
+              : item.STATUS_BLOQUEIO_ATUALIZACAO === 'True' || item.STATUS_BLOQUEIO_ATUALIZACAO === true
+                  ? 'Conciliado e Aguardando na Fila de Integração'
+                  : item.ERRORLOGSAP?.length > 0
+                      ? 'Conciliado / Error ao integrar'
+                      : 'Conciliado',
+
     }
   })
 
@@ -187,6 +184,7 @@ export const ActionListaConciliarPorBanco = ({
     }
 
   }, [selectedItems, dadosListaConciliarBanco, first, rows]);
+
 
   const onSelectAllChange = (e) => {
     if (!e.checked) {
@@ -296,7 +294,6 @@ export const ActionListaConciliarPorBanco = ({
           return <th></th>;
         }
 
-
         return (
           <div className="custom-control custom-checkbox">
             <Checkbox
@@ -370,6 +367,7 @@ export const ActionListaConciliarPorBanco = ({
     },
     {
       field: 'STATUS_TEXTO',
+      sortField: 'STATUS_TEXTO',
       header: 'Status',
       sortable: true,
       body: row => (
@@ -380,6 +378,7 @@ export const ActionListaConciliarPorBanco = ({
     },
     {
       field: 'SITUACAO_TEXTO',
+      sortField: 'SITUACAO_TEXTO',
       header: 'Situação',
       sortable: true,
       body: (row) => {
@@ -607,44 +606,7 @@ export const ActionListaConciliarPorBanco = ({
     if (row && row.IDDEPOSITOLOJA) {
       handleConciliar(row.IDDEPOSITOLOJA);
     }
-  }
-
-  /* 
-    const handleClickIntegrarTodos = () => {
-      if (optionsModulos[0]?.ALTERAR == 'False') {
-        Swal.fire({
-          position: 'center',
-          icon: 'error',
-          title: 'Erro!',
-          text: 'Você não tem permissão para integrar os depósitos no SAP!',
-          customClass: {
-            container: 'custom-swal',
-          },
-          showConfirmButton: false,
-          timer: 4000
-        });
-        return
-      }
-  
-      if (selectedItems.length === 0) {
-        Swal.fire({
-          position: 'center',
-          icon: 'warning',
-          title: 'Atenção!',
-          text: 'Nenhum item foi selecionado para integração!',
-          customClass: {
-            container: 'custom-swal',
-          },
-          showConfirmButton: false,
-          timer: 3000
-        });
-        return
-      }
-  
-      const idsSelecionados = selectedItems.map(item => item.IDDEPOSITOLOJA);
-      handleSubmit(idsSelecionados);
-    } */
-
+  } 
 
   return (
     <Fragment>
@@ -676,17 +638,6 @@ export const ActionListaConciliarPorBanco = ({
             </span>
           </div>
 
-          {/*           <div>
-            <ButtonType
-              onClickButtonType={handleClickIntegrarTodos}
-              textButton={"Integrar Todos"}
-              cor={"success"}
-              Icon={BsCloudUpload}
-              iconSize={25}
-              style={{ display: btnVisivel ? 'block' : 'none' }}
-            />
-          </div> */}
-
         </div>
 
         <div className="card" ref={dataTableRef}>
@@ -699,10 +650,11 @@ export const ActionListaConciliarPorBanco = ({
             selectionMode="single"
             selection={rowSelection}
             onSelectionChange={(e) => setRowSelection(e.value)}
+            sortField=""
             sortOrder={1}
             paginator={true}
-            rows={rows}
             cellMemo={false}
+            rows={rows}
             first={first}
             onPage={(e) => {
               setFirst(e.first);
@@ -715,7 +667,7 @@ export const ActionListaConciliarPorBanco = ({
             showGridlines
             stripedRows
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado </div>}
-
+          
           >
             {colunasConciliarBanco.map(coluna => (
               <Column

@@ -1,32 +1,8 @@
-import { useState } from "react";
 import { post } from "../../../../../api/funcRequest";
-import axios from 'axios'
 import Swal from "sweetalert2";
+import { registrarLogAuditoria } from "../../../../../services/auditLog";
 
 export const useIntegrarPagamentoPix = ({optionsModulos, usuarioLogado, handleClickVendasPixCompensacao, setSelectedItems}) => {
-    const [ipUsuario, setIpUsuario] = useState('');
-
-    const getIPUsuario = async () => {
-        let usuarioIP = null;
-
-        try {
-        const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-        usuarioIP = ipWhoisData?.ip;
-        } catch (error) {
-        console.error("Erro ao buscar IP via ipwho.is:", error);
-        }
-
-        if (!usuarioIP) {
-        try {
-            const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-            usuarioIP = ipifyData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ipify.org:", error);
-        }
-        }
-        setIpUsuario(usuarioIP);
-        return usuarioIP;
-    };
 
     const handleClickIntegrar = async (rowData) => {
         
@@ -84,22 +60,18 @@ export const useIntegrarPagamentoPix = ({optionsModulos, usuarioLogado, handleCl
                 try {
         
                     const response = await post('/pix-integracao', putData)
-                    const textDados = JSON.stringify(putData)
-                    const ipUsuario = await getIPUsuario();
-                    const postData = {
-                        IDFUNCIONARIO: String(usuarioLogado.id),
-                        PATHFUNCAO: `FINANCEIRO/INTEGRACAO DO PAGAMENTO PIX VENDA`,
-                        DADOS: textDados,
-                        IP: ipUsuario || 'INDISPONIVEL'
-                    }
+                    await registrarLogAuditoria({
+                        idFuncionario: usuarioLogado?.id,
+                        pathFuncao: `FINANCEIRO/INTEGRACAO DO PAGAMENTO PIX VENDA`,
+                        dados: putData
+                    });
 
-                    await post('/log-web', postData)
                     Swal.fire({
                         position: 'center',
                         icon: 'success',
                         title: 'Atualizado com sucesso!',
                         showConfirmButton: false,
-                        timer: 3000,
+                        timer: 5000,
                         customClass: {
                             container: 'custom-swal',
                         },
@@ -109,36 +81,30 @@ export const useIntegrarPagamentoPix = ({optionsModulos, usuarioLogado, handleCl
                     setSelectedItems([]);
                     return response.data;
                 } catch (error) {
-                    const textDados = JSON.stringify(putData)
-                    const ipUsuario = await getIPUsuario();
-                    const postData = {
-                        IDFUNCIONARIO: String(usuarioLogado.id),
-                        PATHFUNCAO: `FINANCEIRO/ERRO AO INTEGRAR PAGAMENTO PIX VENDA`,
-                        DADOS: textDados,
-                        IP: ipUsuario || 'INDISPONIVEL'
-                    }
+                    await registrarLogAuditoria({
+                        idFuncionario: usuarioLogado?.id,
+                        pathFuncao: `FINANCEIRO/ERRO AO INTEGRAR PAGAMENTO PIX VENDA`,
+                        dados: putData
+                    });
 
-                    const responsePost = await post('/log-web', postData)
                     Swal.fire({
                         position: 'center',
                         icon: 'error',
                         title: 'Ocorreu um erro ao enviar o formulário. Por favor, tente novamente.',
                         showConfirmButton: false,
-                        timer: 3000,
+                        timer: 5000,
                         customClass: {
                             container: 'custom-swal',
                         },
                     });
                     console.error('Erro Integrar Pagamento PIX:', error);
-                    return responsePost.data;
+                    return;
                 }
             } else {
                 return;
             }
         });
-
     }
-
 
     return {
         handleClickIntegrar

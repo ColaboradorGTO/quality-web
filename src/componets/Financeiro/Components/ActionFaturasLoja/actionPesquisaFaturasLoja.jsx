@@ -27,6 +27,7 @@ export const ActionPesquisaFaturasLoja = ({ usuarioLogado, ID }) => {
   const [situacao, setSituacao] = useState('');
   const [disabledConciliar, setDisabledConciliar] = useState(false);
   const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
+  const [resetPaginacaoKey, setResetPaginacaoKey] = useState(0);
 
   useEffect(() => {
     const dataInicial = getDataAtual();
@@ -169,7 +170,15 @@ export const ActionPesquisaFaturasLoja = ({ usuarioLogado, ID }) => {
 
   const {
     conferirTodas
-  } = useConferirTodasFaturas({ optionsModulos, usuarioLogado, handleClick, selectedItems, disabledConciliar, setDisabledConciliar });
+  } = useConferirTodasFaturas({ 
+    optionsModulos, 
+    usuarioLogado, 
+    handleClick, 
+    selectedItems, 
+    disabledConciliar, 
+    setDisabledConciliar ,
+    onIntegrado: () => setResetPaginacaoKey((k) => k + 1)
+  });
 
   const conferirTodasSelecionadas = () => {
 
@@ -309,6 +318,7 @@ export const ActionPesquisaFaturasLoja = ({ usuarioLogado, ID }) => {
           selectedItems={selectedItems}
           setSelectedItems={setSelectedItems}
           situacao={situacao}
+           resetPaginacaoKey={resetPaginacaoKey}
         />
       )}
 

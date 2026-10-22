@@ -9,7 +9,6 @@ import { ActionListaDespesaLoja } from "./actionListaDespesaLoja";
 import { InputSelectAction } from "../../../Inputs/InputSelectAction";
 import { useQuery } from 'react-query';
 import { animacaoCarregamento, fecharAnimacaoCarregamento, foiCancelado } from "../../../../utils/animationCarregamento"
-import { useFetchData } from "../../../../hooks/useFetchData"
 import { MdOutlineCloudUpload } from "react-icons/md"
 import { useMigrarTodasDespesasSAP } from "./hooks/useMigrarTodasDespesas"
 
@@ -23,6 +22,7 @@ export const ActionPesquisaDespesaLoja = ({ usuarioLogado }) => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [btnVisivel, setBtnVisivel] = useState(false);
   const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
+  const [resetPaginacaoKey, setResetPaginacaoKey] = useState(0);
 
   useEffect(() => {
     const dataInicial = getDataAtual();
@@ -130,7 +130,18 @@ export const ActionPesquisaDespesaLoja = ({ usuarioLogado }) => {
     refetchListaDespesasLoja()
   }
 
-  const {handleMigrarDespesa} = useMigrarTodasDespesasSAP({optionsModulos, usuarioLogado, selectedItems, handleClick})
+  const {
+    handleMigrarDespesa,
+    isSubmitting
+  } = useMigrarTodasDespesasSAP({
+    optionsModulos, 
+    usuarioLogado, 
+    selectedItems, 
+    handleClick,
+    setSelectedItems,
+    onIntegrado: () => setResetPaginacaoKey((k) => k + 1)
+  })
+
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -195,7 +206,7 @@ export const ActionPesquisaDespesaLoja = ({ usuarioLogado }) => {
         corCancelar={"warning"}
         IconCancelar={MdOutlineCloudUpload}
         styleCancelar={{ display: btnVisivel ? 'block' : 'none' }}
-
+        disabledCancelar={isSubmitting}
       />
 
       {tabelaVisivel && (
@@ -208,6 +219,7 @@ export const ActionPesquisaDespesaLoja = ({ usuarioLogado }) => {
           selectedItems={selectedItems}
           setSelectedItems={setSelectedItems}
           setBtnVisivel={setBtnVisivel}
+          resetPaginacaoKey={resetPaginacaoKey}
         />
 
       )}

@@ -1,41 +1,15 @@
-import { useState } from "react";
-import { post, put } from "../../../../../api/funcRequest";
-import axios from 'axios'
+import { post } from "../../../../../api/funcRequest";
 import Swal from "sweetalert2";
+import { registrarLogAuditoria } from "../../../../../services/auditLog";
 
 export const useMigrarDespesaSAP = ({optionsModulos, usuarioLogado, selectedItems, handleClick}) => {
-    const [ipUsuario, setIpUsuario] = useState('');
-
-    const getIPUsuario = async () => {
-        let usuarioIP = null;
-
-        try {
-        const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-        usuarioIP = ipWhoisData?.ip;
-        } catch (error) {
-        console.error("Erro ao buscar IP via ipwho.is:", error);
-        }
-
-        if (!usuarioIP) {
-        try {
-            const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-            usuarioIP = ipifyData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ipify.org:", error);
-        }
-        }
-        setIpUsuario(usuarioIP);
-        return usuarioIP;
-    };
-
-    
     const handleMigrarDespesa = async (data) => {
         if (optionsModulos[0]?.CRIAR !== 'True') {
             Swal.fire({
             position: 'center',
             icon: 'error',
             title: 'Acesso Negado!',
-            html: `${usuarioLogado?.NOFUNCIONARIO} <br/> Você não tem permissão para alterar esta despesa.`,
+            html: `${usuarioLogado?.NOFUNCIONARIO} <br/> Você não tem permissão para integrar esta despesa.`,
             showConfirmButton: false,
             timer: 5000,
             customClass: {
@@ -64,34 +38,27 @@ export const useMigrarDespesaSAP = ({optionsModulos, usuarioLogado, selectedItem
                 document.head.appendChild(style);
             }
         }).then(async (result) => {
-
             if (result.isConfirmed) {
-            
                 const putData = {
                     IDDESPESASLOJA: String(selectedItems[0]?.IDDESPESASLOJA),
                     IDFUNCIONARIO: parseInt(usuarioLogado.id),
                 }
-        
             
                 try {
         
                     const response = await post('/integrar-despesa', putData)
-                    const textDados = JSON.stringify(putData)
-                    const ipUsuario = await getIPUsuario();
-                    const postData = {
-                        IDFUNCIONARIO: String(usuarioLogado.id),
-                        PATHFUNCAO: `FINANCEIRO/INTEGRAR DESPESA`,
-                        DADOS: textDados,
-                        IP: ipUsuario || 'Indisponível'
-                    }
-                    
-                    await post('/log-web', postData)
+                    await registrarLogAuditoria({
+                        idFuncionario: usuarioLogado?.id,
+                        pathFuncao: 'FINANCEIRO/INTEGRAR DESPESA',
+                        dados: putData
+                    })
+             
                     Swal.fire({
                         position: 'center',
                         icon: 'success',
-                        title: 'Atualizado com sucesso!',
+                        title: 'Integrado com sucesso!',
                         showConfirmButton: false,
-                        timer: 3000,
+                        timer: 5000,
                         customClass: {
                             container: 'custom-swal', 
                         },
@@ -100,30 +67,25 @@ export const useMigrarDespesaSAP = ({optionsModulos, usuarioLogado, selectedItem
                     handleClick();
                     return response.data;
                 } catch (error) {
-                    const textDados = JSON.stringify(putData)
-                    const ipUsuario = await getIPUsuario();
-                    const postData = {
-                        IDFUNCIONARIO: String(usuarioLogado.id),
-                        PATHFUNCAO: `FINANCEIRO/ERRO AO INTEGRAR DESPESA`,
-                        DADOS: textDados,
-                        IP: ipUsuario || 'Indisponível'
-                    }
-                    
-                    const responsePost = await post('/log-web', postData)
-        
+                   
+                    await registrarLogAuditoria({
+                        idFuncionario: usuarioLogado?.id,
+                        pathFuncao: 'FINANCEIRO/ERRO AO INTEGRAR DESPESA',
+                        dados: putData
+                    })
         
                     Swal.fire({
                         position: 'center',
                         icon: 'error',
-                        title: 'Ocorreu um erro ao enviar o formulário. Por favor, tente novamente.',
+                        title: 'Ocorreu um erro ao integrar despesa para o sap.',
                         showConfirmButton: false,
-                        timer: 3000,
+                        timer: 5000,
                         customClass: {
                             container: 'custom-swal', 
                         },
                     });
                     console.error('Erro Integrar Despesa:', error);
-                    return responsePost.data;
+                    return;
                 }
             } else {
                 return;
@@ -131,8 +93,6 @@ export const useMigrarDespesaSAP = ({optionsModulos, usuarioLogado, selectedItem
         });
         
     }
-
-    
     return {
         handleMigrarDespesa,
     }
