@@ -343,8 +343,8 @@ export const ActionListaMovimentacaoCaixaDia = ({
       field: 'STCANCELADO',
       header: 'Situação',
       body: row => (
-        <th style={{ color: row.STCANCELADO == 'FALSE' ? 'blue' : 'red' }}>
-          {row.STCANCELADO == 'FALSE' ? 'ABERTO' : 'FECHADO'}
+       <th style={{ color: row.STFECHADO == 'False' ? 'blue' : 'red' }}>
+          {row.STFECHADO == 'False' ? 'ABERTO' : 'FECHADO'}
         </th>
       ),
       sortable: true,
