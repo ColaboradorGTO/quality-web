@@ -121,7 +121,7 @@ export const Formulario = ({ handleClose, dadosDetalheFechamento, usuarioLogado,
                 </div>
                 <div className="form-group">
                     <div className="row">
-                        <div class="col-sm-6 col-xl-4">
+                        <div class="col-sm-6 col-xl-12">
 
                             <Controller
                                 name="motivoAjusteSelecionado"

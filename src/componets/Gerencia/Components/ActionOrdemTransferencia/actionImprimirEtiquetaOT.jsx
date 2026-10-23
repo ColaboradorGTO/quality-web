@@ -9,9 +9,9 @@ import { ButtonTypeModal } from "../../../Buttons/ButtonTypeModal";
 import { FooterModal } from "../../../Modais/FooterModal/footerModal";
 import { HeaderModal } from "../../../Modais/HeaderModal/HeaderModal";
 
- 
 
-export const ActionImprimirEtiquetaOT = ({ show, handleClose, dadosImprimirOT }) => {
+
+export const ActionImprimirEtiquetaOT = ({ show, handleClose, dadosImprimirOT, usuarioLogado }) => {
   const [layout, setLayout] = useState('layout-normal');
 
 
@@ -40,17 +40,48 @@ export const ActionImprimirEtiquetaOT = ({ show, handleClose, dadosImprimirOT })
     });
   };
 
-  const dados = dadosImprimirOT.map((item) => {
-    return {
-      IDRESUMOOT: item.IDRESUMOOT,
-      EMPRESAORIGEM: item.EMPRESAORIGEM,
-      EMPRESADESTINO: item.EMPRESADESTINO,
-      DATAEXPEDICAOFORMATADA: item.DATAEXPEDICAOFORMATADA,
-      NUTOTALVOLUMES: item.NUTOTALVOLUMES ? item.NUTOTALVOLUMES : 1,
-      TPVOLUME: item.TPVOLUME,
-      CODIGOBARRAS: item.CODIGOBARRAS,
-      NUMEROVOLUME: item.NUMEROVOLUME,
-    };
+  const dados = (dadosImprimirOT || []).flatMap((item) => {
+    if (
+      dadosImprimirOT.length > 1 &&
+      item.NUMEROVOLUME &&
+      item.NUTOTALVOLUMES &&
+      dadosImprimirOT.length === Number(item.NUTOTALVOLUMES)
+    ) {
+      return [{
+        IDRESUMOOT: item.IDRESUMOOT,
+        EMPRESAORIGEM: item.EMPRESAORIGEM,
+        EMPRESADESTINO: item.EMPRESADESTINO,
+        DATAEXPEDICAOFORMATADA: item.DATAEXPEDICAOFORMATADA,
+        NUTOTALVOLUMES: Number(item.NUTOTALVOLUMES),
+        NUMEROVOLUME: Number(item.NUMEROVOLUME),
+        TPVOLUME: item.TPVOLUME,
+        CODIGOBARRAS: item.CODIGOBARRAS || (item.IDRESUMOOT ? `${item.IDRESUMOOT}${item.NUMEROVOLUME}` : ''),
+      }];
+    }
+
+    const totalVolumes = Math.max(
+      1,
+      parseInt(item.NUMEROVOLUME, 10) || 0,
+      parseInt(item.numeroVolume, 10) || 0,
+      parseInt(item.NUTOTALVOLUMES, 10) || 0,
+      parseInt(item.nutotalvolumes, 10) || 0,
+      parseInt(item.QTDVOLUME, 10) || 0,
+      parseInt(item.qtdVolume, 10) || 0
+    );
+
+    return Array.from({ length: totalVolumes }, (_, index) => {
+      const numeroVolumeAtual = index + 1;
+      return {
+        IDRESUMOOT: item.IDRESUMOOT,
+        EMPRESAORIGEM: item.EMPRESAORIGEM,
+        EMPRESADESTINO: item.EMPRESADESTINO,
+        DATAEXPEDICAOFORMATADA: item.DATAEXPEDICAOFORMATADA,
+        NUTOTALVOLUMES: totalVolumes,
+        NUMEROVOLUME: numeroVolumeAtual,
+        TPVOLUME: item.TPVOLUME,
+        CODIGOBARRAS: item.CODIGOBARRAS || (item.IDRESUMOOT ? `${item.IDRESUMOOT}${numeroVolumeAtual}` : ''),
+      };
+    });
   });
 
 
@@ -72,29 +103,17 @@ export const ActionImprimirEtiquetaOT = ({ show, handleClose, dadosImprimirOT })
       customClass: {
         container: 'custom-swal',
       },
-      preConfirm: () => {
-        return new Promise((resolve) => {
-
-          toggleLayout();
-          setTimeout(() => {
-            handlePrint();
-            resolve();
-          }, 500);
-        });
-      }
     }).then((result) => {
-      if (result.value) {
-        toggleLayout();
+      if (result.isConfirmed) {
+        setLayout('layout-cupom');
         setTimeout(() => {
           handlePrint();
-          resolve();
-        }, 500)
-      } else if (result.dismiss === 'cancel') {
-        toggleLayout();
+        }, 500);
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        setLayout('layout-normal');
         setTimeout(() => {
           handlePrint();
-          resolve();
-        }, 500)
+        }, 500);
       }
     });
   };
@@ -104,91 +123,101 @@ export const ActionImprimirEtiquetaOT = ({ show, handleClose, dadosImprimirOT })
   return (
     <Fragment>
       <Modal show={show} onHide={handleClose} size="lg" className="modal fade" tabIndex={-1} role="dialog" aria-hidden="true">
-        
-          <HeaderModal title={"Etiqueta"} handleClose={handleClose} />
 
-          <Modal.Body>
-            <div ref={dataTableRef} className={layout}>
-              {dados.map((item, index) => (
-                <Fragment>
-                  <div 
+        <HeaderModal title={"Etiqueta"} handleClose={handleClose} />
+
+
+        <Modal.Body>
+          <div ref={dataTableRef} className={layout}>
+            {dados.map((item, index) => (
+              <Fragment key={index}>
+                <div
+                  style={{
+                    // border: '1px solid',
+                    marginTop: '10px',
+                    padding: '10px',
+                    boxShadow: '0px 0px 0.5cm rgba(0, 0, 0, 0.5)',
+                    backgroundImage: 'url("/img/svg/pattern-1.svg")',
+                    backgroundSize: 'cover',
+                    backgroundRepeat: 'no-repeat',
+                    pageBreakAfter: 'always',
+                    breakAfter: 'page',
+                  }}
+                >
+                  <div
                     style={{
-                      // border: '1px solid', 
-                      marginTop: '10px',
-                      padding: '10px',
-                      boxShadow: '0px 0px 0.5cm rgba(0, 0, 0, 0.5)',
-                      backgroundImage: 'url("/img/svg/pattern-1.svg")',
-                      backgroundSize: 'cover',
-                      backgroundRepeat: 'no-repeat',
-       
-                    }} 
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      padding: '10px 0',
+                      boxSizing: 'border-box',
+                    }}
                   >
-
-                    <div style={{padding: '10px' }}>
-                      <p style={{fontSize: '18px'}}>
-                        <strong>Origem: </strong>
-                        
-                        {dados[0]?.EMPRESAORIGEM}
-                      </p>
-
-                      <p style={{fontSize: '18px'}}>
-                        <strong>Destino: </strong>
-                        {dados[0]?.EMPRESADESTINO}
-                      </p>
-
-                      <p style={{fontSize: '18px'}}>
-                        <strong>Nº da OT: </strong>
-                        {dados[0]?.IDRESUMOOT}
-                      </p>
-
-                      <p style={{fontSize: '18px'}}>
-                        <strong>Data da OT: </strong>
-                        {dados[0]?.DATAEXPEDICAOFORMATADA}
-                      </p>
-
-                      <p style={{fontSize: '18px'}}>
-                        <strong>Volume: </strong>
-                        {dados[0]?.NUMEROVOLUME}/{dados[0]?.NUTOTALVOLUMES}
-                      </p>
-
-                      <p style={{fontSize: '18px'}}>
-                        <strong> {dados[0]?.TPVOLUME} </strong>
-                      </p>
-                      <div style={{ display: "flex",  }}>
-                        <ReactBarcode 
-                          value={dados[0]?.CODIGOBARRAS} 
-                          options={{ 
-                            format: 'code128',
-                            width: 5,
-                            height: 100,
-                            displayValue: true,
-                          }} 
-                          renderer="svg" 
-                        />
-                      </div>
-                    </div>
+                    {item?.CODIGOBARRAS ? (
+                      <ReactBarcode
+                        value={String(item.CODIGOBARRAS)}
+                        options={{
+                          format: 'code128',
+                          width: 5,
+                          height: 100,
+                          displayValue: true,
+                        }}
+                        renderer="svg"
+                      />
+                    ) : null}
                   </div>
-              
-                  
-                </Fragment>
-              ))}
-            </div>
+
+                  <div style={{ padding: '10px' }}>
+                    <p style={{ fontSize: '18px' }}>
+                      <strong>Origem: </strong>
+                      {item?.EMPRESAORIGEM}
+                    </p>
+
+                    <p style={{ fontSize: '18px' }}>
+                      <strong>Destino: </strong>
+                      {item?.EMPRESADESTINO}
+                    </p>
+
+                    <p style={{ fontSize: '18px' }}>
+                      <strong>Nº da OT: </strong>
+                      {item?.IDRESUMOOT}
+                    </p>
+
+                    <p style={{ fontSize: '18px' }}>
+                      <strong>Data da OT: </strong>
+                      {item?.DATAEXPEDICAOFORMATADA}
+                    </p>
+
+                    <p style={{ fontSize: '18px' }}>
+                      <strong>Volume: </strong>
+                      {item?.NUMEROVOLUME}/{item?.NUTOTALVOLUMES}
+                    </p>
+
+                    {/*      <p style={{ fontSize: '18px' }}>
+                      <strong>{item?.TPVOLUME}</strong>
+                    </p> */}
+
+                  </div>
+                </div>
+              </Fragment>
+            ))}
+          </div>
+        </Modal.Body>
 
 
-          </Modal.Body>
+        <FooterModal
+          ButtonTypeConfirmar={ButtonTypeModal}
+          textButtonConfirmar={"Fechar"}
+          onClickButtonConfirmar={handleClose}
+          corConfirmar={"secondary"}
 
-          <FooterModal
-            ButtonTypeConfirmar={ButtonTypeModal}
-            textButtonConfirmar={"Fechar"}
-            onClickButtonConfirmar={handleClose}
-            corConfirmar={"secondary"}
+          ButtonTypeFechar={ButtonTypeModal}
+          textButtonFechar={"Imprimir"}
+          onClickButtonFechar={handleImprimir}
+          corFechar="primary"
+        />
 
-            ButtonTypeFechar={ButtonTypeModal}
-            textButtonFechar={"Imprimir"}
-            onClickButtonFechar={handleImprimir}
-            corFechar="primary"
-          />
-        
       </Modal >
     </Fragment >
   );

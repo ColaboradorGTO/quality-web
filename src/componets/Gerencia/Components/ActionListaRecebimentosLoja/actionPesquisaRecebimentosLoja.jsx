@@ -9,7 +9,7 @@ import { getDataAtual } from "../../../../utils/dataAtual"
 import { ActionListaRecebimentos } from "./actionListaRecebimentos"
 import { ActionListaRecebimentosOperador } from "./actionListaRecebimentosOperador"
 import { useQuery } from "react-query"
-import { animacaoCarregamento, fecharAnimacaoCarregamento } from "../../../../utils/animationCarregamento"
+import { animacaoCarregamento, fecharAnimacaoCarregamento, foiCancelado } from "../../../../utils/animationCarregamento"
 import { MultSelectAction } from "../../../Select/MultSelectAction"
 import { useNavigate } from "react-router-dom"
 import { optionsParcelas } from "../../../../../parceiro.json"
@@ -63,46 +63,90 @@ export const ActionPesquisaRecebimentosLoja = ({ usuarioLogado }) => {
   }, [empresaSelecionada, refetchFuncionarios]);
 
 
-  const fetchListaRecebimentos = async () => {
-    try {
-
-      const urlApi = `venda-total-forma-pagamento?idEmpresa=${usuarioLogado?.IDEMPRESA}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idFuncionario=${colaboradorSelecionado}&dsFormaPagamento=${pagamentoSelecionado}&dsParcela=${parcelaSelecionada}`;
-      const response = await get(urlApi);
-
-      if (response.data.length && response.data.length === pageSize) {
-        let allData = [...response.data];
-        animacaoCarregamento(`Carregando... Página ${currentPage} de ${response.data.length}`, true);
-
-        async function fetchNextPage(currentPage) {
-          try {
-            currentPage++;
-            const responseNextPage = await get(`${urlApi}&page=${currentPage}`);
-            if (responseNextPage.length) {
-              allData.push(...responseNextPage.data);
-              return fetchNextPage(currentPage);
-            } else {
-              return allData;
+  /*   const fetchListaRecebimentos = async () => {
+      try {
+  
+        const urlApi = `venda-total-forma-pagamento?idEmpresa=${usuarioLogado?.IDEMPRESA}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idFuncionario=${colaboradorSelecionado}&dsFormaPagamento=${pagamentoSelecionado}&dsParcela=${parcelaSelecionada}`;
+        const response = await get(urlApi);
+  
+        if (response.data.length && response.data.length === pageSize) {
+          let allData = [...response.data];
+          animacaoCarregamento(`Carregando... Página ${currentPage} de ${response.data.length}`, true);
+  
+          async function fetchNextPage(currentPage) {
+            try {
+              currentPage++;
+              const responseNextPage = await get(`${urlApi}&page=${currentPage}`);
+              if (responseNextPage.length) {
+                allData.push(...responseNextPage.data);
+                return fetchNextPage(currentPage);
+              } else {
+                return allData;
+              }
+            } catch (error) {
+              console.error('Erro ao buscar próxima página:', error);
+              throw error;
             }
-          } catch (error) {
-            console.error('Erro ao buscar próxima página:', error);
-            throw error;
           }
+  
+          await fetchNextPage(currentPage);
+          return allData;
+        } else {
+  
+          return response.data;
         }
+  
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        throw error;
+      } finally {
+        fecharAnimacaoCarregamento();
+      }
+    };
+   */
 
-        await fetchNextPage(currentPage);
-        return allData;
-      } else {
+  const fetchListaRecebimentos = async () => {
+    const urlBase = `venda-total-forma-pagamento?idEmpresa=${usuarioLogado?.IDEMPRESA}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idFuncionario=${colaboradorSelecionado}&dsFormaPagamento=${pagamentoSelecionado}&dsParcela=${parcelaSelecionada}`;
+    let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
+    urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
 
-        return response.data;
+    const controller = new AbortController();
+    let allData = [];
+
+    try {
+      animacaoCarregamento('Carregando dados...', true, true, () => controller.abort());
+
+      const primeiraPagina = 1;
+      const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`, { signal: controller.signal });
+      const page = primeiraResposta.page || primeiraPagina;
+      const pageSize = primeiraResposta.pageSize || 1000;
+      const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
+      const totalPages = Math.ceil(totalRows / pageSize);
+
+      allData = [...(primeiraResposta.data || [])];
+
+      if (totalPages > 1) {
+        for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
+          if (foiCancelado()) break;
+          animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true, true);
+          const responsePage = await get(`${urlApi}&page=${currentPage}`, { signal: controller.signal });
+          allData.push(...(responsePage.data || []));
+        }
       }
 
+      return allData;
     } catch (error) {
-      console.error('Error fetching data:', error);
+      if (error.code === 'ERR_CANCELED') {
+        return allData;
+      }
+      console.error('Erro ao buscar dados:', error);
       throw error;
     } finally {
       fecharAnimacaoCarregamento();
     }
   };
+
+
 
   const { data: dadosRecebimentos = [], error: errorRecebimentos, isLoading: isLoadingRecebimentos, refetch: refetchListaRecebimentos } = useQuery(
     ['venda-total-forma-pagamento', empresaSelecionada, dataPesquisaInicio, dataPesquisaFim, colaboradorSelecionado, pagamentoSelecionado, parcelaSelecionada, currentPage, pageSize],
@@ -112,7 +156,7 @@ export const ActionPesquisaRecebimentosLoja = ({ usuarioLogado }) => {
     }
   );
 
-  const fetchListaRecebimentosOperador = async () => {
+/*   const fetchListaRecebimentosOperador = async () => {
     try {
 
       const urlApi = `venda-total-recebido-periodo-adm?idEmpresa=${usuarioLogado?.IDEMPRESA}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idFuncionario=${colaboradorSelecionado}&dsFormaPagamento=${pagamentoSelecionado}&dsParcela=${parcelaSelecionada}&idGrupo=${marcaSelecionada}`;
@@ -151,6 +195,48 @@ export const ActionPesquisaRecebimentosLoja = ({ usuarioLogado }) => {
     } finally {
       fecharAnimacaoCarregamento();
     }
+  }; */
+
+const fetchListaRecebimentosOperador = async () => {
+
+    const urlBase = `venda-total-recebido-periodo-adm?idEmpresa=${usuarioLogado?.IDEMPRESA}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idFuncionario=${colaboradorSelecionado}&dsFormaPagamento=${pagamentoSelecionado}&dsParcela=${parcelaSelecionada}&idGrupo=${marcaSelecionada}`;
+    let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
+    urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
+
+    const controller = new AbortController();
+    let allData = [];
+
+    try {
+      animacaoCarregamento('Carregando dados...', true, true, () => controller.abort());
+
+      const primeiraPagina = 1;
+      const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`, { signal: controller.signal });
+      const page = primeiraResposta.page || primeiraPagina;
+      const pageSize = primeiraResposta.pageSize || 1000;
+      const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
+      const totalPages = Math.ceil(totalRows / pageSize);
+
+      allData = [...(primeiraResposta.data || [])];
+
+      if (totalPages > 1) {
+        for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
+          if (foiCancelado()) break;
+          animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true, true);
+          const responsePage = await get(`${urlApi}&page=${currentPage}`, { signal: controller.signal });
+          allData.push(...(responsePage.data || []));
+        }
+      }
+
+      return allData;
+    } catch (error) {
+      if (error.code === 'ERR_CANCELED') {
+        return allData;
+      }
+      console.error('Erro ao buscar dados:', error);
+      throw error;
+    } finally {
+      fecharAnimacaoCarregamento();
+    }
   };
 
   const { data: dadosRecebimentosOperador = [], error: errorRecebimentosOperador, isLoading: isLoadingRecebimentosOpredador, refetch: refetchListaRecebimentosOperador } = useQuery(
@@ -180,7 +266,6 @@ export const ActionPesquisaRecebimentosLoja = ({ usuarioLogado }) => {
   }
 
 
-
   const handleClick = () => {
     setTabelaRecebimentos(true)
     setTabelaRecebimentosOperador(false)
@@ -193,7 +278,7 @@ export const ActionPesquisaRecebimentosLoja = ({ usuarioLogado }) => {
     refetchListaRecebimentosOperador()
   }
 
- 
+
   return (
 
     <Fragment>
@@ -208,7 +293,7 @@ export const ActionPesquisaRecebimentosLoja = ({ usuarioLogado }) => {
         valueInputFieldDTInicio={dataPesquisaInicio}
         labelInputFieldDTInicio={"Data Início"}
         onChangeInputFieldDTInicio={(e) => setDataPesquisaInicio(e.target.value)}
-        
+
 
         InputFieldDTFimComponent={InputField}
         labelInputFieldDTFim={"Data Fim"}

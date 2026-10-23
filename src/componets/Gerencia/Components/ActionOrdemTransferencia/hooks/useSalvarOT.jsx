@@ -209,7 +209,7 @@ export const useSalvarOT = ({ handleClick, handleClose, optionsModulos, usuarioL
 
       await post('/log-web', createData)
 
-      Swal.fire({
+      await Swal.fire({
         title: 'Cadastro',
         text: 'OT cadastrada com Sucesso',
         icon: 'success',
@@ -217,6 +217,7 @@ export const useSalvarOT = ({ handleClick, handleClose, optionsModulos, usuarioL
         customClass: {
           container: 'custom-swal',
         },
+
       });
 
 
@@ -291,7 +292,7 @@ export const useSalvarOT = ({ handleClick, handleClose, optionsModulos, usuarioL
       const textDados = JSON.stringify(postData);
       let textoFuncao = 'EXPEDICAO/ERRO AO CRIAR OT COM SUCESSO';
       const ipUsuario = await getIPUsuario();
-      
+
       const createData = {
         IDFUNCIONARIO: String(usuarioLogado?.id),
         PATHFUNCAO: textoFuncao,
@@ -311,7 +312,7 @@ export const useSalvarOT = ({ handleClick, handleClose, optionsModulos, usuarioL
         },
       });
 
-      // handleClick();
+
       return responsePost.data;
 
     }

@@ -25,6 +25,7 @@ export const ActionListaRecebimentosOperador = ({dadosRecebimentosOperador }) =>
 
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
+    setFirst(0);
   };
 
   const handlePrint = useReactToPrint({
@@ -73,7 +74,7 @@ export const ActionListaRecebimentosOperador = ({dadosRecebimentosOperador }) =>
     XLSX.writeFile(workbook, 'forma_pagamento_operador.xlsx');
   };
 
-  const dados = dadosRecebimentosOperador.map((item) => {
+  const dados = (dadosRecebimentosOperador || []).map((item) => {
     return {
       NOFANTASIA: item.NOFANTASIA,
       DSCAIXA: item.DSCAIXA,
@@ -90,14 +91,27 @@ export const ActionListaRecebimentosOperador = ({dadosRecebimentosOperador }) =>
     }
   });
 
+  const filtrarDados = (dados, filtro) => {
+    if (!filtro) return dados;
+
+    return dados.filter(item => {
+      return Object.values(item).some(value => {
+        if (value === null || value === undefined) return false;
+        return value.toString().toLowerCase().includes(filtro.toLowerCase());
+      });
+    });
+  };
+
   const calcularTotalPagina = (field) => {
-    return dados.reduce((total, item) => total + parseFloat(item[field]), 0);
+    const dadosFiltrados = filtrarDados(dados, globalFilterValue);
+    return dadosFiltrados.reduce((total, item) => total + toFloat(item[field] || 0), 0);
   };
 
   const calcularTotal = (field) => {
-    const firstIndex = first * rows;
-    const lastIndex = firstIndex + rows;
-    const dataPaginada = dados.slice(firstIndex, lastIndex); 
+    const dadosFiltrados = filtrarDados(dados, globalFilterValue);
+    const firstIndex = first;
+    const lastIndex = first + rows;
+    const dataPaginada = dadosFiltrados.slice(firstIndex, lastIndex); 
     return dataPaginada.reduce((total, item) => total + toFloat(item[field] || 0), 0);
   };
 
@@ -136,7 +150,7 @@ export const ActionListaRecebimentosOperador = ({dadosRecebimentosOperador }) =>
       field: 'VALORRECEBIDO',
       header: 'Valor',
       body: row => <th>{formatMoeda(row.VALORRECEBIDO)}</th>,
-      footer: formatMoeda(calcularTotalDinheiro()),
+      footer: calcularTotalDinheiro(),
       sortable: true,
     },
     {

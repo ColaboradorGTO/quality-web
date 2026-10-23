@@ -134,38 +134,39 @@ export const ActionListaDepositoLoja = ({ dadosDepositosLoja }) => {
       field: 'STCANCELADO',
       header: 'Situação',
       body: row => {
-        if(row.STCONFERIDO == 'False' || row.STCONFERIDO == null || row.STCONFERIDO == '') {
-         if(row.STCANCELADO == 'False') {
-          return (
-            <th style={{color: 'blue' }}>
-              Ativo
-            </th>
-          )
-         } else {
-          return (
-            <th style={{color: 'red' }}>
-              Cancelado
-            </th>
- 
-           )
-         }
-        } else {
-          if(row.STCANCELADO == 'False') {
+        if (row.STCONFERIDO == 'False' || row.STCONFERIDO == null || row.STCONFERIDO == '') {
+          if (row.STCANCELADO == 'False') {
             return (
-              <th style={{color: 'blue' }}>
-                Ativo - <label style={{color: 'red'}}> Conf. Fin</label>
+              <th style={{ color: 'blue' }}>
+                Ativo
               </th>
             )
-           } else {
+          } else {
             return (
-              <th style={{color: 'red' }}>
+              <th style={{ color: 'red' }}>
                 Cancelado
               </th>
-   
-             )
-           }
+
+            )
+          }
+        } else {
+          if (row.STCANCELADO == 'False') {
+            return (
+              <th style={{ color: 'blue' }}>
+                Ativo - <label style={{ color: 'red' }}> Conf. Fin</label>
+              </th>
+            )
+          } else {
+            return (
+              <th style={{ color: 'red' }}>
+                Cancelado
+              </th>
+
+            )
+          }
         }
       },
+      sortable: true,
     },
 
   ]

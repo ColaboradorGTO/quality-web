@@ -74,7 +74,6 @@ export const FormularioDetalheMalote = ({
 
   const enviarDadosMalote = (idMalote) => {
 
-    console.log('Reenviando malote:', idMalote);
   };
 
   return (
@@ -150,7 +149,7 @@ export const FormularioDetalheMalote = ({
         />
       </div>
 
-      <button
+{/*       <button
         id="btnReenviarMalote"
         className="btn btn-primary mt-3"
         style={{ display: STATUSMALOTE === 'Devolvido' ? 'block' : 'none' }}
@@ -158,7 +157,7 @@ export const FormularioDetalheMalote = ({
       >
         Reenviar Malote
       </button>
-
+ */}
       <FooterModal
         ButtonTypeConfirmar={ButtonTypeModal}
         textButtonConfirmar={"Reenviar Malote"}
@@ -170,6 +169,7 @@ export const FormularioDetalheMalote = ({
         textButtonFechar={"Fechar"}
         onClickButtonFechar={handleClose}
         corFechar="secondary"
+        
       />
     </div>
   );

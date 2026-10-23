@@ -3,7 +3,7 @@ import Modal from 'react-bootstrap/Modal';
 import { HeaderModal } from "../../../../Modais/HeaderModal/HeaderModal";
 import { FormularioEditar } from "./formularioEditar";
 
-export const ActionEditarEmpresaModal = ({ show, handleClose, dadosEmpresasDetalhe}) => {
+export const ActionEditarEmpresaModal = ({ show, handleClose, dadosEmpresasDetalhe, usuarioLogado, refetchEmpresas}) => {
 
   
 
@@ -30,6 +30,8 @@ export const ActionEditarEmpresaModal = ({ show, handleClose, dadosEmpresasDetal
           <FormularioEditar
            handleClose={handleClose}
            dadosEmpresasDetalhe={dadosEmpresasDetalhe} 
+           usuarioLogado={usuarioLogado}
+           refetchEmpresas={refetchEmpresas}
            />
 
         </Modal.Body>

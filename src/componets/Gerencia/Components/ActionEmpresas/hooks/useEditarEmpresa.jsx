@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-export const useEditarEmpresa = ({ dadosEmpresasDetalhe, handleClose, optionsModulos, usuarioLogado }) => {
+export const useEditarEmpresa = ({ dadosEmpresasDetalhe, handleClose, optionsModulos, usuarioLogado, refetchEmpresas }) => {
     const [grupoEmpresa, setGrupoEmpresa] = useState('');
     const [situacao, setSituacao] = useState('');
     const [dataCriacao, setDataCriacao] = useState('');
@@ -44,22 +44,22 @@ export const useEditarEmpresa = ({ dadosEmpresasDetalhe, handleClose, optionsMod
 
     useEffect(() => {
         if (dadosEmpresasDetalhe) {
-            setGrupoEmpresa(dadosEmpresasDetalhe[0]?.IDGRUPOEMPRESARIAL == 1 ? "TO - TESOURA DE OURO" : dadosEmpresasDetalhe[0]?.IDGRUPOEMPRESARIAL == 2 ? "MG - MAGAZINE" : dadosEmpresasDetalhe[0]?.IDGRUPOEMPRESARIAL == 3 ? "YO - YORUS" : dadosEmpresasDetalhe[0]?.IDGRUPOEMPRESARIAL == 4 ? "FC - FREE CENTER" : "");
-            setSituacao(dadosEmpresasDetalhe[0]?.STATIVO == "True" ? "ATIVO" : dadosEmpresasDetalhe[0]?.STATIVO == "False" ? "INATIVO" : "");
-            setDataCriacao(dadosEmpresasDetalhe[0]?.DTULTATUALIZACAO);
-            setNomeFantasia(dadosEmpresasDetalhe[0]?.NOFANTASIA);
-            setCep(dadosEmpresasDetalhe[0]?.NUCEP)
-            setEndereco(dadosEmpresasDetalhe[0]?.EENDERECO)
-            setComplemento(dadosEmpresasDetalhe[0]?.ECOMPLEMENTO == '' ? "Atualizando" : "")
-            setBairro(dadosEmpresasDetalhe[0]?.EBAIRRO)
-            setCidade(dadosEmpresasDetalhe[0]?.ECIDADE)
-            setUF(dadosEmpresasDetalhe[0]?.SGUF)
-            setEmail(dadosEmpresasDetalhe[0]?.EEMAILPRINCIPAL)
-            setTelefone(dadosEmpresasDetalhe[0]?.NUTELCOMERCIAL)
+            setGrupoEmpresa(dadosEmpresasDetalhe?.[0]?.IDGRUPOEMPRESARIAL == 1 ? "TO - TESOURA DE OURO" : dadosEmpresasDetalhe?.[0]?.IDGRUPOEMPRESARIAL == 2 ? "MG - MAGAZINE" : dadosEmpresasDetalhe?.[0]?.IDGRUPOEMPRESARIAL == 3 ? "YO - YORUS" : dadosEmpresasDetalhe?.[0]?.IDGRUPOEMPRESARIAL == 4 ? "FC - FREE CENTER" : "");
+            setSituacao(dadosEmpresasDetalhe?.[0]?.STATIVO == "True" ? "ATIVO" : dadosEmpresasDetalhe?.[0]?.STATIVO == "False" ? "INATIVO" : "");
+            setDataCriacao(dadosEmpresasDetalhe?.[0]?.DTULTATUALIZACAO);
+            setNomeFantasia(dadosEmpresasDetalhe?.[0]?.NOFANTASIA);
+            setCep(dadosEmpresasDetalhe?.[0]?.NUCEP)
+            setEndereco(dadosEmpresasDetalhe?.[0]?.EENDERECO)
+            setComplemento(dadosEmpresasDetalhe?.[0]?.ECOMPLEMENTO == '' ? "Atualizando" : "")
+            setBairro(dadosEmpresasDetalhe?.[0]?.EBAIRRO)
+            setCidade(dadosEmpresasDetalhe?.[0]?.ECIDADE)
+            setUF(dadosEmpresasDetalhe?.[0]?.SGUF)
+            setEmail(dadosEmpresasDetalhe?.[0]?.EEMAILPRINCIPAL)
+            setTelefone(dadosEmpresasDetalhe?.[0]?.NUTELGERENCIA)
         }
     }, [])
     const onSubmit = async (data) => {
-        if (optionsModulos[0]?.CRIAR == 'False') {
+        if (optionsModulos?.[0]?.CRIAR == 'False') {
             Swal.fire({
                 title: 'Erro!',
                 text: `${usuarioLogado?.NOFUNCIONARIO},\nVocê não tem permissão para editar Empresa!`,
@@ -93,9 +93,9 @@ export const useEditarEmpresa = ({ dadosEmpresasDetalhe, handleClose, optionsMod
             EEMAILFINANCEIRO: String(dadosEmpresasDetalhe[0]?.EEMAILFINANCEIRO),
             EEMAILCONTABILIDADE: String(dadosEmpresasDetalhe[0]?.EEMAILCONTABILIDADE),
             NUTELPUBLICO: String(dadosEmpresasDetalhe[0]?.NUTELPUBLICO),
-            NUTELCOMERCIAL: String(telefone || '').replace(/\D/g, ''),
+            NUTELCOMERCIAL: String(dadosEmpresasDetalhe[0]?.NUTELCOMERCIAL),
             NUTELFINANCEIRO: String(dadosEmpresasDetalhe[0]?.NUTELFINANCEIRO),
-            NUTELGERENCIA: String(dadosEmpresasDetalhe[0]?.NUTELGERENCIA),
+            NUTELGERENCIA: String(telefone || '').replace(/\D/g, ''),
             EURL: String(dadosEmpresasDetalhe[0]?.EURL),
             PATHIMG: String(dadosEmpresasDetalhe[0]?.PATHIMG),
             NUCNAE: String(dadosEmpresasDetalhe[0]?.NUCNAE),
@@ -135,6 +135,7 @@ export const useEditarEmpresa = ({ dadosEmpresasDetalhe, handleClose, optionsMod
             })
 
             handleClose()
+            refetchEmpresas()
             return responsePost.data
         } catch (error) {
             const textDados = JSON.stringify(putData);
@@ -147,7 +148,6 @@ export const useEditarEmpresa = ({ dadosEmpresasDetalhe, handleClose, optionsMod
                 DADOS: textDados,
                 IP: ipUsuario || "INDISPONIVEL",
             };
-
             const responsePost = await post('/log-web', createData)
 
 
