@@ -14,6 +14,7 @@ const HeaderTable = ({
   exportToExcel, 
   exportToPDF, 
   exportTXT,
+  exportTXTPonto,
   exportCSV 
 }) => {
   return (
@@ -32,8 +33,8 @@ const HeaderTable = ({
         placeholder="Pesquisar"
 
       />
-
-      <div style={{ display: "flex", justifyContent: "space-around"  }}>
+ 
+      <div style={{ display: "flex",  justifyContent: "space-around" }}>
         {handlePrint && (
           <ButtonHeaderTable
             Icon={MdOutlineLocalPrintshop}
@@ -67,6 +68,15 @@ const HeaderTable = ({
             iconSize={18}
             onClickButtonType={exportTXT}
             cor="info"
+          />
+        )}
+       
+        {exportTXTPonto && (
+          <ButtonHeaderTable
+            Icon={BiSolidFileTxt}
+            iconSize={18}
+            onClickButtonType={exportTXTPonto}
+            cor="danger"
           />
         )}
        

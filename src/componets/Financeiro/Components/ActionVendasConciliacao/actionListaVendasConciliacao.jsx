@@ -32,21 +32,58 @@ export const ActionListaVendasConciliacao = ({ dadosVendasConciliacao }) => {
   };
 
 
+  const exportToTXTComPonto = () => {
+    const linhas = dadosVendasConciliacao.map(item => [
+      item.contador,
+      item.IDEMPRESA,
+      item.NOFANTASIA,
+      item.IDVENDA,
+      item.DATA,
+      toFloat(item.VRTOTALPAGO),
+      toFloat(item.VRTOTALDESCONTO),
+      toFloat(item.VRPAGO),
+      item.DSTIPOPAGAMENTO,
+      item.NSU,
+      item.NUAUTORIZACAO,
+      item.DSADQUIRENTE
+    ].join(';'));
+
+
+    const conteudo = linhas.join('\n');
+
+    const blob = new Blob([conteudo], {
+      type: 'text/plain;charset=utf-8'
+    });
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'conciliacao_ponto.txt';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(url);
+  };
+
   const exportToTXT = () => {
-  const linhas = dadosVendasConciliacao.map(item => [
-    item.contador,
-    item.IDEMPRESA,
-    item.NOFANTASIA,
-    item.IDVENDA,
-    item.DATA,
-    formatMoeda(item.VRTOTALPAGO),
-    formatMoeda(item.VRTOTALDESCONTO),
-    formatMoeda(item.VRPAGO),
-    item.DSTIPOPAGAMENTO,
-    item.NSU,
-    item.NUAUTORIZACAO,
-    item.DSADQUIRENTE
-  ].join(';'));
+    const linhas = dadosVendasConciliacao.map(item => [
+      item.contador,
+      item.IDEMPRESA,
+      item.NOFANTASIA,
+      item.IDVENDA,
+      item.DATA,
+      formatMoeda(item.VRTOTALPAGO),
+      formatMoeda(item.VRTOTALDESCONTO),
+      formatMoeda(item.VRPAGO),
+      item.DSTIPOPAGAMENTO,
+      item.NSU,
+      item.NUAUTORIZACAO,
+      item.DSADQUIRENTE
+    ].join(';'));
+
 
     const conteudo = linhas.join('\n');
 
@@ -95,9 +132,9 @@ export const ActionListaVendasConciliacao = ({ dadosVendasConciliacao }) => {
     const worksheet = XLSX.utils.json_to_sheet(dados.map(item => ({
       "Nº": item.contador,
       "ID EMPRESA": item.IDEMPRESA,
-      "EMPRESA": item.NOFANTASIA, 
-      "ID VENDA": item.IDVENDA, 
-      "DT VENDA": item.DATA, 
+      "EMPRESA": item.NOFANTASIA,
+      "ID VENDA": item.IDVENDA,
+      "DT VENDA": item.DATA,
       "VR TOTAL": toFloat(item.VRTOTALPAGO),
       "DESCONTO": toFloat(item.VRTOTALDESCONTO),
       "VR PAGO": toFloat(item.VRPAGO),
@@ -149,20 +186,20 @@ export const ActionListaVendasConciliacao = ({ dadosVendasConciliacao }) => {
     }
   });
 
-    const csvData = dados?.map(item => ({
+  const csvData = dados?.map(item => ({
 
-      "ID EMPRESA": item.IDEMPRESA,
-      "EMPRESA": item.NOFANTASIA,
-      "ID VENDA": item.IDVENDA,
-      "DT VENDA": item.DATA,
-      "VR TOTAL": toFloat(item.VRTOTALPAGO),
-      "DESCONTO": toFloat(item.VRTOTALDESCONTO),
-      "VR PAGO": toFloat(item.VRPAGO),
-      "TP PAGAMENTO": item.DSTIPOPAGAMENTO,
-      "NSU": item.NSU,
-      "Nº AUTORIZAÇÃO": item.NUAUTORIZACAO,
-      "ADQUIRENTE": item.DSADQUIRENTE,
-    }));
+    "ID EMPRESA": item.IDEMPRESA,
+    "EMPRESA": item.NOFANTASIA,
+    "ID VENDA": item.IDVENDA,
+    "DT VENDA": item.DATA,
+    "VR TOTAL": toFloat(item.VRTOTALPAGO),
+    "DESCONTO": toFloat(item.VRTOTALDESCONTO),
+    "VR PAGO": toFloat(item.VRPAGO),
+    "TP PAGAMENTO": item.DSTIPOPAGAMENTO,
+    "NSU": item.NSU,
+    "Nº AUTORIZAÇÃO": item.NUAUTORIZACAO,
+    "ADQUIRENTE": item.DSADQUIRENTE,
+  }));
 
 
   const colunasVendasLoja = [
@@ -248,14 +285,14 @@ export const ActionListaVendasConciliacao = ({ dadosVendasConciliacao }) => {
         <div className="panel-hdr">
           <h2>Vendas Conciliação</h2>
         </div>
-          <CSVLink
-            data={csvData}
-            filename="vendas_conciliacao.csv"
-            ref={csvLinkRef}
-            separator=";"
-            enclosingCharacter=""
-            style={{ display: "none" }}
-          />
+        <CSVLink
+          data={csvData}
+          filename="vendas_conciliacao.csv"
+          ref={csvLinkRef}
+          separator=";"
+          enclosingCharacter=""
+          style={{ display: "none" }}
+        />
         <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
           <HeaderTable
             globalFilterValue={globalFilterValue}
@@ -264,6 +301,7 @@ export const ActionListaVendasConciliacao = ({ dadosVendasConciliacao }) => {
             exportToExcel={exportToExcel}
             exportToPDF={exportToPDF}
             exportTXT={exportToTXT}
+            exportTXTPonto={exportToTXTComPonto}
             exportCSV={exportToCSV}
           />
         </div>
