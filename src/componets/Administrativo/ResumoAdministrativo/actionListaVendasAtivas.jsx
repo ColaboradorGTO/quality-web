@@ -246,7 +246,7 @@ export const ActionListaVendasAtivas = ({
                   iconSize={20}
                   width="30px"
                   height="30px"
-                  disabledBTN={optionsModulos[0]?.ALTERAR == 'False' ? true : false}
+                  // disabledBTN={optionsModulos[0]?.ALTERAR == 'False' ? true : false}
 
                 />
               </div>
