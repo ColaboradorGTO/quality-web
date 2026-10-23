@@ -74,40 +74,6 @@ export const ActionPesquisaVendasEstrutura = ({ usuarioLogado }) => {
     { staleTime: 60 * 60 * 1000, cacheTime: 60 * 60 * 1000 }
   );
 
-  /*   const fetchVendasEstrutura = async () => {
-      const idEmpresa = empresaSelecionada == '' ? usuarioLogado?.IDEMPRESA : empresaSelecionada;
-      const urlBase = `/vendas-por-estrutura?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idEmpresa=${idEmpresa}&descricaoProduto=${codProduto}&idFornecedor=${fornecedorSelecionado}&idGrupo=${grupoSelecionado}&idSubGrupo=${subGrupoSelecionado}&idMarcaProduto=${marcaSelecionada}`;
-      let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
-      urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
-      try {
-        animacaoCarregamento('Carregando dados...', true);
-  
-        const primeiraPagina = 1;
-        const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`);
-        const page = primeiraResposta.page || primeiraPagina;
-        const pageSize = primeiraResposta.pageSize || 1000;
-        const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
-        const totalPages = Math.ceil(totalRows / pageSize);
-  
-        let allData = [...(primeiraResposta.data || [])];
-  
-        if (totalPages > 1) {
-          for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
-            animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true);
-            const responsePage = await get(`${urlApi}&page=${currentPage}`);
-            allData.push(...(responsePage.data || []));
-          }
-        }
-  
-        return allData;
-      } catch (error) {
-        console.error('Erro ao buscar dados da api:', error);
-        throw error;
-      } finally {
-        fecharAnimacaoCarregamento();
-      }
-    };
-   */
 
   const fetchVendasEstrutura = async () => {
     const idEmpresa = empresaSelecionada == '' ? usuarioLogado?.IDEMPRESA : empresaSelecionada;
@@ -157,38 +123,7 @@ export const ActionPesquisaVendasEstrutura = ({ usuarioLogado }) => {
     { enabled: false, staleTime: 60 * 60 * 1000, cacheTime: 60 * 60 * 1000 }
   );
 
-  /*   const fetchProdutosMaisVendidos = async () => {
-      const urlBase = `/produtos-mais-vendidos?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idEmpresa=${usuarioLogado.IDEMPRESA}&descricaoProduto=${codProduto}&idFornecedor=${fornecedorSelecionado}&idGrupo=${grupoSelecionado}&idGrade=${subGrupoSelecionado}`;
-      let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
-      urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
-      try {
-        animacaoCarregamento('Carregando dados...', true);
-  
-        const primeiraPagina = 1;
-        const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`);
-        const page = primeiraResposta.page || primeiraPagina;
-        const pageSize = primeiraResposta.pageSize || 1000;
-        const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
-        const totalPages = Math.ceil(totalRows / pageSize);
-  
-        let allData = [...(primeiraResposta.data || [])];
-  
-        if (totalPages > 1) {
-          for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
-            animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true);
-            const responsePage = await get(`${urlApi}&page=${currentPage}`);
-            allData.push(...(responsePage.data || []));
-          }
-        }
-  
-        return allData;
-      } catch (error) {
-        console.error('Erro ao buscar dados da api:', error);
-        throw error;
-      } finally {
-        fecharAnimacaoCarregamento();
-      }
-    }; */
+
 
   const fetchProdutosMaisVendidos = async () => {
     const urlBase = `/produtos-mais-vendidos?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idEmpresa=${usuarioLogado.IDEMPRESA}&descricaoProduto=${codProduto}&idFornecedor=${fornecedorSelecionado}&idGrupo=${grupoSelecionado}&idGrade=${subGrupoSelecionado}`;
@@ -238,38 +173,7 @@ export const ActionPesquisaVendasEstrutura = ({ usuarioLogado }) => {
     { enabled: false, staleTime: 60 * 60 * 1000, cacheTime: 60 * 60 * 1000 }
   );
 
-  /*   const fetchVendasVendedor = async () => {
-      const urlBase = `/vendas-vendedor-estrutura?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idEmpresa=${usuarioLogado.IDEMPRESA}&descricaoProduto=${codProduto}&idFornecedor=${fornecedorSelecionado}&idGrupo=${grupoSelecionado}&idGrade=${subGrupoSelecionado}&idMarca=${marcaSelecionada}`;
-      let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
-      urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
-      try {
-        animacaoCarregamento('Carregando dados...', true);
-  
-        const primeiraPagina = 1;
-        const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`);
-        const page = primeiraResposta.page || primeiraPagina;
-        const pageSize = primeiraResposta.pageSize || 1000;
-        const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
-        const totalPages = Math.ceil(totalRows / pageSize);
-  
-        let allData = [...(primeiraResposta.data || [])];
-  
-        if (totalPages > 1) {
-          for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
-            animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true);
-            const responsePage = await get(`${urlApi}&page=${currentPage}`);
-            allData.push(...(responsePage.data || []));
-          }
-        }
-  
-        return allData;
-      } catch (error) {
-        console.error('Erro ao buscar dados da api:', error);
-        throw error;
-      } finally {
-        fecharAnimacaoCarregamento();
-      }
-    }; */
+
 
   const fetchVendasVendedor = async () => {
     const urlBase = `/vendas-vendedor-estrutura?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idEmpresa=${usuarioLogado.IDEMPRESA}&descricaoProduto=${codProduto}&idFornecedor=${fornecedorSelecionado}&idGrupo=${grupoSelecionado}&idGrade=${subGrupoSelecionado}&idMarca=${marcaSelecionada}`;
@@ -445,7 +349,7 @@ export const ActionPesquisaVendasEstrutura = ({ usuarioLogado }) => {
         linkNomeSearch={"Vendas por estrutura"}
         onButtonClickSearch={handleClickVendasEstrutura}
         IconSearch={AiOutlineSearch}
-        corSearch={"primary"}
+        corSearch={"danger"}
 
         ButtonTypeCadastro={ButtonType}
         linkNome={"Vendas Por Vendedor"}

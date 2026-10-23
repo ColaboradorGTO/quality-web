@@ -9,7 +9,7 @@ export const ActionConfeirirOTModal = ({
   dadosDetalheTransferencia, 
   handleClick,
   optionsModulos,
-  usuarioLogado 
+  usuarioLogado,
 }) => {
 
   return (
@@ -27,6 +27,7 @@ export const ActionConfeirirOTModal = ({
             title="Controle Ordem de Transferência"
             subTitle="Confeirir Ordem de Transferência"
             handleClose={handleClose}
+
           />
 
           <Modal.Body >
@@ -36,6 +37,7 @@ export const ActionConfeirirOTModal = ({
               optionsModulos={optionsModulos}
               usuarioLogado={usuarioLogado}
               handleClick={handleClick}
+              
             />
           </Modal.Body>
 

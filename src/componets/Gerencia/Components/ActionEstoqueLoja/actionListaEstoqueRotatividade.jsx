@@ -24,6 +24,7 @@ export const ActionListaEstoqueRotatividade = ({ dadosEstoqueRotatividade }) => 
 
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
+    setFirst(0);
   };
 
   const handlePrint = useReactToPrint({
@@ -74,7 +75,7 @@ export const ActionListaEstoqueRotatividade = ({ dadosEstoqueRotatividade }) => 
     XLSX.writeFile(workbook, 'estoque_rotatividade.xlsx');
   };
 
-  const dados = dadosEstoqueRotatividade.map((item, index) => {
+  const dados = (dadosEstoqueRotatividade || []).map((item, index) => {
     return {
 
       DSPRODUTO: item.DSPRODUTO,
@@ -95,16 +96,35 @@ export const ActionListaEstoqueRotatividade = ({ dadosEstoqueRotatividade }) => 
     }
   });
 
+  const filtrarDados = (dados, filtro) => {
+    if (!filtro) return dados;
+
+    return dados.filter(item => {
+      return Object.values(item).some(value => {
+        if (value === null || value === undefined) return false;
+        return value.toString().toLowerCase().includes(filtro.toLowerCase());
+      });
+    });
+  };
+
   const calcularTotalPagina = (field) => {
-    return dados.reduce((total, item) => total + parseFloat(item[field]), 0);
+    const dadosFiltrados = filtrarDados(dados, globalFilterValue);
+    return dadosFiltrados.reduce((total, item) => total + toFloat(item[field] || 0), 0);
   };
 
   const calcularTotal = (field) => {
-    const firstIndex = first * rows;
-    const lastIndex = firstIndex + rows;
-    const dataPaginada = dados.slice(firstIndex, lastIndex);
+    const dadosFiltrados = filtrarDados(dados, globalFilterValue);
+    const firstIndex = first;
+    const lastIndex = first + rows;
+    const dataPaginada = dadosFiltrados.slice(firstIndex, lastIndex);
     return dataPaginada.reduce((total, item) => total + toFloat(item[field] || 0), 0);
   };
+
+  const calcularQtdInicio = () => {
+    const totalPagina = calcularTotal('QTDINICIO');
+    const total = calcularTotalPagina('QTDINICIO');
+    return `${totalPagina}   (${total} total)`;
+  }
 
   const calcularQtdEntrada = () => {
     const totalPagina = calcularTotal('QTDENTRADA');
@@ -132,21 +152,7 @@ export const ActionListaEstoqueRotatividade = ({ dadosEstoqueRotatividade }) => 
     return `${totalPagina}   (${total} total)`;
   };
 
-  const calcularQtdAjusteBalanco = () => {
-    const totalPagina = calcularTotal('QTDAJUSTEBALANCO');
-    const total = calcularTotalPagina('QTDAJUSTEBALANCO');
-    return `${totalPagina}   (${total} total)`;
-  };
-
-
   const colunasEstoqueRotatividade = [
-
-    {
-      field: 'DATAMOVIMENTO',
-      header: 'Data Movimento',
-      body: row => <th style={{ color: 'blue' }}>{row.DATAMOVIMENTO}</th>,
-      sortable: true
-    },
     {
       field: 'Loja',
       header: 'Loja',
@@ -154,39 +160,51 @@ export const ActionListaEstoqueRotatividade = ({ dadosEstoqueRotatividade }) => 
       sortable: true
     },
     {
+      field: 'DATAMOVIMENTO',
+      header: 'Data Movimento',
+      body: row => <th style={{ color: 'blue' }}>{row.DATAMOVIMENTO}</th>,
+      sortable: true
+    },
+    {
       field: 'QTDINICIO',
       header: 'QTD Início',
       body: row => <th style={{ color: 'blue' }}>{row.QTDINICIO}</th>,
+      footer: calcularQtdInicio(),
       sortable: true
     },
     {
       field: 'QTDENTRADA',
       header: 'QTD Entrada',
       body: row => <th style={{ color: 'blue' }}>{row.QTDENTRADA}</th>,
+      footer: calcularQtdEntrada(),
       sortable: true
     },
     {
       field: 'QTDENTRADAVOUCHER',
       header: 'QTD Entrada Voucher',
       body: row => <th style={{ color: 'blue' }}>{row.QTDENTRADAVOUCHER}</th>,
+      footer: calcularQtdEntradaVoucher(),
       sortable: true
     },
     {
       field: 'QTDSAIDA',
       header: 'QTD Saída',
       body: row => <th style={{ color: 'blue' }}>{row.QTDSAIDA}</th>,
+      footer: calcularQtdSaida(),
       sortable: true
     },
     {
       field: 'QTDSAIDATRANSFERENCIA',
       header: 'QTD Saída Transferência',
       body: row => <th style={{ color: 'blue' }}>{row.QTDSAIDATRANSFERENCIA}</th>,
+      footer: calcularQtdSaidaTransferencia(),
       sortable: true
     },
     {
       field: 'QTDRETORNOAJUSTEPEDIDO',
       header: 'QTD Ret. Ajuste Pedido',
       body: row => <th style={{ color: 'blue' }}>{row.QTDRETORNOAJUSTEPEDIDO}</th>,
+      footer: calcularQtdRetornoAjustePedido(),
       sortable: true
     },
     {
@@ -207,8 +225,8 @@ export const ActionListaEstoqueRotatividade = ({ dadosEstoqueRotatividade }) => 
 
   const HeaderTemplate = (rowData) => {
     return (
-      <div className="flex align-items-center " style={{ alignContent: 'center', border: '1px solid #e9e9e9',  backgroundColor: '#f5f5f5', width: '100%' }}>
-        <span className="font-bold" style={{ fontWeight: 600,  }}>
+      <div className="flex align-items-center " style={{ alignContent: 'center', border: '1px solid #e9e9e9', backgroundColor: '#f5f5f5', width: '100%' }}>
+        <span className="font-bold" style={{ fontWeight: 600, }}>
           {`${rowData.NUCODBARRAS} - ${rowData.DSPRODUTO} / Custo R$ ${formatMoeda(rowData.PRECOCUSTO)}  - Venda R$ ${formatMoeda(rowData.PRECOVENDA)}`}
         </span>
       </div>
@@ -220,14 +238,14 @@ export const ActionListaEstoqueRotatividade = ({ dadosEstoqueRotatividade }) => 
 
       <Row>
         <Column footer="Total " colSpan={2} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem', textAlign: 'center' }} />
+        <Column footer={calcularQtdInicio()} colSpan={1} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
         <Column footer={calcularQtdEntrada()} colSpan={1} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
         <Column footer={calcularQtdEntradaVoucher()} colSpan={1} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
         <Column footer={calcularQtdSaida()} colSpan={1} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
         <Column footer={calcularQtdSaidaTransferencia()} colSpan={1} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
         <Column footer={calcularQtdRetornoAjustePedido()} colSpan={1} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
-        <Column footer={calcularQtdAjusteBalanco()} colSpan={1} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
         <Column footer={""} colSpan={1} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
-        <Column footer={""} colSpan={1} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
+        <Column footer={""} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
       </Row>
     </ColumnGroup>
   )

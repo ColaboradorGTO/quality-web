@@ -304,8 +304,8 @@ export const ActionListaProdutoEtiqueta = ({
       header: 'Quantidade',
       body: (row) => {
         const produtoSelecionado = produtosSelecionados.find(p => p.IDPRODUTO === row.IDPRODUTO);
-        const quantidadeAtual = produtoSelecionado 
-          ? (produtoSelecionado.quantidade ?? 1) 
+        const quantidadeAtual = produtoSelecionado
+          ? (produtoSelecionado.quantidade ?? 1)
           : 1;
 
         return (
@@ -405,7 +405,7 @@ export const ActionListaProdutoEtiqueta = ({
           <h2>Lista de Produtos </h2>
         </div>
 
-        <div style={{ background: '', width: '15%', display: 'flex', alignItems: 'center', gap: '1rem', marginLeft: '1rem' }}>
+        <div style={{ background: '', width: '15%', display: 'flex', alignItems: 'center', gap: '1rem', marginLeft: '1rem',  marginTop: '15px'}}>
           <span style={{ fontWeight: 'bold', textWrap: 'nowrap' }}>QTD CÓPIAS:</span>
           <input
             type="number"

@@ -28,7 +28,7 @@ export const schema = yup.object().shape({
     .required("Valor quebra sistema é obrigatório"),
 
   dinheiroAjuste: yup
-    .number()
+    .string()
     .typeError("Valor quebra ajustado deve ser um número")
     .required("Valor quebra ajustado é obrigatório"),
 });

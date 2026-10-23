@@ -23,6 +23,7 @@ export const ActionDetalharProdutosEtiquetaModal = ({
   dadosAcumuladorEtiquetas,
   setDadosAcumuladorEtiquetas,
   setProdutosSelecionados,
+  copia
 }) => {
 
   const [globalFilterValue, setGlobalFilterValue] = useState("");
@@ -302,6 +303,9 @@ export const ActionDetalharProdutosEtiquetaModal = ({
               setTabelaVisivel={setTabelaVisivel}
               dadosAcumuladorEtiquetas={dadosAcumuladorEtiquetas}
               produtosSelecionados={produtosSelecionados}
+              copia={copia}
+              show={show}
+              handleClose={handleClose}
             />
           }
         </Modal.Body>

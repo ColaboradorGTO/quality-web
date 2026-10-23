@@ -44,7 +44,7 @@ export const FormularioEditar = ({
             <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="row" data-select2-id="736">
                     <div className="col-sm-6 col-xl-6">
-                  
+
                         <Controller
                             name="lojaOrigem"
                             control={control}
@@ -116,7 +116,7 @@ export const FormularioEditar = ({
                             cor={"info"}
                             className={"mr-4"}
                             type="submit"
-                            buttonDisabled={dadosDetalheTransferencia[0]?.IDSTATUSOT != 1}
+                            buttonDisabled={dadosDetalheTransferencia[0]?.IDSTATUSOT !== 1}
 
                         />
                     </div>

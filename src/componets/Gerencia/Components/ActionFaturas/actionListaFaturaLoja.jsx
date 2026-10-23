@@ -39,17 +39,17 @@ export const ActionListaFaturaLoja = ({ dadosFaturas, usuarioLogado, optionsModu
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(dadosExcel);
     const workbook = XLSX.utils.book_new();
-    const header =[
+    const header = [
       'Nº',
       'DT Receb',
       'Nº Mov. Fatura',
       'Nº Mov. Caixa',
       'Caixa',
-      'Cod. Auto', 
-      'Valor', 
-      'Recebedor', 
-      'Situação', 
-      'PIX', 
+      'Cod. Auto',
+      'Valor',
+      'Recebedor',
+      'Situação',
+      'PIX',
       'Opção'
     ];
     worksheet['!cols'] = [
@@ -64,7 +64,7 @@ export const ActionListaFaturaLoja = ({ dadosFaturas, usuarioLogado, optionsModu
       { wpx: 100, caption: 'Situação' },
       { wpx: 100, caption: 'PIX' },
       { wpx: 100, caption: 'Opção' },
-     
+
     ];
     XLSX.utils.sheet_add_aoa(worksheet, [header], { origin: 'A1' });
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Faturas da Loja');
@@ -81,11 +81,11 @@ export const ActionListaFaturaLoja = ({ dadosFaturas, usuarioLogado, optionsModu
         'Nº Mov. Fatura',
         'Nº Mov. Caixa',
         'Caixa',
-        'Cod. Auto', 
-        'Valor', 
-        'Recebedor', 
-        'Situação', 
-        'PIX', 
+        'Cod. Auto',
+        'Valor',
+        'Recebedor',
+        'Situação',
+        'PIX',
         'Opção'
       ]],
       body: dados.map(item => [item.contador, item.DTPROCESSAMENTO, item.IDMOVIMENTOCAIXAWEB, item.IDMOVCAIXA, item.DSCAIXA, item.NUCODAUTORIZACAO, item.VRRECEBIDO, item.NOFUNCIONARIO, item.STCANCELADO, item.STPIX, item.STCONFERIDO]),
@@ -202,6 +202,7 @@ export const ActionListaFaturaLoja = ({ dadosFaturas, usuarioLogado, optionsModu
           <th style={{ color: 'blue' }}>{row.STCANCELADO == 'False' ? 'Ativo' : 'Cancelado'}</th>
         </div>
       ),
+      sortable: true,
     },
     {
       field: 'STPIX',
@@ -211,6 +212,7 @@ export const ActionListaFaturaLoja = ({ dadosFaturas, usuarioLogado, optionsModu
           <th style={{ color: 'blue' }}>{row.STPIX == 'True' ? 'SIM' : 'NÃO'} </th>
         </div>
       ),
+      sortable: true,
     },
     {
       field: 'STCONFERIDO',
@@ -264,6 +266,8 @@ export const ActionListaFaturaLoja = ({ dadosFaturas, usuarioLogado, optionsModu
           )
         }
       },
+      sortable: true,
+
     },
     {
       field: 'STRECOMPRA',
@@ -312,6 +316,7 @@ export const ActionListaFaturaLoja = ({ dadosFaturas, usuarioLogado, optionsModu
           )
         }
       },
+      sortable: true
     },
   ]
 
@@ -336,7 +341,7 @@ export const ActionListaFaturaLoja = ({ dadosFaturas, usuarioLogado, optionsModu
   };
 
   const handleClickEditar = (row) => {
-    if(optionsModulos[0]?.ALTERAR == 'True') {
+    if (optionsModulos[0]?.ALTERAR == 'True') {
       if (row && row.IDDETALHEFATURA) {
         handleEditar(row.IDDETALHEFATURA);
       }
@@ -373,7 +378,7 @@ export const ActionListaFaturaLoja = ({ dadosFaturas, usuarioLogado, optionsModu
   };
 
   const handleClickCancelar = (row) => {
-    if(optionsModulos[0]?.ALTERAR == 'True') {
+    if (optionsModulos[0]?.ALTERAR == 'True') {
       if (row && row.IDDETALHEFATURA) {
         handleCancelar(row.IDDETALHEFATURA);
       }
@@ -386,12 +391,12 @@ export const ActionListaFaturaLoja = ({ dadosFaturas, usuarioLogado, optionsModu
           container: 'custom-swal',
         },
       });
-    }  
+    }
   };
-  
+
 
   const handleIncluirRecompra = async (row) => {
-    if(optionsModulos[0]?.ALTERAR == 'False') {
+    if (optionsModulos[0]?.ALTERAR == 'False') {
       Swal.fire({
         icon: 'info',
         title: 'Atenção!',
@@ -424,7 +429,7 @@ export const ActionListaFaturaLoja = ({ dadosFaturas, usuarioLogado, optionsModu
       timer: 3000,
       preConfirm: async () => {
         try {
-          
+
           await put('/atualizar-recompra', putData);
           refetchListaFaturas()
           Swal.fire('Sucesso!', 'Recompra atualizada com sucesso.', 'success');
