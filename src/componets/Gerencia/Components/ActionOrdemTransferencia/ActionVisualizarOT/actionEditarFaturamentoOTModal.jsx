@@ -3,7 +3,7 @@ import Modal from 'react-bootstrap/Modal';
 import { FormularioVisualizar } from "./formularioVisualizar";
 import { HeaderModal } from "../../../../Modais/HeaderModal/HeaderModal";
 
-export const ActionEditarFaturamentoOTModal = ({show, handleClose, dadosDetalheTransferencia }) => {
+export const ActionEditarFaturamentoOTModal = ({show, handleClose, dadosDetalheTransferencia, usuarioLogado }) => {
 
   return (
     <Fragment>
@@ -22,6 +22,7 @@ export const ActionEditarFaturamentoOTModal = ({show, handleClose, dadosDetalheT
           <FormularioVisualizar 
             handleClose={handleClose} 
             dadosDetalheTransferencia={dadosDetalheTransferencia} 
+            usuarioLogado={usuarioLogado}
             
           />
         </Modal.Body>

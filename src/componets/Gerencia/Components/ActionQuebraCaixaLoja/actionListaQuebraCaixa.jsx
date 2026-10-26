@@ -145,6 +145,7 @@ export const ActionListaQuebraCaixa = ({ dadosQuebraCaixa }) => {
           {row.STATIVO == 'True' ? 'Ativo' : 'Cancelado'}
         </th>
       ),
+      sortable: true,
     },
     {
       header: 'Opções',
@@ -195,7 +196,7 @@ export const ActionListaQuebraCaixa = ({ dadosQuebraCaixa }) => {
 
     <Fragment>
       <div className="panel">
-        <div className="panel-hdr">
+        <div className="panel-hdr"> 
           <h2>Lista de Quebras de Caixas da Loja</h2>
         </div>
         <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>

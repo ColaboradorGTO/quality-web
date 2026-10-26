@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from "react"
 import { CiEdit } from "react-icons/ci";
-import { FaFileInvoiceDollar} from "react-icons/fa";
+import { FaClipboardCheck, FaFileInvoiceDollar, FaFilePdf, FaPrint } from "react-icons/fa";
 import Swal from 'sweetalert2';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -22,11 +22,11 @@ import { ActionEditarFaturamentoOTModal } from "./ActionVisualizarOT/actionEdita
 import { ActionConfeirirOTModal } from "./ActionConferirModal/modalConferirOT";
 import { FiNavigation } from "react-icons/fi";
 
-export const ActionListaOrdemTransferencia = ({ 
-  dadosConferencia, 
-  optionsModulos, 
-  usuarioLogado, 
-  handleClick  
+export const ActionListaOrdemTransferencia = ({
+  dadosConferencia,
+  optionsModulos,
+  usuarioLogado,
+  handleClick
 }) => {
   const [modalVisivel, setModalVisivel] = useState(false);
   const [modalEditar, setModalEditar] = useState(false);
@@ -40,17 +40,17 @@ export const ActionListaOrdemTransferencia = ({
   const [rowSelection, setRowSelection] = useState(null);
   const [globalFilterValue, setGlobalFilterValue] = useState('');
   const dataTableRef = useRef();
-  const{
+  const {
     handleCancelar,
-  } = useCancelarOT({usuarioLogado, optionsModulos, handleClick});
+  } = useCancelarOT({ usuarioLogado, optionsModulos, handleClick });
 
   const {
     handleFaturarOT
-  } = useEmitirNFE({usuarioLogado, optionsModulos, handleClick });
-  
+  } = useEmitirNFE({ usuarioLogado, optionsModulos, handleClick });
+
   const {
     handleFinalizarOT
-  } = useFinalizarOT({usuarioLogado, optionsModulos, handleClick});
+  } = useFinalizarOT({ usuarioLogado, optionsModulos, handleClick });
 
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
@@ -92,7 +92,6 @@ export const ActionListaOrdemTransferencia = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       if (usuarioLogado && usuarioLogado?.NOFANTASIA) {
-        // console.log(usuarioLogado?.NOFANTASIA)
         setValueLojaOrigem(usuarioLogado?.NOFANTASIA);
       }
     }, 3000);
@@ -140,13 +139,13 @@ export const ActionListaOrdemTransferencia = ({
     {
       field: 'EMPRESAORIGEM',
       header: 'Loja Origem',
-      body: row => <p style={{margin: '0px', width: '250px', fontWeight: 600}}>{row.EMPRESAORIGEM}</p>,
+      body: row => <p style={{ margin: '0px', width: '250px', fontWeight: 600 }}>{row.EMPRESAORIGEM}</p>,
       sortable: true,
     },
     {
       field: 'EMPRESADESTINO',
       header: 'Loja Destino',
-      body: row => <p style={{margin: '0px', width: '250px', fontWeight: 600}}>{row.EMPRESADESTINO}</p>,
+      body: row => <p style={{ margin: '0px', width: '250px', fontWeight: 600 }}>{row.EMPRESADESTINO}</p>,
       sortable: true,
     },
     {
@@ -166,96 +165,137 @@ export const ActionListaOrdemTransferencia = ({
       field: 'IDSTATUSOT',
       header: 'Opções',
       body: (row) => {
-        if (row.IDEMPRESAORIGEM === usuarioLogado?.IDEMPRESA) {
+        const ehOrigem =
+          row.IDEMPRESAORIGEM === usuarioLogado?.IDEMPRESA;
+
+        const statusOT = Number(row.IDSTATUSOT);
+
+        if (ehOrigem) {
           return (
             <div
-              style={{display: "flex", justifyContent: "space-between", alignItems: "center", width: "15rem"}}>
-              <div>
-                <ButtonTable
-                  titleButton={"Editar / Visualizar"}
-                  // onClickButton={() => IDRESUMOOT + 0 + IDSTATUSOT + DSOBSERVACAO + DATAENTREGAFORMATADA}
-                  onClickButton={() => handleClickEdit(row)}
-                  Icon={CiEdit}
-                  iconSize={20}
-                  width="35px"
-                  height="35px"
-                  iconColor={"#fff"}
-                  cor={"info"}
-                  disabledBTN={[1, 2].indexOf(row.IDSTATUSOT) >= 0}
-                />
-              </div>
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                flexWrap: 'wrap',
+                minWidth: '15rem',
+              }}
+            >
 
-              <div>
-                <ButtonTable
-                  titleButton={"Cancelar"}
-                  // onClickButton={() => IDRESUMOOT + 0 + IDSTATUSOT + DSOBSERVACAO + DATAENTREGAFORMATADA}
-                  onClickButton={() => handleCancelar(row)}
-                  Icon={BsTrash3}
-                  iconSize={20}
-                  width="35px"
-                  height="35px"
-                  iconColor={"#fff"}
-                  cor={"danger"}
-                  disabledBTN={row.IDSTATUSOT != 1}
-                />
-              </div>
-        
-              <div>
-                <ButtonTable
-                  titleButton={"Emitir / Visualizar NFe"}
-                  onClickButton={() => handleFaturarOT(row)}
-                  Icon={FaFileInvoiceDollar}
-                  iconSize={20}
-                  width="35px"
-                  height="35px"
-                  iconColor={"#fff"}
-                  cor={"success"}
-                  disabledBTN={row.IDSTATUSOT != 1}
-                />
-              </div>
+              <ButtonTable
+                titleButton="Editar / Visualizar"
+                onClickButton={() => handleClickEdit(row)}
+                Icon={CiEdit}
+                iconSize={20}
+                width="35px"
+                height="35px"
+                iconColor="#fff"
+                cor="info"
+              />
+
+              <ButtonTable
+                titleButton="Cancelar"
+                onClickButton={() => handleCancelar(row)}
+                Icon={BsTrash3}
+                iconSize={20}
+                width="35px"
+                height="35px"
+                iconColor="#fff"
+                cor="danger"
+                disabledBTN={statusOT !== 1}
+              />
+
+              <ButtonTable
+                titleButton="Emitir / Visualizar NFe"
+                onClickButton={() => handleFaturarOT(row)}
+                Icon={FaFileInvoiceDollar}
+                iconSize={20}
+                width="35px"
+                height="35px"
+                iconColor="#fff"
+                cor="success"
+                disabledBTN={statusOT !== 1}
+              />
+
+              <ButtonTable
+                titleButton="Imprimir etiqueta"
+                onClickButton={() => handleClickImprimir(row)}
+                Icon={FaPrint}
+                iconSize={20}
+                width="35px"
+                height="35px"
+                iconColor="#fff"
+                cor="primary"
+              />
+
+              <ButtonTable
+                titleButton="Imprimir nota fiscal"
+                onClickButton={() =>
+                  window.open(
+                    `http://164.152.244.96:3000/files/NFe${row.CHAVESEFAZ}.pdf`,
+                    '_blank'
+                  )
+                }
+                Icon={FaFilePdf}
+                iconSize={20}
+                width="35px"
+                height="35px"
+                iconColor="#fff"
+                cor="danger"
+                disabledBTN={!row.CHAVESEFAZ}
+              />
+
+              <ButtonTable
+                titleButton="Status da nota fiscal"
+                onClickButton={() => handleClickStatusNota(row)}
+                Icon={FaClipboardCheck}
+                iconSize={20}
+                width="35px"
+                height="35px"
+                iconColor="#fff"
+                cor="warning"
+              />
             </div>
-
           );
-        } else {
-          return (
-           
-              <div style={{ display: "flex", alignItems: "center", width: "15rem",}} >
-                
-                <ButtonTable
-                  titleButton={"Conferir OT"}
-                  onClickButton={() => handleClickConferir(row)}
-                  Icon={CiEdit}
-                  iconSize={20}
-                  width="35px"
-                  height="35px"
-                  iconColor={"#fff"}
-                  cor={"primary"}
-                 disabledBTN={[1, 2].indexOf(row.IDSTATUSOT) >= 0 }
-                />
-              
+        }
 
-              {[3, 5].indexOf(row.IDSTATUSOT) >= 0 ? (
-               <div style={{marginLeft: '10px'}}>
-                  <ButtonTable
-                    titleButton={"Finalizar Recebimento OT"}
-                    onClickButton={() => handleFinalizarOT(row)}
-                    Icon={FiNavigation}
-                    iconSize={20}
-                    width="35px"
-                    height="35px"
-                    iconColor={"#fff"}
-                    cor={"warning"}
-                    disabledBTN={row.NUMERONOTASEFAZ === ''}
-                  />
+        return (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              flexWrap: 'wrap',
+              minWidth: '15rem',
+            }}
+          >
+            <ButtonTable
+              titleButton="Conferir OT"
+              onClickButton={() => handleClickConferir(row)}
+              Icon={CiEdit}
+              iconSize={20}
+              width="35px"
+              height="35px"
+              iconColor="#fff"
+              cor="primary"
+              disabledBTN={[1, 2].includes(statusOT)}
+            />
 
-               </div>
-              ) : (
-                <></>
-              )}
-            </div>
-          )
-        } 
-      }
+            {[3, 5].includes(statusOT) && (
+              <ButtonTable
+                titleButton="Finalizar Recebimento OT"
+                onClickButton={() => handleFinalizarOT(row)}
+                Icon={FiNavigation}
+                iconSize={20}
+                width="35px"
+                height="35px"
+                iconColor="#fff"
+                cor="warning"
+              />
+            )}
+          </div>
+        );
+      },
     }
   ]
 
@@ -266,7 +306,7 @@ export const ActionListaOrdemTransferencia = ({
       if (response.data && response.data.length > 0) {
         setDadosDetalheTransferencia(response.data);
         setModalEditar(true);
-   
+
       } else {
         Swal.fire({
           icon: 'error',
@@ -281,14 +321,14 @@ export const ActionListaOrdemTransferencia = ({
   };
 
   const handleClickEdit = (row) => {
-    if(optionsModulos[0]?.ALTERAR == 'False') {
+    if (optionsModulos[0]?.ALTERAR == 'False') {
       Swal.fire({
         icon: 'error',
         title: 'Atenção',
         text: 'Você não tem permissão para editar esta Ordem de Transferência.',
         confirmButtonColor: '#7352A5',
       });
-      return; 
+      return;
     } else if (row && row.IDRESUMOOT) {
       handleEdit(row.IDRESUMOOT);
     }
@@ -316,7 +356,7 @@ export const ActionListaOrdemTransferencia = ({
   }
 
   const handleClickConferir = (row) => {
-    if(optionsModulos[0]?.ALTERAR == 'False') {
+    if (optionsModulos[0]?.ALTERAR == 'False') {
       Swal.fire({
         icon: 'error',
         title: 'Atenção',
@@ -332,8 +372,7 @@ export const ActionListaOrdemTransferencia = ({
   const handleStatusNota = async (IDRESUMOOT) => {
 
     try {
-      const response = await get(`/detalhe-ordem-transferencia?idResumoOT=${IDRESUMOOT}`)
-
+      const response = await get(`/resumo-ordem-transferencia?id=${IDRESUMOOT}`)
       if (response.data && response.data.length > 0) {
         setDadosObservacaoOT(response.data);
         setModalObservacao(true);
@@ -359,7 +398,7 @@ export const ActionListaOrdemTransferencia = ({
   const handleImprimir = async (IDRESUMOOT) => {
 
     try {
-      const response = await get(`/impressao-etiqueta-ot?idResumoOT=${IDRESUMOOT}`)
+      const response = await get(`/resumo-ordem-transferencia?id=${IDRESUMOOT}`)
 
       if (response.data && response.data.length > 0) {
         setDadosImprimirOT(response.data);
@@ -449,6 +488,7 @@ export const ActionListaOrdemTransferencia = ({
             currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
             filterDisplay="menu"
             showGridlines
+            cellMemo={false}
             stripedRows
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado </div>}
           >
@@ -485,24 +525,29 @@ export const ActionListaOrdemTransferencia = ({
         show={modalVisivel}
         handleClose={() => setModalVisivel(false)}
         dadosDetalheTransferencia={dadosDetalheTransferencia}
+        usuarioLogado={usuarioLogado}
       />
-      
+
       <ActionImprimirEtiquetaOT
         show={modalImprimirOT}
         handleClose={() => setModalImprimirOT(false)}
         dadosImprimirOT={dadosImprimirOT}
+        usuarioLogado={usuarioLogado}
       />
 
       <ActionObservacaoOT
         show={modalObservacao}
         handleClose={() => setModalObservacao(false)}
         dadosObservacaoOT={dadosObservacaoOT}
-      /> 
+        usuarioLogado={usuarioLogado}
+      />
 
-      <ActionConfeirirOTModal 
+      <ActionConfeirirOTModal
         show={modalConferirOT}
         handleClose={() => setModalConferirOT(false)}
         dadosDetalheTransferencia={dadosDetalheTransferencia}
+        usuarioLogado={usuarioLogado}
+        handleClick={handleClick}
       />
     </Fragment>
   )

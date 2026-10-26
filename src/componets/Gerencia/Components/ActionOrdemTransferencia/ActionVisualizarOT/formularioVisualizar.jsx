@@ -7,7 +7,7 @@ import { Controller, useForm } from "react-hook-form";
 import FormField from "../../../../Formularios/FormField";
 
 
-export const FormularioVisualizar = ({ handleClose, dadosDetalheTransferencia }) => {
+export const FormularioVisualizar = ({ handleClose, dadosDetalheTransferencia, usuarioLogado }) => {
   const { register, handleSubmit, formState: { errors }, clearErrors, setError, control } = useForm({
     mode: "onChange"
   });

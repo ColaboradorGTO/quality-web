@@ -13,7 +13,7 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
-export const ActionListaAdiantamentoSalarioLoja = ({dadosAdiantamentoFuncionarios}) => {
+export const ActionListaAdiantamentoSalarioLoja = ({ dadosAdiantamentoFuncionarios }) => {
   const [modalImprimirVisivel, setModalImprimirVisivel] = useState(false);
   const [dadosAdiantamentoSalarialFuncionarios, setDadosAdiantamentoSalarialFuncionarios] = useState([]);
   const [globalFilterValue, setGlobalFilterValue] = useState('');
@@ -33,7 +33,7 @@ export const ActionListaAdiantamentoSalarioLoja = ({dadosAdiantamentoFuncionario
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.autoTable({
-      head: [['contador', 'Data Mov', 'Funcionário', 'Valor', 'Situação' ]],
+      head: [['contador', 'Data Mov', 'Funcionário', 'Valor', 'Situação']],
       body: dados.map(item => [item.contador, item.DTLANCAMENTO, item.NOFUNCIONARIO, item.VRVALORDESCONTO, item.STATIVO == 'True' ? 'ATIVO' : 'CANCELADO']),
     });
     doc.save('adiantamento_salario.pdf');
@@ -42,14 +42,14 @@ export const ActionListaAdiantamentoSalarioLoja = ({dadosAdiantamentoFuncionario
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(dados);
     const workbook = XLSX.utils.book_new();
-    const header = ['contador', 'Data Mov', 'Funcionário', 'Valor', 'Situação' ];
+    const header = ['contador', 'Data Mov', 'Funcionário', 'Valor', 'Situação'];
     worksheet['!cols'] = [
       { wpx: 70, caption: 'Nº' },
       { wpx: 100, caption: 'Data Mov' },
       { wpx: 250, caption: 'Funcionário' },
       { wpx: 100, caption: 'Valor' },
       { wpx: 100, caption: 'Situação' },
-     
+
     ];
     XLSX.utils.sheet_add_aoa(worksheet, [header], { origin: 'A1' });
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Adiantamento de Salário');
@@ -58,8 +58,8 @@ export const ActionListaAdiantamentoSalarioLoja = ({dadosAdiantamentoFuncionario
 
   const calcularValorTotal = () => {
     let total = 0;
-    for(let resultado of dadosAdiantamentoFuncionarios){
-      if(resultado.STATIVO == 'True') {
+    for (let resultado of dadosAdiantamentoFuncionarios) {
+      if (resultado.STATIVO == 'True') {
         total += parseFloat(resultado.VRVALORDESCONTO)
       }
     }
@@ -77,7 +77,7 @@ export const ActionListaAdiantamentoSalarioLoja = ({dadosAdiantamentoFuncionario
       VRVALORDESCONTO: item.VRVALORDESCONTO,
       STATIVO: item.STATIVO == 'True' ? 'ATIVO' : 'CANCELADO',
       IDADIANTAMENTOSALARIO: item.IDADIANTAMENTOSALARIO,
-   
+
     }
   });
 
@@ -88,7 +88,7 @@ export const ActionListaAdiantamentoSalarioLoja = ({dadosAdiantamentoFuncionario
       header: 'Nº',
       body: row => <th>{row.contador}</th>,
       sortable: true,
-    
+
     },
     {
       field: 'DTLANCAMENTO',
@@ -118,11 +118,13 @@ export const ActionListaAdiantamentoSalarioLoja = ({dadosAdiantamentoFuncionario
           {row.STATIVO}
         </th>
       ),
+      sortable: true,
+
     },
     {
       header: 'Opções',
       body: (row) => {
-        if(row.STATIVO == 'ATIVO') {
+        if (row.STATIVO == 'ATIVO') {
           return (
             <div className="p-1 "
               style={{ justifyContent: "space-between" }}
@@ -221,15 +223,15 @@ export const ActionListaAdiantamentoSalarioLoja = ({dadosAdiantamentoFuncionario
 
               />
             ))}
-    
+
           </DataTable>
         </div>
       </div>
 
 
-      <ActionImprimirAdiantamentoSalarial 
-        show={modalImprimirVisivel} 
-        handleClose={() => setModalImprimirVisivel(false)} 
+      <ActionImprimirAdiantamentoSalarial
+        show={modalImprimirVisivel}
+        handleClose={() => setModalImprimirVisivel(false)}
         dadosAdiantamentoSalarialFuncionarios={dadosAdiantamentoSalarialFuncionarios}
       />
     </Fragment>

@@ -8,6 +8,7 @@ import { useQuery } from "react-query"
 import { InputSelectAction } from "../../../Inputs/InputSelectAction"
 import { ActionImprimirEtiquetaModal } from "./actionImprimirEtiquetaModal"
 import { useEffect } from "react"
+import Swal from "sweetalert2"
 
 export const ActionPesquisaEtiquetasVolumes = ({ usuarioLogado }) => {
   const [tipoSelecionado, setTipoSelecionado] = useState('DEVOLUÇÃO');
@@ -31,15 +32,24 @@ export const ActionPesquisaEtiquetasVolumes = ({ usuarioLogado }) => {
     { enabled: true, staleTime: 60 * 60 * 1000, }
   );
 
-  const handleImprimir = () => {
+
+    const handleImprimir = () => {
+     if(tipoSelecionado == 'REMANEJAMENTO' && (empresaDestinoSelecionada == null || empresaDestinoSelecionada == undefined || empresaDestinoSelecionada == '')){ 
+      Swal.fire({
+        icon: 'error',
+        title: 'Erro',
+        text: 'Selecione a empresa destino novamente para remanejamento.',
+      })
+      return;
+    } 
     const dados = [{
       tipoSelecionado,
       numeroOR,
       numeroOT,
       descricao,
       categoria,
-      empresaOrigem: usuarioLogado?.NOFANTASIA,
-      empresaDestinoSelecionada: '0101 - TO - CD (Depósito)',
+      empresaOrigem: usuarioLogado.NOFANTASIA,
+      empresaDestino: empresaDestinoSelecionada || '0101 - TO - CD (Depósito)',
       solicitanteSelecionado,
       quantidade: quantidade
     }];
@@ -59,13 +69,21 @@ export const ActionPesquisaEtiquetasVolumes = ({ usuarioLogado }) => {
     { value: 'Diretoria', label: 'Diretoria' },
   ]
 
-  useEffect(() => {
+/*   useEffect(() => {
     if (tipoSelecionado === 'DEVOLUÇÃO') {
       setSolicitanteSelecionado('');
       setEmpresaDestinoSelecionada('');
     }
   }, [tipoSelecionado, setSolicitanteSelecionado, setEmpresaDestinoSelecionada])
-  
+   */
+
+  const handleChangeTipoSelecionado = (e) => {
+    setTipoSelecionado(e.value);
+    if (e.value == 'DEVOLUÇÃO') {
+      setSolicitanteSelecionado('');
+      setEmpresaDestinoSelecionada('');
+    }
+  }
 
   return (
 
@@ -84,7 +102,7 @@ export const ActionPesquisaEtiquetasVolumes = ({ usuarioLogado }) => {
         }))}
         valueSelectEmpresa={tipoSelecionado}
         defaultValueSelectEmpresa={{ value: 'DEVOLUÇÃO', label: 'DEVOLUÇÃO' }}
-        onChangeSelectEmpresa={(e) => setTipoSelecionado(e.value)}
+        onChangeSelectEmpresa={handleChangeTipoSelecionado}
 
         InputSelectGrupoComponent={InputSelectAction}
         labelSelectGrupo={"Solicitante"}
