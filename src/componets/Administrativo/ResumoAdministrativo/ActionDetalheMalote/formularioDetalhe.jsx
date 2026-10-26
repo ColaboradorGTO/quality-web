@@ -111,12 +111,14 @@ export const FormularioDetalheMalote = ({ dadosDetalhesMalote, dadosPendenciasMa
             <p style={{margin: '0px', fontSize: '16px', fontWeight: 900,}} className="text-p">Data Envio: <span className='span-print' style={{fontWeight: 500,}}>{DATAHORAENVIADO || ''}</span></p>
             <p style={{margin: '0px', fontSize: '16px', fontWeight: 900,}} className="text-p">Usuário Recepção: <span className='span-print' style={{fontWeight: 500,}}>{NOFUNCIONARIORECEPCAO || ''}</span></p>
             <p style={{margin: '0px', fontSize: '16px', fontWeight: 900,}} className="text-p">Data Recepção: <span className='span-print' style={{fontWeight: 500,}}>{DATAHORARECEBIDO || ''}</span></p>
-            {showConferencia && (
+            <p style={{margin: '0px', fontSize: '16px', fontWeight: 900,}} className="text-p">Usuário Conferência: <span className="span-print" style={{fontWeight: 500,}}>{NOFUNCIONARIOCONFERENCIA || ''}</span></p>
+            <p style={{margin: '0px', fontSize: '16px', fontWeight: 900,}} className="text-p">Data Conferência: <span className="span-print" style={{fontWeight: 500,}}>{DATAHORACONFERIDO || ''}</span></p>
+            {/* {showConferencia && (
               <>
                 <p style={{margin: '0px', fontSize: '16px', fontWeight: 900,}} className="text-p">Usuário Conferência: <span className="span-print" style={{fontWeight: 500,}}>{NOFUNCIONARIOCONFERENCIA || ''}</span></p>
                 <p style={{margin: '0px', fontSize: '16px', fontWeight: 900,}} className="text-p">Data Conferência: <span className="span-print" style={{fontWeight: 500,}}>{DATAHORACONFERIDO || ''}</span></p>
               </>
-            )}
+            )} */}
 
             {showDevolucao && (
               <>
