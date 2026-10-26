@@ -10,14 +10,23 @@ import { jsPDF } from 'jspdf';
 import * as XLSX from 'xlsx';
 import 'jspdf-autotable';
 import { formatarPorcentagem } from "../../../../utils/formatarPorcentagem";
+import { toFloat } from "../../../../utils/toFloat";
 
 export const ActionListaEstoqueAtual = ({ dadosEstoqueAtual }) => {
   const [globalFilterValue, setGlobalFilterValue] = useState('');
+  const [first, setFirst] = useState(0);
+  const [rows, setRows] = useState(10);
   const [rowSelection, setRowSelection] = useState(null);
   const dataTableRef = useRef();
 
+  const onPageChange = (event) => {
+    setFirst(event.first);
+    setRows(event.rows);
+  }
+
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
+    setFirst(0);
   };
 
   const handlePrint = useReactToPrint({
@@ -67,12 +76,16 @@ export const ActionListaEstoqueAtual = ({ dadosEstoqueAtual }) => {
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Estoque Atual');
     XLSX.writeFile(workbook, 'estoque_atual.xlsx');
   };
-  const dados = dadosEstoqueAtual.map((item, index) => {
+  const dados = (dadosEstoqueAtual || []).map((item, index) => {
     let contador = index + 1;
 
-    const totalCusto = (parseFloat(item.QTDFINAL) * parseFloat(item.PRECOCUSTO))
-    const totalVenda = (parseFloat(item.QTDFINAL) * parseFloat(item.PRECOVENDA))
-    const markup = parseFloat(((parseFloat(item.PRECOVENDA) * 100) / parseFloat(item.PRECOCUSTO)) - 100)
+    const precoCusto = toFloat(item.PRECOCUSTO);
+    const precoVenda = toFloat(item.PRECOVENDA);
+    const qtdFinal = toFloat(item.QTDFINAL);
+
+    const totalCusto = qtdFinal * precoCusto;
+    const totalVenda = qtdFinal * precoVenda;
+    const markup = precoCusto > 0 ? (((precoVenda * 100) / precoCusto) - 100) : 0;
 
     return {
       NUCODBARRAS: item.NUCODBARRAS,
@@ -98,20 +111,53 @@ export const ActionListaEstoqueAtual = ({ dadosEstoqueAtual }) => {
       totalVenda: totalVenda,
       markup: formatarPorcentagem(markup),
       contador
+
     }
   });
 
+  const filtrarDados = (dados, filtro) => {
+    if (!filtro) return dados;
+
+    return dados.filter(item => {
+      return Object.values(item).some(value => {
+        if (value === null || value === undefined) return false;
+        return value.toString().toLowerCase().includes(filtro.toLowerCase());
+      });
+    });
+  };
+
+  const calcularTotalPagina = (field) => {
+    const dadosFiltrados = filtrarDados(dados, globalFilterValue);
+    return dadosFiltrados.reduce((total, item) => total + toFloat(item[field] || 0), 0);
+  };
+
+  const calcularTotal = (field) => {
+    const dadosFiltrados = filtrarDados(dados, globalFilterValue);
+    const firstIndex = first;
+    const lastIndex = first + rows;
+    const dataPaginada = dadosFiltrados.slice(firstIndex, lastIndex);
+    return dataPaginada.reduce((total, item) => total + toFloat(item[field] || 0), 0);
+  };
+
   const calcularEstoque = () => {
-    return dados.reduce((total, dados) => total + parseFloat(dados.QTDFINAL), 0);
+    const totalEstoque = calcularTotal('QTDFINAL');
+    const totalEstoquePagina = calcularTotalPagina('QTDFINAL');
+    return `${totalEstoque}   (${totalEstoquePagina} total)`;
   }
 
   const calcularTotalCusto = () => {
-    return dados.reduce((total, dados) => total + parseFloat(dados.totalCusto), 0);
+    const PaginatotalCusto = calcularTotal('totalCusto');
+    const PaginatotalCustoPagina = calcularTotalPagina('totalCusto');
+    return `${formatMoeda(PaginatotalCusto)} (${formatMoeda(PaginatotalCustoPagina)} total) `;
   }
 
   const calcularTotalVenda = () => {
-    return dados.reduce((total, dados) => total + parseFloat(dados.totalVenda), 0);
+    const totalVenda = calcularTotal('totalVenda');
+    const totalVendaPagina = calcularTotalPagina('totalVenda');
+    return `${formatMoeda(totalVenda)} (${formatMoeda(totalVendaPagina)} total) `;
+
   }
+
 
   const colunasEstoqueAtual = [
     {
@@ -167,14 +213,14 @@ export const ActionListaEstoqueAtual = ({ dadosEstoqueAtual }) => {
       field: 'totalCusto',
       header: 'Total Custo',
       body: row => <th style={{ color: 'blue' }}>{formatMoeda(row.totalCusto)}</th>,
-      footer: formatMoeda(calcularTotalCusto()),
+      footer: calcularTotalCusto(),
       sortable: true
     },
     {
       field: 'totalVenda',
       header: 'Total Venda',
       body: row => <th style={{ color: 'blue' }}>{formatMoeda(row.totalVenda)}</th>,
-      footer: formatMoeda(calcularTotalVenda()),
+      footer: calcularTotalVenda(),
       sortable: true
     },
     {
@@ -190,11 +236,13 @@ export const ActionListaEstoqueAtual = ({ dadosEstoqueAtual }) => {
     <ColumnGroup>
 
       <Row>
-        <Column footer="Total " colSpan={4} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem', textAlign: 'center' }} />
-        <Column footer={calcularEstoque()} colSpan={1} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
-        <Column footer={formatMoeda(calcularTotalCusto())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
-        <Column footer={formatMoeda(calcularTotalVenda())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
-        <Column footer={""} colSpan={4} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
+        <Column footer="Total " colSpan={5} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem', textAlign: 'center' }} />
+        <Column footer={calcularEstoque()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
+        <Column footer={""} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
+        <Column footer={""} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
+        <Column footer={calcularTotalCusto()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
+        <Column footer={calcularTotalVenda()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
+        <Column footer={""} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
       </Row>
     </ColumnGroup>
   )
@@ -230,7 +278,10 @@ export const ActionListaEstoqueAtual = ({ dadosEstoqueAtual }) => {
             footerColumnGroup={footerGroup}
             sortOrder={-1}
             paginator={true}
-            rows={10}
+            onPage={onPageChange}
+            first={first}
+            rows={rows}
+            cellMemo={false}
             rowsPerPageOptions={[10, 20, 50, 100, dados.length]}
             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"

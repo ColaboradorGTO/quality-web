@@ -133,6 +133,7 @@ export const ActionPesquisaEmpresas = ({ usuarioLogado }) => {
         dadosEmpresas={dadosEmpresas}
         usuarioLogado={usuarioLogado}
         optionsModulos={optionsModulos}
+        refetchEmpresas={refetchEmpresas}
       />
 
     </Fragment>

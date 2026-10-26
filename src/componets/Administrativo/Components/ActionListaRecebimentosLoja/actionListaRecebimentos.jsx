@@ -25,6 +25,7 @@ export const ActionListaRecebimentos = ({dadosRecebimentos }) => {
 
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
+    setFirst(0);
   };
 
   const handlePrint = useReactToPrint({
@@ -80,7 +81,7 @@ export const ActionListaRecebimentos = ({dadosRecebimentos }) => {
   };
 
   
-  const dados = dadosRecebimentos.map((item) => {
+  const dados = (dadosRecebimentos || []).map((item) => {
     
     return {
       NOFANTASIA: item.NOFANTASIA,
@@ -98,15 +99,27 @@ export const ActionListaRecebimentos = ({dadosRecebimentos }) => {
     }
   });
 
+  const filtrarDados = (dados, filtro) => {
+    if (!filtro) return dados;
+
+    return dados.filter(item => {
+      return Object.values(item).some(value => {
+        if (value === null || value === undefined) return false;
+        return value.toString().toLowerCase().includes(filtro.toLowerCase());
+      });
+    });
+  };
 
   const calcularTotalPagina = (field) => {
-    return dados.reduce((total, item) => total + parseFloat(item[field]), 0);
+    const dadosFiltrados = filtrarDados(dados, globalFilterValue);
+    return dadosFiltrados.reduce((total, item) => total + toFloat(item[field] || 0), 0);
   };
 
   const calcularTotal = (field) => {
-    const firstIndex = first * rows;
-    const lastIndex = firstIndex + rows;
-    const dataPaginada = dados.slice(firstIndex, lastIndex); 
+    const dadosFiltrados = filtrarDados(dados, globalFilterValue);
+    const firstIndex = first;
+    const lastIndex = first + rows;
+    const dataPaginada = dadosFiltrados.slice(firstIndex, lastIndex); 
     return dataPaginada.reduce((total, item) => total + toFloat(item[field] || 0), 0);
   };
 
@@ -179,28 +192,28 @@ export const ActionListaRecebimentos = ({dadosRecebimentos }) => {
       field: 'VRRECCARTAO',
       header: 'TEF',
       body: row => <th>{formatMoeda(row.VRRECCARTAO)}</th>,
-      footer: formatMoeda(calcularTotalCartao()),
+      footer: calcularTotalCartao(),
       sortable: true,
     },
     {
       field: 'VRRECPOS',
       header: 'POS',
       body: row => <th>{formatMoeda(row.VRRECPOS)}</th>,
-      footer: formatMoeda(calcularTotalPos()),
+      footer: calcularTotalPos(),
       sortable: true,
     },
     {
       field: 'VRRECVOUCHER',
       header: 'Voucher',
       body: row => <th>{formatMoeda(row.VRRECVOUCHER)}</th>,
-      footer: formatMoeda(calcularTotalVoucher()),
+      footer: calcularTotalVoucher(),
       sortable: true,
     },
     {
       field: 'VRRECCONVENIO',
       header: 'Convênio',
       body: row => <th>{row.VRRECCONVENIO}</th>,
-      footer: formatMoeda(calcularTotalConvenio()),
+      footer: calcularTotalConvenio(),
       sortable: true,
     },
     {

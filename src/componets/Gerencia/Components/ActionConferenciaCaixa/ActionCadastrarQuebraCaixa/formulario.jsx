@@ -122,7 +122,7 @@ export const Formulario = ({ show, handleClose, dadosDetelheCaixa, usuarioLogado
                     </div>
                     <div className="form-group">
                         <div className="row">
-                            <div class="col-sm-6 col-xl-4">
+                            <div class="col-sm-6 col-xl-12">
                                 <Controller
                                     name="historicoDigitado"
                                     control={control}
@@ -191,7 +191,7 @@ export const Formulario = ({ show, handleClose, dadosDetelheCaixa, usuarioLogado
                                             label={"Valor Quebra Ajustado"}
                                             name="dinheiroAjuste"
                                             type="text"
-                                            readOnly={false}
+                                            readOnly={true}
                                             value={dinheiroAjuste}
                                             onChange={(e) => setDinheiroAjuste(formatarMoeda(e.target.value))}
                                             errors={errors}

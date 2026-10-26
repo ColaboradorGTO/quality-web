@@ -5,7 +5,8 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { getDataAtual } from "../../../../../utils/dataAtual";
 import { dataFormatada } from "../../../../../utils/dataFormatada";
-import { removerFormatacaoMoeda } from "../../../../../utils/formatMoeda";
+import { formatMoeda, removerFormatacaoMoeda } from "../../../../../utils/formatMoeda";
+import { toFloat } from "../../../../../utils/toFloat";
 
 export const useCadastroQuebraCaixa = ({
     handleClose,
@@ -73,6 +74,32 @@ export const useCadastroQuebraCaixa = ({
         }
     })
 
+    useEffect(() => {
+        if (!dadosDetelheCaixa?.length) return;
+
+        const item = dadosDetelheCaixa[0];
+
+        const valorQuebraAjustado =
+            Number(toFloat(item?.TOTALAJUSTEDINHEIRO)) > 0
+                ? toFloat(item?.TOTALAJUSTEDINHEIRO) -
+                toFloat(item?.TOTALFECHAMENTODINHEIROFISICO) -
+                toFloat(item?.VRQUEBRAEFETIVADO)
+                : toFloat(item?.TOTALFECHAMENTOVRQUEBRACAIXA) -
+                toFloat(item?.VRQUEBRAEFETIVADO);
+
+        const valorFormatado =
+            valorQuebraAjustado > 0
+                ? `+${formatMoeda(valorQuebraAjustado)}`
+                : valorQuebraAjustado < 0
+                    ? `-${formatMoeda(Math.abs(valorQuebraAjustado))}`
+                    : formatMoeda(0);
+
+        setDinheiroAjuste(valorFormatado);
+
+        console.log(valorFormatado, 'valor formatado');
+    }, [dadosDetelheCaixa]);
+
+
     const onSubmit = async () => {
         if (optionsModulos[0]?.ALTERAR == 'False') {
             Swal.fire({
@@ -94,11 +121,18 @@ export const useCadastroQuebraCaixa = ({
             IDFUNCIONARIO: parseInt(dadosDetelheCaixa[0].IDOPERADORFECHAMENTO),
             DTLANCAMENTO: dataLancamento,
             VRQUEBRASISTEMA: parseFloat(dadosDetelheCaixa[0].TOTALFECHAMENTOVRQUEBRACAIXA),
-            VRQUEBRAEFETIVADO: removerFormatacaoMoeda(dinheiroAjuste),
+            VRQUEBRAEFETIVADO: parseFloat(
+                dinheiroAjuste
+                    .replace(/R\$/g, '')
+                    .replace(/\s/g, '')
+                    .replace(/\./g, '')
+                    .replace(',', '.')
+                    .replace(/^\+/, '')
+            ),
             TXTHISTORICO: motivoAjuste == '' ? TxTHistorico : motivoAjuste,
             STATIVO: 'True'
         }
-
+        console.log(dinheiroAjuste, 'dinheiroAjustepayload')
         try {
             const response = await post('/quebra-caixa-todos', postData)
 
