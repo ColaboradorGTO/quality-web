@@ -164,10 +164,6 @@ export const ActionListaMovimentacaoCaixaDia = ({
 
   const calcularTotalPCJTotal = (item) => {
 
-    // return (
-    //   (toFloat(item.vendapcj[0]['venda-pcj'].TOTALPCJ18) /
-    //   toFloat(item.vendapcj[0]['venda-pcj'].TOTALPCJ78)) * 100
-    // )
     const vrPCJ18 = toFloat(item.vendapcj?.[0]?.['venda-pcj']?.TOTALPCJ18);
     const vrPCJ78 = toFloat(item.vendapcj?.[0]?.['venda-pcj']?.TOTALPCJ78);
     const totalPCJ = (vrPCJ78 / vrPCJ18) * 100;
@@ -196,7 +192,7 @@ export const ActionListaMovimentacaoCaixaDia = ({
     const vrPCJ78 = toFloat(item.vendapcj?.[0]?.['venda-pcj']?.TOTALPCJ78);
     const totalPCJ = (vrPCJ78 / vrPCJ18) * 100;
 
-
+    
     return {
       IDCAIXAWEB: item.caixa?.IDCAIXAWEB,
       ID: item.caixa?.ID,
@@ -233,7 +229,7 @@ export const ActionListaMovimentacaoCaixaDia = ({
     };
   });
 
-  //console.log(dadosMovimentacaoCaixaDoDia, "dadosMovimentacaoCaixaDoDia")
+  
 
   const colunaCaixaDoDia = [
     {
@@ -340,10 +336,10 @@ export const ActionListaMovimentacaoCaixaDia = ({
       sortable: true,
     },
     {
-      field: 'STCANCELADO',
+      field: 'STFECHADO',
       header: 'Situação',
       body: row => (
-       <th style={{ color: row.STFECHADO == 'False' ? 'blue' : 'red' }}>
+        <th style={{ color: row.STFECHADO == 'False' ? 'blue' : 'red' }}>
           {row.STFECHADO == 'False' ? 'ABERTO' : 'FECHADO'}
         </th>
       ),
@@ -381,24 +377,11 @@ export const ActionListaMovimentacaoCaixaDia = ({
     return total
   }
 
-
-/*   const calcularTotalVendidoCartao = () => {
-    let total = 0
-    for (let dados of dadosMovLojaDia) {
-      total += toFloat(dados.TOTALVENDIDOCARTAO)
-    }
-    return total
-  }
- */
-/*   const calcularTotalQuebra = () => {
-    const total = calcularTotal('quebraCaixaOP');
-    return total;
-  } */
-
   const calcularTotalvrPCJ18 = () => {
     const total = calcularTotal('TOTALPCJ18');
     return total;
   }
+
   const calcularTotalvrPCJ78 = () => {
     const total = calcularTotal('TOTALPCJ78');
     return total;
@@ -574,6 +557,7 @@ export const ActionListaMovimentacaoCaixaDia = ({
                   tableStyle={{ marginBottom: '1rem' }}
                   showGridlines
                   stripedRows
+                  cellMemo={false}
                   emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
                 >
                   {colunaCaixaDoDia.map(coluna => (

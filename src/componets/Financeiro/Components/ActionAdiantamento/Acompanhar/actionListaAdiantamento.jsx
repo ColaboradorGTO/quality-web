@@ -3,15 +3,13 @@ import { ButtonTable } from "../../../../ButtonsTabela/ButtonTable"
 import { formatMoeda } from "../../../../../utils/formatMoeda"
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { FaCheck, FaCloudUploadAlt } from "react-icons/fa"
 import HeaderTable from "../../../../Tables/headerTable"
 import { useReactToPrint } from "react-to-print";
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import Swal from "sweetalert2";
-import { IoMdClose } from "react-icons/io";
-import { MdEdit } from "react-icons/md";
+import { MdEdit, MdMoneyOff, MdOutlineAttachMoney } from "react-icons/md";
 import { ActionEditarModal } from "./EditarSolicitacao/actionEditarModal";
 import { get } from "../../../../../api/funcRequest";
 import { ActionPagamentoModal } from "../Pagamento/actionPagamentoModal";
@@ -90,21 +88,6 @@ export const ActionListaAdiantamento = ({
     XLSX.writeFile(workbook, 'adiantamento_departamento.xlsx');
   };
 
-  const arraySituacao = [
-    { color: '#2196F3', txt: 'Pronto para Integrar SAP' },
-    { color: '#886ab5', txt: 'Em Fila' },
-    { color: 'success', txt: 'Integrado' },
-    { color: '#fd3995', txt: 'Erro ao Tentar Integrar' },
-    { color: '#fd3995', txt: 'Cancelado' }
-  ]
-
-  const arrayMsgStatusIntegracao = [
-    'Adiantamento Pronto Para Integrar',
-    'Integração Em Andamento, Aguarde...',
-    'Adiantamento Integrado Com Sucesso!',
-    'Erro ao Tentar Integrar',
-    'Cancelado'
-  ];
 
   const dados = dadosAdiantamentos.map((item, index) => {
     let contador = index + 1;
@@ -129,6 +112,8 @@ export const ActionListaAdiantamento = ({
       DATAALTERACAO: item.DATAALTERACAO,
       DATAFINALIZACAO: item.DATAFINALIZACAO,
       STATIVO: item.STATIVO,
+      FORMAPAGAMENTO: item.FORMAPAGAMENTO,
+      STATUSPAGAMENTO: item.STATUSPAGAMENTO
     }
   });
 
@@ -158,7 +143,7 @@ export const ActionListaAdiantamento = ({
     {
       field: 'RAZAOSOCIALFATURAMENTO',
       header: 'Rz. Social',
-      body: row => <th style={{ color: 'blue' }}>{row.RAZAOSOCIALFATURAMENTO}</th>,
+      body: row => <p style={{ color: 'blue', width: '300px', fontWeight: 600 }}>{row.RAZAOSOCIALFATURAMENTO}</p>,
       sortable: true,
     },
     {
@@ -170,6 +155,7 @@ export const ActionListaAdiantamento = ({
     {
       field: 'DESCRICAO',
       header: 'Descrição',
+      sortable: true,
       body: row => (
         <th style={{ color: 'blue', }}>
 
@@ -180,10 +166,15 @@ export const ActionListaAdiantamento = ({
     {
       field: 'STATUS',
       header: 'Status',
+      sortable: true,
       body: row => (
         <th style={{
-          color: row.STATUS == 'PAGO' ? '#1DC9B7' : row.STATUS == 'AGUARDANDO FINANCEIRO' ? 'blue' : row.STATUS == 'APROVADO' ? 'blue' : '#FD1381',
-
+          color: row.STATUS == 'APROVADO' ? '#1DC9B7' : 
+             row.STATUS == 'PAGO' ? '#1DC9B7' 
+            : row.STATUS == 'AGUARDANDO FINANCEIRO' ? '#6e4e9e' 
+            : row.STATUS == 'REPROVADO' ? '#FD1381' 
+            : row.STATUS == 'PENDENTE' ? '#ffc241' : '',
+          fontWeight: 700
         }}>
 
           {row.STATUS}
@@ -193,6 +184,7 @@ export const ActionListaAdiantamento = ({
     {
       field: 'POSSUINOTAFISCAL',
       header: 'Possui Nota',
+      sortable: true,
       body: row => (
         <th style={{ color: row.POSSUINOTAFISCAL == 'True' ? 'blue' : '#FD1381' }}>
 
@@ -203,6 +195,7 @@ export const ActionListaAdiantamento = ({
     {
       field: 'ANEXOORCAMENTO',
       header: 'Orçamento',
+      sortable: true,
       body: row => (
         <th style={{ color: row.ANEXOORCAMENTO ? 'blue' : '#FD1381' }}>
 
@@ -223,22 +216,24 @@ export const ActionListaAdiantamento = ({
               <ButtonTable
                 titleButton={"Aprovar Pagamento"}
                 cor={"success"}
-                Icon={FaCheck}
-                iconSize={20}
+                Icon={MdOutlineAttachMoney}
+                iconSize={30}
                 width="35px"
                 height="35px"
                 onClickButton={() => handleClickAprovar(row)}
+                // disabledBTN={row.STATUS == 'PAGO' ? true : false}
               />
             </div>
             <div className="p-1">
               <ButtonTable
                 titleButton={"Reprovar Pagamento"}
                 cor={"danger"}
-                Icon={IoMdClose}
-                iconSize={20}
+                Icon={MdMoneyOff}
+                iconSize={30}
                 width="35px"
                 height="35px"
                 onClickButton={() => handleClickAprovar(row)}
+                // disabledBTN={row.STATUS == 'PAGO' ? false : true}
               />
             </div>
             <div className="p-1">
@@ -246,7 +241,7 @@ export const ActionListaAdiantamento = ({
                 titleButton={"Editar Solicitação"}
                 cor={"primary"}
                 Icon={MdEdit}
-                iconSize={20}
+                iconSize={30}
                 width="35px"
                 height="35px"
                 onClickButton={() => handleClickEditar(row)}
@@ -270,9 +265,9 @@ export const ActionListaAdiantamento = ({
         position: 'center',
         icon: 'error',
         title: 'Acesso Negado!',
-        text: 'Você não tem permissão.',
+        text: `${usuarioLogado?.NOFUNCIONARIO} <br/> Você não tem permissão.`,
         showConfirmButton: false,
-        timer: 1500,
+        timer: 5000,
         customClass: {
           container: 'custom-swal',
         }
@@ -340,7 +335,7 @@ export const ActionListaAdiantamento = ({
         title: 'Acesso Negado!',
         html: `${usuarioLogado?.NOFUNCIONARIO} <br> Você não tem permissão.`,
         showConfirmButton: true,
-        timer: 30000,
+        timer: 5000,
         customClass: {
           container: 'custom-swal',
         }

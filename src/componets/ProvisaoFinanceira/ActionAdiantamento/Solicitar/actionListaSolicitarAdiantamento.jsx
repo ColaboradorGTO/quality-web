@@ -12,7 +12,6 @@ import Swal from "sweetalert2";
 import { IoMdDownload } from "react-icons/io";
 import { MdEdit } from "react-icons/md";
 import { ActionEditarModal } from "./EditarSolicitacao/actionEditarModal";
-
 import { get } from "../../../../api/funcRequest";
 import { BASE_URL } from "../../../../api/api";
 
@@ -92,22 +91,6 @@ export const ActionListaAdiantamento = ({
     XLSX.writeFile(workbook, 'adiantamento_departamento.xlsx');
   };
 
-  const arraySituacao = [
-    { color: '#2196F3', txt: 'Pronto para Integrar SAP' },
-    { color: '#886ab5', txt: 'Em Fila' },
-    { color: 'success', txt: 'Integrado' },
-    { color: '#fd3995', txt: 'Erro ao Tentar Integrar' },
-    { color: '#fd3995', txt: 'Cancelado' }
-  ]
-
-  const arrayMsgStatusIntegracao = [
-    'Adiantamento Pronto Para Integrar',
-    'Integração Em Andamento, Aguarde...',
-    'Adiantamento Integrado Com Sucesso!',
-    'Erro ao Tentar Integrar',
-    'Cancelado'
-  ];
-
   const dados = dadosAdiantamentos.map((item, index) => {
     let contador = index + 1;
 
@@ -133,8 +116,6 @@ export const ActionListaAdiantamento = ({
       STATIVO: item.STATIVO,
     }
   });
-
-
 
   const colunasAdiantamentos = [
     {
@@ -188,8 +169,14 @@ export const ActionListaAdiantamento = ({
     {
       field: 'STATUS',
       header: 'Status',
-      body: row => (
-        <th style={{ color: 'blue' }}>
+       body: row => (
+        <th style={{
+          color: row.STATUS == 'APROVADO' ? '#1DC9B7' 
+            : row.STATUS == 'AGUARDANDO FINANCEIRO' ? '#6e4e9e' 
+            : row.STATUS == 'REPROVADO' ? '#FD1381' 
+            : row.STATUS == 'PENDENTE' ? '#ffc241' : '',
+          fontWeight: 700
+        }}>
 
           {row.STATUS}
         </th>

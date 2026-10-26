@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { get, post, postFile, put } from "../../../../../../api/funcRequest";
+import { get, postFile, put } from "../../../../../../api/funcRequest";
 import { BASE_URL } from "../../../../../../api/api";
 import Swal from "sweetalert2";
 import { Departamentos, optionsReposicao, optionsNota } from "../../../../../../../parceiro.json";
@@ -66,9 +66,7 @@ export const useEditarAdiantamento = ({
                 value: dadosDetalheAdiantamento[0]?.POSSUINOTAFISCAL,
                 label: dadosDetalheAdiantamento[0]?.POSSUINOTAFISCAL == 'True' ? 'SIM' : 'NÃO'
             })
-            // setNotaFiscal({
-            //     value: dadosDetalheAdiantamento[0]?.
-            // })
+            
             setAnexoOrcamento(dadosDetalheAdiantamento[0]?.ANEXOORCAMENTO || '')
             setAnexoNotaFiscal(dadosDetalheAdiantamento[0]?.ANEXONOTAFISCAL || '')
             setProposta(dadosDetalheAdiantamento[0]?.DSJUSTIFICATIVA || '')
@@ -261,42 +259,17 @@ export const useEditarAdiantamento = ({
 
 
     const onSubmit = async (data) => {
-        if (optionsModulos[0]?.CRIAR == 'False') {
+        if (optionsModulos[0]?.ALTERAR == 'False') {
             Swal.fire({
                 position: 'center',
                 icon: 'error',
-                html: `${usuarioLogado?.NOFUNCIONARIO} <br> Você não tem permissão para cadastrar uma conta bancária.`,
+                html: `${usuarioLogado?.NOFUNCIONARIO} <br> Você não tem permissão para alterar adiantamento.`,
                 showConfirmButton: true,
-                timer: 3000,
+                timer: 5000,
                 customClass: {
                     container: 'custom-swal',
                 },
             });
-            return;
-        }
-
-        const confirmResult = await Swal.fire({
-            title: 'Confirmar Cadastro',
-            text: 'Deseja realmente executar esta ação?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Sim',
-            cancelButtonText: 'Não',
-            customClass: {
-                container: 'custom-swal',
-                actions: 'swal-button-spacing'
-            },
-            width: '500px',
-            didOpen: () => {
-                const style = document.createElement('style');
-                style.innerHTML = '.swal-button-spacing button { margin: 0 5px; }';
-                document.head.appendChild(style);
-            }
-        });
-
-        if (!confirmResult.isConfirmed) {
             return;
         }
 
@@ -332,9 +305,9 @@ export const useEditarAdiantamento = ({
             Swal.fire({
                 position: 'center',
                 icon: 'success',
-                title: 'Conta bancária cadastrada com sucesso!',
+                title: 'atualizada com sucesso!',
                 showConfirmButton: false,
-                timer: 3000,
+                timer: 5000,
                 customClass: {
                     container: 'custom-swal',
                 },
@@ -354,14 +327,14 @@ export const useEditarAdiantamento = ({
             Swal.fire({
                 position: 'center',
                 icon: 'error',
-                title: 'Ocorreu um erro ao cadastrar. Por favor, tente novamente.',
+                title: 'Ocorreu um erro ao atualizar. Por favor, tente novamente.',
                 showConfirmButton: false,
                 timer: 3000,
                 customClass: {
                     container: 'custom-swal',
                 },
             });
-            console.error('Erro Cadastrar:', error);
+            console.error('Erro atualizar:', error);
             return responsePost.data;
         }
     }

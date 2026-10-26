@@ -7,8 +7,6 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import HeaderTable from "../../../Tables/headerTable";
-import { ButtonType } from "../../../Buttons/ButtonType";
-import { BiSolidFileTxt } from "react-icons/bi";
 import { CSVLink } from "react-csv";
 import { toFloat } from "../../../../utils/toFloat";
 

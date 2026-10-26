@@ -21,7 +21,8 @@ export const schema = yup.object({
     vrFaturamento: yup.string()
     .required("Valor do Faturamento é obrigatório"),
     
-    descricaoFaturamento: yup.string(),
+    descricaoFaturamento: yup.string()
+    .required('Observação, não pode ser vazio'),
 
     possuiNotaFiscalFaturamento: yup.object()
     .nullable()

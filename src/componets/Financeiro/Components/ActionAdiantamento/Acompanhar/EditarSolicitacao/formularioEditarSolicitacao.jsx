@@ -71,7 +71,6 @@ export const Formulario = ({
         cnpjFaturamento: cnpjFaturado,
         razaoFaturamento: razaoSocialFaturamento,
         vrFaturamento: vrAdiantamento,
-        descricaoFaturamento: descricao,
         possuiNotaFiscalFaturamento: possuiNota,
        
       }

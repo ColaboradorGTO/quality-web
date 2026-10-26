@@ -6,12 +6,12 @@ export const schema = yup.object({
     dataPagamentoSelecionada: yup.string()
         .required("Data do Pagamento é obrigatória"),
 
-    // formaPagamentoSelecionada: yup.object()
-    //     .nullable()
-    //     .required("Forma de Pagamento é obrigatória")
-    //     .typeError("Forma de Pagamento é obrigatória"),
+    statusPagamentoSelecionada: yup.object()
+        .nullable()
+        .required("Status de Pagamento é obrigatória")
+        .typeError("Status de Pagamento é obrigatória"),
 
     anexoComprovanteAnexado: yup.string(),
 
-    observacaoDigitada: yup.string(),
+    // observacaoDigitada: yup.string(),
 })

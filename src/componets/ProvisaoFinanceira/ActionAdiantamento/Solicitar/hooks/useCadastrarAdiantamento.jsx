@@ -174,7 +174,7 @@ export const useCadastrarAdiantamento = ({
                 icon: 'error',
                 html: `${usuarioLogado?.NOFUNCIONARIO} <br> Você não tem permissão para cadastrar uma conta bancária.`,
                 showConfirmButton: true,
-                timer: 3000,
+                timer: 5000,
                 customClass: {
                     container: 'custom-swal',
                 },
@@ -238,13 +238,13 @@ export const useCadastrarAdiantamento = ({
                 icon: 'success',
                 title: 'Conta bancária cadastrada com sucesso!',
                 showConfirmButton: false,
-                timer: 3000,
+                timer: 5000,
                 customClass: {
                     container: 'custom-swal',
                 },
             })
 
-            // handleClick();
+            handleClick();
             handleClose();
             return response.data;
 
@@ -260,7 +260,7 @@ export const useCadastrarAdiantamento = ({
                 icon: 'error',
                 title: 'Ocorreu um erro ao cadastrar a conta. Por favor, tente novamente.',
                 showConfirmButton: false,
-                timer: 3000,
+                timer: 5000,
                 customClass: {
                     container: 'custom-swal',
                 },

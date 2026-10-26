@@ -39,25 +39,25 @@ export const Formulario = ({
     handleExportarNotaFiscal,
     handleEmpresaChange,
     optionsFormaPagamento,
+    optionsStatus,
     optionsEmpresas,
     onSubmit
   } = useAutorizarPagamento({ dadosDetalheAdiantamento, optionsModulos, usuarioLogado, handleClick, handleClose });
 
   const dadosAdiantamento = dadosDetalheAdiantamento?.[0];
-  // console.log(empresaSelecionada, 'empresa')
+
   const handleValidatedSubmit = async () => {
     try {
       const dadosParaValidar = {
         valorPagamentoDigitado: valorPagamento,
         dataPagamentoSelecionada: dataPagamento,
         anexoComprovanteAnexado: anexoComprovante,
-        observacaoDigitada: observacao
-        // formaPagamentoSelecionada: formaPagamento,
+        statusPagamentoSelecionada: statusPagamento
       }
 
       await schema.validate(dadosParaValidar, { abortEarly: false });
 
-      onSubmit();
+      await onSubmit();
 
     } catch (validationError) {
       clearErrors();
@@ -78,10 +78,7 @@ export const Formulario = ({
     }
   }
 
-  const optionsStatus = [
-    {value: 'PAGO', label: 'PAGO'},
-    {value: 'REPROVADO FINANCEIRO', label: 'REPROVADO FINANCEIRO'}
-  ]
+  
   return (
     <Fragment>
 
@@ -152,7 +149,7 @@ export const Formulario = ({
                   control={control}
                   render={({ field }) => (
                     <FormField
-                      label={"Razão Social"}
+                      label={"Razão Social Faturamento"}
                       name="cnpjSolicitante"
                       type="text"
                       value={razaoSocial}
@@ -296,21 +293,21 @@ export const Formulario = ({
               <Select
                 className="basic-single"
                 classNamePrefix="select"
-                name="formaPagamentoSelecionada"
+                name="statusPagamentoSelecionada"
                 value={statusPagamento}
                 options={optionsStatus}
                 onChange={(e) => {
                   setStatusPagamento(e)
-                  clearErrors('formaPagamentoSelecionada')
+                  clearErrors('statusPagamentoSelecionada')
                 }}
               />
-              {/* {errors.formaPagamentoSelecionada && (
+              {errors.statusPagamentoSelecionada && (
                 <AlertError
-                  error={errors.formaPagamentoSelecionada}
+                  error={errors.statusPagamentoSelecionada}
                   onClose={clearErrors}
-                  fieldName="formaPagamentoSelecionada"
+                  fieldName="statusPagamentoSelecionada"
                 />
-              )} */}
+              )}
             </div>
           </div>
         </div>
@@ -322,15 +319,13 @@ export const Formulario = ({
           corFechar={"secondary"}
 
           ButtonTypeCadastrar={ButtonTypeModal}
-          onClickButtonCadastrar={handleSubmit(handleValidatedSubmit)}
+          onClickButtonCadastrar={handleValidatedSubmit}
           tipoBtnCadastrar={"submit"}
           textButtonCadastrar={"Autorizar"}
           corCadastrar={"success"}
           loadingTextCadastrar={"Autorizando..."}
           autoLoadingCadastrar={true}
 
-          // ButtonTypeCancelar={ButtonTypeModal}
-          // onClickButtonCancelar
         />
       </form>
     </Fragment>

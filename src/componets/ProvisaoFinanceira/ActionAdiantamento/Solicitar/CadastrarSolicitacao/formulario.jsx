@@ -11,6 +11,7 @@ import { formatarMoeda } from "../../../../../utils/formatMoeda";
 
 export const Formulario = ({
   handleClose,
+  handleClick,
   optionsModulos,
   usuarioLogado,
 }) => {
@@ -50,7 +51,7 @@ export const Formulario = ({
     optionsNota,
     optionsEmpresas,
     onSubmit
-  } = useCadastrarAdiantamento({ optionsModulos, usuarioLogado, handleClose });
+  } = useCadastrarAdiantamento({ optionsModulos, usuarioLogado, handleClose, handleClick });
   
   const handleValidatedSubmit = async () => {
     try {

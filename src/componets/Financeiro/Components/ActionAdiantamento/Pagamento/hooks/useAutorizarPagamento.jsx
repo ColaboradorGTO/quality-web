@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { get, post, postFile, put } from "../../../../../../api/funcRequest";
+import { get, post, postFile } from "../../../../../../api/funcRequest";
 import { BASE_URL } from "../../../../../../api/api";
 import Swal from "sweetalert2";
 import { registrarLogAuditoria } from "../../../../../../services/auditLog";
@@ -15,6 +15,10 @@ export const optionsFormaPagamento = [
     { value: 'BOLETO', label: 'Boleto' },
 ]
 
+export const optionsStatus = [
+    {value: 'PAGO', label: 'PAGO'},
+    {value: 'REPROVADO', label: 'REPROVADO'}
+]
 export const useAutorizarPagamento = ({
     dadosDetalheAdiantamento,
     optionsModulos,
@@ -38,8 +42,9 @@ export const useAutorizarPagamento = ({
         
         return response.data;
         },
-        {enabled: true, cacheTime: 60 * 60 * 1000,}
+        {enabled: true, staleTime: 60 * 60 * 1000, cacheTime: 60 * 60 * 1000,}
     );
+
     useEffect(() => {
         if (dadosDetalheAdiantamento?.length > 0) {
             setValorPagamento(dadosDetalheAdiantamento[0]?.VRSOLICITADO || '')
@@ -48,11 +53,20 @@ export const useAutorizarPagamento = ({
             setEmpresaSelecionada(
                 empresaEncontrada ? { value: empresaEncontrada.IDEMPRESA, label: empresaEncontrada.NOFANTASIA } : null
             )
-             setRazaoSocial(empresaEncontrada?.NORAZAOSOCIAL || '');
-             console.log(empresaEncontrada, 'empresa')
+            setRazaoSocial(dadosDetalheAdiantamento[0]?.RAZAOSOCIALFATURAMENTO);
+            
             setObservacao(dadosDetalheAdiantamento[0]?.DSJUSTIFICATIVA)
+            const pagamentoEncontrada = optionsFormaPagamento.find(item => item.value == dadosDetalheAdiantamento[0]?.FORMAPAGAMENTO)
+            setFormaPagamento(
+                pagamentoEncontrada ? { value: pagamentoEncontrada.value, label: pagamentoEncontrada.label} : null
+            )
+          
+            const statusEncontrada = optionsStatus.find(item => item.value == dadosDetalheAdiantamento[0]?.STATUS)
+            setStatusPagamento(
+                statusEncontrada ? { value: statusEncontrada.STATUS, label: statusEncontrada.STATUS == 'PAGO' ? 'PAGO' : 'REPROVADO FINANCEIRO'} : null
+            )
         }
-    }, [optionsEmpresas, dadosDetalheAdiantamento])
+    }, [dadosDetalheAdiantamento])
 
     
     const handleEmpresaChange = (selected) => {
@@ -60,8 +74,6 @@ export const useAutorizarPagamento = ({
 
         const empresa = optionsEmpresas.find((item) => item.IDEMPRESA === selected?.value);
 
-        // setCnpj(empresa?.NUCNPJ || '');
-        // setRazaoSocial(empresa?.NOFANTASIA || '');
     }
     const tiposArquivoPermitidos = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
@@ -168,39 +180,13 @@ export const useAutorizarPagamento = ({
             return;
         }
 
-        const confirmResult = await Swal.fire({
-            title: 'Confirmar Pagamento',
-            text: 'Deseja realmente executar esta ação?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Sim',
-            cancelButtonText: 'Não',
-            customClass: {
-                container: 'custom-swal',
-                actions: 'swal-button-spacing'
-            },
-            width: '500px',
-            buttonsStyling: false,
-            didOpen: () => {
-                const style = document.createElement('style');
-                style.innerHTML = '.swal-button-spacing button { margin: 0 5px; }';
-                document.head.appendChild(style);
-            }
-        });
-
-        if (!confirmResult.isConfirmed) {
-            return;
-        } 
-
         const postData = {
             IDADIANTAMENTO: dadosDetalheAdiantamento?.[0]?.IDADIANTAMENTO,
             VLPAGAMENTO: valorPagamento,
             DATAPAGAMENTO: dataPagamento,
-            FORMAPAGAMENTO: formaPagamento?.value,
+            FORMAPAGAMENTO: formaPagamento?.value || '',
             ANEXOCOMPROVANTE: anexoComprovante,
-            DSOBSERVACAO: observacao,
+            DSOBSERVACAO: observacao?.value,
             STATUS: statusPagamento?.value,
             IDUSUARIOCRIACAO: usuarioLogado?.id
         }
@@ -220,7 +206,7 @@ export const useAutorizarPagamento = ({
                 icon: 'success',
                 title: 'Pagamento registrado com sucesso!',
                 showConfirmButton: false,
-                timer: 3000,
+                timer: 5000,
                 customClass: {
                     container: 'custom-swal',
                 },
@@ -272,6 +258,7 @@ export const useAutorizarPagamento = ({
         razaoSocial,
         setRazaoSocial,
         optionsFormaPagamento,
+        optionsStatus,
         optionsEmpresas,
         onSubmit,
     }

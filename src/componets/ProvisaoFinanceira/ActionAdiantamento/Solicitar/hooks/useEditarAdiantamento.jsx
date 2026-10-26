@@ -238,6 +238,8 @@ export const useEditarAdiantamento = ({
         }
 
         const postData = {
+            IDADIANTAMENTO: dadosDetalheAdiantamento[0]?.IDADIANTAMENTO,
+            STATUS: dadosDetalheAdiantamento[0]?.STATUS,
             DEPARTAMENTO: departamento?.value,
             IDEMPRESA: empresaSelecionada?.value,
             NUCNPJEMPRESA: cnpj,
@@ -249,7 +251,7 @@ export const useEditarAdiantamento = ({
             ANEXONOTAFISCAL: anexoNotaFiscal,
             RAZAOSOCIALFATURAMENTO: razaoSocialFaturamento,
             DSJUSTIFICATIVA: proposta,
-            IDUSUARIOCRIACAO: usuarioLogado?.id
+            IDUSUARIOALTERACAO: usuarioLogado?.id
         }
 
         try {
