@@ -56,13 +56,12 @@ export const FormularioDetalheMalote = ({ dadosDetalhesMalote, dadosPendenciasMa
   }
 
 
-  const showConferencia = STATUSMALOTE === 'Conferido' || STATUSMALOTE === 'Enviado';
+  const showConferencia = STATUSMALOTE == 'Conferido' || STATUSMALOTE == 'Enviado';
   const showDevolucao = !!DATAHORADEVOLVIDO;
   const showReenviado = !!DATAHORAREENVIADO;
-  const showPendencias = PENDENCIAS?.length > 0 || STATUSMALOTE === 'Devolvido' || STATUSMALOTE !== 'Conferido';
+  const showPendencias = PENDENCIAS?.length > 0 || STATUSMALOTE == 'Devolvido' || STATUSMALOTE !== 'Conferido';
   const isReadOnly = STATUSMALOTE !== 'Devolvido';
-  console.log('dadosPendenciasMalotes', dadosPendenciasMalotes[0]);
-  console.log(dadosDetalhesMalote[0], 'dadosDetalhesMalote');
+  
   const enviarDadosMalote = (idMalote) => {
 
  
