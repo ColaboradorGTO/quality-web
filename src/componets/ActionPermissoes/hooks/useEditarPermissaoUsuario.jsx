@@ -246,6 +246,7 @@ export const useEditarPermissaoUsuario = () => {
         IDMENU: menuPaiSelecionado,
         IDMENUFILHO: idMenuFilho,
         IDMODULOPROMOCAO: String(moduloSelecionado) == "19" ? String(moduloSelecionado) : '',
+        IDMODULOPROVISAOFINANCEIRA: String(moduloSelecionado) == "20" ? String(moduloSelecionado) : '',
       };
       console.log(payload, 'payload');  
       const putFuncionarioData = {
