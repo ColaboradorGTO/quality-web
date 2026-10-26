@@ -625,16 +625,24 @@ export const ActionPesquisaPromocao = ({ usuarioLogado }) => {
         valueInputFieldDesconto1={vrDesconto}
         onChangeInputFieldDesconto1={(e) => {
           let valor = e.target.value.replace(/,/g, '.');
+
           valor = valor.replace(/[^0-9.]/g, '');
-          const parts = valor.split('.');
-          if (parts.length > 2) {
-            valor = parts[0] + '.' + parts.slice(1).join('');
+          const firstDotIndex = valor.indexOf('.');
+          if (firstDotIndex !== -1) {
+            valor =
+              valor.substring(0, firstDotIndex + 1) +
+              valor.substring(firstDotIndex + 1).replace(/\./g, '');
           }
 
-          if (valor.length > 1 && valor.startsWith('0') && !valor.startsWith('0.')) {
+          if (
+            valor.length > 1 &&
+            valor.startsWith('0') &&
+            !valor.startsWith('0.')
+          ) {
             valor = valor.replace(/^0+/, '');
+            if (valor === '') valor = '0';
           }
-          setVrDesconto(Number(valor));
+          setVrDesconto(valor);
         }}
         readOnlyDesconto1={tipoDescontoSelecionado == 1 ? false : true}
         // styleDesconto1={styleDesconto1}
