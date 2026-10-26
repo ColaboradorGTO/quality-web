@@ -309,7 +309,7 @@ export const ActionFechamentoLojaModal = ({ show, handleClose, dadosDetalheFecha
       field: 'totalQuebraCaixa',
       header: 'Quebra',
       body: (row) => {
-        const sinal = parseFloat(row.totalQuebraCaixa) > 0 ? ' + ' : ' - ';
+        const sinal = parseFloat(row.totalQuebraCaixa) > 0 ? ' + ' : '  ';
         return (
           <th style={{ color: row.totalQuebraCaixa > 0 ? 'blue' : 'red' }}>
             {`${sinal}${row.totalQuebraCaixa}`}
@@ -320,7 +320,7 @@ export const ActionFechamentoLojaModal = ({ show, handleClose, dadosDetalheFecha
       footer: (row) => {
         const sinal = parseFloat(row.calcularTotalQuebra) > 0 ? ' + ' : ' - ';
         return (
-          <th style={{ color: row.totalQuebraCaixa > 0 ? 'red' : 'blue' }}>
+          <th style={{ color: row.totalQuebraCaixa > 0 ? 'blue' : 'red' }}>
             {` ${formatMoeda(calcularTotalQuebra())}`}
           </th>
         )

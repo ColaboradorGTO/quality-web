@@ -215,7 +215,7 @@ export const ActionDetalheVendaModal = ({ show, handleClose, dadosDetalheVendas,
     {
       field: 'NUAUTORIZACAO',
       header: 'Autorização',
-      body: row => <th style={{ color: 'blue' }}> {parseFloat(row.NUAUTORIZACAO)}</th>,
+      body: row => <th style={{ color: 'blue' }}> {row.NUAUTORIZACAO}</th>,
       sortable: true,
     },
     {
@@ -291,6 +291,7 @@ export const ActionDetalheVendaModal = ({ show, handleClose, dadosDetalheVendas,
                   // rowsPerPageOptions={[5, 10, 20, 50]}
                   showGridlines
                   stripedRows
+                  cellMemo={false}
                   emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
                 >
                   {colunasVendas.map(coluna => (
@@ -343,6 +344,7 @@ export const ActionDetalheVendaModal = ({ show, handleClose, dadosDetalheVendas,
                   // rowsPerPageOptions={[5, 10, 20, 50]}
                   showGridlines
                   stripedRows
+                  cellMemo={false}
                   emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
                 >
                   {colunasPagamento.map(coluna => (

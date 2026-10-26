@@ -130,10 +130,10 @@ export const ActionListaVendasContingencia = ({ dadosVendasContigencia, optionsM
       body: row => <th>{row.NF}</th>,
       sortable: true,
     },
-    {
+  {
       field: 'CHAVENFE',
       header: 'Chave NF',
-      body: row => <th>{row.CHAVENFE}</th>,
+      body: row => <th>{row.IDCHAVENFE.replace('NFe', '')}</th>,
       sortable: true,
     },
     {
@@ -171,6 +171,7 @@ export const ActionListaVendasContingencia = ({ dadosVendasContigencia, optionsM
 
         </div>
       ),
+      sortable: true
     }
   ]
 
@@ -251,6 +252,7 @@ export const ActionListaVendasContingencia = ({ dadosVendasContigencia, optionsM
             currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
             filterDisplay="menu"
             showGridlines
+            cellMemo={false}
             stripedRows
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
           >
