@@ -295,6 +295,7 @@ export const useCadastrarClienteCPFVoucher = ({ usuarioLogado, optionsModulos, h
                 IDINDICACAOIE: Number(tipoIndicacaoIE.value) || 9,
                 DSINDICACAOIE: tipoIndicacaoIE == 9 ? 'NÃO CONTRIBUINTE COM OU SEM IE' : tipoIndicacaoIE == 1 ? 'CONTRIBUINTE ICMS' : 'CONTRIBUINTE ISENTO DE IE',
                 IDFUNCIONARIO: Number(usuarioLogado.id),
+                STATIVO: "True"
             }
 
             const response = isUpdate ? await put('/todos-cliente/:id', putData) : await post('/criar-cliente', putData);

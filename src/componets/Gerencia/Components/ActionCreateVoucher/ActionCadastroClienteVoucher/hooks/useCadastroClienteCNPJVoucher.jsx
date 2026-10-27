@@ -506,7 +506,8 @@ export const useCadastrarClienteCNPJVoucher = ({ usuarioLogado, optionsModulos, 
                 DTNASCFUNDACAO: dataCriacao,
                 IDINDICACAOIE: Number(tipoIndicacaoIE),
                 DSINDICACAOIE: tipoIndicacaoIE == 9 ? 'NÃO CONTRIBUINTE COM OU SEM IE' : tipoIndicacaoIE == 1 ? 'CONTRIBUINTE ICMS' : 'CONTRIBUINTE ISENTO DE IE',
-                IDFUNCIONARIO: Number(usuarioLogado?.id)
+                IDFUNCIONARIO: Number(usuarioLogado?.id),
+                STATIVO: "True"
             }
 
             const response = isUpdate ? await put(`/todos-cliente/${idCliente}`, postData) : await post('/criar-cliente', postData)
