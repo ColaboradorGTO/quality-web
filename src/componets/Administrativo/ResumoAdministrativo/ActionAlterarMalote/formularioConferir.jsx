@@ -1,12 +1,13 @@
 import React, { Fragment, useRef, useState } from 'react';
 import { ListaPendencias } from './actionListaPendencias';
 import Select from 'react-select';
-import { useFetchData } from '../../../../hooks/useFetchData';
 import { useReactToPrint } from "react-to-print";
 import { FooterModal } from '../../../Modais/FooterModal/footerModal';
 import { ButtonTypeModal } from '../../../Buttons/ButtonTypeModal';
 import '../ActionDetalheMalote/styles.css';
 import { useConferirMalote } from '../hooks/useConferirMalote';
+import { get } from '../../../../api/funcRequest';
+import { useQuery } from 'react-query';
 
 export const FormularioConferirMalote = ({ 
   dadosConferirMalote, 
@@ -16,13 +17,34 @@ export const FormularioConferirMalote = ({
   optionsModulos, 
   usuarioLogado 
 }) => {
-  const [historicoSelecionado, setHistoricoSelecionado] = useState('');
-  const [imprimir, setImprimir] = useState(false);
-  const { data: optionsHistoricos = [] } = useFetchData('historicos-malotes', '/historicos-malotes');
+  const maloteAtual = dadosConferirMalote[0] || {};
+  const idMalote = maloteAtual.IDMALOTE;
+  const [historicoSelecionado, setHistoricoSelecionado] = useState(`idMalote_${idMalote}`);
+  const [tipoHistorico, idHistorico] = historicoSelecionado.split('_');
+  const isHistorico = tipoHistorico === 'idHistorico';
+
+  const { data: optionsHistoricos = [] } = useQuery(
+    ['historicos-malotes', idMalote],
+    async () => {
+      const response = await get(`/historicos-malotes?idMalote=${idMalote}`);
+      return response.data;
+    },
+    { enabled: !!idMalote, staleTime: 60 * 60 * 1000, }
+  );
+
+  const { data: dadosHistorico } = useQuery(
+    ['historico-malote', idHistorico],
+    async () => {
+      const response = await get(`/historicos-malotes?idHistoricoMalote=${idHistorico}`);
+      return response.data;
+    },
+    { enabled: isHistorico, staleTime: 60 * 60 * 1000, }
+  );
+
   const [salvarDadosMalotes, setSalvarDadosMalotes] = useState([dadosConferirMalote[0]]);
-  const [checkedItems, setCheckedItems] = useState([]); 
-  const [conferencia, setModuloConferencia] = useState('Conferência');
-  const [devolucao, setStatusMalote] = useState('Devolução');
+  const [checkedItems, setCheckedItems] = useState(
+    () => (maloteAtual.PENDENCIAS || []).map(({ IDPENDENCIA }) => IDPENDENCIA)
+  );
   const dataTableRef = useRef();
   const {
     observacaoFinanceiro,
@@ -32,11 +54,15 @@ export const FormularioConferirMalote = ({
     onSalvarMalote
   } = useConferirMalote({ salvarDadosMalotes, checkedItems, handleClick, handleClose, optionsModulos, usuarioLogado});
   
-  // console.log(dadosConferirMalote, 'dadosConferirMalote')
+  
   const handlePrint = useReactToPrint({
     content: () => dataTableRef.current,
     documentTitle: 'Detalhes do Malote',
   });
+
+  const registroHistorico = Array.isArray(dadosHistorico) ? dadosHistorico[0] : dadosHistorico?.data?.[0];
+  // Enquanto o histórico carrega, mantém os dados do malote atual
+  const dadosExibidos = isHistorico && registroHistorico ? registroHistorico : maloteAtual;
 
   const {
     NOFANTASIA,
@@ -58,46 +84,48 @@ export const FormularioConferirMalote = ({
     OBSERVACAOADMINISTRATIVO,
     OBSERVACAOLOJA,
     PENDENCIAS
-  } = dadosConferirMalote[0] || {};
-
+  } = dadosExibidos;
 
   let classStatus = 'text-danger';
   let msgStatus = STATUSMALOTE || '';
 
-
-  if (STATUSMALOTE === 'Enviado' || STATUSMALOTE === 'Reenviado') {
+  if (STATUSMALOTE == 'Criacao') {
+    classStatus = 'text-info';
+  } else if (STATUSMALOTE == 'Enviado' || STATUSMALOTE == 'Reenviado') {
     classStatus = 'text-info';
     msgStatus += ' e Aguardando Recebimento...';
-  } else if (STATUSMALOTE === 'Recepcionado') {
+  } else if (STATUSMALOTE == 'Recepcionado') {
     classStatus = 'text-info';
     msgStatus += ' e Aguardando Conferência...';
-  } else if (STATUSMALOTE === 'Conferido') {
+  } else if (STATUSMALOTE == 'Conferido') {
     classStatus = 'text-success';
   }
 
-
-  const showConferencia = STATUSMALOTE === 'Conferido' || STATUSMALOTE === 'Enviado';
-  const showDevolucao = !!DATAHORADEVOLVIDO;
+  // Só o malote atual, e apenas Recepcionado, pode ser conferido/devolvido
+  const isRecepcionado = !isHistorico && STATUSMALOTE === 'Recepcionado';
+  const isReadOnly = !isRecepcionado;
+  const showDevolucao = !!DATAHORADEVOLVIDO || (!isHistorico && STATUSMALOTE === 'Devolvido');
   const showReenviado = !!DATAHORAREENVIADO;
-  const showPendencias = PENDENCIAS?.length > 0 || STATUSMALOTE === 'Devolvido' || STATUSMALOTE !== 'Conferido';
-  const isReadOnly = STATUSMALOTE !== 'Devolvido';
 
-  const enviarDadosMalote = (idMalote) => {
-
-    console.log('Reenviando malote:', idMalote);
-  };
-
-  const defaultOption = {
-    value: IDMALOTE,
-    label: `ATUAL - ${STATUSMALOTE}`,
-  };
+  const pendenciasMarcadas = isRecepcionado
+    ? checkedItems
+    : (PENDENCIAS || []).map(({ IDPENDENCIA }) => IDPENDENCIA);
+  const textoPendenciasImpressao = (dadosPendenciasMalotes || [])
+    .filter(({ IDPENDENCIA }) => pendenciasMarcadas.includes(IDPENDENCIA))
+    .map(({ TXTPENDENCIA }) => TXTPENDENCIA)
+    .join(', ');
+  const observacaoFinanceiroExibida = isRecepcionado ? observacaoFinanceiro : (OBSERVACAOADMINISTRATIVO || '');
+  const rowsObsFinanceiro = (isRecepcionado || OBSERVACAOADMINISTRATIVO?.length > 0) ? 5 : 1;
 
   const selectOptions = [
-    defaultOption,
     ...optionsHistoricos.map(item => ({
-      value: item.IDHISTORICOMALOTE,
+      value: `idHistorico_${item.IDHISTORICOMALOTE}`,
       label: `${item.DATAHOTAALTERACAO} - ${item.STATUSMALOTE}`
-    }))
+    })),
+    {
+      value: `idMalote_${idMalote}`,
+      label: `ATUAL - ${maloteAtual.STATUSMALOTE}`,
+    }
   ];
 
   const handleCheckboxChange = (id, isChecked) => {
@@ -115,7 +143,7 @@ export const FormularioConferirMalote = ({
           <label htmlFor="" style={{ fontWeight: 900, fontSize: '16px', }}>Histórico:</label>
           <Select
             options={selectOptions}
-            value={selectOptions.find(opt => opt.value === historicoSelecionado) || defaultOption}
+            value={selectOptions.find(opt => opt.value === historicoSelecionado)}
             onChange={(e) => setHistoricoSelecionado(e.value)}
           />
 
@@ -143,16 +171,20 @@ export const FormularioConferirMalote = ({
                 <p style={{margin: '0px', fontSize: '16px', fontWeight: 900,}} className="text-p">Data Conferência: <span className="span-print" style={{fontWeight: 500,}}>{DATAHORACONFERIDO || ''}</span></p>
               </>
     
+            {showDevolucao && (
               <>
                 <p style={{margin: '0px', fontSize: '16px', fontWeight: 900,}} className="text-p">Usuário Devolução: <span className="span-print" style={{fontWeight: 500,}}>{NOFUNCIONARIODEVOLUCAO || ''}</span></p>
                 <p style={{margin: '0px', fontSize: '16px', fontWeight: 900,}} className="text-p">Data Devolução: <span className="span-print" style={{fontWeight: 500,}}>{DATAHORADEVOLVIDO || ''}</span></p>
               </>
-        
+            )}
+
+            {showReenviado && (
               <>
                 <p style={{margin: '0px', fontSize: '16px', fontWeight: 900,}} className="text-p">Usuário Reenvio: <span className="span-print" style={{fontWeight: 500,}}>{NOFUNCIONARIOREENVIO || ''}</span></p>
                 <p style={{margin: '0px', fontSize: '16px', fontWeight: 900,}} className="text-p">Data Reenvio: <span className="span-print" style={{fontWeight: 500,}}>{DATAHORAREENVIADO || ''}</span></p>
               </>
-            
+            )}
+
 
             <p style={{margin: '0px', fontSize: '16px', fontWeight: 900,}} className="text-p">
               Status: <span className={`${classStatus} span-print fw-500`}>{msgStatus}</span>
@@ -161,14 +193,14 @@ export const FormularioConferirMalote = ({
             <div>
               <p className="imprimir-somente" htmlFor="statusMalote">
                 Pendências: 
-                <span className="span-print" style={{fontWeight: 500,}}> Não Há Pendências</span>
+                <span className="span-print" style={{fontWeight: 500,}}> {textoPendenciasImpressao || 'Não Há Pendências'}</span>
               </p>
             
             </div>
             <div>
               <p className="imprimir-somente" htmlFor="statusMalote">
                 Observações Financeiro:  
-                <span className="span-print" style={{fontWeight: 500,}}>   Não há Observações</span>
+                <span className="span-print" style={{fontWeight: 500,}}>   {observacaoFinanceiroExibida || 'Não há Observações'}</span>
               </p>
             
             </div>
@@ -180,7 +212,7 @@ export const FormularioConferirMalote = ({
             {dadosPendenciasMalotes?.length > 0 && (
               <ListaPendencias 
                 dadosPendenciasMalotes={dadosPendenciasMalotes} 
-                checkedItems={checkedItems}
+                checkedItems={pendenciasMarcadas}
                 onChange={handleCheckboxChange}
                 isReadOnly={isReadOnly}
               />
@@ -213,48 +245,40 @@ export const FormularioConferirMalote = ({
               id="observacaoFinanceiroMalote"
               className="form-control text-uppercase fw-700"
               style={{ resize: 'none' }}
-              rows={OBSERVACAOADMINISTRATIVO?.length > 0 ? 5 : 5}
-              value={observacaoFinanceiro}
+              rows={rowsObsFinanceiro}
+              value={observacaoFinanceiroExibida}
               onChange={(e) => setObservacaoFinanceiro(e.target.value)}
-              readOnly={false}
+              readOnly={isReadOnly}
               placeholder="..."
             />
           </div>
-
-          {STATUSMALOTE === 'Devolvido' && (
-            <button
-              id="btnReenviarMalote"
-              className="btn btn-primary mt-3"
-              onClick={() => enviarDadosMalote(IDMALOTE)}
-            >
-              Reenviar Malote
-            </button>
-          )}
         </div>
        
-        {optionsModulos[0]?.ALTERAR == 'True' && (
-          <FooterModal
-            ButtonTypeCadastrar={ButtonTypeModal}
-            textButtonCadastrar={"Imprimir"}
-            onClickButtonCadastrar={handlePrint}
-            corCadastrar="primary"
-            
-            ButtonTypeFechar={ButtonTypeModal}
-            textButtonFechar={"Finalizar"}
-            onClickButtonFechar={() => onSalvarMalote('Conferência')}
-            corFechar="success"
-            
-            ButtonTypeConfirmar={ButtonTypeModal}
-            textButtonConfirmar={"Devolver"}
-            onClickButtonConfirmar={() => onSalvarMalote('Devolução')}
-            corConfirmar="danger"
+  
+        <FooterModal
+          ButtonTypeCadastrar={ButtonTypeModal}
+          textButtonCadastrar={"Imprimir"}
+          onClickButtonCadastrar={handlePrint}
+          corCadastrar="primary"
+          loadingTextCadastrar={"Cadastrando..."}
+          autoLoadingCadastrar={true}
+          
+          ButtonTypeFechar={isRecepcionado ? ButtonTypeModal : undefined}
+          textButtonFechar={"Finalizar"}
+          onClickButtonFechar={() => onSalvarMalote('Conferência')}
+          corFechar="success"
 
-            ButtonTypeCancelar={ButtonTypeModal}
-            textButtonCancelar={"Fechar"}
-            onClickButtonCancelar={handleClose}
-            corCancelar="secondary"
-          />
-        )}
+          ButtonTypeConfirmar={isRecepcionado ? ButtonTypeModal : undefined}
+          textButtonConfirmar={"Devolver"}
+          onClickButtonConfirmar={() => onSalvarMalote('Devolução')}
+          corConfirmar="danger"
+
+          ButtonTypeCancelar={ButtonTypeModal}
+          textButtonCancelar={"Fechar"}
+          onClickButtonCancelar={handleClose}
+          corCancelar="secondary"
+        />
+       
       </form>
 
     </Fragment>

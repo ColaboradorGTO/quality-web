@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const ListaPendencias = ({ dadosPendenciasMalotes, onChange, checkedItems }) => {
+export const ListaPendencias = ({ dadosPendenciasMalotes, onChange, checkedItems, isReadOnly }) => {
   const data = dadosPendenciasMalotes || [];
 
   if (data.length === 0) {
@@ -33,7 +33,8 @@ export const ListaPendencias = ({ dadosPendenciasMalotes, onChange, checkedItems
                   type="checkbox"
                   id={IDPENDENCIA}
                   value={IDPENDENCIA}
-                  checked={checkedItems?.includes(IDPENDENCIA)} 
+                  checked={checkedItems?.includes(IDPENDENCIA)}
+                  disabled={isReadOnly}
                   onChange={(e) => onChange(IDPENDENCIA, e.target.checked)}
                 />
                 <label
