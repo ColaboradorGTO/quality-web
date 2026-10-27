@@ -106,7 +106,7 @@ export const ActionListaSaldoLoja = ({ dadosSaldoExtratos }) => {
     {
       field: 'saldoAtualizado',
       header: 'Saldo',
-      body: row => <th style={{ fontWeight: 600 }}>{formatMoeda(row.saldoAtualizado)}</th>,
+      body: row => <th style={{ fontWeight: 600 }}>{row.saldoAtualizado}</th>,
       sortable: true,
     }
   ]
