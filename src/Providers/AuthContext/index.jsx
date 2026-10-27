@@ -13,6 +13,8 @@ export function AuthProvider({ children }) {
   const [loginError, setLoginError] = useState('');
   const [usuarioAutenticado, setUsuarioAutenticado] = useState();
 
+  const TEMPO_INATIVIDADE = 60 * 60 * 1000; // 1 hora 
+
   const handleSenhaChange = (e) => {
     setSenha(e.target.value);
   };
@@ -62,7 +64,6 @@ export function AuthProvider({ children }) {
           navigate('/modulo', { replace: true });
         }, 100);
 
-        // Limpa os campos
         setUsuario('');
         setSenha('');
         setLoginError('');
@@ -114,7 +115,8 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = (motivo) => {
+
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');
     setUsuarioAutenticado(null);
@@ -128,7 +130,78 @@ export function AuthProvider({ children }) {
     } else {
       console.log('Token ainda existe no localStorage:', token);
     }
+
+    if (motivo === 'inatividade') {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Sessão Expirada',
+        text: 'Você foi desconectado por inatividade.',
+        confirmButtonText: 'OK'
+      });
+    }
+
+    navigate('/', { replace: true });
   };
+
+
+  useEffect(() => {
+
+    const token = localStorage.getItem('token');
+    if (!token && !usuarioAutenticado) return;
+
+
+    let timer;
+
+    const resetTimer = () => {
+      localStorage.setItem('ultimoAcesso', Date.now().toString());
+
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        verificarInatividade();
+      }, TEMPO_INATIVIDADE);
+    };
+
+
+    const verificarInatividade = () => {
+      const ultimoAcesso = localStorage.getItem('ultimoAcesso');
+      if (ultimoAcesso) {
+        const tempoDecorrido = Date.now() - parseInt(ultimoAcesso, 10);
+        if (tempoDecorrido >= TEMPO_INATIVIDADE) {
+          handleLogout('inatividade');
+                console.log('Sessão expirada por inatividade.' + tempoDecorrido);
+          return;
+        }
+      }
+
+      const restante = TEMPO_INATIVIDADE - (Date.now() - (ultimoAcesso ? parseInt(ultimoAcesso, 10) : Date.now()));
+      timer = setTimeout(verificarInatividade, Math.max(restante, 1000));
+    };
+
+    const eventos = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+
+    let ultimoRegistroMouseMove = 0;
+    const handleMouseMove = () => {
+      const agora = Date.now();
+      if (agora - ultimoRegistroMouseMove > 5000) {
+        ultimoRegistroMouseMove = agora;
+        resetTimer();
+      }
+    };
+
+    resetTimer();
+
+    eventos.forEach((evento) => window.addEventListener(evento, resetTimer));
+    window.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      if (timer) clearTimeout(timer);
+      eventos.forEach((evento) => window.removeEventListener(evento, resetTimer));
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+
+
+  }, [usuarioAutenticado]);
+
 
   return (
     <AuthContext.Provider
@@ -150,6 +223,7 @@ export function AuthProvider({ children }) {
   );
 }
 
+
 export default AuthProvider;
 
 export const useAuth = () => {
@@ -161,3 +235,5 @@ export const useAuth = () => {
 
   return context;
 }
+
+
