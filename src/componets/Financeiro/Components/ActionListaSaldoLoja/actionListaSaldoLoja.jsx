@@ -106,7 +106,7 @@ export const ActionListaSaldoLoja = ({ dadosSaldoExtratos }) => {
     {
       field: 'saldoAtualizado',
       header: 'Saldo',
-      body: row => <th style={{ fontWeight: 600 }}>{parseFloat(row.saldoAtualizado)}</th>,
+      body: row => <th style={{ fontWeight: 600 }}>{parseFloat(row.saldoAtualizado).toFixed(2).replace('.', ',').replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</th>,
       sortable: true,
     }
   ]
@@ -161,6 +161,7 @@ export const ActionListaSaldoLoja = ({ dadosSaldoExtratos }) => {
             <DataTable
               title="Vendas por Loja"
               value={dados}
+              cellMemo={false}
               size="small"
               dataKey="IDEMPRESA"
               sortField="VRTOTALPAGO"
