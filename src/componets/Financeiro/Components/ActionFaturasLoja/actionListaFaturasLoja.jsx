@@ -128,11 +128,14 @@ export const ActionListaFaturasLoja = ({
       VRRECEBIDO: item.VRRECEBIDO,
       STCANCELADO: item.STCANCELADO,
       IDMOVIMENTOCAIXAWEB: item.IDMOVIMENTOCAIXAWEB,
-      STPIX: item.STPIX,
+      STPIX: item.STPIX == 'True' ? 'SIM' : 'NÃO',
       STCONFERIDOFATURA: item.STCONFERIDOFATURA,
       DOCENTRY_SAP_CONTAS_A_RECEBER: item.DOCENTRY_SAP_CONTAS_A_RECEBER,
       IDCONSOLIDACAOFATURA: item.IDCONSOLIDACAOFATURA,
       IDMOVCAIXA: item.IDMOVCAIXA,
+      SITUACAO_TEXTO: item.STCANCELADO == 'False'
+        ? `ATIVO / ${item.STCONFERIDOFATURA == 'True' ? 'CONFERIDO' : 'NÃO CONFERIDO'}${item.IDCONSOLIDACAOFATURA ? ' / CONSOLIDADO' : ''}`
+        : `CANCELADO${item.IDCONSOLIDACAOFATURA ? ' / CONSOLIDADO' : ''}`,
       status
 
     }
@@ -345,6 +348,7 @@ export const ActionListaFaturasLoja = ({
       field: 'STCANCELADO',
       header: 'Situação',
       sortable: true,
+      sortField: 'SITUACAO_TEXTO',
       body: row => {
         if (row.STCANCELADO == 'False') {
           return <p style={{ color: 'blue', width: '150px', margin: 0, padding: 0, fontWeight: 600 }}>ATIVO / {row.STCONFERIDOFATURA == 'True' ? 'CONFERIDO' : <p style={{ color: 'red',width: '150px', margin: 0, padding: 0, fontWeight: 600 }}>NÃO CONFERIDO</p>} {row.IDCONSOLIDACAOFATURA ? ' / CONSOLIDADO' : ''}</p>
@@ -361,12 +365,14 @@ export const ActionListaFaturasLoja = ({
     },
     {
       field: 'STPIX',
+      sortField: 'STPIX',
       header: 'PIX',
       body: row => (
-        <th style={{ color: row.STPIX == 'True' ? 'blue' : 'red' }}>
-          {row.STPIX == 'True' ? 'SIM' : 'NÃO'}
+        <th style={{ color: row.STPIX == 'SIM' ? 'blue' : 'red' }}>
+          {row.STPIX}
         </th>
       ),
+      sortable: true,
     },
     {
       field: 'IDDETALHEFATURA',
@@ -472,7 +478,7 @@ export const ActionListaFaturasLoja = ({
     <Fragment>
       <div className="panel">
         <div className="panel-hdr">
-          <h2>Lista de Faturas </h2>
+          <h2>Lista de Faturas AAAAAAAAAA</h2>
         </div>
         <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
 
@@ -511,7 +517,7 @@ export const ActionListaFaturasLoja = ({
             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
             filterDisplay="menu"
-            sortOrder={-1}
+            sortOrder={1}
             paginator={true}
             cellMemo={false}
             first={first}

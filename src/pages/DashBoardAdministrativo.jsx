@@ -92,6 +92,10 @@ export const DashBoardAdministrativo = () => {
     setComponentToShow(componentName);
   }
 
+  const menuFilhoResumo = selectedModule?.menuPai?.menuFilho?.find(
+    menu => menu.URL === "/administrativo/ResumoDashBoardAdministrativo"
+  );
+
   const permissaoUsuario = selectedModule.menuPai.menuFilho;
   const {   
     ID, 
@@ -105,7 +109,7 @@ export const DashBoardAdministrativo = () => {
 
   switch (componentToShow) {
     case "/administrativo/ResumoDashBoardAdministrativo":
-      component = <ResumoDashBoardAdministrativo usuarioLogado={usuarioLogado}  />;
+      component = <ResumoDashBoardAdministrativo usuarioLogado={usuarioLogado} menuFilhoAtual={menuFilhoResumo} />;
       break;
     case "/administrativo/ActionPesquisaExtratoContaCorenteLoja":
       component = <ActionPesquisaExtratoContaCorenteLoja />;
@@ -201,7 +205,7 @@ export const DashBoardAdministrativo = () => {
                           <div className="panel-content">
                             <Suspense fallback={<div>Loading...</div>}>
                               {resumoVisivel && !componentToShow && (
-                                <ResumoDashBoardAdministrativo usuarioLogado={usuarioLogado} />
+                                <ResumoDashBoardAdministrativo usuarioLogado={usuarioLogado} menuFilhoAtual={menuFilhoResumo} />
                               )}
 
                               {componentToShow && component}

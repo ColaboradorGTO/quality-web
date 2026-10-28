@@ -27,25 +27,16 @@ import { useQuery } from "react-query";
 import Swal from "sweetalert2";
 import { ActionTabelaMainExtrato } from "./Components/ActionExtrato/actionTabelaMainExtrato";
 
-export const ResumoDashBoardAdministrativo = ({ usuarioLogado }) => {
+export const ResumoDashBoardAdministrativo = ({ usuarioLogado, menuFilhoAtual }) => {
   const [resumoVisivel, setResumoVisivel] = useState(false);
   const [empresaSelecionada, setEmpresaSelecionada] = useState('');
   const [empresaSelecionadaNome, setEmpresaSelecionadaNome] = useState('');
   const [dataPesquisa, setDataPesquisa] = useState('')
   const [dadosExtratoLojaPeriodo, setDadosExtratoLojaPeriodo] = useState([])
-  const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
 
   useEffect(() => {
     const dataAtual = getDataAtual()
     setDataPesquisa(dataAtual)
-  }, []);
-
-  useEffect(() => {
-    const menuSalvo = localStorage.getItem('menuFilhoSelecionado');
-    if (menuSalvo) {
-      const menuParsed = JSON.parse(menuSalvo);
-      setMenuFilhoAtual(menuParsed);
-    }
   }, []);
 
   const { data: optionsModulos = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
@@ -55,7 +46,7 @@ export const ResumoDashBoardAdministrativo = ({ usuarioLogado }) => {
 
       return response.data;
     },
-    { enabled: Boolean(usuarioLogado?.id), staleTime: 5 * 60 * 1000, }
+    { enabled: Boolean(usuarioLogado?.id && menuFilhoAtual?.ID), staleTime: 5 * 60 * 1000, }
   );
 
   const { data: dadosEmpresas = [], } = useFetchData('empresas', '/empresas');
