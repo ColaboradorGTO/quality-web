@@ -31,19 +31,21 @@ export const ActionListaVendasConciliacao = ({ dadosVendasConciliacao }) => {
 
 
   const exportToTXTComPonto = () => {
+    const q = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const dec = (v) => Number(toFloat(v) || 0).toFixed(2);
+
     const linhas = dadosVendasConciliacao.map(item => [
-      item.contador,
-      item.IDEMPRESA,
-      item.NOFANTASIA,
-      item.IDVENDA,
-      item.DATA,
-      toFloat(item.VRTOTALPAGO),
-      toFloat(item.VRTOTALDESCONTO),
-      toFloat(item.VRPAGO),
-      item.DSTIPOPAGAMENTO,
-      item.NSU,
-      item.NUAUTORIZACAO,
-      item.DSADQUIRENTE
+      q(item.IDEMPRESA),
+      q(item.NOFANTASIA),
+      q(item.IDVENDA),
+      q(item.DATA),
+      q(dec(item.VRTOTALPAGO)),
+      q(dec(item.VRTOTALDESCONTO)),
+      q(dec(item.VRPAGO)),
+      q(item.DSTIPOPAGAMENTO),
+      q(item.NSU),
+      q(item.NUAUTORIZACAO),
+      q(item.DSADQUIRENTE)
     ].join(';'));
 
 
@@ -58,42 +60,6 @@ export const ActionListaVendasConciliacao = ({ dadosVendasConciliacao }) => {
     const link = document.createElement('a');
     link.href = url;
     link.download = 'conciliacao_ponto.txt';
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    window.URL.revokeObjectURL(url);
-  };
-
-  const exportToTXT = () => {
-    const linhas = dadosVendasConciliacao.map(item => [
-      item.contador,
-      item.IDEMPRESA,
-      item.NOFANTASIA,
-      item.IDVENDA,
-      item.DATA,
-      formatMoeda(item.VRTOTALPAGO),
-      formatMoeda(item.VRTOTALDESCONTO),
-      formatMoeda(item.VRPAGO),
-      item.DSTIPOPAGAMENTO,
-      item.NSU,
-      item.NUAUTORIZACAO,
-      item.DSADQUIRENTE
-    ].join(';'));
-
-
-    const conteudo = linhas.join('\n');
-
-    const blob = new Blob([conteudo], {
-      type: 'text/plain;charset=utf-8'
-    });
-
-    const url = window.URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'vendas_conciliacao.txt';
 
     document.body.appendChild(link);
     link.click();
@@ -298,7 +264,6 @@ export const ActionListaVendasConciliacao = ({ dadosVendasConciliacao }) => {
             handlePrint={handlePrint}
             exportToExcel={exportToExcel}
             exportToPDF={exportToPDF}
-            exportTXT={exportToTXT}
             exportTXTPonto={exportToTXTComPonto}
             exportCSV={exportToCSV}
           />
