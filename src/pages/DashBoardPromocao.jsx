@@ -82,7 +82,10 @@ export const DashBoardPromocao = ({ }) => {
     setComponentToShow(componentName);
   }
 
-
+  const menuFilhoResumo = selectedModule?.menuPai?.menuFilho?.find(
+    menu => menu.URL === "/promocoes/ActionPesquisaPromocao"
+  );
+  
   const permissaoUsuario = selectedModule.menuPai.menuFilho;
   const {
     ID,

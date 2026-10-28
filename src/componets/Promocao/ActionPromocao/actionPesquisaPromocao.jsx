@@ -23,28 +23,19 @@ import { ActionEstruturaProdutoDestinoModal } from "./ActionProdutosDestino/acti
 import { animacaoCarregamento, fecharAnimacaoCarregamento } from "../../../utils/animationCarregamento"
 import { MECANICAS_COM_QTD_LIBERADA } from "../../../../mecanica"
 
-export const ActionPesquisaPromocao = ({ usuarioLogado }) => {
-  const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
+export const ActionPesquisaPromocao = ({ usuarioLogado, menuFilhoAtual }) => {
   const [treeData, setTreeData] = useState([]);
   const [selectedNodesOrigem, setSelectedNodesOrigem] = useState({});
   const [selectedNodesDestino, setSelectedNodesDestino] = useState({});
 
-  useEffect(() => {
-    const menuSalvo = localStorage.getItem('menuFilhoSelecionado');
-    if (menuSalvo) {
-      const menuParsed = JSON.parse(menuSalvo);
-      setMenuFilhoAtual(menuParsed);
-    }
-  }, []);
-  
   const { data: optionsModulos = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
     ['menus-usuario-excecao', menuFilhoAtual?.ID],
     async () => {
       const response = await get(`/menus-usuario-excecao?idUsuario=${usuarioLogado?.id}&idMenuFilho=${menuFilhoAtual?.ID}`);
-      
+
       return response.data;
     },
-    { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000,}
+    { enabled: Boolean(usuarioLogado?.id && menuFilhoAtual?.ID), staleTime: 5 * 60 * 1000, }
   );
 
   const {

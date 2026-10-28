@@ -104,6 +104,10 @@ export const DashBoardFinanceiro = () => {
     { enabled: Boolean(usuarioLogado?.id), staleTime: 5 * 60 * 1000, }
   );
 
+  const menuFilhoResumo = selectedModule?.menuPai?.menuFilho?.find(
+    menu => menu.URL === "/financeiro/ResumoDashBoardFinaneiro"
+  );
+
   const permissaoUsuario = selectedModule.menuPai.menuFilho;
   const {   
     ID, 
@@ -118,7 +122,7 @@ export const DashBoardFinanceiro = () => {
 
   switch (componentToShow) {
     case "/financeiro/ResumoDashBoardFinaneiro":
-      component = <ResumoDashBoardFinaneiro usuarioLogado={usuarioLogado}  />
+      component = <ResumoDashBoardFinaneiro usuarioLogado={usuarioLogado}  menuFilhoAtual={menuFilhoResumo} />
       break;
     case "/financeiro/ActionPesquisaVendasLoja":
       component = <ActionPesquisaVendasLoja />
@@ -243,7 +247,7 @@ export const DashBoardFinanceiro = () => {
                         <div className="panel-content">
 
                           <Suspense fallback={<div>Carregando...</div>}>
-                            {resumoVisivel && !componentToShow && <ResumoDashBoardFinaneiro />}
+                            {resumoVisivel && !componentToShow && <ResumoDashBoardFinaneiro menuFilhoAtual={menuFilhoResumo} />}
                             {componentToShow && component}
                           </Suspense>
                         </div>
