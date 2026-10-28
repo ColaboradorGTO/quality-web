@@ -478,7 +478,7 @@ export const ActionListaFaturasLoja = ({
     <Fragment>
       <div className="panel">
         <div className="panel-hdr">
-          <h2>Lista de Faturas AAAAAAAAAA</h2>
+          <h2>Lista de Faturas </h2>
         </div>
         <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
 
