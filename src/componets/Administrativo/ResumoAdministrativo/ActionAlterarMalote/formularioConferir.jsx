@@ -262,6 +262,7 @@ export const FormularioConferirMalote = ({
           corCadastrar="primary"
           loadingTextCadastrar={"Cadastrando..."}
           autoLoadingCadastrar={true}
+          tipoBtnCadastrar={"button"}
           
           ButtonTypeFechar={isRecepcionado ? ButtonTypeModal : undefined}
           textButtonFechar={"Finalizar"}
