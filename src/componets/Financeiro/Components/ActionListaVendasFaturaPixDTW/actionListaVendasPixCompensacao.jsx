@@ -474,7 +474,7 @@ export const ActionListaVendasPIXCompensacao = ({
           </span>
         );
       },
-      sortable: false,
+      sortable: true,
     },
     {
       field: 'opcoes',
@@ -522,7 +522,7 @@ export const ActionListaVendasPIXCompensacao = ({
           </div>
         );
       },
-      sortable: false,
+      sortable: true,
     }
   ]
 
@@ -543,7 +543,7 @@ export const ActionListaVendasPIXCompensacao = ({
           <div id="panel-1" className="panel">
             <div className="panel-hdr">
               <h2>
-                Lista de Vendas PIX Por Período<span className="fw-300"><i></i></span>
+                Lista de Vendas PIX Por Período <span className="fw-300"><i></i></span>
               </h2>
             </div>
             <div className="panel-container show">
