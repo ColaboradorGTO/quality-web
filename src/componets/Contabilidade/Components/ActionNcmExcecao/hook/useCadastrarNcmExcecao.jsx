@@ -1,14 +1,8 @@
 import Swal from "sweetalert2";
 import { get, post, put } from "../../../../../api/funcRequest";
-import { useQuery } from "react-query";
 import { useEffect, useState } from "react";
-import { getDataAtual } from "../../../../../utils/dataAtual";
 import axios from 'axios';
-import { Funcoes } from '../../../../../../tipoFuncao.json';
-import { Parceiro, situacao, localizacao, Departamentos } from '../../../../../../parceiro.json';
-import { removerMascaraCPF } from "../../../../../utils/formatCPF";
-import { removerFormatacaoMoeda } from "../../../../../utils/formatMoeda";
-import { removerMascaraTelefone } from "../../../../../utils/mascaraTelefone";
+
 
 export const useCadastrarNcmExcecao = ({ handleClose, usuarioLogado, optionsModulos, refetchNcmExcecao }) => {
 
@@ -78,7 +72,7 @@ export const useCadastrarNcmExcecao = ({ handleClose, usuarioLogado, optionsModu
       IMPIMPORTACAOFEDERAL: Number(ImpImportacaoFederal),
       IMPESTADUAL: Number(ImpEstadual),
       IMPMUNICIPAL: Number(ImpMunicipal),
-      DTINICIOVIGENCIA: String(DtInicioVigencia),
+      DTINICIOVIGENCIA: String(DtInicioVigencia), 
       DTFIMVIGENCIA: String(DtFimVigencia),
       PWCHAVE: String(PwChave),
       NUVERSAO: String(NuVersao),

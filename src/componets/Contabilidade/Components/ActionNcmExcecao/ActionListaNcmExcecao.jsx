@@ -7,7 +7,6 @@ import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import HeaderTable from "../../../Tables/headerTable";
 import { ButtonTable } from "../../../ButtonsTabela/ButtonTable";
-import { FaRegFileAlt } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { formatarDataParaBR, } from "../../../../utils/dataFormatada";
 import { GrEdit } from "react-icons/gr";

@@ -21,7 +21,7 @@ export const ActionVendaXMLModal = ({ show, handleClose, dadosDetalheVendasXML }
       const xmlData = dadosDetalheVendasXML[0]?.XML_FORMATADO;
 
       const response = await axiosInstance.post(
-        `${baseURL}gerar-danfe`,
+        `${baseURL}/gerar-danfe`,
         { xml: xmlData, idVenda, consulta: '' },
         {
           responseType: 'arraybuffer',
@@ -146,7 +146,7 @@ export const ActionVendaXMLModal = ({ show, handleClose, dadosDetalheVendasXML }
               )}
             </ScrollPanel>
           </Modal.Body>
-
+ 
 
           <FooterModal
             ButtonTypeFechar={ButtonTypeModal}
