@@ -1,9 +1,7 @@
 import Swal from "sweetalert2";
 import { get, post, put } from "../../../../../api/funcRequest";
-import { useQuery } from "react-query";
 import { useEffect, useState } from "react";
 import axios from 'axios';
-import { formatarDataDTW } from "../../../../../utils/dataFormatada";
 
 export const useEditarNcmExcecao = ({
   handleClose,

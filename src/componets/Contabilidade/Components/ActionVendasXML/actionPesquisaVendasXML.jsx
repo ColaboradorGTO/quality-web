@@ -68,7 +68,7 @@ export const ActionPesquisaVendasXML = ({ usuarioLogado }) => {
         stContigencia = 'False',
           stCancelado = 'False'
           break;
-      case 'CONTIGENCIA':
+      case 'CONTINGÊNCIA':
         stContigencia = 'True',
         stCancelado = 'False'
         break;
@@ -289,7 +289,7 @@ export const ActionPesquisaVendasXML = ({ usuarioLogado }) => {
   const optionsStatus = [
     { value: '', label: 'Todas', color: 'grey' },
     { value: 'AUTORIZADA', label: 'Autorizadas', color: 'green' },
-    { value: 'CONTIGENCIA', label: 'Em Contigência', color: 'orange' },
+    { value: 'CONTINGÊNCIA', label: 'Em Contingência', color: 'orange' },
     { value: 'CANCELADO', label: 'Canceladas', color: 'red' },
   ]
 
@@ -386,3 +386,4 @@ export const ActionPesquisaVendasXML = ({ usuarioLogado }) => {
     </Fragment>
   )
 }
+

@@ -1,15 +1,10 @@
 import { Fragment } from "react"
 import { Controller, useForm } from "react-hook-form";
 import Select from 'react-select';
-import { InputFieldModal } from "../../../../Buttons/InputFieldModal";
 import { FooterModal } from "../../../../Modais/FooterModal/footerModal";
 import { ButtonTypeModal } from "../../../../Buttons/ButtonTypeModal";
-import { mascaraCPF, removerMascaraCPF, validarCPF } from "../../../../../utils/formatCPF";
 import { AlertError } from "../../../../Inputs/alertError"
-import { format, subDays } from "date-fns";
 import FormField from "../../../../Formularios/FormField";
-import { formatarMoeda, removerFormatacaoMoeda } from "../../../../../utils/formatMoeda";
-import { mascaraTelefone } from "../../../../../utils/mascaraTelefone";
 import { useCadastrarNcmExcecao } from "../hook/useCadastrarNcmExcecao";
 import { schema } from "./SchemaCadastrarNCM";
 

@@ -46,10 +46,6 @@ export const ActionListaAlvaraBombeiro = ({
     );
 
 
-    const onGlobalFilterChange = (e) => {
-        setGlobalFilterValue(e.target.value);
-    };
-
     const handlePrint = useReactToPrint({
         content: () => dataTableRef.current,
         documentTitle: 'Lista de Alvaras',
@@ -253,13 +249,6 @@ export const ActionListaAlvaraBombeiro = ({
 
                 </div>
                 <div style={{ marginBottom: "0.5rem" }}>
-                    <HeaderTable
-                        globalFilterValue={globalFilterValue}
-                        onGlobalFilterChange={onGlobalFilterChange}
-                        handlePrint={handlePrint}
-                        exportToExcel={exportToExcel}
-                        exportToPDF={exportToPDF}
-                    />
                     <div style={{ marginTop: "1rem", marginLeft: "0.8rem" }}>
                         <ButtonTable
                             titleButton="Adicionar Alvará"
@@ -289,6 +278,7 @@ export const ActionListaAlvaraBombeiro = ({
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
                         filterDisplay="menu"
+                        cellMemo={false}
                         showGridlines
                         stripedRows
                         emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}

@@ -90,7 +90,7 @@ export const ActionListaVendasXML = ({
       IDCHAVENFE: item.IDCHAVENFE ? item.IDCHAVENFE : item.IDCHAVENFE.replace(/[a-zA-Z]/g, ''),
       CHAVENFE: item.CHAVENFE ? item.CHAVENFE : item.IDCHAVENFE.replace(/[a-zA-Z]/g, ''),
       STCONTINGENCIA: item.STCONTINGENCIA,
-      STCANCELADO: item.STCANCELADO == 'True' ? 'Cancelada' : item.STCONTINGENCIA == 'True' ? 'Contigência' : 'Autorizada',
+      STCANCELADO: item.STCANCELADO == 'True' ? 'Cancelada' : item.STCONTINGENCIA == 'True' ? 'Contingência' : 'Autorizada',
       TXTMOTIVOCANCELAMENTO: item.TXTMOTIVOCANCELAMENTO,
       VRTOTALPAGO: item.VRTOTALPAGO,
       PROTNFE_INFPROT_XMOTIVO: item.PROTNFE_INFPROT_XMOTIVO,
