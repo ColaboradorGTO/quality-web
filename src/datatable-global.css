@@ -1,0 +1,13 @@
+/* Cabeçalho dos DataTable: texto e ícone de ordenação (sortable) em branco */
+.p-datatable .p-datatable-thead > tr > th,
+.p-datatable .p-datatable-thead > tr > th .p-column-title,
+.p-datatable .p-sortable-column .p-sortable-column-icon,
+.p-datatable .p-sortable-column:not(.p-highlight):hover .p-sortable-column-icon,
+.p-datatable .p-sortable-column.p-highlight .p-sortable-column-icon,
+.p-datatable .p-sortable-column.p-highlight:hover .p-sortable-column-icon {
+  color: #fff !important;
+}
+
+.p-datatable .p-sortable-column:focus {
+  box-shadow: inset 0 0 0 0.15rem #fff;
+}

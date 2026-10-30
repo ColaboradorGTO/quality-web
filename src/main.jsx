@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from 'react-query/devtools'
 
 // import "./index.css"
 import '../css/app.bundle.css'
+import './datatable-global.css'
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { BrowserRouter } from 'react-router-dom'
 import AuthProvider from './Providers/AuthContext/index.jsx'
