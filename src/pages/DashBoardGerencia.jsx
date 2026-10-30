@@ -30,7 +30,7 @@ const ActionPesquisaVendasEstrutura = lazy(() => import("../componets/Gerencia/C
 const ActionPesquisaVendasDescontoFuncionario = lazy(() => import("../componets/Gerencia/Components/ActionDescontoFuncionario/actionPesquisaVendasDescontoFuncionario").then(module => ({ default: module.ActionPesquisaVendasDescontoFuncionario })));
 const ActionPesquisaEstoqueLoja = lazy(() => import("../componets/Gerencia/Components/ActionEstoqueLoja/actionPesquisaEstoqueLoja").then(module => ({ default: module.ActionPesquisaEstoqueLoja })));
 const ActionPesquisaBalancoLoja = lazy(() => import("../componets/Gerencia/Components/ActionBalancoPorLoja/actionPesquisaBalancoLoja").then(module => ({ default: module.ActionPesquisaBalancoLoja })));
-const ActionPesqvuisaEmpresas = lazy(() => import("../componets/Gerencia/Components/ActionEmpresas/actionPesquisaEmpresas").then(module => ({ default: module.ActionPesquisaEmpresas })));
+const ActionPesquisaEmpresas = lazy(() => import("../componets/Gerencia/Components/ActionEmpresas/actionPesquisaEmpresas").then(module => ({ default: module.ActionPesquisaEmpresas })));
 const ActionPesquisaConferenciaMalote = lazy(() => import("../componets/Gerencia/Components/ActionConferenciaMalote/actionPesquisaConferenciaMalote").then(module => ({ default: module.ActionPesquisaConferenciaMalote })));
 const ActionPesquisaProdutoEtiqueta = lazy(() => import("../componets/Gerencia/Components/ActionProdutoEtiqueta/actionPesquisaProdutoEtiqueta").then(module => ({ default: module.ActionPesquisaProdutoEtiqueta })));
 const ActionPesquisaEtiquetaRemarcacao = lazy(() => import("../componets/Gerencia/Components/ActionEtiquetaRemarcacao/actionPesquisaEtiquetaRemarcacao").then(module => ({ default: module.ActionPesquisaEtiquetaRemarcacao })));
@@ -39,8 +39,8 @@ const ActionRelatorioBI = lazy(() => import("../componets/Gerencia/Components/Ac
 const ActionPesquisaEtiquetasVolumes = lazy(() => import("../componets/Gerencia/Components/ActionEtiquetasVolumes/actionPesquisaEtiquetasVolumes").then(module => ({ default: module.ActionPesquisaEtiquetasVolumes })));
 const ActionPesquisaVendaVoucher = lazy(() => import("../componets/Gerencia/Components/ActionVendaVoucher/actionPesquisaVendaVoucher").then(module => ({ default: module.ActionPesquisaVendaVoucher })));
 const ActionPesquisaVendasDigitais = lazy(() => import("../componets/Gerencia/Components/ActionVendasDigitais/actionPesquisaVendasDigitais").then(module => ({ default: module.ActionPesquisaVendasDigitais })));
+const ActionPesquisaMetas = lazy(() => import("../componets/Gerencia/Components/ActionMetas/actionPesquisaMetas").then(module => ({ default: module.ActionPesquisaMetas })));
 
- 
 export const DashBoardGerencia = () => {
   const storedModule = localStorage.getItem('moduloselecionado');
   const selectedModule = JSON.parse(storedModule);
@@ -103,6 +103,10 @@ export const DashBoardGerencia = () => {
     { enabled: Boolean(usuarioLogado?.id), staleTime: 5 * 60 * 1000, }
   );
 
+  const menuFilhoResumo = selectedModule?.menuPai?.menuFilho?.find(
+    menu => menu.URL === "/gerencia/ResumoDashBoardGerencia"
+  );
+
   const permissaoUsuario = selectedModule.menuPai.menuFilho;
   const {
     ID,
@@ -120,7 +124,7 @@ export const DashBoardGerencia = () => {
 
   switch (componentToShow) {
     case "/gerencia/ResumoDashBoardGerencia":
-      component = <ResumoDashBoardGerencia usuarioLogado={usuarioLogado} />;
+      component = <ResumoDashBoardGerencia usuarioLogado={usuarioLogado} menuFilhoAtual={menuFilhoResumo} />;
       break;
     case "/gerencia/ActionPesquisaProdutoEtiqueta":
       component = <ActionPesquisaProdutoEtiqueta usuarioLogado={usuarioLogado} optionsEmpresas={optionsEmpresas} />;
@@ -212,13 +216,15 @@ export const DashBoardGerencia = () => {
     case "/gerencia/ActionPesquisaVendasDigitais":
       component = <ActionPesquisaVendasDigitais usuarioLogado={usuarioLogado} optionsEmpresas={optionsEmpresas} />
       break;
+    case "/gerencia/ActionPesquisaMetas":
+      component = <ActionPesquisaMetas usuarioLogado={usuarioLogado} optionsEmpresas={optionsEmpresas} />
+      break;
     default:
       component = null;
       break;
   }
 
   return (
-
 
     <Fragment>
       {usuarioLogado && (
@@ -241,7 +247,7 @@ export const DashBoardGerencia = () => {
                           <div className="panel-content">
                             <Suspense fallback={<div>Loading...</div>}>
                               {resumoVisivel && !componentToShow && (
-                                <ResumoDashBoardGerencia usuarioLogado={usuarioLogado} />
+                                <ResumoDashBoardGerencia usuarioLogado={usuarioLogado} menuFilhoAtual={menuFilhoResumo} />
                               )}
 
                               {componentToShow && component}
