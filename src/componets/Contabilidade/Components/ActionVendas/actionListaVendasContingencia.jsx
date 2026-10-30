@@ -1,5 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from "react"
-import { CiEdit } from "react-icons/ci"
+import { Fragment, useRef, useState } from "react"
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { ButtonTable } from "../../../ButtonsTabela/ButtonTable";

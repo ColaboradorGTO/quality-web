@@ -2,7 +2,6 @@ import { Fragment } from "react";
 import { FooterModal } from "../../../../Modais/FooterModal/footerModal";
 import { ButtonTypeModal } from "../../../../Buttons/ButtonTypeModal";
 import { useCadastrarNcmImportacao } from "../hook/useCadastrarNcmImportacao";
-import { BsDownload } from "react-icons/bs";
 
 export const FormularioImportar = ({
     handleClose,

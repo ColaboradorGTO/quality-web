@@ -174,6 +174,7 @@ export const ActionListaAlvaras = ({
         if (negacao.includes(status)) return "bg-danger";
         if (status === "Não Iniciado") return "bg-warning";
         if (status === "Concluído") return "bg-success";
+        if (status === "Emitido - Aprovado") return "bg-success";
         return "bg-info";
     };
     const isStatusNegacao = (status, dtFim) => {
@@ -238,7 +239,7 @@ export const ActionListaAlvaras = ({
         {
             field: 'NOFANTASIA',
             header: 'Fantasia',
-            body: row => <p style={{width: '200px', fontWeight: 600}}> {row.NOFANTASIA} </p>,
+            body: row => <p style={{ width: '200px', fontWeight: 600 }}> {row.NOFANTASIA} </p>,
             sortable: true,
         },
         {
@@ -281,8 +282,17 @@ export const ActionListaAlvaras = ({
             {
                 field: 'STATIVOBOMBEIRO',
                 header: 'St.Bombeiro',
-                body: row => <th className={`badge text-white ${row.STATIVOBOMBEIRO_BADGE}`}>
-                    {row.STATIVOBOMBEIRO}
+                body: row => <th className={`badge text-white ${row.STATIVOBOMBEIRO_BADGE}`}
+                    style={{
+                        backgroundColor: "#198754",
+                        color: "#fff",
+                        padding: "3px 8px",
+                        borderRadius: "3px",
+                        fontSize: "12px",
+                        fontWeight: "bold"
+                    }}
+                >
+                    {row.STATIVOBOMBEIRO == "concluido" ? "Emitido - Aprovado" : row.STATIVOBOMBEIRO}
                 </th>,
                 sortable: true,
             },
@@ -299,8 +309,16 @@ export const ActionListaAlvaras = ({
             {
                 field: 'STATIVOMEIOAMBIENTE',
                 header: 'St.Meio Ambiente',
-                body: row => <th className={`badge text-white ${row.STATIVOMEIOAMBIENTE_BADGE}`}>
-                    {row.STATIVOMEIOAMBIENTE}
+                body: row => <th className={`badge text-white ${row.STATIVOMEIOAMBIENTE_BADGE}`}
+                    style={{
+                        backgroundColor: "#198754",
+                        color: "#fff",
+                        padding: "3px 8px",
+                        borderRadius: "3px",
+                        fontSize: "12px",
+                        fontWeight: "bold"
+                    }}>
+                    {row.STATIVOMEIOAMBIENTE == "Concluído" ? "Emitido - Aprovado" : row.STATIVOMEIOAMBIENTE}
                 </th>,
                 sortable: true,
             },
@@ -316,8 +334,17 @@ export const ActionListaAlvaras = ({
             {
                 field: 'STATIVOVIGILANCIASANITARIA',
                 header: 'St.Vigilância Sanitaria',
-                body: row => <th className={`badge text-white ${row.STATIVOVIGILANCIASANITARIA_BADGE}`}>
-                    {row.STATIVOVIGILANCIASANITARIA}
+                body: row => <th className={`badge text-white ${row.STATIVOVIGILANCIASANITARIA_BADGE}`}
+                    style={{
+                        backgroundColor: "#198754",
+                        color: "#fff",
+                        padding: "3px 8px",
+                        borderRadius: "3px",
+                        fontSize: "12px",
+                        fontWeight: "bold"
+                    }}
+                >
+                    {row.STATIVOVIGILANCIASANITARIA == "Concluído" ? "Emitido - Aprovado" : row.STATIVOVIGILANCIASANITARIA}
                 </th>,
                 sortable: true,
             },
@@ -333,8 +360,17 @@ export const ActionListaAlvaras = ({
             {
                 field: 'STATIVOPREFEITURA',
                 header: 'St.Prefeitura',
-                body: row => <th className={`badge text-white ${row.STATIVOPREFEITURA_BADGE}`}>
-                    {row.STATIVOPREFEITURA}
+                body: row => <th className={`badge text-white ${row.STATIVOPREFEITURA_BADGE}`}
+                    style={{
+                        backgroundColor: "#198754",
+                        color: "#fff",
+                        padding: "3px 8px",
+                        borderRadius: "3px",
+                        fontSize: "12px",
+                        fontWeight: "bold"
+                    }}>
+                    {row.STATIVOPREFEITURA == "Concluído" ? "Emitido - Aprovado" : row.STATIVOPREFEITURA}
+
                 </th>,
                 sortable: true,
             },
@@ -419,6 +455,7 @@ export const ActionListaAlvaras = ({
                         currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
                         filterDisplay="menu"
                         showGridlines
+                        cellMemo={false}
                         stripedRows
                         emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
                     >

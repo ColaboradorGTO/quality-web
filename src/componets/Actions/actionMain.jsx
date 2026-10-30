@@ -649,6 +649,7 @@ export const ActionMain = ({
   corTypeSaldo,
   corProdutoVendido,
   corImportar,
+  iconColorImportar,
 
   MenuTreeSelectComponent,
   valueTreeSelect,
@@ -2078,7 +2079,7 @@ export const ActionMain = ({
                         cor={corImportar || '"success"'}
                         tipo="button"
                         Icon={GoUpload}
-                        iconColor="#fff"
+                        iconColor={"#fff"}
                         iconSize={16}
                         style={styleImportar}
 
