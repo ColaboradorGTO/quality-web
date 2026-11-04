@@ -64,7 +64,7 @@ export const useUpdateDeposito = ({ handleClose, optionsModulos, usuarioLogado, 
                 deposito.DTMOVDEPCOMPLETA
             );
 
-            setEmpresa(deposito.NOFANTASIA);
+            setEmpresa(deposito.IDEMPRESA);
 
             setData(depositoDataHora.data);
             setHora(depositoDataHora.hora);
