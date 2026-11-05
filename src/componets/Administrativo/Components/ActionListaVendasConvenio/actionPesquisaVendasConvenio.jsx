@@ -8,7 +8,7 @@ import { AiOutlineSearch } from "react-icons/ai";
 import { ActionListaVendasConvenio } from "./actionListaVendasConvenio";
 import { ActionListaConvenioDescontoFuncionario } from "./actionListaConvenioDescontoFuncionario";
 import { getDataAtual } from "../../../../utils/dataAtual";
-import { animacaoCarregamento, fecharAnimacaoCarregamento } from "../../../../utils/animationCarregamento";
+import { animacaoCarregamento, fecharAnimacaoCarregamento, foiCancelado } from "../../../../utils/animationCarregamento";
 import { useQuery } from "react-query"
 import { useFetchData, useFetchEmpresas } from "../../../../hooks/useFetchData";
 
