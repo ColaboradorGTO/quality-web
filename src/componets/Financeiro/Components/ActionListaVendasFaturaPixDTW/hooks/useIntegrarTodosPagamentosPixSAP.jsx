@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { post } from "../../../../../api/funcRequest";
 import Swal from "sweetalert2";
@@ -13,7 +14,10 @@ export const useIntegrarTodosPagamentosPix = ({
 }) => {
     const [isSubmitting, setisSubmitting] = useState(false);
 
+    const LIMITE_MAXIMO = 100;
+
     const integrarTodos = async () => {
+
         if (optionsModulos[0]?.ALTERAR == 'False') {
             Swal.fire({
                 position: 'center',
@@ -26,6 +30,26 @@ export const useIntegrarTodosPagamentosPix = ({
                     container: 'custom-swal',
                 },
             });
+            return;
+        }
+
+        // Validação do limite máximo de 100 pagamentos
+        if (selectedItems.length > LIMITE_MAXIMO) {
+            Swal.fire({
+                position: 'center',
+                icon: 'warning',
+                title: 'Limite máximo permitido!',
+                html: `
+                    Você selecionou <b>${selectedItems.length}</b> pagamentos PIX.<br/><br/>
+                    O limite máximo permitido é de <b>100 pagamentos por vez</b>.<br/><br/>
+                    Selecione no máximo 100 pagamentos para continuar.
+                `,
+                confirmButtonText: 'Entendi',
+                customClass: {
+                    container: 'custom-swal',
+                },
+            });
+
             return;
         }
 
@@ -50,10 +74,11 @@ export const useIntegrarTodosPagamentosPix = ({
         }).then(async (result) => {
 
             if (result.isConfirmed) {
-                setisSubmitting(true)
+                setisSubmitting(true);
+
                 const total = selectedItems.length;
                 let enviados = 0;
-                
+
                 const atualizarContador = () => {
                     const container = Swal.getHtmlContainer();
 
@@ -105,14 +130,17 @@ export const useIntegrarTodosPagamentosPix = ({
                     },
                     didOpen: atualizarContador
                 });
+
                 try {
                     for (let i = 0; i < selectedItems.length; i++) {
                         const rowData = selectedItems[i];
+
                         const putData = {
                             IDVENDAPAGAMENTO: rowData.IDVENDAPAGAMENTO,
                         };
 
-                        const response = await post('/pix-integracao', putData)
+                        const response = await post('/pix-integracao', putData);
+
                         enviados++;
                         atualizarContador();
 
@@ -123,7 +151,6 @@ export const useIntegrarTodosPagamentosPix = ({
                         });
                     }
 
-
                     Swal.fire({
                         position: 'center',
                         icon: 'success',
@@ -133,16 +160,19 @@ export const useIntegrarTodosPagamentosPix = ({
                         customClass: {
                             container: 'custom-swal',
                         },
-                    })
+                    });
 
                     setSelectedItems([]);
                     handleClickVendasPixCompensacao();
-                    onIntegrado?.()
+                    onIntegrado?.();
+
                     return;
+
                 } catch (error) {
 
                     for (let i = 0; i < selectedItems.length; i++) {
                         const rowData = selectedItems[i];
+
                         const putData = {
                             IDVENDAPAGAMENTO: rowData.IDVENDAPAGAMENTO,
                         };
@@ -164,19 +194,22 @@ export const useIntegrarTodosPagamentosPix = ({
                             container: 'custom-swal',
                         },
                     });
+
                     console.error('Erro Integrar Todos Pagamentos PIX:', error);
                     return;
+
                 } finally {
-                    setisSubmitting(false)
+                    setisSubmitting(false);
                 }
+
             } else {
                 return;
             }
         });
-    }
+    };
 
     return {
         integrarTodos,
         isSubmitting
-    }
-}
+    };
+};
