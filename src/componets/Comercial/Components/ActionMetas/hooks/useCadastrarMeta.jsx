@@ -91,7 +91,6 @@ const montarMetasDetalhe = (dadosLinhas, metas) => {
 export const useCadastrarMeta = ({ usuarioLogado, optionsModulos, handleClick }) => {
 
     const handleCadastrar = async (periodo, dadosLinhas, metas) => {
-        console.log(periodo, 'periodo hook')
         if (optionsModulos[0]?.ALTERAR == 'False') {
             Swal.fire({
                 icon: "error",
@@ -139,7 +138,7 @@ export const useCadastrarMeta = ({ usuarioLogado, optionsModulos, handleClick })
             });
 
             const dados = {
-                IDGRUPOEMPRESA: parseInt(periodo?.marcaSelecionada),
+                IDGRUPOEMPRESA: parseInt(periodo?.IDGRUPOEMPRESA),
                 IDFUNCIONARIO: parseInt(usuarioLogado?.id),
                 DTMETAINICIO: periodo?.DTMETAINICIO,
                 DTMETAFIM: periodo?.DTMETAFIM,
@@ -155,7 +154,6 @@ export const useCadastrarMeta = ({ usuarioLogado, optionsModulos, handleClick })
             });
 
             const response = await post("/cadastrar-metas-lojas", dados);
-            // const response = await post("/cadastrar-", dados);
 
             Swal.close();
 

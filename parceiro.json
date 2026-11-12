@@ -365,5 +365,23 @@
   "optionsNota": [
     { "value": "65", "label": "NFC-e" },
     { "value": "55", "label": "NF-e" }
+  ],
+  "optionsTipoBeneficiario": [
+    { "value": "PJ", "label": "Pessoa Jurídica (CNPJ)" },
+    { "value": "PF", "label": "Pessoa Física (CPF)" }
+  ],
+  "optionsTipoDespesa": [
+    { "value": "MANUTENCAO", "label": "Manutenção" },
+    { "value": "REFORMA", "label": "Reforma" },
+    { "value": "EQUIPAMENTOS_VEICULOS", "label": "Equipamentos de Veículos" },
+    { "value": "EQUIPAMENTOS_TI", "label": "Equipamentos de TI" },
+    { "value": "SERVICOS", "label": "Serviços" },
+    { "value": "MATERIAIS", "label": "Materiais" },
+    { "value": "OUTROS", "label": "Outros" }
+  ],
+  "optionsFormaPagamento": [
+    { "value": "PIX", "label": "PIX" },
+    { "value": "TED", "label": "TED" },
+    { "value": "TRANSFERENCIA", "label": "Transferência" }
   ]
 }

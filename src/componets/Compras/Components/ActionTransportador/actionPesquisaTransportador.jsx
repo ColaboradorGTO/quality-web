@@ -38,7 +38,7 @@ export const ActionPesquisaTransportador = ({ usuarioLogado }) => {
     },
     { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000,}
   );
-
+  
   const fetchListaTransporte = async () => {
     const urlBase = `/transportadoras?idTransportador=${transportadorSelecionado}&descricaoTransportador=${razaoSocial}&cnpjTransportador=${cnpj}`;
     let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';

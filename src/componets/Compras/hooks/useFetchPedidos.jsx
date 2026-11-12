@@ -50,38 +50,3 @@ export const useFetchWithPagination = (key, url, currentPage, pageSize, enabled)
   );
 };
 
-
-// const urlListaPedidos = `/listaTodosPedidos?dataPesquisaInicio=${dataInicio}&dataPesquisaFim=${dataFim}`;
-// const { data: dadosListaPedidos = [], refetch: refetchListaPedidos } = useFetchWithPagination(
-//   'listaTodosPedidos',
-//   urlListaPedidos,
-//   currentPage,
-//   pageSize,
-//   Boolean(dataInicio && dataFim)
-// );
-
-// const urlPedidosResumido = `/listaPedidos?dataPesquisaInicio=${dataInicio}&dataPesquisaFim=${dataFim}&idFornPesquisa=${fornecedorSelecionado}&idMarcaPesquisa=${marcaSelecionada}&NuPedidoPesquisa=${numeroPedido}&idFabPesquisa=${fabricanteSelecionado}&idCompradorPesquisa=${compradorSelecionado}&STSituacaoSAP=${situacaoSelecionada}`;
-// const { data: dadosPedidoResumido = [], refetch: refetchPedidosResumido } = useFetchWithPagination(
-//   'listaPedidosResumido',
-//   urlPedidosResumido,
-//   currentPage,
-//   pageSize,
-//   Boolean(dataInicio && dataFim)
-// );
-
-// const urlPedidosDetalhados = `/listaPedidosDetalhado?dataPesquisaInicio=${dataInicio}&dataPesquisaFim=${dataFim}&idFornecedor=${fornecedorSelecionado}&idMarca=${marcaSelecionada}&idPedido=${numeroPedido}`;
-// const { data: dadosPedidosDetalhados = [], refetch: refetchPedidosDetalhados } = useFetchWithPagination(
-//   'listaPedidosDetalhados',
-//   urlPedidosDetalhados,
-//   currentPage,
-//   pageSize,
-//   Boolean(fornecedorSelecionado)
-// );
-
-// const urlProdutosCriados = `/listaProdutoCriadoPedidoCompra?dataPesquisaInicio=${dataInicio}&dataPesquisaFim=${dataFim}`;
-// const { data: dadosListaProdutosCriados = [], refetch: refetchPedidosCriados } = useFetchWithPagination(
-//   'listaProdutosCriados',
-//   urlProdutosCriados,
-//   currentPage,
-//   pageSize,
-// );

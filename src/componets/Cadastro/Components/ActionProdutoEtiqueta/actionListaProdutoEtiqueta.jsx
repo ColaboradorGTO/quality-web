@@ -1,8 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from "react"
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { InputNumber } from 'primereact/inputnumber';
-import { TriStateCheckbox } from 'primereact/tristatecheckbox';
 import HeaderTable from "../../../Tables/headerTable";
 import Swal from "sweetalert2";
 import { useReactToPrint } from "react-to-print";
@@ -444,8 +442,6 @@ export const ActionListaProdutoEtiqueta = ({
             selectionMode={'single'}
             sortField="VRTOTALPAGO"
             sortOrder={-1}
-            paginator={true}
-            rows={10}
             rowsPerPageOptions={[10, 20, 50, 100, dados.length]}
             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"

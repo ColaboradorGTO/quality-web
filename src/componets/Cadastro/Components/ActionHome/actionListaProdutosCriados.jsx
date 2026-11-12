@@ -9,91 +9,359 @@ import { useReactToPrint } from "react-to-print";
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import Swal from "sweetalert2";
+import { get } from "../../../../api/funcRequest";
+import { ButtonTable } from "../../../ButtonsTabela/ButtonTable";
+import { GrView } from "react-icons/gr";
+import { BsLockFill, BsTrash3 } from "react-icons/bs";
+import { CiEdit } from "react-icons/ci";
+import { IoIosAdd } from "react-icons/io";
+import { useMigrarProdutos } from "../ActionNovoPedido/hooks/useMigrarProdutos";
+import { useIncluirProdutoPdv } from "../ActionNovoPedido/hooks/useIncluirProdutoPdv";
 
 
-export const ActionListaProdutosCriados = ({ dadosListaProdutosCriados }) => {
-    const [globalFilterValue, setGlobalFilterValue] = useState('');
-    const dataTableRef = useRef();
-  
-  
-    const onGlobalFilterChange = (e) => {
-      setGlobalFilterValue(e.target.value);
-    };
-  
-    const handlePrint = useReactToPrint({
-      content: () => dataTableRef.current,
-      documentTitle: 'Produtos Criados',
+export const ActionListaProdutosCriados = ({ 
+  dadosListaProdutosCriados,
+  dadosVisualizarPedido,
+  usuarioLogado,
+  optionsModulos 
+}) => {
+  const [modalEditarItemPedido, setModalEditarItemPedido] = useState(false);
+  const [dadosItemPedido, setDadosItemPedido] = useState([]);
+  const [globalFilterValue, setGlobalFilterValue] = useState('');
+  const dataTableRef = useRef();
+
+  const {
+    handleProdutoPDV
+  } = useIncluirProdutoPdv({ usuarioLogado, optionsModulos })
+
+  const {
+    MigrarTodosProdutosSAP
+  } = useMigrarProdutos({ usuarioLogado, optionsModulos })
+
+  const onGlobalFilterChange = (e) => {
+    setGlobalFilterValue(e.target.value);
+  };
+
+  const handlePrint = useReactToPrint({
+    content: () => dataTableRef.current,
+    documentTitle: 'Previa Produtos ',
+  });
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.autoTable({
+      head: [['Nº', 'Cód Barras', 'Produto', 'NCM', 'TM', 'Qtd', 'Vr. Custo', 'Vr Venda', 'Total Custo', 'Obs', 'Situação']],
+      body: dados.map(item => [
+        item.contador,
+        item.CODBARRAS,
+        item.DSPRODUTO,
+        item.NUNCM,
+        item.DSTAMANHO,
+        toFloat(item.QTDPRODUTO),
+        formatMoeda(item.VRCUSTO),
+        formatMoeda(item.VRVENDA),
+        formatMoeda(item.VRTOTALCUSTO),
+        item.STEDITADOCOMPRAS === 'True' ? 'PRODUTO ALTERADO' : 'PRODUTO SEM ALTERAÇÃO',
+        item.STREPOSICAO == 'True' && item.STMIGRADOSAP == 'True' ? 'PRODUTO REPOSIÇÃO / MIGRADO SAP' : item.STREPOSICAO == 'True' && item.STMIGRADOSAP != 'True' ? 'PRODUTO REPOSIÇÃO / NÃO MIGRADO SAP' : item.STMIGRADOSAP == 'True' ? item.STCADASTRO == 'True' && item.IDPRODCADASTRO > 0 && item.IDPRODCADASTRO != 'NULL' ? 'INCLUIDO PDV / MIGRADO SAP' : 'NÃO INCLUIDO PDV / NÃO MIGRADO SAP' : item.STCADASTRO == 'True' && item.IDPRODCADASTRO > 0 && item.IDPRODCADASTRO != 'NULL' ? 'INCLUIDO PDV / NÃO MIGRADO SAP' : 'NÃO INCLUIDO PDV / NÃO MIGRADO SAP',
+      ]),
+      horizontalPageBreak: true,
+      horizontalPageBreakBehaviour: 'immediately'
     });
-  
-    const exportToPDF = () => {
-      const doc = new jsPDF();
-      doc.autoTable({
-        head: [['Nº', 'Data Pedido', 'Nº Pedido',  'Cod Barras', 'Produto', 'NCM', 'TM', 'QTD', 'Vr. Custo', 'Vr. Venda', 'Total Venda', 'Estoque Ideal']],
-        body: dados.map(item => [
-          item.contador,
-          dataFormatada(item.DTCADASTRO),
-          item.IDRESUMOPEDIDO,
-          item.CODBARRAS,
-          item.DSPRODUTO,
-          toFloat(item.NUNCM),
-          item.DSTAMANHO,
-          toFloat(item.QTDPRODUTO),
-          formatMoeda(item.VRCUSTO),
-          formatMoeda(item.VRVENDA),
-          formatMoeda(item.VRTOTALCUSTO),
-          toFloat(item.QTDESTOQUEIDEAL),
-        ]),
-        horizontalPageBreak: true,
-        horizontalPageBreakBehaviour: 'immediately'
-      });
-      doc.save('produtos_criados.pdf');
-    };
-  
-    const exportToExcel = () => {
-      const worksheet = XLSX.utils.json_to_sheet(dados);
-      const workbook = XLSX.utils.book_new();
-      const header = ['Nº', 'Data Pedido', 'Nº Pedido',  'Cod Barras', 'Produto', 'NCM', 'TM', 'QTD', 'Vr. Custo', 'Vr. Venda', 'Total Venda', 'Estoque Ideal'];
-      worksheet['!cols'] = [
-        { wpx: 50, caption: 'Nº' },
-        { wpx: 200, caption: 'Data Pedido' },
-        { wpx: 70, caption: 'Nº Pedido' },
-        { wpx: 100, caption: 'Cod Barras' },
-        { wpx: 250, caption: 'Produto' },
-        { wpx: 100, caption: 'NCM' },
-        { wpx: 50, caption: 'TM' },
-        { wpx: 50, caption: 'QTD' },
-        { wpx: 70, caption: 'Vr. Custo' },
-        { wpx: 70, caption: 'Vr. Venda' },
-        { wpx: 70, caption: 'Total Venda' },
-        { wpx: 70, caption: 'Estoque Ideal' },
-  
-      ];
-      XLSX.utils.sheet_add_aoa(worksheet, [header], { origin: 'A1' });
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Produtos Criados');
-      XLSX.writeFile(workbook, 'produtos_criados.xlsx');
-    };
+    doc.save('previa_produtos.pdf');
+  };
 
-  const dados = dadosListaProdutosCriados.map((item, index) => {
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(dados);
+    const workbook = XLSX.utils.book_new();
+    const header = ['Nº', 'Cód Barras', 'Produto', 'NCM', 'TM', 'Qtd', 'Vr. Custo', 'Vr Venda', 'Total Custo', 'Obs', 'Situação'];
+    worksheet['!cols'] = [
+      { wpx: 50, caption: 'Nº' },
+      { wpx: 200, caption: 'Cód Barras' },
+      { wpx: 200, caption: 'Produto' },
+      { wpx: 100, caption: 'NCM' },
+      { wpx: 100, caption: 'TM' },
+      { wpx: 100, caption: 'Qtd' },
+      { wpx: 100, caption: 'Vr. Custo' },
+      { wpx: 100, caption: 'Vr Venda' },
+      { wpx: 100, caption: 'Total Custo' },
+      { wpx: 100, caption: 'Obs' },
+      { wpx: 100, caption: 'Situação' },
+    ];
+    XLSX.utils.sheet_add_aoa(worksheet, [header], { origin: 'A1' });
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Previa Produtos');
+    XLSX.writeFile(workbook, 'previa_cadastro_produtos.xlsx');
+  };
+
+
+  const idsAndamentosLiberados = [4, 5, 16, 17];
+
+  let idAndamentoPedido = 0;
+  let stPedidoMigradoSAP = false;
+  let isPedidoSecundario = Number(dadosVisualizarPedido[0]?.IDPEDIDOPRIMARIO || 0) > 0;
+
+  const handleClickAvisoBloqueio = (mensagem) => {
+    Swal.fire({
+      icon: 'info',
+      title: mensagem,
+    })
+  }
+
+  const handleClickErroMigracaoSap = (motivo) => {
+    Swal.fire({
+      icon: 'info',
+      title: 'Erro ao tentar migrar',
+      text: `Motivo: ${motivo}`,
+    })
+  }
+
+  const dados = dadosListaProdutosCriados?.map((item, index) => {
     let contador = index + 1;
 
-    return {
+    idAndamentoPedido = !idAndamentoPedido ? Number(item?.IDANDAMENTO || 0) : idAndamentoPedido;
+    stPedidoMigradoSAP = !stPedidoMigradoSAP ? item?.STPEDIDOMIGRADOSAP == 'True' : stPedidoMigradoSAP;
+    isPedidoSecundario = !isPedidoSecundario ? Number(item?.IDPEDIDOPRIMARIO || 0) > 0 : isPedidoSecundario;
+
+    const row = {
       contador,
-      DTCADASTRO: item.DTCADASTRO,
-      IDRESUMOPEDIDO: item.IDRESUMOPEDIDO,
       CODBARRAS: item.CODBARRAS,
       DSPRODUTO: item.DSPRODUTO,
-      NUNCM: toFloat(item.NUNCM),
+      NUNCM: item.NUNCM,
       DSTAMANHO: item.DSTAMANHO,
-      QTDPRODUTO: toFloat(item.QTDPRODUTO),
-      VRCUSTO: toFloat(item.VRCUSTO),
-      VRVENDA: toFloat(item.VRVENDA),
-      VRTOTALCUSTO: toFloat(item.VRTOTALCUSTO),
-      QTDESTOQUEIDEAL: toFloat(item.QTDESTOQUEIDEAL),
-     
+      QTDPRODUTO: item.QTDPRODUTO,
+      VRCUSTO: item.VRCUSTO,
+      VRVENDA: item.VRVENDA,
+
+      STEDITADOCOMPRAS: item.STEDITADOCOMPRAS,
+      STMIGRADOSAP: item.STMIGRADOSAP,
+      STREPOSICAO: item.STREPOSICAO,
+      STCADASTRO: item.STCADASTRO,
+      IDDETALHEPRODUTOPEDIDO: item.IDDETALHEPRODUTOPEDIDO,
+      IDRESUMOPEDIDO: item.IDRESUMOPEDIDO,
+      IDPRODCADASTRO: item.IDPRODCADASTRO,
+      DTCADASTRO: item.DTCADASTRO,
+      DSSUBGRUPOESTRUTURA: item.DSSUBGRUPOESTRUTURA,
+      VRTOTALCUSTO: item.VRTOTALCUSTO,
+      QTDESTOQUEIDEAL: item.QTDESTOQUEIDEAL,
+    }
+
+    const idProdutoCadastro = String(item.IDPRODCADASTRO || '');
+    const stMigradoSapProduto = item.STMIGRADOSAP == 'True';
+    const stProdutoParaIncluirNoPedidoSAP = stMigradoSapProduto && item.STLINHAPRODUTOMIGRADAPARAPEDIDOSAP == 'False';
+    const stProdutoCadastrado = item.STCADASTRO == 'True';
+    const stProdutoReposicao = item.STREPOSICAO;
+    const stProdutoEditado = item.STEDITADOCOMPRAS;
+    const errorLogSap = (item.ERRORLOGSAP || '').replaceAll("'", "");
+    const stIncluidoPDV = stProdutoCadastrado && idProdutoCadastro.length > 0 && idProdutoCadastro != 'NULL';
+
+    const btnEditarProduto = (
+      <div className="p-1" key="btnEditar">
+        <ButtonTable
+          Icon={CiEdit}
+          cor={"warning"}
+          iconColor={"white"}
+          iconSize={20}
+          onClickButton={() => handleClickEditar(row)}
+          titleButton={"Editar Produto do Pedido"}
+        />
+      </div>
+    )
+
+    const btnAvisoFaltaInclusaoMigracao = (
+      <div className="p-1" key="btnAviso">
+        <ButtonTable
+          Icon={GrView}
+          cor={"warning"}
+          iconColor={"white"}
+          iconSize={20}
+          onClickButton={() => handleClickStatusMigracaoSap(row)}
+          titleButton={"Aviso"}
+        />
+      </div>
+    )
+
+    const btnMigrarPDV = (
+      <div className="p-1" key="btnMigrarPDV">
+        <ButtonTable
+          Icon={IoIosAdd}
+          cor={"success"}
+          iconColor={"white"}
+          iconSize={20}
+          onClickButton={() => handleClickEditar(row)}
+          titleButton={"Incluir para PDV"}
+        />
+      </div>
+    )
+
+    const btnMigrarSAPReposicao = (
+      <div className="p-1" key="btnMigrarSAPReposicao">
+        <ButtonTable
+          Icon={CiEdit}
+          cor={"primary"}
+          iconColor={"white"}
+          iconSize={20}
+          onClickButton={() => handleClickEditar(row)}
+          titleButton={"Migrar para SAP"}
+        />
+      </div>
+    )
+
+    const btnMigrarSAP = (
+      <div className="p-1" key="btnMigrarSAP">
+        <ButtonTable
+          Icon={CiEdit}
+          cor={"primary"}
+          iconColor={"white"}
+          iconSize={20}
+          onClickButton={() => handleClickEditar(row)}
+          titleButton={"Migrar para SAP"}
+        />
+      </div>
+    )
+
+    const btnCancelarProduto = (
+      <div className="p-1" key="btnCancelar">
+        <ButtonTable
+          Icon={BsTrash3}
+          cor={"danger"}
+          iconColor={"white"}
+          iconSize={20}
+          onClickButton={() => handleClickCancelar(row)}
+          titleButton={"Cancelar Produto do Pedido"}
+        />
+      </div>
+    )
+
+    const btnLockedProdutoPedidoSecundario = (
+      <div className="p-1" key="btnLocked">
+        <ButtonTable
+          Icon={BsLockFill}
+          cor={"danger"}
+          iconColor={"white"}
+          iconSize={20}
+          onClickButton={() => handleClickAvisoBloqueio(`Este Produto só pode ser manipulado através do Pedido Primário: ${dadosVisualizarPedido[0]?.IDPEDIDOPRIMARIO || ''}`)}
+          titleButton={"Este Produto só pode ser manipulado através do Pedido Primário"}
+        />
+      </div>
+    )
+
+    const btnProdNaoLiberado = (
+      <div className="p-1" key="btnNaoLiberado">
+        <ButtonTable
+          Icon={BsLockFill}
+          cor={"danger"}
+          iconColor={"white"}
+          iconSize={20}
+          onClickButton={() => handleClickAvisoBloqueio('PRODUTOS NÃO LIBERADOS')}
+          titleButton={"PRODUTOS NÃO LIBERADOS"}
+        />
+      </div>
+    )
+
+    const btnStatusMigracao = (
+      <div className="p-1" key="btnStatusMigracao">
+        <ButtonTable
+          Icon={GrView}
+          cor={"info"}
+          iconColor={"white"}
+          iconSize={20}
+          onClickButton={() => handleClickErroMigracaoSap(errorLogSap)}
+          titleButton={"Status Migração SAP"}
+        />
+      </div>
+    )
+
+    let labelStatusAlteracaoProduto = <span style={{ color: 'blue', fontSize: '10px' }}>PRODUTO SEM ALTERAÇÃO</span>;
+    let labelStatusMigracaoProduto = <span style={{ color: 'red', fontSize: '10px' }}>NÃO INCLUIDO PDV / NÃO MIGRADO SAP</span>;
+    let botoesOpcoes = [];
+
+    if (idsAndamentosLiberados.includes(idAndamentoPedido)) {
+      const stPermitirEditarProduto = stProdutoCadastrado === stMigradoSapProduto;
+
+      botoesOpcoes = [stPermitirEditarProduto ? btnEditarProduto : btnAvisoFaltaInclusaoMigracao];
+
+      if (stProdutoEditado == 'True') {
+        labelStatusAlteracaoProduto = <span style={{ color: 'red', fontSize: '10px' }}>PRODUTO ALTERADO</span>;
+      }
+
+      if (stProdutoReposicao == 'True') {
+        if (stMigradoSapProduto) {
+          labelStatusMigracaoProduto = <span style={{ color: 'blue', fontSize: '10px' }}>PRODUTO REPOSIÇÃO / MIGRADO SAP</span>;
+        } else {
+          labelStatusMigracaoProduto = (
+            <>
+              <span style={{ color: 'blue', fontSize: '10px' }}>PRODUTO REPOSIÇÃO / </span>
+              <span style={{ color: 'red', fontSize: '10px' }}>NÃO MIGRADO SAP</span>
+            </>
+          );
+          botoesOpcoes.push(btnMigrarSAPReposicao);
+        }
+      } else if (stMigradoSapProduto) {
+        if (stIncluidoPDV) {
+          labelStatusMigracaoProduto = <span style={{ color: 'blue', fontSize: '10px' }}>INCLUIDO PDV / MIGRADO SAP</span>;
+        } else {
+          labelStatusMigracaoProduto = (
+            <>
+              <span style={{ color: 'red', fontSize: '10px' }}>NÃO INCLUIDO PDV </span> /{' '}
+              <span style={{ color: 'blue', fontSize: '10px' }}>MIGRADO SAP</span>
+            </>
+          );
+          botoesOpcoes.push(btnMigrarPDV);
+        }
+      } else if (stIncluidoPDV) {
+        labelStatusMigracaoProduto = (
+          <>
+            <span style={{ color: 'blue', fontSize: '10px' }}>INCLUIDO PDV </span> /{' '}
+            <span style={{ color: 'red', fontSize: '10px' }}>NÃO MIGRADO SAP</span>
+          </>
+        );
+        botoesOpcoes.push(btnMigrarSAP);
+      } else {
+        botoesOpcoes.push(btnMigrarPDV);
+      }
+
+      if (stPedidoMigradoSAP && stIncluidoPDV && stMigradoSapProduto && stProdutoParaIncluirNoPedidoSAP) {
+        labelStatusMigracaoProduto = (
+          <>
+            {labelStatusMigracaoProduto} /{' '}
+            <span
+              className="cursor-pointer text-danger fw-900"
+              title="Finalize o Cadastro e Migre o Pedido Para o SAP Novamente"
+              style={{ fontSize: '10px' }}
+            >
+              PRODUTO NÃO INCLUÍDO NO PEDIDO SAP
+            </span>
+          </>
+        );
+      }
+
+      if (stPermitirEditarProduto) botoesOpcoes.push(btnCancelarProduto);
+      if (errorLogSap.length > 0) botoesOpcoes.push(btnStatusMigracao);
+
+      if (isPedidoSecundario) botoesOpcoes = [btnLockedProdutoPedidoSecundario];
+
+      if (stPedidoMigradoSAP && idAndamentoPedido != 4 && idAndamentoPedido != 16) {
+        botoesOpcoes = [];
+        labelStatusAlteracaoProduto = (
+          <span className="text-danger fw-700" style={{ fontSize: '10px' }}>PRODUTO BLOQUEADO PARA MANIPULAÇÃO</span>
+        );
+      }
+    } else {
+      labelStatusAlteracaoProduto = <span style={{ color: 'red', fontSize: '10px' }}>PRODUTO NÃO LIBERADO</span>;
+      labelStatusMigracaoProduto = <span style={{ color: 'red', fontSize: '10px' }}>PRODUTO NÃO LIBERADO</span>;
+      botoesOpcoes = [btnProdNaoLiberado];
+    }
+
+    return {
+      ...row,
+      labelStatusAlteracaoProduto,
+      labelStatusMigracaoProduto,
+      botoesOpcoes,
     }
   });
 
-  const colunasProdutosCriado = [
+
+  const colunas = [
     {
       field: 'contador',
       header: 'Nº',
@@ -101,20 +369,8 @@ export const ActionListaProdutosCriados = ({ dadosListaProdutosCriados }) => {
       sortable: true,
     },
     {
-      field: 'DTCADASTRO',
-      header: 'DT. Pedido',
-      body: row => <th>{dataFormatada(row.DTCADASTRO)}</th>,
-      sortable: true,
-    },
-    {
-      field: 'IDRESUMOPEDIDO',
-      header: 'Nº Pedido',
-      body: row => <th>{row.IDRESUMOPEDIDO}</th>,
-      sortable: true,
-    },
-    {
-      field: 'CODBARRAS',
-      header: 'Código de Barras',
+      field: 'row.CODBARRAS',
+      header: 'Cód Barras',
       body: row => <th>{row.CODBARRAS}</th>,
       sortable: true,
     },
@@ -138,42 +394,101 @@ export const ActionListaProdutosCriados = ({ dadosListaProdutosCriados }) => {
     },
     {
       field: 'QTDPRODUTO',
-      header: 'QTD',
-      body: row => row.QTDPRODUTO,
+      header: 'Qtd',
+      body: row => <th>{row.QTDPRODUTO}</th>,
       sortable: true,
     },
     {
       field: 'VRCUSTO',
       header: 'Vr. Custo',
-      body: row => <th>{formatMoeda(row.VRCUSTO)}</th>,
+      body: row => <th>{row.VRCUSTO}</th>,
       sortable: true,
     },
     {
       field: 'VRVENDA',
-      header: 'Vr. Venda',
+      header: 'Vr Venda',
       body: row => <th>{formatMoeda(row.VRVENDA)}</th>,
       sortable: true,
     },
     {
       field: 'VRTOTALCUSTO',
-      header: 'Total Venda',
+      header: 'T.Custo',
       body: row => <th>{formatMoeda(row.VRTOTALCUSTO)}</th>,
       sortable: true,
     },
     {
-      field: 'QTDESTOQUEIDEAL',
-      header: 'Estoque Ideal',
-      body: row => <th>{row.QTDESTOQUEIDEAL}</th>,
+      field: 'STEDITADOCOMPRAS',
+      header: 'Obs',
+      body: row => <th>{row.labelStatusAlteracaoProduto}</th>,
       sortable: true,
     },
-    
+    {
+      field: 'STREPOSICAO',
+      header: 'Situação',
+      body: row => <th>{row.labelStatusMigracaoProduto}</th>,
+      sortable: true,
+    },
+    {
+      field: 'OPCOES',
+      header: 'Opções',
+      body: row => (
+        <div className="p-1" style={{ justifyContent: 'flex-start', display: 'flex', flexWrap: 'wrap' }}>
+          {row.botoesOpcoes}
+        </div>
+      ),
+      sortable: true,
+    },
   ]
+
+  const handleClickEditar = (row) => {
+    if (row && row.IDDETPEDIDO) {
+      handleEditar(row.IDDETPEDIDO);
+    }
+  };
+
+  const handleEditar = async (IDDETPEDIDO) => {
+    try {
+      const response = await get(`/editar-item-pedido?idDetalhePedido=${IDDETPEDIDO}`);
+      if (response.data && response.data.length > 0) {
+
+        setDadosItemPedido(response.data);
+        setModalEditarItemPedido(true);
+      } else {
+        Swal.fire({
+          icon: 'info',
+          title: 'Dados não encontrados',
+          text: 'Dados Não Encontrados para este pedido',
+          customClass: {
+            container: 'custom-swal'
+          }
+        })
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+
+  const handleClickCancelar = (row) => {
+    if (row && row.IDDEPOSITOLOJA) {
+      handleProdutoPDV(row.IDDEPOSITOLOJA);
+    }
+  };
+
+  const handleClickStatusMigracaoSap = (row) => {
+    Swal.fire({
+      icon: 'info',
+      title: 'Realize a Inclusão/Migração!',
+      text: 'O produto só pode ser editado após o processo de Inclusão/Migração estar completo',
+    })
+  }
+
 
   return (
     <Fragment>
       <div className="panel">
         <div className="panel-hdr">
-          <h2>Lista de Produtos Criados</h2>
+          <h2>Lista de Produtos Criados: {dadosVisualizarPedido[0]?.IDPEDIDO}</h2>
         </div>
         <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
           <HeaderTable
@@ -185,7 +500,7 @@ export const ActionListaProdutosCriados = ({ dadosListaProdutosCriados }) => {
           />
 
         </div>
-        <div className="card"ref={dataTableRef}>
+        <div className="card" ref={dataTableRef}>
           <DataTable
             title="Vendas por Loja"
             value={dados}
@@ -199,7 +514,7 @@ export const ActionListaProdutosCriados = ({ dadosListaProdutosCriados }) => {
             stripedRows
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
           >
-            {colunasProdutosCriado.map(coluna => (
+            {colunas.map(coluna => (
               <Column
                 key={coluna.field}
                 field={coluna.field}

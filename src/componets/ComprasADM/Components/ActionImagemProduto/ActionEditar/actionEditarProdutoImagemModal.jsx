@@ -15,11 +15,11 @@ import * as XLSX from 'xlsx';
 import { useEditarProdutoImagem } from "../hooks/useEditarProdutoImagem"
 
 
-export const ActionEditarProdutoImagemModal = ({ show, handleClose, dadosDetalheProdutos }) => {
+export const ActionEditarProdutoImagemModal = ({ show, handleClose, dadosDetalheProdutos,usuarioLogado, optionsModulos, handleClick }) => {
     const [globalFilterValue, setGlobalFilterValue] = useState('');
     const dataTableRef = useRef();
-    const { handleExcluir } = useEditarProdutoImagem();
-  
+    const { handleExcluir } = useEditarProdutoImagem({usuarioLogado, optionsModulos, handleClick});
+
   
     const onGlobalFilterChange = (e) => {
       setGlobalFilterValue(e.target.value);
@@ -61,8 +61,8 @@ export const ActionEditarProdutoImagemModal = ({ show, handleClose, dadosDetalhe
 
   const dados = dadosDetalheProdutos.map((item, index) => {
     let contador = index + 1;
-
-    const imagemProduto = item?.IMAGEM.data.map((byte) => {
+    
+    const imagemProduto = item?.IMAGEM?.map((byte) => {
       return String.fromCharCode(byte)
     }).join('')
 
@@ -113,9 +113,11 @@ export const ActionEditarProdutoImagemModal = ({ show, handleClose, dadosDetalhe
                 Icon={BsTrash3}
                 cor={"danger"}
                 iconColor={"white"}
-                iconSize={18}
                 onClickButton={() => handleExcluir(row.IDIMAGEMPRODUTO, 'False')}
                 titleButton={"Cancelar Produto da Imagem"}
+                iconSize={25}
+                width="30px"
+                height="30px"
               />
             </div>
           </div>
@@ -171,6 +173,10 @@ export const ActionEditarProdutoImagemModal = ({ show, handleClose, dadosDetalhe
                   globalFilter={globalFilterValue}
                   sortOrder={-1}
                   rows={true}
+                  rowsPerPageOptions={[10, 20, 50, 100, dados.length]}
+                  paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                  currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
+                  filterDisplay="menu"
                   showGridlines
                   stripedRows
                   emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado </div>}
@@ -202,10 +208,6 @@ export const ActionEditarProdutoImagemModal = ({ show, handleClose, dadosDetalhe
             textButtonFechar={"Fechar"}
             corFechar={"secondary"}
 
-            ButtonTypeCadastrar={ButtonTypeModal}
-            onClickButtonCadastrar
-            textButtonCadastrar={"Salvar"}
-            corCadastrar={"success"}
           />
         </Modal.Body>
 

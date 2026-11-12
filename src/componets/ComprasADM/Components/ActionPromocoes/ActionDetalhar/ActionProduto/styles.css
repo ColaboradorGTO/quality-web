@@ -1,0 +1,36 @@
+/* Classes para customizar largura das modais Bootstrap */
+.modal-90w {
+  width: 90%;
+  max-width: 90% !important;
+}
+
+.modal-80w {
+  width: 80%;
+  max-width: 80% !important;
+}
+
+.modal-70w {
+  width: 70%;
+  max-width: 70% !important;
+}
+
+.modal-60w {
+  width: 60%;
+  max-width: 60% !important;
+}
+
+.modal-fullscreen {
+  width: 100%;
+  max-width: 100% !important;
+  height: 100%;
+  max-height: 100% !important;
+  margin: 0;
+}
+
+.modal-xl-custom {
+  max-width: 1200px !important;
+}
+
+.modal-lg-custom {
+  max-width: 900px !important;
+}

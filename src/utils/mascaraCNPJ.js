@@ -1,4 +1,22 @@
 export const mascaraCNPJ = (cnpj) => {
+    // Verifica se o CNPJ existe e não está vazio
+    if (!cnpj || cnpj.trim() === '') {
+        return '';
+    }
+    
+    // Remove caracteres não numéricos
+    cnpj = cnpj.replace(/[^\d]+/g, '');
+    
+    // Verifica se tem pelo menos algum número
+    if (cnpj.length === 0) {
+        return '';
+    }
+    
+    // Se tiver menos de 14 dígitos, retorna apenas os números sem máscara
+    if (cnpj.length < 14) {
+        return cnpj;
+    }
+    
     return cnpj.substring(0, 2) + "." + cnpj.substring(2, 5) + "." + cnpj.substring(5, 8) + "/" + cnpj.substring(8, 12) + "-" + cnpj.substring(12, 14);
 }
 

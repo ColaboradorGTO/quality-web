@@ -1,33 +1,9 @@
-import { useState } from "react";
-import axios from "axios";
 import Swal from "sweetalert2";
-import { get, post, put } from "../../../../../api/funcRequest";
+import { get, put } from "../../../../../api/funcRequest";
+import { registrarLogAuditoria } from "../../../../../services/auditLog";
 
 
 export const useIncluirProduto = ({ usuarioLogado, optionsModulos, handleClick }) => {
-    const [ipUsuario, setIpUsuario] = useState('');
-
-    const getIPUsuario = async () => {
-        let usuarioIP = null;
-
-        try {
-            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-            usuarioIP = ipWhoisData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ipwho.is:", error);
-        }
-
-        if (!usuarioIP) {
-            try {
-                const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-                usuarioIP = ipifyData?.ip;
-            } catch (error) {
-                console.error("Erro ao buscar IP via ipify.org:", error);
-            }
-        }
-        setIpUsuario(usuarioIP);
-        return usuarioIP;
-    };
 
     const validarGradeamento = (produtoDetalhe) => {
         const gradeRaw = produtoDetalhe?.detalhegrade || produtoDetalhe?.detalheGrade || [];
@@ -66,6 +42,9 @@ export const useIncluirProduto = ({ usuarioLogado, optionsModulos, handleClick }
                 icon: "error",
                 title: "Permissão Negada!",
                 html: `${usuarioLogado?.NOFUNCIONARIO} <br/> Você não tem permissão.`,
+                customClass: {
+                    container: 'custom-swal'
+                }
             });
             return;
         }
@@ -80,6 +59,9 @@ export const useIncluirProduto = ({ usuarioLogado, optionsModulos, handleClick }
                 icon: "error",
                 title: "Erro!",
                 text: 'Não foi possível obter os dados do produto para validação.',
+                customClass: {
+                    container: 'custom-swal'
+                }
             });
             return;
         }
@@ -90,6 +72,9 @@ export const useIncluirProduto = ({ usuarioLogado, optionsModulos, handleClick }
                 icon: "warning",
                 title: "Erro no gradeamento de tamanhos!",
                 text: mensagem,
+                customClass: {
+                    container: 'custom-swal'
+                }
             });
             return;
         }
@@ -101,44 +86,40 @@ export const useIncluirProduto = ({ usuarioLogado, optionsModulos, handleClick }
         try {
             const response = await put(`/incluir-produto-avulso/:id`, data);
 
-            const ipUsuario = await getIPUsuario();
-            const textDados = JSON.stringify(data);
-            const textFuncao = 'CADASTRO/PRODUTO AVULSO - INCLUINDO NO PDV';
-            const createtLog = {
-                IDFUNCIONARIO: String(usuarioLogado.id),
-                PATHFUNCAO: textFuncao,
-                DADOS: textDados,
-                IP: ipUsuario || 'Indisponível'
-            }
-
-            await post('/log-web', createtLog)
+            await registrarLogAuditoria({
+                idFuncionario: usuarioLogado?.id,
+                pathFuncao: 'CADASTRO/PRODUTO AVULSO - INCLUINDO NO PDV',
+                dados: data
+            })
 
             Swal.fire({
                 icon: "success",
                 title: "Sucesso!",
                 text: 'Produto Avulso incluído no PDV com sucesso.',
+                customClass: {
+                    container: 'custom-swal'
+                }
             });
             handleClick();
 
             return response.data;
         } catch (error) {
-            const ipUsuario = await getIPUsuario();
-            const textDados = JSON.stringify(data);
-            const textFuncao = 'CADASTRO/PRODUTO AVULSO - ERRO AO INCLUIR NO PDV';
-            const createtLog = {
-                IDFUNCIONARIO: String(usuarioLogado.id),
-                PATHFUNCAO: textFuncao,
-                DADOS: textDados,
-                IP: ipUsuario || 'Indisponível'
-            }
 
-            await post('/log-web', createtLog)
+            await registrarLogAuditoria({
+                idFuncionario: usuarioLogado?.id,
+                pathFuncao: 'CADASTRO/PRODUTO AVULSO - ERRO AO INCLUIR NO PDV',
+                dados: data
+            })
 
             Swal.fire({
                 icon: "error",
                 title: "Erro!",
                 text: 'Ocorreu um erro ao incluir o Produto Avulso no PDV.',
+                customClass: {
+                    container: 'custom-swal'
+                }
             });
+            return;
         }
     }
 

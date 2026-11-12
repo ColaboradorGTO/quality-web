@@ -1,10 +1,8 @@
 import { Fragment } from "react"
 import { Modal } from "react-bootstrap"
-import Swal from 'sweetalert2'
 import { ButtonTypeModal } from "../../../Buttons/ButtonTypeModal"
 import { FooterModal } from "../../../Modais/FooterModal/footerModal";
 import { HeaderModal } from "../../../Modais/HeaderModal/HeaderModal";
-import { useNavigate } from "react-router-dom";
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 

@@ -8,11 +8,21 @@ import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { ButtonTable } from "../../../../../ButtonsTabela/ButtonTable";
 import HeaderTable from "../../../../../Tables/headerTable";
+import { FaCheck } from "react-icons/fa6";
+import { IoMdClose } from "react-icons/io";
+import { useIncluirEmpresaPromocao } from "./hooks/useIncluirEmpresaPromocao";
 
 
-export const ActionListaEmpresaPromocao = ({ dadosListaPromocaoEmpresa }) => {
+export const ActionListaEmpresaPromocao = ({ 
+    dadosListaPromocaoEmpresa,
+    usuarioLogado, 
+    optionsModulos,
+    handleClose 
+}) => {
     const [globalFilterValue, setGlobalFilterValue] = useState('');
-    const dataTableRef = useRef();
+    const [rowSelection, setRowSelection] = useState(null);
+    const dataTableRef = useRef();  
+    const { handleAtivar, handleDesativar } = useIncluirEmpresaPromocao({usuarioLogado, optionsModulos, handleClose})
 
     const onGlobalFilterChange = (e) => {
         setGlobalFilterValue(e.target.value);
@@ -29,7 +39,7 @@ export const ActionListaEmpresaPromocao = ({ dadosListaPromocaoEmpresa }) => {
             head: [['Nº', 'Empresa', 'Situação']],
             body: dados.map(item => [
                 item.contador,
-                item.NOEMPPROMO,
+                item.NOFANTASIA,
                 item.STATIVO == 'True' ? 'ATIVO' : 'INATIVO',
             ]),
             horizontalPageBreak: true,
@@ -52,14 +62,14 @@ export const ActionListaEmpresaPromocao = ({ dadosListaPromocaoEmpresa }) => {
         XLSX.writeFile(workbook, 'lista_empresas_promocoes.xlsx');
     };
 
-    const dadosPromocaoEmpresa = dadosListaPromocaoEmpresa.map((item, index) => {
+  
+    const dados = dadosListaPromocaoEmpresa.map((item, index) => {
         let contador = index + 1;
-
 
         return {
             contador,
-            NOEMPPROMO: item.NOEMPPROMO,
-            STATIVO: item.STATIVO == 'True' ? 'ATIVO' : 'INATIVO',
+            NOFANTASIA: item.NOFANTASIA,
+            STATIVO: item.STATIVO,
             IDEMPRESAPROMOCAOMARKETING: item.IDEMPRESAPROMOCAOMARKETING,
             IDRESUMOPROMOCAOMARKETING: item.IDRESUMOPROMOCAOMARKETING,
 
@@ -76,9 +86,9 @@ export const ActionListaEmpresaPromocao = ({ dadosListaPromocaoEmpresa }) => {
             width: '10%'
         },
         {
-            field: 'NOEMPPROMO',
+            field: 'NOFANTASIA',
             header: 'Empresa',
-            body: row => <th>{row.NOEMPPROMO}</th>,
+            body: row => <th>{row.NOFANTASIA}</th>,
             sortable: true,
 
         },
@@ -86,33 +96,45 @@ export const ActionListaEmpresaPromocao = ({ dadosListaPromocaoEmpresa }) => {
             field: 'STATIVO',
             header: 'Situação',
             body: (row) => (
-                <th style={{ color: row.SATIVO == 'ATIVO' ? 'red' : 'blue' }}>
+                <th style={{ color: row.STATIVO == 'True' ? 'blue' : 'red' }}>
 
-                    {row.STATIVO}
+                    {row.STATIVO == 'True' ? 'ATIVO' : 'INATIVO'}
                 </th>
             )
         },
-        {
+       {
+            field: 'IDEMPRESA',
             header: 'Opções',
-            button: true,
-            body: (row) => (
-                <div style={{ display: "flex", justifyContent: "space-around" }}>
-                    <div className="p-1">
-                        <ButtonTable
-                            titleButton={"Excluir Empresas da Promoção"}
-                            onClickButton
-                            Icon={FaRegTrashAlt}
-                            iconSize={18}
-                            iconColor={"#fff"}
-                            cor={"danger"}
-                        />
-
-                    </div>
-
-
-                </div>
-
-            ),
+            body: row => {
+            if (row.STATIVO === 'True') {
+                return (
+                    <ButtonTable
+                        titleButton={"Desativar Empresa"}
+                        cor={"danger"}
+                        Icon={IoMdClose}
+                        iconSize={22}
+                        onClickButton={() => handleDesativar(row)}
+                        width="40px"
+                        height="40px"
+                        disabledBTN={row.STATIVO === 'False'}
+                    />
+                );
+            } else {
+                return (
+                    <ButtonTable
+                        titleButton={"Ativar Empresa"}
+                        cor={"success"}
+                        Icon={FaCheck}
+                        iconSize={22}
+                        onClickButton={() => handleAtivar(row)}
+                        width="40px"
+                        height="40px"
+                        disabledBTN={row.STATIVO === 'True'}
+                    />
+                );
+            }
+            },
+            sortable: true
         },
 
     ]
@@ -135,16 +157,22 @@ export const ActionListaEmpresaPromocao = ({ dadosListaPromocaoEmpresa }) => {
                         exportToPDF={exportToPDF}
                     />
                 </div>
-                <div className="card mb-4" ref={dataTableRef}>
+                <div className="card" ref={dataTableRef}>
 
                     <DataTable
                         title="Lista das Empresas Promoções"
-                        value={dadosPromocaoEmpresa}
+                        value={dados}
                         size="small"
+                        selectionMode="single"
+                        selection={rowSelection}
+                        onSelectionChange={(e) => setRowSelection(e.value)}
                         sortOrder={-1}
                         paginator={true}
                         rows={10}
-                        rowsPerPageOptions={[10, 20, 50, 100, dadosPromocaoEmpresa.length]}
+                        rowsPerPageOptions={[10, 20, 50, 100, dados.length]}
+                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
+                        filterDisplay="menu"
                         showGridlines
                         stripedRows
                         emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado </div>}
@@ -158,8 +186,8 @@ export const ActionListaEmpresaPromocao = ({ dadosListaPromocaoEmpresa }) => {
                                 body={coluna.body}
                                 footer={coluna.footer}
                                 sortable={coluna.sortable}
-                                headerStyle={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
-                                footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }}
+                                headerStyle={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '1rem' }}
+                                footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }}
                                 bodyStyle={{ fontSize: '1rem' }}
 
                             />

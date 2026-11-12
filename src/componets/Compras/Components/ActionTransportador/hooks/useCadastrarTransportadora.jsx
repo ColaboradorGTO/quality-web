@@ -72,7 +72,7 @@ export const useCadastrarTransportadora = ({handleClose, usuarioLogado, optionsM
     const [ipUsuario, setIpUsuario] = useState('');
     
     const URL_PUBLICAWS = 'https://publica.cnpj.ws/cnpj/{CNPJ}';
-    const URL_MINHA_RECEITA = 'https://minhareceita.org/{CNPJ}';
+    const URL_MINHA_RECEITA = `https://minhareceita.org/{CNPJ}`;
     const URL_RECEITAWS = 'https://www.receitaws.com.br/v1/cnpj/{CNPJ}';
 
     
@@ -110,7 +110,7 @@ export const useCadastrarTransportadora = ({handleClose, usuarioLogado, optionsM
 
             if (status === 'OK') status = 200;
             if (status !== 200) throw { status, message };
-
+            console.log(response.data, 'response.data - API-receitaws')
             response.data.descApi = "API-receitaws";
             return { status, data: response.data };
         } catch (error) {
@@ -121,12 +121,12 @@ export const useCadastrarTransportadora = ({handleClose, usuarioLogado, optionsM
     }
 
     async function getDadosCNPJComIE_API_externa(cnpj) {
-        console.log('🔥 CHAMADA API PUBLICA.WS - getDadosCNPJComIE_API_externa:', cnpj);
+        
         try {
             const response = await axios.get(URL_PUBLICAWS.replace('{CNPJ}', cnpj));
             let status = response.data?.status || 200;
             if (status === 'OK') status = 200;
-
+            // console.log(response.data, 'response.data - API-publicaws')
             response.data.descApi = "API-publicaws";
             return { status, data: response.data };
         } catch (error) {
@@ -180,7 +180,7 @@ export const useCadastrarTransportadora = ({handleClose, usuarioLogado, optionsM
                 cnae: dados.estabelecimento?.atividade_principal?.id  || dados?.cnae_fiscal || '',
                 dataCriacaoEmpresa: dados?.estabelecimento?.data_inicio_atividade || dados?.data_situacao ||  dados?.data_inicio_atividade || '',
                 
-                tel1: (dados?.estabelecimento?.ddd1 + dados?.estabelecimento?.telefone1) || dados?.telefone ||  (dados?.ddd_telefone || dados?.ddd_telefone_1.replace(/\D/g, "")) || '',
+                tel1: (dados?.estabelecimento?.ddd1 + dados?.estabelecimento?.telefone1) || dados?.telefone ||  (dados?.ddd_telefone || dados?.ddd_telefone_1) || '',
                 tel2: (dados?.estabelecimento?.ddd2 + dados?.estabelecimento?.telefone2) || dados?.ddd_telefone_2 || '',
                 email: dados?.estabelecimento?.email || dados?.email || '',
                 cep: dados?.estabelecimento?.cep || dados?.cep || '',
@@ -193,7 +193,6 @@ export const useCadastrarTransportadora = ({handleClose, usuarioLogado, optionsM
                 uf: dados?.estabelecimento?.estado?.sigla || '',
                 codigoIbge: dados?.estabelecimento?.cidade?.ibge_id || ''
             };
-            
 
             if(dadosMapeados) {
                 setNomeFantasia(dadosMapeados.fantasia || '');
@@ -283,15 +282,21 @@ export const useCadastrarTransportadora = ({handleClose, usuarioLogado, optionsM
     const { data: dadosCNPJ = [], error: errorCNPJ, isLoading: isLoadingCNPJ, refetch: refetchCNPJ } = useQuery(
         ['transportadoras', cnpj], // ✅ Inclui cnpj na chave para invalidar cache
         async () => {
-            const response = await get(`/transportadoras?cnpjTransportador=${cnpj}`);
+            const response = await get(`/transportadoras?cnpjTransportador=${removeMascaraCNPJ(cnpj)}`);
             return response.data;
         },
-        { 
-            enabled: cnpj?.length >= 14,
+        {
+            enabled: false, // ✅ Busca só é disparada manualmente (ao sair do campo CNPJ)
             staleTime: 0, // ✅ Não fazer cache
-            cacheTime: 0, // ✅ Remove do cache imediatamente 
+            cacheTime: 0, // ✅ Remove do cache imediatamente
         }
     );
+
+    const handleBlurCnpj = () => {
+        if (cnpj?.length >= 14) {
+            refetchCNPJ();
+        }
+    }
 
     useEffect(() => {
 
@@ -334,7 +339,7 @@ export const useCadastrarTransportadora = ({handleClose, usuarioLogado, optionsM
     }, [dadosCNPJ])
 
 
-
+ 
     async function preenche_dados_registrados(response, cnpj, stUltimaInstancia = false) {
         let cnpjEmpresaVoucher = cnpj.replace(/\D/g, "");
      
@@ -396,7 +401,7 @@ export const useCadastrarTransportadora = ({handleClose, usuarioLogado, optionsM
         handleClose();
         // console.log(cnpj, 'Length após fechar:', cnpj?.length);
     }
-
+    
     const onSubmit = async () => {
         if(optionsModulos[0]?.CRIAR == 'False') {
             Swal.fire({
@@ -560,6 +565,7 @@ export const useCadastrarTransportadora = ({handleClose, usuarioLogado, optionsM
         setTelefone3,
         situacao,
         handleFechar,
+        handleBlurCnpj,
         onSubmit,
     }
 }

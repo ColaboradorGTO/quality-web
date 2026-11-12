@@ -6,7 +6,6 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import HeaderTable from "../../../Tables/headerTable";
-import { dataFormatada } from "../../../../utils/dataFormatada";
 import { toFloat } from "../../../../utils/toFloat";
 import { formatMoeda } from "../../../../utils/formatMoeda";
 import { ButtonTable } from "../../../ButtonsTabela/ButtonTable";
@@ -14,21 +13,31 @@ import { IoIosAdd } from "react-icons/io";
 import { BsTrash3 } from "react-icons/bs";
 import { CiEdit } from "react-icons/ci";
 import { ActionEditarItemPedidoModal } from "./ActionEditarItemDoPedidoModal/actionEditarItemPedidoModal";
+import { ActionProdutoPedidoModal } from "./ActionProdutoPedido/actionProdutoPedidoModal";
 import { get } from "../../../../api/funcRequest";
+import { FaLock } from "react-icons/fa";
+import Swal from "sweetalert2";
+import { useCancelarPedido } from "./hooks/useCancelarPedido";
 
-export const ActionListaNovoPedido = ({ 
-  dadosVisualizarPedido, 
+export const ActionListaNovoPedido = ({
+  dadosVisualizarPedido,
   dadosDetalhe,
   setModalIncluirProdutoPedido,
   usuarioLogado,
-  optionsModulos 
+  optionsModulos
 }) => {
   const [modalEditarItemPedido, setModalEditarItemPedido] = useState(false);
   const [dadosItemPedido, setDadosItemPedido] = useState([]);
+  const [modalCriarProdutoItemPedido, setModalCriarProdutoItemPedido] = useState(false);
+  const [dadosItemPedidoCriar, setDadosItemPedidoCriar] = useState([]);
   const [globalFilterValue, setGlobalFilterValue] = useState('');
   const [rowSelection, setRowSelection] = useState(null);
   const dataTableRef = useRef();
 
+  const {
+    handleClickCancelarItem
+  } = useCancelarPedido({usuarioLogado, optionsModulos})
+  
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
   };
@@ -54,8 +63,7 @@ export const ActionListaNovoPedido = ({
         formatMoeda(item.VRUNITLIQDETALHEPEDIDO),
         formatMoeda(item.VRVENDADETALHEPEDIDO),
         formatMoeda(item.VRTOTALDETALHEPEDIDO),
-        item.STTRANSFORMADO === 'False' && item.IDANDAMENTO == 4 ? 'PRODUTOS NÃO CRIADOS' : item.STTRANSFORMADO === 'True' && (item.IDANDAMENTO == 5 || item.IDANDAMENTO == 4) ? 'PRODUTOS CRIADOS' : 'PRODUTOS NÃO LIBERADOS'
-        
+        getInfoItemPedido(item).textoSituacao
       ]),
       horizontalPageBreak: true,
       horizontalPageBreakBehaviour: 'immediately'
@@ -86,9 +94,14 @@ export const ActionListaNovoPedido = ({
     XLSX.writeFile(workbook, 'produtos_criados.xlsx');
   };
 
+ 
+  const idPedidoPrimarioPedido = Number(dadosVisualizarPedido[0]?.IDPEDIDOPRIMARIO || 0);
+  const isPedidoSecundarioPedido = idPedidoPrimarioPedido > 0;
 
-  const dados = dadosDetalhe.map((item, index) => {
+  const dados = dadosVisualizarPedido[0]?.DETALHEPEDIDO?.map((item, index) => {
     let contador = index + 1;
+    let isPedidoSecundario = isPedidoSecundarioPedido || Number(item.IDDETALHEPEDIDOPRIMARIO || 0) > 0;
+
     return {
       IDPEDIDO: item.IDPEDIDO,
       IDDETPEDIDO: item.IDDETPEDIDO,
@@ -106,13 +119,63 @@ export const ActionListaNovoPedido = ({
       STTRANSFORMADO: item.STTRANSFORMADO,
       DSSUBGRUPOESTRUTURA: item.DSSUBGRUPOESTRUTURA,
       DSCOR: item.DSCOR,
+      STNOVOTAMANHOADICIONADO: item.STNOVOTAMANHOADICIONADO,
+      STMIGRADOSAP: item.STMIGRADOSAP || dadosVisualizarPedido[0]?.STMIGRADOSAP || 'False',
+      IDPEDIDOPRIMARIO: idPedidoPrimarioPedido,
+      isPedidoSecundario,
 
-      IDANDAMENTO: item.IDANDAMENTO,
-  
+      IDANDAMENTO: Number(item.IDANDAMENTO),
+
       contador
     }
   });
-  
+
+  const IDS_ANDAMENTO_ITEM_LIBERADO = [4, 5, 16];
+  const ID_ANDAMENTO_ITEM_BLOQUEIO_MIGRADO_SAP = 5;
+
+  const getInfoItemPedido = (row) => {
+    const { STTRANSFORMADO, IDANDAMENTO, STNOVOTAMANHOADICIONADO, STMIGRADOSAP } = row;
+
+    const stItemLiberado = IDS_ANDAMENTO_ITEM_LIBERADO.includes(IDANDAMENTO);
+    const stNovoTamanhoAdicionado = STNOVOTAMANHOADICIONADO === 'True';
+
+    let corSituacao = 'red';
+    let textoSituacao = 'PRODUTOS NÃO CRIADOS';
+    let stMostrarCriar = false;
+    let stMostrarEditar = false;
+    let stMostrarCancelar = false;
+    let corBtnCriar = 'info';
+
+    if (stItemLiberado) {
+      stMostrarCriar = true;
+      stMostrarCancelar = true;
+
+      if (STTRANSFORMADO === 'True') {
+        textoSituacao = 'PRODUTOS NÃO CRIADOS - NOVO TAMANHO ADICIONADO';
+        corBtnCriar = 'warning';
+
+        if (!stNovoTamanhoAdicionado) {
+          corSituacao = 'green';
+          textoSituacao = 'PRODUTOS CRIADOS';
+          stMostrarCriar = false;
+          stMostrarEditar = true;
+        }
+      }
+
+      if (IDANDAMENTO === ID_ANDAMENTO_ITEM_BLOQUEIO_MIGRADO_SAP && STMIGRADOSAP === 'True') {
+        corSituacao = 'blue';
+        textoSituacao = 'PRODUTOS BLOQUEADOS PARA EDIÇÃO - PEDIDO MIGRADO SAP';
+        stMostrarCriar = false;
+        stMostrarEditar = false;
+        stMostrarCancelar = false;
+      }
+    } else {
+      textoSituacao = 'PRODUTOS NÃO LIBERADOS';
+    }
+
+    return { corSituacao, textoSituacao, stItemLiberado, stMostrarCriar, stMostrarEditar, stMostrarCancelar, corBtnCriar };
+  };
+
   const colunasPedidos = [
     {
       field: 'contador',
@@ -184,13 +247,8 @@ export const ActionListaNovoPedido = ({
       field: 'STTRANSFORMADO',
       header: 'Situação',
       body: row => {
-        if (row.STTRANSFORMADO === 'False' && row.IDANDAMENTO == 4) {
-          return <th style={{ color: 'red' }}>PRODUTOS NÃO CRIADOS</th>
-        } else if(row.STTRANSFORMADO === 'True' && (row.IDANDAMENTO == 5 || row.IDANDAMENTO == 4)){ 
-          return <th style={{ color: 'green' }}>PRODUTOS CRIADOS</th>
-        } else {
-          return <th style={{ color: 'red' }}>PRODUTOS NÃO LIBERADOS</th>
-        }
+        const { corSituacao, textoSituacao } = getInfoItemPedido(row);
+        return <th style={{ color: corSituacao }}>{textoSituacao}</th>
       },
       sortable: true,
     },
@@ -198,68 +256,117 @@ export const ActionListaNovoPedido = ({
       field: 'contador',
       header: 'Opções',
       body: row => {
-        if (row.STTRANSFORMADO === 'False' && row.IDANDAMENTO == 4) {
-          return (
-            <div className="p-1 "
-            style={{ justifyContent: "space-between", display: "flex" }}
-          >
-            <div className="p-1">
-              <ButtonTable
-                Icon={IoIosAdd}
-                cor={"success"}
-                iconColor={"white"}
-                iconSize={20}
-                onClickButton={() => handleClickEditar(row)}
-                titleButton={"Criar Produto do Item do Pedido"}
-              />
-            </div>
-            <div className="p-1">
-              <ButtonTable
-                Icon={BsTrash3}
-                cor={"danger"}
-                iconColor={"white"}
-                iconSize={20}
-                onClickButton={() => handleClickVisualizarPedido(row)}
-                titleButton={"Cancelar Item do Pedido"}
-              />
-            </div>
+        const { stItemLiberado, stMostrarCriar, stMostrarEditar, stMostrarCancelar, corBtnCriar } = getInfoItemPedido(row);
+
+        const btnEditar = (
+          <div className="p-1">
+            <ButtonTable
+              Icon={CiEdit}
+              cor={"primary"}
+              width="30px"
+              height="30px"
+              iconColor={"white"}
+              iconSize={20}
+              onClickButton={() => handleClickEditar(row)}
+              titleButton={"Editar Item do Pedido"}
+            />
           </div>
-          )
-        } else if(row.STTRANSFORMADO === 'True' && (row.IDANDAMENTO == 5 || row.IDANDAMENTO == 4)){ 
-          return (
-            <div className="p-1 "
-            style={{ justifyContent: "space-between", display: "flex" }}
-          >
-            <div className="p-1">
-              <ButtonTable
-                Icon={CiEdit}
-                cor={"primary"}
-                iconColor={"white"}
-                iconSize={20}
-                onClickButton={() => handleClickEditar(row)}
-                titleButton={"Editar Item do Pedido"}
-              />
-            </div>
-            <div className="p-1">
-              <ButtonTable
-                Icon={BsTrash3}
-                cor={"danger"}
-                iconColor={"white"}
-                iconSize={20}
-                onClickButton={() => handleClickVisualizarPedido(row)}
-                titleButton={"Cancelar Item do Pedido"}
-              />
-            </div>
+        )
+
+        const btnCriar = (
+          <div className="p-1">
+            <ButtonTable
+              Icon={IoIosAdd}
+              cor={corBtnCriar}
+              width="30px"
+              height="30px"
+              iconColor={"white"}
+              iconSize={20}
+              onClickButton={() => handleClickCriarProduto(row)}
+              titleButton={"Criar Produto do Item do Pedido"}
+            />
           </div>
-          )
-        } else {
-          return <th style={{ color: 'red' }}></th>
+        )
+
+        const btnCancelar = (
+          <div className="p-1">
+            <ButtonTable
+              Icon={BsTrash3}
+              cor={"danger"}
+              width="30px"
+              height="30px"
+              iconColor={"white"}
+              iconSize={20}
+              onClickButton={() => handleClickCancelarItem(row)}
+              titleButton={"Cancelar Item do Pedido"}
+            />
+          </div>
+        )
+
+        const btnNaoLiberado = (
+          <div className="p-1">
+            <ButtonTable
+              Icon={FaLock}
+              cor={"danger"}
+              width="30px"
+              height="30px"
+              iconColor={"white"}
+              iconSize={20}
+              onClickButton={() => handleClickAlertaBloqueio("PRODUTOS NÃO LIBERADOS")}
+              titleButton={"PRODUTOS NÃO LIBERADOS"}
+            />
+          </div>
+        )
+
+        const btnAvisoPedidoSecundario = (
+          <div className="p-1">
+            <ButtonTable
+              Icon={FaLock}
+              cor={"danger"}
+              width="30px"
+              height="30px"
+              iconColor={"white"}
+              iconSize={20}
+              onClickButton={() => handleClickAlertaBloqueio("Item só pode ser manipulado através do Pedido Primario: " + row.IDPEDIDOPRIMARIO)}
+              titleButton={"Item só pode ser manipulado através do Pedido Primario: " + row.IDPEDIDOPRIMARIO}
+            />
+          </div>
+        )
+
+        let buttons = [];
+
+        if (stMostrarEditar) {
+          buttons.push(btnEditar);
+        } else if (stMostrarCriar) {
+          buttons.push(btnCriar);
         }
+
+        if (stMostrarCancelar) {
+          buttons.push(btnCancelar);
+        }
+
+        if (!stItemLiberado) {
+          buttons = [btnNaoLiberado];
+        }
+
+        if (row.isPedidoSecundario) {
+          buttons = [btnAvisoPedidoSecundario];
+        }
+
+        return (
+          <div
+            className="p-1 "
+            style={{ justifyContent: "space-between", display: "flex" }}
+          >
+            {buttons.map((btn, i) => (
+              <div key={i} className="p-1">{btn}</div>
+            ))}
+          </div>
+        )
       },
       sortable: true,
     },
   ]
-
 
 
   const handleClickEditar = (row) => {
@@ -271,19 +378,69 @@ export const ActionListaNovoPedido = ({
   const handleEditar = async (IDDETPEDIDO) => {
     try {
       const response = await get(`/editar-item-pedido?idDetalhePedido=${IDDETPEDIDO}`);
-      setDadosItemPedido(response.data);
-  
-      setModalEditarItemPedido(true);
+      if(response.data && response.data.length > 0) {
+
+        setDadosItemPedido(response.data);
+        setModalEditarItemPedido(true);
+      } else {
+        Swal.fire({
+          icon: 'info',
+          title: 'Dados não encontrados',
+          text: 'Dados Não Encontrados para este pedido',
+          customClass: {
+            container:  'custom-swal'
+          }
+        })
+      }
+
     } catch (error) {
       console.error(error);
     }
   }
 
+  const handleClickCriarProduto = (row) => {
+    if (row && row.IDDETPEDIDO) {
+      handleCriarProduto(row.IDDETPEDIDO);
+    }
+  };
+
+  const handleCriarProduto = async (IDDETPEDIDO) => {
+    try {
+      const response = await get(`/editar-item-pedido?idDetalhePedido=${IDDETPEDIDO}`);
+      if(response.data && response.data.length > 0) {
+        
+        setDadosItemPedidoCriar(response.data);
+        setModalCriarProdutoItemPedido(true);
+        setModalIncluirProdutoPedido?.(true);
+      } else {
+        Swal.fire({
+          icon: 'info',
+          title: 'Dados não encontrados',
+          text: 'Dados Não Encontrados para este pedido',
+          customClass: {
+            container:  'custom-swal'
+          }
+        })
+      }
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleClickAlertaBloqueio = (mensagem) => {
+    Swal.fire({
+      icon: 'info',
+      title: mensagem,
+    });
+  };
+
+
   return (
     <Fragment>
       <div className="panel">
         <div className="panel-hdr">
-          {/* <h2>LISTA DOS ITENS DO PEDIDO Nº: {dadosVisualizarPedido[0]?.IDPEDIDO}</h2> */}
+          <h2>LISTA DOS ITENS DO PEDIDO Nº: {dadosVisualizarPedido[0]?.IDPEDIDO}</h2>
         </div>
         <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
           <HeaderTable
@@ -303,7 +460,7 @@ export const ActionListaNovoPedido = ({
             globalFilter={globalFilterValue}
             paginator={true}
             rows={10}
-            rowsPerPageOptions={[10, 100, 500, 1000, dados.length]}
+            rowsPerPageOptions={[10, 100, 500, 1000, dados?.length]}
             selectionMode="single"
             selection={rowSelection}
             onSelectionChange={(e) => setRowSelection(e.value)}
@@ -335,6 +492,15 @@ export const ActionListaNovoPedido = ({
             show={modalEditarItemPedido}
             handleClose={() => setModalEditarItemPedido(false)}
             dadosItemPedido={dadosItemPedido}
+          />
+
+          <ActionProdutoPedidoModal
+            show={modalCriarProdutoItemPedido}
+            handleClose={() => {
+              setModalCriarProdutoItemPedido(false);
+              setModalIncluirProdutoPedido?.(false);
+            }}
+            dadosItemPedido={dadosItemPedidoCriar}
           />
       </div>
     </Fragment>

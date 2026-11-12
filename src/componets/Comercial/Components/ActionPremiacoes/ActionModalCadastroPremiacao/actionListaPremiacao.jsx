@@ -211,7 +211,7 @@ export const ActionListaPremiacao = ({
         <div className="card" ref={dataTableRef}>
 
           <DataTable
-            title="Lista de Premiações"    
+            title="Lista de Premiações"
             value={dados}
             size="small"
             globalFilter={globalFilterValue}

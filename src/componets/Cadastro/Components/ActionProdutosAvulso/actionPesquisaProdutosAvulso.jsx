@@ -20,9 +20,6 @@ export const ActionPesquisaProdutosAvulso = ({ usuarioLogado }) => {
   const [codProduto, setCodProduto] = useState('')
   const [tabelaVisivel, setTabelaVisivel] = useState(false);
   const [modalVisivel, setModalVisivel] = useState(false);
-  const [clickContador, setClickContador] = useState(0);
-  const [pageSize, setPageSize] = useState(1000);
-  const [currentPage, setCurrentPage] = useState(1);
   const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
 
   useEffect(() => {

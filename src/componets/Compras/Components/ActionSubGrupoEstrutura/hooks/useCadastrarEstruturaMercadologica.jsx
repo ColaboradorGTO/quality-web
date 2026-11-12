@@ -40,7 +40,9 @@ export const useCadastrarEstruturaMercadologica = ({ handleClose, usuarioLogado,
         }
         setIpUsuario(usuarioIP);
         return usuarioIP;
-    };
+    };  
+
+    console.log(subGrupoSelecionado, "subGrupoSelecionado")
 
     const onSubmit = async () => {
         if(optionsModulos[0]?.CRIAR == 'False') {

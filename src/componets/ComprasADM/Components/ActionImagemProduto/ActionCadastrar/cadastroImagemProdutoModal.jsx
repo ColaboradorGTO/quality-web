@@ -1,14 +1,16 @@
 import { Fragment } from "react"
 import { Modal } from "react-bootstrap"
-import { ButtonTypeModal } from "../../../../Buttons/ButtonTypeModal"
-import { FooterModal } from "../../../../Modais/FooterModal/footerModal"
 import { HeaderModal } from "../../../../Modais/HeaderModal/HeaderModal"
-import { InputFieldModal } from "../../../../Buttons/InputFieldModal"
-import { ActionCarregaImagem } from "../actionCarregaImagem"
 import { FormularioCadastrar } from "./formularioCadastrar"
 
-
-export const ActionCadastroImagemProdutoModal = ({ show, handleClose }) => {
+export const ActionCadastroImagemProdutoModal = ({ 
+  show, 
+  handleClose,
+  usuarioLogado,
+  optionsModulos,
+  handleClick
+}) => {
+  
   return (
     <Fragment>
       <Modal
@@ -18,7 +20,6 @@ export const ActionCadastroImagemProdutoModal = ({ show, handleClose }) => {
         size="xl"
         centered
       >
-
         <HeaderModal
           title={"Imagens"}
           subTitle={"Lista de Produtos Vinculados a Imagem"}
@@ -26,7 +27,12 @@ export const ActionCadastroImagemProdutoModal = ({ show, handleClose }) => {
         />
 
         <Modal.Body>
-          <FormularioCadastrar handleClose={handleClose} />
+          <FormularioCadastrar
+            handleClose={handleClose} 
+            usuarioLogado={usuarioLogado}
+            optionsModulos={optionsModulos}
+            handleClick={handleClick}
+          />
         </Modal.Body>
 
       </Modal>

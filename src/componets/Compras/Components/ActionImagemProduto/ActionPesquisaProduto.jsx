@@ -8,7 +8,6 @@ import { AiOutlineSearch } from "react-icons/ai"
 import { MdAdd } from "react-icons/md"
 import { ActionListaProduto } from "./actionListaProdutos"
 import { ActionCadastroImagemProdutoModal } from "./ActionCadastrar/cadastroImagemProdutoModal"
-import { useFetchData } from "../../../../hooks/useFetchData"
 import { useQuery } from "react-query"
 import { animacaoCarregamento, fecharAnimacaoCarregamento } from "../../../../utils/animationCarregamento"
 
@@ -78,9 +77,24 @@ export const ActionPesquisaProduto = ({ usuarioLogado }) => {
     { enabled: false, staleTime: 60 * 60 * 1000, cacheTime: 5 * 60 * 1000 }
   )
 
-  const { data: dadosMercadoria = [], error: errorFornecedor, isLoading: isLoadingFornecedor } = useFetchData('subGrupoEstrutura', '/subGrupoEstrutura');
-  const { data: dadosFabricantes = [], error: errorFabricantes, isLoading: isLoadingFabricantes } = useFetchData('fabricantes', '/fabricantes');
-  
+  const { data: dadosMercadoria = [], error: errorFornecedor, isLoading: isLoadingFornecedor, refetch: refetchListaSubGrupo } = useQuery(
+    ['subGrupoEstrutura'],
+    async () => {
+      const response = await get(`/subGrupoEstrutura`);
+      return response.data;
+    },
+    { enabled: false, staleTime: 60 * 60 * 1000, cacheTime: 5 * 60 * 1000 }
+  )
+  const { data: dadosFabricantes = [], error: errorFabricantes, isLoading: isLoadingFabricantes, refetch: refetchListaFabricantes } = useQuery(
+    ['fabricantes'],
+    async () => {
+      const response = await get(`/fabricantes`);
+      return response.data;
+    },
+    { enabled: false, staleTime: 60 * 60 * 1000, cacheTime: 5 * 60 * 1000 }
+  )
+
+
   const handleClick = () => {
     refetchListaProdutos()
   }

@@ -30,7 +30,7 @@ export const ActionListaProdutoImagem = ({
       if (existe) {
         return prevState.filter(item => String(item.IDPRODUTO) !== String(id));
       } else {
-        console.log('produtoSelecionado', produtoSelecionado);
+    
         return [...prevState, produtoSelecionado];
       }
     });
@@ -76,7 +76,7 @@ export const ActionListaProdutoImagem = ({
 
   const dados = dadosDetalheProdutos.map((item, index) => {
     let contador = index + 1;
-
+  
     return {
       contador,
       DSNOME: item.DSNOME,

@@ -12,9 +12,9 @@ export const InputSearch = ({
 
     <Fragment>
       {/* <div className="col-sm-6 col-md-4 input-group align-items-center mb-5"> */}
-      <div className="col-sm-6 col-md-4 input-group align-items-center " aria-label="pesquisar">
+      <div className="col-sm-6 col-md-4 input-group align-items-center ">
         <div className="input-group-prepend">
-          <button type="submit" className="input-group-text bg-primary">
+          <button type="submit" className="input-group-text bg-primary" aria-label="pesquisar">
             <AiOutlineSearch className="fa " size={22} color="#fff" />
           </button>
         </div>

@@ -1,12 +1,10 @@
 import Swal from "sweetalert2";
-import { post, put } from "../../../../../api/funcRequest";
+import { put } from "../../../../../api/funcRequest";
 import { useState } from "react";
-import axios from "axios";
 import { useEffect } from "react";
 import { getDataAtual } from "../../../../../utils/dataAtual";
 
 export const useAtivarCancelarProduto = ({ usuarioLogado, optionsModulos, handleClick }) => {
-    const [ipUsuario, setIpUsuario] = useState('');
     const [data, setData] = useState('');
 
     useEffect(() => {
@@ -14,34 +12,15 @@ export const useAtivarCancelarProduto = ({ usuarioLogado, optionsModulos, handle
         setData(dataAtual);
     }, [])
 
-    const getIPUsuario = async () => {
-        let usuarioIP = null;
-
-        try {
-            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-            usuarioIP = ipWhoisData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ipwho.is:", error);
-        }
-
-        if (!usuarioIP) {
-            try {
-                const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-                usuarioIP = ipifyData?.ip;
-            } catch (error) {
-                console.error("Erro ao buscar IP via ipify.org:", error);
-            }
-        }
-        setIpUsuario(usuarioIP);
-        return usuarioIP;
-    };
-
     const handleCancelar = async (row, status) => {
         if (optionsModulos[0]?.ALTERAR == 'False') {
             Swal.fire({
                 icon: "error",
                 title: "Permissão Negada!",
                 html: `${usuarioLogado?.NOFUNCIONARIO} <br/> Você não tem permissão.`,
+                customClass: {
+                    container: 'custom-swal'
+                }
             });
             return;
         }
@@ -70,15 +49,15 @@ export const useAtivarCancelarProduto = ({ usuarioLogado, optionsModulos, handle
                 icon: 'question',
                 title: `Motivo para ${msgtitulo} o Produto?`,
                 html: `
-                <div class="input-group pt-0">
-                    <input 
-                        type="text" id="motivoCancelItem" 
-                        class="swal2-input m-0"
-                        placeholder="Motivo para ${msgtitulo} o produto!"
-                        style="text-transform: uppercase"
-                    >
-                </div>
-            `,
+                    <div class="input-group pt-0">
+                        <input 
+                            type="text" id="motivoCancelItem" 
+                            class="swal2-input m-0"
+                            placeholder="Motivo para ${msgtitulo} o produto!"
+                            style="text-transform: uppercase"
+                        >
+                    </div>
+                `,
                 width: '25rem',
                 focusConfirm: false,
                 showCancelButton: true,
@@ -148,6 +127,9 @@ export const useAtivarCancelarProduto = ({ usuarioLogado, optionsModulos, handle
                     icon: "success",
                     title: "Sucesso!",
                     text: `${msgtitulo} realizado com sucesso!`,
+                    customClass: {
+                        container: 'custom-swal'
+                    }
                 });
 
                 handleClick();
@@ -155,6 +137,9 @@ export const useAtivarCancelarProduto = ({ usuarioLogado, optionsModulos, handle
                 Swal.fire({
                     icon: "warning",
                     text: response?.data?.msg || "Erro ao processar",
+                    customClass: {
+                        container: 'custom-swal'
+                    }
                 });
             }
 
@@ -167,6 +152,9 @@ export const useAtivarCancelarProduto = ({ usuarioLogado, optionsModulos, handle
                 icon: "error",
                 title: "Erro!",
                 text: `Erro ao ${msgtitulo.toLowerCase()} o produto`,
+                customClass: {
+                    container: 'custom-swal'
+                }
             });
         }
     };

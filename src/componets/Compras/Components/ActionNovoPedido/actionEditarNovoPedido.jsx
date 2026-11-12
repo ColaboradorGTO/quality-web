@@ -281,28 +281,6 @@ export const ActionEditarNovoPedido = ({dadosEditarPedido, dadosDetalhePedido}) 
     }
   }
 
-  // const optionsFiscal = [
-  //   { value: "S", label: "Simples Nacional" },
-  //   { value: "N", label: "Lucro Presumido" },
-  //   { value: "R", label: "Lucro Real" },
-  // ]
-
-  // const optionsEnviar = [
-  //   { value: "NE", label: "NÃO ENVIAR" },
-  //   { value: "ET", label: "ETIQUETA" },
-  //   { value: "AR", label: "ARQUIVO" },
-  // ]
-
-  // const optionsTipoPedido = [
-  //   { value: "VESTUARIO", label: "VESTUARIO" },
-  //   { value: "CALCADOS", label: "CALÇADOS" },
-  //   { value: "ARTIGOS", label: "ARTIGOS" },
-  //   { value: "ACESSORIOS", label: "ACESSÓRIOS" },
-  // ]
-  // const optionsTipoFrete = [
-  //   { value: "PAGO", label: "PAGO - CIF" },
-  //   { value: "APAGAR", label: "A PAGAR - FOB" },
-  // ]
 
   return (
 

@@ -11,7 +11,7 @@ import { ActionCadastrarFornecedorModal } from "./ActionCadastrar/actionCadastra
 import { useFetchData } from "../../../../hooks/useFetchData";
 import { useQuery } from "react-query";
 import { animacaoCarregamento, fecharAnimacaoCarregamento } from "../../../../utils/animationCarregamento";
-import { useCadastrarVinculoFabricanteFornecedor } from "../ActionVincularFabricanteFornecedor/hooks/useCadastrarViculoFabricanteFornecedor";
+import { useCadastrarVinculoFornecedorFabricante } from "./hooks/useCadastrarViculoFornecedorFabricante";
 import Swal from "sweetalert2";
 
 export const ActionPesquisaFornecedor = ({ usuarioLogado }) => {
@@ -116,7 +116,7 @@ export const ActionPesquisaFornecedor = ({ usuarioLogado }) => {
   }
   const  {
     handleCadastrarVinculo
-  } = useCadastrarVinculoFabricanteFornecedor({
+  } = useCadastrarVinculoFornecedorFabricante({
     fornecedorSelecionado, 
     fabricanteSelecionado, 
     usuarioLogado, 

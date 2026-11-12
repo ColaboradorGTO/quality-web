@@ -8,7 +8,6 @@ import { ButtonTable } from "../../../ButtonsTabela/ButtonTable";
 import { BsTrash3 } from "react-icons/bs";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
-import HeaderTable from "../../../Tables/headerTable";
 import { useReactToPrint } from "react-to-print";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
@@ -16,6 +15,7 @@ import * as XLSX from "xlsx";
 import { ActionImprimirEtiquetaModal } from "./actionImprimirEtiquetaModal";
 import Swal from "sweetalert2";
 import { MdOutlineLocalPrintshop } from "react-icons/md";
+
 export const ActionDetalharProdutosEtiquetaModal = ({
   show,
   handleClose,

@@ -1,12 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import Swal from "sweetalert2";
-import { adicionarMeses, getDataAtual } from "../../../../../utils/dataAtual";
-import { get, post, put } from "../../../../../api/funcRequest";
-import { useNavigate } from "react-router-dom";
+import { get, post } from "../../../../../api/funcRequest";
 import { toFloat } from "../../../../../utils/toFloat";
-import { useFetchData } from "../../../../../hooks/useFetchData";
 import { optionsTipoPedido, optionsReposicao } from "../../../../../../parceiro.json"
-import axios from "axios"
 import { useQuery } from "react-query";
 import { removerFormatacaoMoeda } from "../../../../../utils/formatMoeda";
 import { animacaoCarregamento, fecharAnimacaoCarregamento } from "../../../../../utils/animationCarregamento";
@@ -43,32 +39,8 @@ export const useCadastrarProdutoAvulso = ({ usuarioLogado, optionsModulos, handl
     const [compradorSelecionado, setCompradorSelecionado] = useState(null);
     const [referenciaProduto, setReferenciaProduto] = useState('');
     const [produtoPesquisado, setProdutoPesquisado] = useState('');
-    const [previaVisivel, setPreviaVisivel] = useState(false);
-    const [ipUsuario, setIpUsuario] = useState('');
-     
+    const [previaVisivel, setPreviaVisivel] = useState(false); 
     const pendingTamanhoIdRef = useRef(null);
-
-    const getIPUsuario = async () => {
-        let usuarioIP = null;
-
-        try {
-            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-            usuarioIP = ipWhoisData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ifconfig.me:", error);
-        }
-
-        if (!usuarioIP) {
-        try {
-            const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-            usuarioIP = ipifyData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ipify.org:", error);
-        }
-        }
-        setIpUsuario(usuarioIP);
-        return usuarioIP;
-    };
     
     const optionsEcommerce = [
         { value: 'True', label: 'SIM' },
@@ -492,20 +464,14 @@ export const useCadastrarProdutoAvulso = ({ usuarioLogado, optionsModulos, handl
                         STREDESOCIAL: redeSocialSelecionado?.value,
                     };
 
-                    // Aqui você pode fazer a requisição POST para salvar o produto
                     const response = await post('/criar-produto-avulso', data);
-                    const textDados = JSON.stringify(data);
-                    const textFuncao = 'CADASTRO / CADASTRAR PRODUTO AVULSO';
-                    const ipUsuario = await getIPUsuario();
-                 
-                    const createtLog = {
-                        IDFUNCIONARIO: String(usuarioLogado.id),
-                        PATHFUNCAO: textFuncao,
-                        DADOS: textDados,
-                        IP: ipUsuario || 'Indisponível'
-                    }
+                  
+                    await registrarLogAuditoria({
+                        idFuncionario: usuarioLogado?.id,
+                        pathFuncao: 'CADASTRO / CADASTRAR PRODUTO AVULSO',
+                        dados: data
+                    })
 
-                    await post('/log-web', createtLog)
                     Swal.fire({
                         icon: 'success',
                         title: 'Produto cadastrado com sucesso!',

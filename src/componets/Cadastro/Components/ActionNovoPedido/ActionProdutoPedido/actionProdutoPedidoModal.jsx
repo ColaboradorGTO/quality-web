@@ -8,7 +8,7 @@ import { useFetchData } from "../../../../../hooks/useFetchData"
 import Swal from "sweetalert2";
 import { useForm } from "react-hook-form";
 import Select from 'react-select';
-import { FormularioEditarItemPedido } from "./formularioEditarItemPedido"
+// import { FormularioEditarItemPedido } from "./formularioEditarItemPedido"
 
 export const ActionProdutoPedidoModal = ({ show, handleClose, dadosItemPedido }) => {
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -117,7 +117,7 @@ export const ActionProdutoPedidoModal = ({ show, handleClose, dadosItemPedido })
 
 
         <Modal.Body>
-          <FormularioEditarItemPedido dadosItemPedido={dadosItemPedido} handleClose={handleClose}/>
+          {/* <FormularioEditarItemPedido dadosItemPedido={dadosItemPedido} handleClose={handleClose}/> */}
         </Modal.Body>
       </Modal>
     </Fragment>

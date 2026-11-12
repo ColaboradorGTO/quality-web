@@ -76,6 +76,7 @@ export const FormularioCadastrar = ({handleClose, usuarioLogado, optionsModulos,
         dadosTransportadora,
         dadosCondicoesPagamento,
         handleFechar,
+        handleBlurCnpj,
         onSubmit,
     } = useCadastrarAlterarFornecedor({handleClose, usuarioLogado, optionsModulos, handleClick });
 
@@ -152,6 +153,7 @@ export const FormularioCadastrar = ({handleClose, usuarioLogado, optionsModulos,
                                         type="text"
                                         value={cnpj}
                                         onChange={(e) => setCnpj(e.target.value)}
+                                        onBlur={handleBlurCnpj}
                                         errors={errors}
                                         clearErrors={clearErrors}
                                     />

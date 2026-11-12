@@ -57,8 +57,8 @@ export const useCadastrarFabricanteFornecedor = ({handleClose, usuarioLogado, op
             DTULTATUALIZACAO: data,
             STATIVO: statusSelecionado.value,
             DTCADASTRO: data,
-         
         }
+        
         try {
 
             const response = await post('/cadastrar-fabricante', postData)

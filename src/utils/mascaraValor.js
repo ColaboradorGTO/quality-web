@@ -35,7 +35,7 @@ export const formatToDecimal = (value, qtdDecimal = 2) => {
 	numericValue = Number(`${firstPart}.${lastPart}`);
   
 	return numericValue; // Retorna um número
-  };
+};
 
 export const maskValorEmDecimal = (valor, numMaxCasasDecimais = 2) => {
  return new Intl.NumberFormat('br-BR', {
@@ -43,6 +43,13 @@ export const maskValorEmDecimal = (valor, numMaxCasasDecimais = 2) => {
 	 minimumFractionDigits: 2,
 	 maximumFractionDigits: numMaxCasasDecimais
  }).format(valor)
+}
+
+export const maskValorEmInteiro = (valor) => {
+    return new Intl.NumberFormat('br-BR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(valor)
 }
 
 export const isSameMoneyValue = (valorA, valorB) => {

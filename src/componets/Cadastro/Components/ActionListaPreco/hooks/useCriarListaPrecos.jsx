@@ -1,16 +1,15 @@
 import Swal from "sweetalert2"
 import { useEffect, useState } from "react"
-import axios from "axios"
 import { get, post } from "../../../../../api/funcRequest"
 import { situacao } from "../../../../../../parceiro.json"
 import { useQuery } from "react-query"
 import { getDataAtual } from "../../../../../utils/dataAtual"
+import { registrarLogAuditoria } from "../../../../../services/auditLog"
 
 
 export const useCriarListaPrecos = ({optionsModulos, usuarioLogado, dadosListaPreco, handleClose, refetchListaPreco }) => {
   const [descricao, setDescricao] = useState('')
   const [statusSelecionado, setStatusSelecionado] = useState({ value: 'True', label: 'ATIVO' })
-  const [ipUsuario, setIpUsuario] = useState('');
   const [empresaSelecionada, setEmpresaSelecionada] = useState([]);
   const [nomeListaPreco, setNomeListaPreco] = useState('');
   const [selectedIds, setSelectedIds] = useState([]);
@@ -31,30 +30,7 @@ export const useCriarListaPrecos = ({optionsModulos, usuarioLogado, dadosListaPr
     },
     { enabled: true, staleTime: 60 * 60 * 1000, }
   );
-
-  const getIPUsuario = async () => {
-    let usuarioIP = null;
-
-    try {
-      const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-      usuarioIP = ipWhoisData?.ip;
-    } catch (error) {
-      console.error("Erro ao buscar IP via ifconfig.me:", error);
-    }
-
-    if (!usuarioIP) {
-      try {
-        const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-        usuarioIP = ipifyData?.ip;
-      } catch (error) {
-        console.error("Erro ao buscar IP via ipify.org:", error);
-      }
-    }
-    setIpUsuario(usuarioIP);
-    return usuarioIP;
-  };
-  console.log(empresaSelecionada, 'empresaSelecionada fora do submit')
-   
+  
   const onSubmit = async () => {
 
     if (optionsModulos[0]?.CRIAR == 'False') {
@@ -74,11 +50,8 @@ export const useCriarListaPrecos = ({optionsModulos, usuarioLogado, dadosListaPr
     const NOMELISTA = nomeListaPreco;
     const IDUSERCRIACAO = usuarioLogado?.id; 
     const STATIVO = statusSelecionado?.value;
-
-   
     let dadosDetalheLista = [];
 
-   console.log(empresaSelecionada, 'empresaSelecionada dentro do submit')
     if (empresaSelecionada && empresaSelecionada.length > 0) {
       empresaSelecionada.forEach((empresa) => {
         const IDGRUPOEMPRESARIAL = empresa.IDGRUPOEMPRESARIAL ? Number(empresa.IDGRUPOEMPRESARIAL) : null;
@@ -148,17 +121,12 @@ export const useCriarListaPrecos = ({optionsModulos, usuarioLogado, dadosListaPr
       handleClose();
       refetchListaPreco();
 
-      const textDados = JSON.stringify(dadosLista);
-      const textFuncao = 'CADASTRO /CRIAÇÃO DE LISTA DE PREÇOS';
-      const ipUsuario = await getIPUsuario();
-      const createtLog = {
-        IDFUNCIONARIO: String(usuarioLogado.id),
-        PATHFUNCAO: textFuncao,
-        DADOS: textDados,
-        IP: ipUsuario || 'Indisponível'
-      };
-      
-      await post('/log-web', createtLog);
+
+      await registrarLogAuditoria({
+        idFuncionario: usuarioLogado?.id,
+        pathFuncao: 'CADASTRO /CRIAÇÃO DE LISTA DE PREÇOS',
+        dados: dadosLista
+      })
 
       setNomeListaPreco('');
       setEmpresaSelecionada([]);
@@ -169,18 +137,13 @@ export const useCriarListaPrecos = ({optionsModulos, usuarioLogado, dadosListaPr
       return response.data;
     } catch (error) {
       console.error('Erro ao criar lista de preço:', error);
-      const textDados = JSON.stringify(dadosLista);
-      let textFuncao = 'CADASTRO /ERRO AO CRIAR LISTA DE PREÇOS';
-      const ipUsuario = await getIPUsuario();
-      const createtLog = {
-        IDFUNCIONARIO: String(usuarioLogado.id),
-        PATHFUNCAO: textFuncao,
-        DADOS: textDados,
-        IP: ipUsuario || 'Indisponível'
-      };
-      
-      await post('/log-web', createtLog);
-      
+
+      await registrarLogAuditoria({
+        idFuncionario: usuarioLogado?.id,
+        pathFuncao: 'CADASTRO /ERRO AO CRIAR LISTA DE PREÇOS',
+        dados: dadosLista
+      })
+
       Swal.fire({
         icon: 'error',
         title: 'Erro',
@@ -189,7 +152,6 @@ export const useCriarListaPrecos = ({optionsModulos, usuarioLogado, dadosListaPr
           container: 'custom-swal',
         },
       });
-
     }
   }
 

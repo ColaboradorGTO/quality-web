@@ -5,7 +5,7 @@ import { getDataHoraAtual } from "../../../../../utils/dataAtual"
 import { get, post, put } from "../../../../../api/funcRequest"
 import { useQuery } from "react-query"
 import { useFetchData } from "../../../../../hooks/useFetchData"
-import { validarCNPJ } from "../../../../../utils/mascaraCNPJ"
+import { removeMascaraCNPJ, validarCNPJ } from "../../../../../utils/mascaraCNPJ"
 import { situacao, optionsTipoFrete, optionsTipoCategoria, optionsEnviar, optionsFiscal } from "../../../../../../parceiro.json"
 
 export const useCadastrarAlterarFornecedor = ({ handleClose, usuarioLogado, optionsModulos, handleClick }) => {
@@ -78,17 +78,21 @@ export const useCadastrarAlterarFornecedor = ({ handleClose, usuarioLogado, opti
     const { data: dadosTransportadora = [], error: errorTransportadora, isLoading: isLoadingTransportadora } = useFetchData('/transportadoras', '/transportadoras');
     const { data: dadosCondicoesPagamento = [], error: errorPagamento, isLoading: isLoadingPagamento } = useFetchData('/condicaoPagamento', '/condicaoPagamento');
 
-    const { data: dadosCNPJ = [], error: errorCNPJ, isLoading: isLoadingCNPJ } = useQuery(
+    const { data: dadosCNPJ = [], error: errorCNPJ, isLoading: isLoadingCNPJ, refetch: refetchCNPJ } = useQuery(
         ['fornecedores', cnpj],
         async () => {
             const response = await get(`/fornecedores?CNPJFornecedor=${cnpj}`);
             setFornecedorExistente(response.data);
-            console.log(cnpj, 'cnpj')
             return response.data;
         },
         { enabled: cnpj.length > 13  }
     );
-    console.log(cnpj, 'cnpj fora')
+    
+    const handleBlurCnpj = () => {
+        if (cnpj?.length >= 14) {
+            refetchCNPJ();
+        }
+    }
 
     async function getDadosEnderecoViaCep_API_redundancia(cep) {
         const URL_VIA_CEP = 'https://viacep.com.br/ws/{CEP}/json/';
@@ -370,7 +374,7 @@ export const useCadastrarAlterarFornecedor = ({ handleClose, usuarioLogado, opti
             MODPEDIDO: 'NENHUM',
             NORAZAOSOCIAL: razaoSocial,
             NOFANTASIA: nomeFantasia,
-            NUCNPJ: cnpj,
+            NUCNPJ: removeMascaraCNPJ(cnpj),
             NUINSCESTADUAL: inscricaoEstadual,
             NUINSCMUNICIPAL: inscricaoMunicipal,
             NUIBGE: String(numeroIBGE),
@@ -519,6 +523,7 @@ export const useCadastrarAlterarFornecedor = ({ handleClose, usuarioLogado, opti
         dadosTransportadora,
         dadosCondicoesPagamento,
         handleFechar,
+        handleBlurCnpj,
         onSubmit,
     }
 }

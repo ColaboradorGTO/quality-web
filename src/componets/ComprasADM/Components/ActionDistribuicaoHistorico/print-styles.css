@@ -1,0 +1,198 @@
+/* ✅ Estilos CSS para impressão da tabela de distribuição */
+@media print {
+  /* Reset da página */
+  * {
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Configuração da página */
+  @page {
+    size: A4 landscape;
+    margin: 5mm !important;
+  }
+  
+  /* Oculta elementos desnecessários na impressão */
+  .no-print, 
+  .p-datatable-header,
+  .p-paginator,
+  button,
+  .btn,
+  .panel-hdr,
+  .card-header {
+    display: none !important;
+  }
+  
+  /* Container principal ocupa toda área */
+  body {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: 100vh !important;
+    background: white !important;
+    font-family: Verdana !important;
+  }
+  
+  /* Tabela ocupa toda largura e altura */
+  #dt-basic-distribuicao {
+    width: 100% !important;
+    height: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 16px !important;
+    font-family: Verdana !important;
+    page-break-inside: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* Headers da tabela */
+  #dt-basic-distribuicao thead th {
+    background-color: #f8f9fa !important;
+    border: 1px solid #000 !important;
+    padding: 3px !important;
+    font-size: 16px !important;
+    font-weight: bold !important;
+    text-align: center !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  /* Header com colspan (Nº Pedido) */
+  #dt-basic-distribuicao thead th[colspan] {
+    /* background-color: #007bff !important; */
+    color: black !important;
+    font-size: 12px !important;
+    padding: 9px !important;
+    text-align: center !important;
+    font-weight: bold !important;
+  }
+  
+  /* Células da tabela */
+  #dt-basic-distribuicao tbody td {
+    border: 1px solid #000 !important;
+    padding: 1px !important;
+    font-size: 16px !important;
+    word-wrap: break-word !important;
+    max-width: none !important;
+    text-align: center !important;
+  }
+  
+  /* Primeira coluna (produto) - mais larga */
+  #dt-basic-distribuicao tbody td:first-child {
+    text-align: left !important;
+    font-weight: bold !important;
+    max-width: 200px !important;
+  }
+  
+  /* Texto rotacionado dos headers das filiais */
+  .rotate-270 {
+    writing-mode: vertical-rl !important;
+    text-orientation: mixed !important;
+    transform: rotate(180deg) !important;
+    font-size: 9px !important;
+    height: 140px !important;
+    white-space: nowrap !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Span dentro dos headers das filiais */
+  #dt-basic-distribuicao thead th span {
+    font-size: 10px !important;
+    font-weight: 500 !important;
+    color: #000 !important;
+  }
+  /* Container da tabela */
+  .scroll {
+    overflow: visible !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* DataTable do PrimeReact */
+  .p-datatable {
+    width: 100% !important;
+    border: none !important;
+  }
+  
+  .p-datatable-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+  
+  .p-datatable-thead th {
+    background-color: #f8f9fa !important;
+    border: 1px solid #000 !important;
+    padding: 0px !important;
+    font-size: 9px !important;
+    font-weight: bold !important;
+    text-align: center !important;
+  }
+  
+  .p-datatable-tbody td {
+    border: 1px solid #000 !important;
+    padding: 1px !important;
+    font-size: 9px !important;
+    text-align: center !important;
+  }
+  
+  /* Container dos headers rotacionados */
+  .p-datatable-thead th[style*="height"] {
+    height: 140px !important;
+    vertical-align: bottom !important;
+    position: relative !important;
+    
+  }
+  
+  /* Quebra de página inteligente */
+  tr {
+    page-break-inside: avoid !important;
+  }
+  
+  thead {
+    page-break-inside: avoid !important;
+  }
+  
+  /* Força impressão em cores */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  /* Remove margens e paddings extras */
+  .card,
+  .panel,
+  .container,
+  .row,
+  .col {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+  
+  /* Título da página */
+  h1, h2, h3 {
+    page-break-after: avoid !important;
+    margin-bottom: 10px !important;
+  }
+}
+
+/* ✅ Estilos específicos para o componente de visualização */
+@media print {
+  .print-container {
+    width: 100% !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .print-table-wrapper {
+    width: 100% !important;
+    height: 100% !important;
+    overflow: visible !important;
+  }
+}

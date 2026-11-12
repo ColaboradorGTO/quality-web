@@ -11,18 +11,35 @@ import { toFloat } from "../../../../utils/toFloat";
 import { formatMoeda } from "../../../../utils/formatMoeda";
 import { ButtonTable } from "../../../ButtonsTabela/ButtonTable";
 import { IoIosAdd } from "react-icons/io";
-import { BsTrash3 } from "react-icons/bs";
+import { BsTrash3, BsLockFill } from "react-icons/bs";
 import { CiEdit } from "react-icons/ci";
-import { get, put } from "../../../../api/funcRequest";
+import { get, post, put } from "../../../../api/funcRequest";
 import { AiOutlineSearch } from "react-icons/ai";
 import Swal from "sweetalert2";
 import { ButtonType } from "../../../Buttons/ButtonType";
+import { GrView } from "react-icons/gr";
+import { useIncluirProdutoPdv } from "./hooks/useIncluirProdutoPdv";
+import { useMigrarProdutos } from "./hooks/useMigrarProdutos";
 
-export const ActionListaProdutosParaCadastro = ({ dadosVisualizarPedido, dadosProdutosPedidos }) => {
+export const ActionListaProdutosParaCadastro = ({ 
+  dadosVisualizarPedido, 
+  dadosProdutosPedidos,
+  usuarioLogado,
+  optionsModulos,
+  handleClickPedido 
+}) => {
   const [modalEditarItemPedido, setModalEditarItemPedido] = useState(false);
   const [dadosItemPedido, setDadosItemPedido] = useState([]);
   const [globalFilterValue, setGlobalFilterValue] = useState('');
   const dataTableRef = useRef();
+
+  const {
+    handleProdutoPDV
+  } = useIncluirProdutoPdv({usuarioLogado, optionsModulos, dadosProdutosPedidos })
+
+  const {
+    MigrarTodosProdutosSAP
+  } = useMigrarProdutos({usuarioLogado, optionsModulos, dadosProdutosPedidos })
 
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
@@ -79,10 +96,35 @@ export const ActionListaProdutosParaCadastro = ({ dadosVisualizarPedido, dadosPr
   };
 
 
+  const idsAndamentosLiberados = [4, 5, 16, 17];
+
+  let idAndamentoPedido = 0;
+  let stPedidoMigradoSAP = false;
+  let isPedidoSecundario = Number(dadosVisualizarPedido[0]?.IDPEDIDOPRIMARIO || 0) > 0;
+
+  const handleClickAvisoBloqueio = (mensagem) => {
+    Swal.fire({
+      icon: 'info',
+      title: mensagem,
+    })
+  }
+
+  const handleClickErroMigracaoSap = (motivo) => {
+    Swal.fire({
+      icon: 'info',
+      title: 'Erro ao tentar migrar',
+      text: `Motivo: ${motivo}`,
+    })
+  }
+
   const dados = dadosProdutosPedidos.map((item, index) => {
     let contador = index + 1;
-    return {
 
+    idAndamentoPedido = !idAndamentoPedido ? Number(item?.IDANDAMENTO || 0) : idAndamentoPedido;
+    stPedidoMigradoSAP = !stPedidoMigradoSAP ? item?.STPEDIDOMIGRADOSAP == 'True' : stPedidoMigradoSAP;
+    isPedidoSecundario = !isPedidoSecundario ? Number(item?.IDPEDIDOPRIMARIO || 0) > 0 : isPedidoSecundario;
+
+    const row = {
         contador,
         CODBARRAS: item.CODBARRAS,
         DSPRODUTO: item.DSPRODUTO,
@@ -104,8 +146,223 @@ export const ActionListaProdutosParaCadastro = ({ dadosVisualizarPedido, dadosPr
         VRTOTALCUSTO: item.VRTOTALCUSTO,
         QTDESTOQUEIDEAL: item.QTDESTOQUEIDEAL,
     }
+
+    const idProdutoCadastro = String(item.IDPRODCADASTRO || '');
+    const stMigradoSapProduto = item.STMIGRADOSAP == 'True';
+    const stProdutoParaIncluirNoPedidoSAP = stMigradoSapProduto && item.STLINHAPRODUTOMIGRADAPARAPEDIDOSAP == 'False';
+    const stProdutoCadastrado = item.STCADASTRO == 'True';
+    const stProdutoReposicao = item.STREPOSICAO;
+    const stProdutoEditado = item.STEDITADOCOMPRAS;
+    const errorLogSap = (item.ERRORLOGSAP || '').replaceAll("'", "");
+    const stIncluidoPDV = stProdutoCadastrado && idProdutoCadastro.length > 0 && idProdutoCadastro != 'NULL';
+
+    const btnEditarProduto = (
+      <div className="p-1" key="btnEditar">
+        <ButtonTable
+          Icon={CiEdit}
+          cor={"warning"}
+          iconColor={"white"}
+          iconSize={20}
+          onClickButton={() => handleClickEditar(row)}
+          titleButton={"Editar Produto do Pedido"}
+        />
+      </div>
+    )
+
+    const btnAvisoFaltaInclusaoMigracao = (
+      <div className="p-1" key="btnAviso">
+        <ButtonTable
+          Icon={GrView}
+          cor={"warning"}
+          iconColor={"white"}
+          iconSize={20}
+          onClickButton={() => handleClickStatusMigracaoSap(row)}
+          titleButton={"Aviso"}
+        />
+      </div>
+    )
+
+    const btnMigrarPDV = (
+      <div className="p-1" key="btnMigrarPDV">
+        <ButtonTable
+          Icon={IoIosAdd}
+          cor={"success"}
+          iconColor={"white"}
+          iconSize={20}
+          onClickButton={() => handleClickEditar(row)}
+          titleButton={"Incluir para PDV"}
+        />
+      </div>
+    )
+
+    const btnMigrarSAPReposicao = (
+      <div className="p-1" key="btnMigrarSAPReposicao">
+        <ButtonTable
+          Icon={CiEdit}
+          cor={"primary"}
+          iconColor={"white"}
+          iconSize={20}
+          onClickButton={() => handleClickEditar(row)}
+          titleButton={"Migrar para SAP"}
+        />
+      </div>
+    )
+
+    const btnMigrarSAP = (
+      <div className="p-1" key="btnMigrarSAP">
+        <ButtonTable
+          Icon={CiEdit}
+          cor={"primary"}
+          iconColor={"white"}
+          iconSize={20}
+          onClickButton={() => handleClickEditar(row)}
+          titleButton={"Migrar para SAP"}
+        />
+      </div>
+    )
+
+    const btnCancelarProduto = (
+      <div className="p-1" key="btnCancelar">
+        <ButtonTable
+          Icon={BsTrash3}
+          cor={"danger"}
+          iconColor={"white"}
+          iconSize={20}
+          onClickButton={() => handleClickCancelar(row)}
+          titleButton={"Cancelar Produto do Pedido"}
+        />
+      </div>
+    )
+
+    const btnLockedProdutoPedidoSecundario = (
+      <div className="p-1" key="btnLocked">
+        <ButtonTable
+          Icon={BsLockFill}
+          cor={"danger"}
+          iconColor={"white"}
+          iconSize={20}
+          onClickButton={() => handleClickAvisoBloqueio(`Este Produto só pode ser manipulado através do Pedido Primário: ${dadosVisualizarPedido[0]?.IDPEDIDOPRIMARIO || ''}`)}
+          titleButton={"Este Produto só pode ser manipulado através do Pedido Primário"}
+        />
+      </div>
+    )
+
+    const btnProdNaoLiberado = (
+      <div className="p-1" key="btnNaoLiberado">
+        <ButtonTable
+          Icon={BsLockFill}
+          cor={"danger"}
+          iconColor={"white"}
+          iconSize={20}
+          onClickButton={() => handleClickAvisoBloqueio('PRODUTOS NÃO LIBERADOS')}
+          titleButton={"PRODUTOS NÃO LIBERADOS"}
+        />
+      </div>
+    )
+
+    const btnStatusMigracao = (
+      <div className="p-1" key="btnStatusMigracao">
+        <ButtonTable
+          Icon={GrView}
+          cor={"info"}
+          iconColor={"white"}
+          iconSize={20}
+          onClickButton={() => handleClickErroMigracaoSap(errorLogSap)}
+          titleButton={"Status Migração SAP"}
+        />
+      </div>
+    )
+
+    let labelStatusAlteracaoProduto = <span style={{ color: 'blue', fontSize: '10px' }}>PRODUTO SEM ALTERAÇÃO</span>;
+    let labelStatusMigracaoProduto = <span style={{ color: 'red', fontSize: '10px' }}>NÃO INCLUIDO PDV / NÃO MIGRADO SAP</span>;
+    let botoesOpcoes = [];
+
+    if (idsAndamentosLiberados.includes(idAndamentoPedido)) {
+      const stPermitirEditarProduto = stProdutoCadastrado === stMigradoSapProduto;
+
+      botoesOpcoes = [stPermitirEditarProduto ? btnEditarProduto : btnAvisoFaltaInclusaoMigracao];
+
+      if (stProdutoEditado == 'True') {
+        labelStatusAlteracaoProduto = <span style={{ color: 'red', fontSize: '10px' }}>PRODUTO ALTERADO</span>;
+      }
+
+      if (stProdutoReposicao == 'True') {
+        if (stMigradoSapProduto) {
+          labelStatusMigracaoProduto = <span style={{ color: 'blue', fontSize: '10px' }}>PRODUTO REPOSIÇÃO / MIGRADO SAP</span>;
+        } else {
+          labelStatusMigracaoProduto = (
+            <>
+              <span style={{ color: 'blue', fontSize: '10px' }}>PRODUTO REPOSIÇÃO / </span>
+              <span style={{ color: 'red', fontSize: '10px' }}>NÃO MIGRADO SAP</span>
+            </>
+          );
+          botoesOpcoes.push(btnMigrarSAPReposicao);
+        }
+      } else if (stMigradoSapProduto) {
+        if (stIncluidoPDV) {
+          labelStatusMigracaoProduto = <span style={{ color: 'blue', fontSize: '10px' }}>INCLUIDO PDV / MIGRADO SAP</span>;
+        } else {
+          labelStatusMigracaoProduto = (
+            <>
+              <span style={{ color: 'red', fontSize: '10px' }}>NÃO INCLUIDO PDV </span> /{' '}
+              <span style={{ color: 'blue', fontSize: '10px' }}>MIGRADO SAP</span>
+            </>
+          );
+          botoesOpcoes.push(btnMigrarPDV);
+        }
+      } else if (stIncluidoPDV) {
+        labelStatusMigracaoProduto = (
+          <>
+            <span style={{ color: 'blue', fontSize: '10px' }}>INCLUIDO PDV </span> /{' '}
+            <span style={{ color: 'red', fontSize: '10px' }}>NÃO MIGRADO SAP</span>
+          </>
+        );
+        botoesOpcoes.push(btnMigrarSAP);
+      } else {
+        botoesOpcoes.push(btnMigrarPDV);
+      }
+
+      if (stPedidoMigradoSAP && stIncluidoPDV && stMigradoSapProduto && stProdutoParaIncluirNoPedidoSAP) {
+        labelStatusMigracaoProduto = (
+          <>
+            {labelStatusMigracaoProduto} /{' '}
+            <span
+              className="cursor-pointer text-danger fw-900"
+              title="Finalize o Cadastro e Migre o Pedido Para o SAP Novamente"
+              style={{ fontSize: '10px' }}
+            >
+              PRODUTO NÃO INCLUÍDO NO PEDIDO SAP
+            </span>
+          </>
+        );
+      }
+
+      if (stPermitirEditarProduto) botoesOpcoes.push(btnCancelarProduto);
+      if (errorLogSap.length > 0) botoesOpcoes.push(btnStatusMigracao);
+
+      if (isPedidoSecundario) botoesOpcoes = [btnLockedProdutoPedidoSecundario];
+
+      if (stPedidoMigradoSAP && idAndamentoPedido != 4 && idAndamentoPedido != 16) {
+        botoesOpcoes = [];
+        labelStatusAlteracaoProduto = (
+          <span className="text-danger fw-700" style={{ fontSize: '10px' }}>PRODUTO BLOQUEADO PARA MANIPULAÇÃO</span>
+        );
+      }
+    } else {
+      labelStatusAlteracaoProduto = <span style={{ color: 'red', fontSize: '10px' }}>PRODUTO NÃO LIBERADO</span>;
+      labelStatusMigracaoProduto = <span style={{ color: 'red', fontSize: '10px' }}>PRODUTO NÃO LIBERADO</span>;
+      botoesOpcoes = [btnProdNaoLiberado];
+    }
+
+    return {
+      ...row,
+      labelStatusAlteracaoProduto,
+      labelStatusMigracaoProduto,
+      botoesOpcoes,
+    }
   });
-  
+
+ 
   const colunasPedidos = [
     {
       field: 'contador',
@@ -157,254 +414,30 @@ export const ActionListaProdutosParaCadastro = ({ dadosVisualizarPedido, dadosPr
     },
     {
       field: 'VRTOTALCUSTO',
-      header: 'Total Custo',
+      header: 'T.Custo',
       body: row => <th>{formatMoeda(row.VRTOTALCUSTO)}</th>,
       sortable: true,
     },
     {
       field: 'STEDITADOCOMPRAS',
       header: 'Obs',
-      body: row => {
-        if (row.STEDITADOCOMPRAS === 'True') {
-          return <th style={{ color: 'red' }}>PRODUTO ALTERADO</th>
-    
-        } else {
-          return <th style={{ color: 'red' }}>PRODUTO SEM ALTERAÇÃO</th>
-        }
-      },
+      body: row => <th>{row.labelStatusAlteracaoProduto}</th>,
       sortable: true,
     },
     {
       field: 'STREPOSICAO',
       header: 'Situação',
-      body: row => {
-        if (row.STREPOSICAO == 'True' && row.STMIGRADOSAP == 'True') {
-          return <th style={{ color: 'blue' }}>PRODUTO REPOSIÇÃO / MIGRADO SAP</th>
-    
-        } else if(row.STREPOSICAO == 'True' && row.STMIGRADOSAP != 'True') {
-
-            return <th style={{ color: 'blue' }}>PRODUTO REPOSIÇÃO / <label htmlFor="" style={{ color: 'red' }}>NÃO MIGRADO SAP</label></th>
-        } else {
-            if(row.STMIGRADOSAP == 'True') {
-              if(row.STCADASTRO == 'True' && row.IDPRODCADASTRO > 0 && row.IDPRODCADASTRO != 'NULL') {
-                return <th style={{ color: 'blue' }}>INCLUIDO PDV / MIGRADO SAP</th>
-              } else {
-                return <th style={{ color: 'red' }}>NÃO INCLUIDO PDV / <label htmlFor="" style={{ color: 'blue' }}>MIGRADO SAP</label></th>
-              }
-            } else {
-              if(row.STCADASTRO == 'True' && row.IDPRODCADASTRO > 0 && row.IDPRODCADASTRO != 'NULL') {
-                return <th style={{ color: 'blue' }}>INCLUIDO PDV / <label htmlFor="" style={{ color: 'red' }}>NÃO MIGRADO SAP</label></th>
-              } else {
-                return <th style={{ color: 'red' }}>NÃO INCLUIDO PDV / <label htmlFor="" style={{ color: 'red' }}>NÃO MIGRADO SAP</label></th>
-              }
-            }
-        }
-        
-      },
+      body: row => <th>{row.labelStatusMigracaoProduto}</th>,
       sortable: true,
     },
     {
-      field: 'contador',
+      field: 'OPCOES',
       header: 'Opções',
-      body: row => {
-        if (row.STCADASTRO == 'True' && row.IDPRODCADASTRO > 0 && row.IDPRODCADASTRO != 'NULL') {
-          if(row.STREPOSICAO == 'True' && row.STMIGRADOSAP != 'True') {
-            return (
-              <div className="p-1 "
-                style={{ justifyContent: "space-between", display: "flex" }}
-              >
-                <div className="p-1">
-                  <ButtonTable
-                    Icon={CiEdit}
-                    cor={"primary"}
-                    iconColor={"white"}
-                    iconSize={20}
-                    onClickButton={() => handleClickEditar(row)}
-                    titleButton={"Editar Produto do Pedido"}
-                  />
-                </div>
-                <div className="p-1">
-                  <ButtonTable
-                    Icon={CiEdit}
-                    cor={"primary"}
-                    iconColor={"white"}
-                    iconSize={20}
-                    onClickButton={() => handleClickEditar(row)}
-                    titleButton={"Migrar para SAP"}
-                  />
-                </div>
-                <div className="p-1">
-                  <ButtonTable
-                    Icon={BsTrash3}
-                    cor={"danger"}
-                    iconColor={"white"}
-                    iconSize={20}
-                    onClickButton={() => handleClickVisualizarPedido(row)}
-                    titleButton={"Cancelar Produto do Pedido"}
-                  />
-                </div>
-              </div>
-            )
-          } else {
-            if(row.STMIGRADOSAP == 'True') {
-              return ( 
-                <div className="p-1">
-                  <ButtonTable
-                    Icon={CiEdit}
-                    cor={"primary"}
-                    iconColor={"white"}
-                    iconSize={20}
-                    onClickButton={() => handleClickEditar(row)}
-                    titleButton={"Editar Produto do Pedido"}
-                  />
-                </div>
-              )
-            } else {
-              return (
-                <div className="p-1 "
-                  style={{ justifyContent: "space-between", display: "flex" }}
-                >
-                  <div className="p-1">
-                    <ButtonTable
-                      Icon={CiEdit}
-                      cor={"primary"}
-                      iconColor={"white"}
-                      iconSize={20}
-                      onClickButton={() => handleClickEditar(row)}
-                      titleButton={"Editar Produto do Pedido"}
-                    />
-                  </div>
-                  <div className="p-1">
-                    <ButtonTable
-                      Icon={CiEdit}
-                      cor={"primary"}
-                      iconColor={"white"}
-                      iconSize={20}
-                      onClickButton={() => handleClickEditar(row)}
-                      titleButton={"Migrar para SAP"}
-                    />
-                  </div>
-                  <div className="p-1">
-                    <ButtonTable
-                      Icon={BsTrash3}
-                      cor={"danger"}
-                      iconColor={"white"}
-                      iconSize={20}
-                      onClickButton={() => handleClickVisualizarPedido(row)}
-                      titleButton={"Cancelar Produto do Pedido"}
-                    />
-                  </div>
-                </div>
-              )
-            }
-          }
-     
-        } else { 
-          if(row.STREPOSICAO == 'True' && row.STMIGRADOSAP != 'True') {
-            return (
-              <div className="p-1 "
-                style={{ justifyContent: "space-between", display: "flex" }}
-              >
-                <div className="p-1">
-                  <ButtonTable
-                    Icon={CiEdit}
-                    cor={"primary"}
-                    iconColor={"white"}
-                    iconSize={20}
-                    onClickButton={() => handleClickEditar(row)}
-                    titleButton={"Editar Produto do Pedido"}
-                  />
-                </div>
-                <div className="p-1">
-                  <ButtonTable
-                    Icon={CiEdit}
-                    cor={"primary"}
-                    iconColor={"white"}
-                    iconSize={20}
-                    onClickButton={() => handleClickEditar(row)}
-                    titleButton={"Migrar para SAP"}
-                  />
-                </div>
-                <div className="p-1">
-                  <ButtonTable
-                    Icon={BsTrash3}
-                    cor={"danger"}
-                    iconColor={"white"}
-                    iconSize={20}
-                    onClickButton={() => handleClickVisualizarPedido(row)}
-                    titleButton={"Cancelar Produto do Pedido"}
-                  />
-                </div>
-              </div>
-            )
-          } else {
-            if(row.STMIGRADOSAP == 'True' && row.IDPRODCADASTRO > 0 && row.IDPRODCADASTRO != 'NULL') {
-              return ( 
-                <div className="p-1">
-                  <ButtonTable
-                    Icon={CiEdit}
-                    cor={"primary"}
-                    iconColor={"white"}
-                    iconSize={20}
-                    onClickButton={() => handleClickEditar(row)}
-                    titleButton={"Editar Produto do Pedido"}
-                  />
-                </div>
-              )
-            } else if(row.STMIGRADOSAP == 'True' && row.STREPOSICAO == 'True') {
-              return ( 
-                <div className="p-1">
-                  <ButtonTable
-                    Icon={CiEdit}
-                    cor={"primary"}
-                    iconColor={"white"}
-                    iconSize={20}
-                    onClickButton={() => handleClickEditar(row)}
-                    titleButton={"Editar Produto do Pedido"}
-                  />
-                </div>
-              )
-            } else {
-              return (
-                <div className="p-1 "
-                  style={{ justifyContent: "space-between", display: "flex" }}
-                >
-                  <div className="p-1">
-                    <ButtonTable
-                      Icon={CiEdit}
-                      cor={"primary"}
-                      iconColor={"white"}
-                      iconSize={20}
-                      onClickButton={() => handleClickEditar(row)}
-                      titleButton={"Editar Produto do Pedido"}
-                    />
-                  </div>
-                  <div className="p-1">
-                    <ButtonTable
-                      Icon={CiEdit}
-                      cor={"success"}
-                      iconColor={"white"}
-                      iconSize={20}
-                      onClickButton={() => handleClickEditar(row)}
-                      titleButton={"Incluir para PDV"}
-                    />
-                  </div>
-                  <div className="p-1">
-                    <ButtonTable
-                      Icon={BsTrash3}
-                      cor={"danger"}
-                      iconColor={"white"}
-                      iconSize={20}
-                      onClickButton={() => handleClickVisualizarPedido(row)}
-                      titleButton={"Cancelar Produto do Pedido"}
-                    />
-                  </div>
-                </div>
-              )
-            }
-          }
-        } 
-      },
+      body: row => (
+        <div className="p-1" style={{ justifyContent: 'flex-start', display: 'flex', flexWrap: 'wrap' }}>
+          {row.botoesOpcoes}
+        </div>
+      ),
       sortable: true,
     },
   ]
@@ -418,201 +451,46 @@ export const ActionListaProdutosParaCadastro = ({ dadosVisualizarPedido, dadosPr
   const handleEditar = async (IDDETPEDIDO) => {
     try {
       const response = await get(`/editar-item-pedido?idDetalhePedido=${IDDETPEDIDO}`);
-      setDadosItemPedido(response.data);
-      setModalEditarItemPedido(true);
-    } catch (error) {
-      console.error(error);
-    }
-  }
+      if(response.data && response.data.length > 0) {
 
-  const handleProdutoPDV = async (IDRESUMOPEDIDIO) => {
-    if (!dadosProdutosPedidos || dadosProdutosPedidos.length === 0) {
-      Swal.fire({
-        icon: "warning",
-        title: `Não Existem Produtos do Pedido: ${IDRESUMOPEDIDIO} para serem Incluídos no PDV`,
-        showConfirmButton: false,
-        timer: 3000
-      });
-      return;
-    }
-
-    let stCadastradoTrue = "True";
-
-    for (const produto of dadosProdutosPedidos) {
-      if (produto.STCADASTRADO !== "True") {
-        stCadastradoTrue = produto.STCADASTRADO;
-      }
-    }
-
-    if (stCadastradoTrue !== "True") {
-
-      Swal.fire({
-        title: 'Certeza que Deseja Incluir Todos esses Produtos no PDV?',
-        text: 'Você não poderá reverter esta ação!',
-        icon: 'warning',
-        showCancelButton: true,
-        showConfirmButton: true,
-        cancelButtonText: 'Cancelar',
-        confirmButtonText: 'OK',
-        customClass: {
-          confirmButton: 'btn btn-primary',
-          cancelButton: 'btn btn-danger',
-          loader: 'custom-loader'
-        },
-        buttonsStyling: false
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          try {
-            const putData = {  
-              IDRESUMOPEDIDIO: IDRESUMOPEDIDIO,
-      
-            }
-            const response = await put('/incluir_todos_produtos_pdv/:id', putData)
-            
-            const textDados = JSON.stringify(putData)
-            let textoFuncao = 'INCLUIR TODOS PRODUTOS NO PDV';
-          
-            const postData = {  
-              IDFUNCIONARIO: usuarioLogado.id,
-              PATHFUNCAO:  textoFuncao,
-              DADOS: textDados,
-              IP: ipUsuario
-            }
-    
-            const responsePost = await post('/log-web', postData)
-        
-            Swal.fire({
-              title: 'Cancelado', 
-              text: 'Conciliação do Depósito cancelado com Sucesso', 
-              icon: 'success'
-            })
-  
-            return responsePost;
-          } catch (error) {
-            
-            let textoFuncao = 'ERRO AO INCLUIR TODOS PRODUTOS NO PDV';
-          
-            const postData = {  
-              IDFUNCIONARIO: usuarioLogado.id,
-              PATHFUNCAO:  textoFuncao,
-              DADOS: 'ERRO AO INCLUIR TODOS PRODUTOS NO PDV',
-              IP: ipUsuario
-            }
-
-            const responsePost = await post('/log-web', postData)
+        setDadosItemPedido(response.data);
+        setModalEditarItemPedido(true);
+      } else {
+        Swal.fire({
+          icon: 'info',
+          title: 'Dados não encontrados',
+          text: 'Dados Não Encontrados para este pedido',
+          customClass: {
+            container:  'custom-swal'
           }
-        }
-      })
-    } else {
-      Swal.fire({
-        icon: "warning",
-        title: `Não Existem Produtos do Pedido: ${IDRESUMOPEDIDIO} para serem Incluídos no PDV`,
-        showConfirmButton: false,
-        timer: 3000
-      });
+        })
+      }
+    } catch (error) {
+      console.error(error)
     }
   }
-  
+
+ 
   const handleClickCancelar = (row) => {
     if (row && row.IDDEPOSITOLOJA) {
       handleProdutoPDV(row.IDDEPOSITOLOJA);
     }
   };
 
-
-  const handleMigrarSAP = async (IDRESUMOPEDIDIO) => {
-    if (!dadosProdutosPedidos || dadosProdutosPedidos.length === 0) {
-      Swal.fire({
-        icon: "warning",
-        title: `Não Existem Produtos do Pedido: ${IDRESUMOPEDIDIO} para serem Incluídos no PDV`,
-        showConfirmButton: false,
-        timer: 3000
-      });
-      return;
-    }
-
-    let stCadastradoTrue = "True";
-
-    for (const produto of dadosProdutosPedidos) {
-      if (produto.STCADASTRADO !== "True") {
-        stCadastradoTrue = produto.STCADASTRADO;
-      }
-    }
-
-    if (stCadastradoTrue !== "True") {
-
-      Swal.fire({
-        title: 'Certeza que Deseja Incluir Todos esses Produtos no PDV?',
-        text: 'Você não poderá reverter esta ação!',
-        icon: 'warning',
-        showCancelButton: true,
-        showConfirmButton: true,
-        cancelButtonText: 'Cancelar',
-        confirmButtonText: 'OK',
-        customClass: {
-          confirmButton: 'btn btn-primary',
-          cancelButton: 'btn btn-danger',
-          loader: 'custom-loader'
-        },
-        buttonsStyling: false
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          try {
-            const putData = {  
-              IDRESUMOPEDIDIO: IDRESUMOPEDIDIO,
-      
-            }
-            const response = await put('/incluir_todos_produtos_pdv/:id', putData)
-            
-            const textDados = JSON.stringify(putData)
-            let textoFuncao = 'INCLUIR TODOS PRODUTOS NO SAP';
-          
-            const postData = {  
-              IDFUNCIONARIO: usuarioLogado.id,
-              PATHFUNCAO:  textoFuncao,
-              DADOS: textDados,
-              IP: ipUsuario
-            }
-    
-            const responsePost = await post('/log-web', postData)
-        
-            Swal.fire({
-              title: 'Sucesso', 
-              text: 'Migração do Produto no SAP com Sucesso', 
-              icon: 'success'
-            })
-  
-            return responsePost;
-          } catch (error) {
-            
-            let textoFuncao = 'ERRO AO INCLUIR TODOS PRODUTOS NO SAP';
-          
-            const postData = {  
-              IDFUNCIONARIO: usuarioLogado.id,
-              PATHFUNCAO:  textoFuncao,
-              DADOS: 'ERRO AO INCLUIR TODOS PRODUTOS NO SAP',
-              IP: ipUsuario
-            }
-
-            const responsePost = await post('/log-web', postData)
-          }
-        }
-      })
-    } else {
-      Swal.fire({
-        icon: "warning",
-        title: `Não Existem Produtos do Pedido: ${IDRESUMOPEDIDIO} para serem Migrados para o SAP`,
-        showConfirmButton: false,
-        timer: 3000
-      });
-    }
+  const handleClickStatusMigracaoSap = (row) => {
+    Swal.fire({
+      icon: 'info',
+      title: 'Realize a Inclusão/Migração!',
+      text: 'O produto só pode ser editado após o processo de Inclusão/Migração estar completo',
+    })
   }
+ 
 
   return (
     <Fragment>
       <div className="panel">
         <div className="panel-hdr">
-          <h2>Lista dos Produtos do Pedido</h2>
+          <h2>Lista dos Produtos do Pedido </h2>
         </div>
         <div className="row mb-4">
         
@@ -622,7 +500,7 @@ export const ActionListaProdutosParaCadastro = ({ dadosVisualizarPedido, dadosPr
             textButton="Incluir Todos Novos PDV"
             cor="primary"
             tipo="button"
-            onClickButtonType={() => handleProdutoPDV(dadosVisualizarPedido.IDRESUMOPEDIDO)}
+            onClickButtonType={() => handleProdutoPDV(dadosVisualizarPedido[0]?.IDPEDIDO)}
           />
           <ButtonType
             Icon={AiOutlineSearch}
@@ -630,7 +508,7 @@ export const ActionListaProdutosParaCadastro = ({ dadosVisualizarPedido, dadosPr
             textButton="Migrar Todos Novos SAP"
             cor="secondary"
             tipo="button"
-            onClickButtonType={() => handleMigrarSAP(dadosVisualizarPedido.IDRESUMOPEDIDO)}
+            onClickButtonType={() => MigrarTodosProdutosSAP(dadosVisualizarPedido[0]?.IDPEDIDO)}
           />
           <ButtonType
             Icon={AiOutlineSearch}
@@ -686,3 +564,4 @@ export const ActionListaProdutosParaCadastro = ({ dadosVisualizarPedido, dadosPr
     </Fragment>
   )
 }
+//  793

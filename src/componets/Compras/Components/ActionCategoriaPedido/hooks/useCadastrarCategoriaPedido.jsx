@@ -51,6 +51,7 @@ export const useCadastrarCategoriaPedido = ({handleClose, usuarioLogado, options
             TIPOPEDIDO: tipoCategoriaSelecionado.value,
             STATIVO: statusSelecionado.value,
         }
+        
         try {
 
             const response = await post('/criar-categoria-pedidos', postData)

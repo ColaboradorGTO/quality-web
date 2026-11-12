@@ -17,6 +17,7 @@ import Swal from 'sweetalert2';
 import { ActionEditarVinculoFornecedorFabricanteModal } from './ActionEditarVinculoFornecedor/actionEditarVincularFabricanterModal';
 import { useExcluirVinculoFornecedorFabricante } from './hooks/useExluirViculoFornecedorFabricante';
 import { useMigrarFornecedorSAP } from './hooks/useMigrarFornecedorSap';
+import { SiSap } from 'react-icons/si';
 
 const formatarCNPJ = (cnpj) => {
   const x = cnpj.replace(/\D/g, '').match(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/);
@@ -340,7 +341,7 @@ export const ActionListaFornecedores = ({
                 </div>
                 <div className="p-1">
                   <ButtonTable
-                    Icon={GrView}
+                    Icon={SiSap}
                     cor={"primary"}
                     iconColor={"white"}
                     onClickButton={() => handleMigrarSAP(row.IDFORNECEDOR)}
@@ -371,11 +372,11 @@ export const ActionListaFornecedores = ({
 
                 <div className="p-1">
                   <ButtonTable
-                    Icon={GrView}
+                    Icon={SiSap}
                     cor={"primary"}
                     iconColor={"white"}
-                    onClickButton={() => hanldeClickVisualizarFornecedorSap(row)}
-                    titleButton={"Consultar Fornecedor SAP"}
+                    onClickButton={() => handleMigrarSAP(row.IDFORNECEDOR)}
+                    titleButton={"Migrar Fornecedor SAP"}
                     iconSize={25}
                     width="30px"
                     height="30px"
@@ -528,6 +529,7 @@ export const ActionListaFornecedores = ({
             stripedRows
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado </div>}
           >
+            
             {colunasFornecedores.map(coluna => (
               <Column
                 key={coluna.field}

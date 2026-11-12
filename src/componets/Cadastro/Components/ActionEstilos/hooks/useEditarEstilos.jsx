@@ -1,15 +1,14 @@
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
-import { get, post, put } from "../../../../../api/funcRequest";
-import axios from 'axios';
+import { get, put } from "../../../../../api/funcRequest";
 import { useQuery } from "react-query";
+import { registrarLogAuditoria } from "../../../../../services/auditLog";
 
 
 export const useEditarEstilos = ({dadosDetalheEstilos, handleClose, handleClick, usuarioLogado, optionsModulos}) => {
     const [descricao, setDescricao] = useState('')
     const [statusSelecionado, setStatusSelecionado] = useState([])
     const [subGrupoSelecionado, setSubGrupoSelecionado] = useState("")
-    const [ipUsuario, setIpUsuario] = useState('');
 
     const { data: dadosGrupoEstrutura = [], error: errorGrupoEstrutura, isLoading: isLoadingGrupoEstrutura, refetch: refetchGrupoEstrutura } = useQuery(
         'grupoEstrutura',
@@ -28,28 +27,6 @@ export const useEditarEstilos = ({dadosDetalheEstilos, handleClose, handleClick,
             setSubGrupoSelecionado({ value: dadosDetalheEstilos[0]?.ID_GRUPOESTILOS, label: `${dadosDetalheEstilos[0]?.COD_GRUPOESTILOS} - ${dadosDetalheEstilos[0]?.DS_GRUPOESTILOS}` })
         }
     }, [dadosDetalheEstilos])
-
-    const getIPUsuario = async () => {
-        let usuarioIP = null;
-
-        try {
-            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-            usuarioIP = ipWhoisData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ifconfig.me:", error);
-        }
-
-        if (!usuarioIP) {
-        try {
-            const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-            usuarioIP = ipifyData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ipify.org:", error);
-        }
-        }
-        setIpUsuario(usuarioIP);
-        return usuarioIP;
-    };
 
     const onSubmit = async () => {
         if(optionsModulos[0]?.ALTERAR == 'False') {
@@ -75,21 +52,13 @@ export const useEditarEstilos = ({dadosDetalheEstilos, handleClose, handleClick,
         }
         
         try {
-
             const response = await put('/listaEstilos/:id', postData)
-            const textDados = JSON.stringify(postData)
-            let textFuncao = 'CADASTRO / ATUALIZANDO ESTILOS';
-            const ip = await getIPUsuario();
 
-            const createtLog = {
-                IDFUNCIONARIO: String(usuarioLogado.id),
-                PATHFUNCAO: textFuncao,
-                DADOS: textDados,
-                IP: ip || 'Indisponível'
-            }
-
-            await post('/log-web', createtLog)
-
+            await registrarLogAuditoria({
+                idFuncionario: usuarioLogado?.id,
+                pathFuncao: 'CADASTRO / ATUALIZANDO ESTILOS',
+                dados: postData
+            })
             Swal.fire({
                 position: 'top-end',
                 icon: 'success',
@@ -103,20 +72,12 @@ export const useEditarEstilos = ({dadosDetalheEstilos, handleClose, handleClick,
             handleClick();
             handleClose();
             return response.data;
-
         } catch (error) {
-            const textDados = JSON.stringify(postData)
-            let textFuncao = 'CADASTRO / ERRO AO ATUALIZAR ESTILOS';
-            const ip = await getIPUsuario();
-            const createtLog = {
-                IDFUNCIONARIO: String(usuarioLogado.id),
-                PATHFUNCAO: textFuncao,
-                DADOS: textDados,
-                IP: ip || 'Indisponível'
-            }
-
-            const responseLog = await post('/log-web', createtLog)
-
+            await registrarLogAuditoria({
+                idFuncionario: usuarioLogado?.id,
+                pathFuncao: 'CADASTRO / ERRO AO ATUALIZAR ESTILOS',
+                dados: postData
+            })
 
             Swal.fire({
                 position: 'center',
@@ -132,7 +93,7 @@ export const useEditarEstilos = ({dadosDetalheEstilos, handleClose, handleClick,
             
             handleClick();
             handleClose();
-            return responseLog.data;
+            return;
         }
     }
 
@@ -147,4 +108,4 @@ export const useEditarEstilos = ({dadosDetalheEstilos, handleClose, handleClick,
         dadosGrupoEstrutura,
         onSubmit
     };
-};
+}; 

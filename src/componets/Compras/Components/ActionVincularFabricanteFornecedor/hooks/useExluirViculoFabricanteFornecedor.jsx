@@ -11,19 +11,19 @@ export const useExcluirVinculoFabricanteFornecedor = ({usuarioLogado, optionsMod
         let usuarioIP = null;
 
         try {
-            const { data: ipWhoisData } = await axios.get("http://ipwho.is/");
+            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
             usuarioIP = ipWhoisData?.ip;
         } catch (error) {
-            console.error("Erro ao buscar IP via ipwho.is:", error);
+            console.error("Erro ao buscar IP via ifconfig.me:", error);
         }
 
         if (!usuarioIP) {
-            try {
-                const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-                usuarioIP = ipifyData?.ip;
-            } catch (error) {
-                console.error("Erro ao buscar IP via ipify.org:", error);
-            }
+        try {
+            const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
+            usuarioIP = ipifyData?.ip;
+        } catch (error) {
+            console.error("Erro ao buscar IP via ipify.org:", error);
+        }
         }
         setIpUsuario(usuarioIP);
         return usuarioIP;
@@ -32,13 +32,16 @@ export const useExcluirVinculoFabricanteFornecedor = ({usuarioLogado, optionsMod
     const handleExcluir = async (IDFABRICANTEFORN) => {
         if(optionsModulos[0]?.ALTERAR == 'False') {
             Swal.fire({
-                title: 'Atenção',
-                text: `${usuarioLogado?.NOFUNCIONARIO} Você não tem permissão para excluir vínculos de Fornecedor-Fabricante.`,
-                icon: 'warning'
+                title: 'Acesso Negado!',
+                html: `${usuarioLogado?.NOFUNCIONARIO} <br/> Você não tem permissão para excluir vínculos de Fornecedor-Fabricante.`,
+                icon: 'warning',
+                customClass: {
+                    container: 'custom-swal',
+                }
             });
             return;
-
         }
+
         Swal.fire({
             title: `Certeza que Deseja Excluir o Vínculo do Fornecedor?`,
             text: 'Você não poderá reverter a ação!',
@@ -61,13 +64,13 @@ export const useExcluirVinculoFabricanteFornecedor = ({usuarioLogado, optionsMod
                 }
                 const response = await put(`/excluir-vinculo-fornecedor?IDFABRICANTEFORNOCEDOR=${IDFABRICANTEFORN}`, putData)
                 const textDados = JSON.stringify(putData)
-                let textoFuncao = 'COMPRAS/EXCLUSÃO VINCULO FORNECEDOR-FABRICANTE'
+                let textoFuncao = 'COMPRAS/EXCLUSÃO VINCULO FABRICANTE-FORNECEDOR'
                 const ipUsuario = await getIPUsuario();
                 const postData = {
                     IDFUNCIONARIO: String(usuarioLogado.id),
                     PATHFUNCAO: textoFuncao,
                     DADOS: textDados,
-                    IP: ipUsuario
+                    IP: ipUsuario || 'Indisponível'
                 }
         
                 await post('/log-web', postData)
@@ -85,13 +88,13 @@ export const useExcluirVinculoFabricanteFornecedor = ({usuarioLogado, optionsMod
                 }
                
                 const textDados = JSON.stringify(putData)
-                let textoFuncao = 'COMPRAS/ERRO AO EXCLUIR VINCULO FORNECEDOR-FABRICANTE'
+                let textoFuncao = 'COMPRAS/ERRO AO EXCLUIR VINCULO FABRICANTE-FORNECEDOR'
                 const ipUsuario = await getIPUsuario();
                 const postData = {
                     IDFUNCIONARIO: String(usuarioLogado.id),
                     PATHFUNCAO: textoFuncao,
                     DADOS: textDados,
-                    IP: ipUsuario
+                    IP: ipUsuario || 'Indisponível'
                 }
         
                 await post('/log-web', postData)

@@ -48,7 +48,7 @@ export const useCadastrarGrupoEstruturaMercadologica = ({handleClose, usuarioLog
             IDGRUPOEMPRESARIAL: usuarioLogado?.IDGRUPOEMPRESARIAL,
             STATIVO: statusSelecionado.value,
         }
-
+ 
         try {
             const response = await post('/cadastro-grupoEstrutura', postData)
             

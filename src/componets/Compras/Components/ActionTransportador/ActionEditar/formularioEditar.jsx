@@ -471,7 +471,7 @@ export const FormularioEditar = ({
                                     clearErrors("situacaoTransportador")
                                 }}
                             />
-                            {errors.situacaoTransportador && (
+                             {errors.situacaoTransportador && (
                                 <AlertError
                                     error={errors.situacaoTransportador}
                                     onClose={clearErrors}

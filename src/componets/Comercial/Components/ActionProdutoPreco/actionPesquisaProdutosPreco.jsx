@@ -22,7 +22,7 @@ export const ActionPesquisaProductoPreco = () => {
     { enabled: true, staleTime: 60 * 60 * 1000, }
   );
 
-  const { data: dadosEmpresas = [], error: errorEmpresas, isLoading: isLoadingEmpresas, refetch: refetchEmpresas } = useQuery(
+   const { data: dadosEmpresas = [], error: errorEmpresas, isLoading: isLoadingEmpresas, refetch: refetchEmpresas } = useQuery(
     ['listaEmpresaComercial', marcaSelecionada],
     async () => {
       const response = await get(`/listaEmpresaComercial?idMarca=${marcaSelecionada}`);
@@ -30,7 +30,6 @@ export const ActionPesquisaProductoPreco = () => {
     },
     { enabled: Boolean(marcaSelecionada), }
   );
-
 
   const fetchListaProdutos = async () => {
     const urlBase = `/lista-produtos?idEmpresa=${empresaSelecionada}`;

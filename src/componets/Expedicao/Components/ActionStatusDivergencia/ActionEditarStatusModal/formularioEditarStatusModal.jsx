@@ -70,7 +70,7 @@ export const FormularioEditarStatusDivergencia = ({
             console.log(`Erro de validação:\n${errorMessages.join('\n')}`);
         }
     };
-    
+
     return (
         <Fragment>
             <form onSubmit={handleSubmit(handleValidatedSubmit)}>

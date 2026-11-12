@@ -235,7 +235,8 @@ export const ActionPesquisaMetas = ({
         corCadastro={"danger"}
         IconCadastro={IoMdAdd}
         styleCadastro={{display: optionsModulos[0]?.CRIAR == 'True' ? 'block' : 'none'}}
-      
+ 
+
       />
       
 

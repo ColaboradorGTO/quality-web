@@ -733,9 +733,9 @@ export const FormularioEditar = ({
                     ButtonTypeCadastrar={ButtonTypeModal}
                     onClickButtonCadastrar={handleSubmit(handleValidatedSubmit)}
                     tipoBtnCadastrar={"submit"}
-                    textButtonCadastrar={"Salvar"}
+                    textButtonCadastrar={"Atualizar"}
                     corCadastrar={"success"}
-                    loadingTextCadastrar={"Cadastrando..."}
+                    loadingTextCadastrar={"Atualizando..."}
                     autoLoadingCadastrar={true}
                 />
             </form>

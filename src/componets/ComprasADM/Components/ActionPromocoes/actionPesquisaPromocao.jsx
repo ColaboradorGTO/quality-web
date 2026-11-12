@@ -4,80 +4,124 @@ import { InputField } from "../../../Buttons/Input";
 import { ButtonType } from "../../../Buttons/ButtonType";
 import { get } from "../../../../api/funcRequest";
 import { ActionListaPromocao } from "./actionListaPromocao";
-import { getDataAtual, getDataDoisMesesAtras } from "../../../../utils/dataAtual";
 import { MdAdd } from "react-icons/md";
 import { AiOutlineSearch } from "react-icons/ai";
 import { ActionCadastroPromocaoModal } from "./ActionCadastrar/actionCadastroPromocaoModal";
 import { useQuery } from "react-query";
 import { animacaoCarregamento, fecharAnimacaoCarregamento } from "../../../../utils/animationCarregamento"
+import { InputSelectAction } from "../../../Inputs/InputSelectAction";
 
-export const ActionPesquisaPromocao = () => {
+export const ActionPesquisaPromocao = ({ usuarioLogado }) => {
   const [tabelaVisivel, setTabelaVisivel] = useState(false);
   const [modalCadastro, setModalCadastro] = useState(false)
   const [dataPesquisaInicio, setDataPesquisaInicio] = useState("");
   const [dataPesquisaFim, setDataPesquisaFim] = useState("");
-  const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(1000)
-  
-  useEffect(() => {
-    const dataInicio = getDataDoisMesesAtras()
-    const dataFim = getDataAtual()
-    setDataPesquisaInicio(dataInicio)
-    setDataPesquisaFim(dataFim)
-  }, [])
+  const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
+  const [statusSelecionado, setstatusSelecionado] = useState("")
 
-  // const { data: dadosListaPromocao = [], error: errorPromocaoes, isLoading: isLoadingPromocoes } = useFetchData('listaPromocoes', '/listaPromocoes');
+  useEffect(() => {
+    const menuSalvo = localStorage.getItem('menuFilhoSelecionado');
+    if (menuSalvo) {
+      const menuParsed = JSON.parse(menuSalvo);
+      setMenuFilhoAtual(menuParsed);
+
+    }
+  }, []);
+
+
+  const { data: optionsModulos = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
+    ['menus-usuario-excecao', menuFilhoAtual?.ID],
+    async () => {
+      const response = await get(`/menus-usuario-excecao?idUsuario=${usuarioLogado?.id}&idMenuFilho=${menuFilhoAtual?.ID}`);
+
+      return response.data;
+    },
+    { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000, }
+  );
+ 
+  /* const fetchListaProdutosPromocao = async () => {
+      const urlBase = `/promocoes-ativas?dataPesquisaInicio=${dataInicio}&dataPesquisaFim=${dataFim}&status=${statusSelecionado}`;
+      let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
+      urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
+        try {
+        animacaoCarregamento('Carregando dados...', true);
   
+        const primeiraPagina = 1;
+        const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`);
+        const page = primeiraResposta.page || primeiraPagina;
+        const pageSize = primeiraResposta.pageSize || 1000;
+        const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
+        const totalPages = Math.ceil(totalRows / pageSize);
   
-  const fetchListaProdutos = async () => {
-    try {
-    
-      const urlApi = `/listaPromocoes?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}`;
-      const response = await get(urlApi);
-      
-      if (response.data.length && response.data.length === pageSize) {
-        let allData = [...response.data];
-        animacaoCarregamento(`Carregando... Página ${currentPage} de ${response.data.length}`, true);
+        let allData = [...(primeiraResposta.data || [])];
   
-        async function fetchNextPage(currentPage) {
-          try {
-            currentPage++;
-            const responseNextPage = await get(`${urlApi}&page=${currentPage}`);
-            if (responseNextPage.length) {
-              allData.push(...responseNextPage.data);
-              return fetchNextPage(currentPage);
-            } else {
-              return allData;
-            }
-          } catch (error) {
-            console.error('Erro ao buscar próxima página:', error);
-            throw error;
+        if (totalPages > 1) {
+          for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
+            animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true);
+            const responsePage = await get(`${urlApi}&page=${currentPage}`);
+            allData.push(...(responsePage.data || []));
           }
         }
   
-        await fetchNextPage(currentPage);
         return allData;
-      } else {
-        
-        return response.data;
+      } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+        throw error;
+      } finally {
+        fecharAnimacaoCarregamento();
       }
+  };
   
+  const { data: dadosListaPromocao = [], error: errorFuncionario, isLoading: isLoadingFuncionario, refetch: refetchListaProdutos } = useQuery(
+      ['promocoes-ativas'],
+      () => fetchListaProdutosPromocao(dataInicio, dataFim, currentPage, pageSize),
+      {
+        enabled: Boolean(isQueryData), staleTime: 5 * 60 * 1000,
+      }
+  ); */
+
+  const fetchListaProdutos = async () => {
+    // const urlBase = `/listaPromocoes?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}`;
+    const urlBase = `/promocoes-ativas?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&status=${statusSelecionado}`;
+    let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
+    urlApi = urlApi.replace('&page=1', '').replace('page=1', '')
+
+    try {
+      animacaoCarregamento('Carregando dados...', true);
+
+      const primeiraPagina = 1;
+      const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`);
+      const page = primeiraResposta.page || primeiraPagina;
+      const pageSize = primeiraResposta.pageSize || 1000;
+      const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
+      const totalPages = Math.ceil(totalRows / pageSize);
+
+      let allData = [...(primeiraResposta.data || [])];
+
+      if (totalPages > 1) {
+        for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
+          animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true);
+          const responsePage = await get(`${urlApi}&page=${currentPage}`);
+          allData.push(...(responsePage.data || []));
+        }
+      }
+
+      return allData;
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Erro ao buscar dados da api:', error);
       throw error;
     } finally {
       fecharAnimacaoCarregamento();
     }
   };
-    
+
   const { data: dadosListaPromocao = [], error: errorPromocao, isLoading: isLoadingPromocao, refetch: refetchListaPromocao } = useQuery(
-    ['listaPromocoes', dataPesquisaInicio, dataPesquisaFim, currentPage, pageSize],
-    () => fetchListaProdutos(dataPesquisaInicio, dataPesquisaFim, currentPage, pageSize),
-    { enabled: true, staleTime: 5 * 60 * 1000, cacheTime: 5 * 60 * 1000 }
+    ['listaPromocoes',],
+    () => fetchListaProdutos(),
+    { enabled: true, staleTime: 5 * 60 * 1000,  }
   )
 
   const handleClick = () => {
-    setCurrentPage(prevPage => prevPage + 1)
     refetchListaPromocao()
     setTabelaVisivel(true)
   }
@@ -86,6 +130,19 @@ export const ActionPesquisaPromocao = () => {
     setModalCadastro(true)
   }
 
+  const handleClickProdutoDestino = () => {
+
+  }
+
+  const handleClickProdutoOrigem = () => {
+
+  }
+
+  const options = [
+    { value: '', label: 'Selecione' },
+    { value: 'True', label: 'Ativa' },
+    { value: 'False', label: 'Inativa' },
+  ]
 
   return (
 
@@ -97,6 +154,17 @@ export const ActionPesquisaPromocao = () => {
         title="Programação -"
         subTitle="Promoções"
 
+        InputSelectMarcasComponent={InputSelectAction}
+        onChangeSelectMarcas={(e) => setstatusSelecionado(e.value)}
+        valueSelectMarca={statusSelecionado}
+        optionsMarcas={[
+          ...options.map((item) => ({
+            value: item.value,
+            label: item.label,
+          }))
+        ]}
+        labelSelectMarcas={"Status da Promoção"}
+
         InputFieldDTInicioComponent={InputField}
         valueInputFieldDTInicio={dataPesquisaInicio}
         labelInputFieldDTInicio={"Data Início"}
@@ -107,9 +175,10 @@ export const ActionPesquisaPromocao = () => {
         valueInputFieldDTFim={dataPesquisaFim}
         onChangeInputFieldDTFim={(e) => setDataPesquisaFim(e.target.value)}
 
+
         ButtonSearchComponent={ButtonType}
         linkNomeSearch={"Pesquisar"}
-        onButtonClickSearch={handleClick }
+        onButtonClickSearch={handleClick}
         corSearch={"primary"}
         IconSearch={AiOutlineSearch}
 
@@ -120,11 +189,17 @@ export const ActionPesquisaPromocao = () => {
         IconCadastro={MdAdd}
       />
 
-      <ActionListaPromocao dadosListaPromocao={dadosListaPromocao} />
+      <ActionListaPromocao 
+        dadosListaPromocao={dadosListaPromocao} 
+        usuarioLogado={usuarioLogado}
+        optionsModulos={optionsModulos}  
+      />
 
-      <ActionCadastroPromocaoModal 
+      <ActionCadastroPromocaoModal
         show={modalCadastro}
         handleClose={() => setModalCadastro(false)}
+        usuarioLogado={usuarioLogado}
+        optionsModulos={optionsModulos}
       />
 
     </Fragment>

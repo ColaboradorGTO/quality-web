@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
 import Swal from "sweetalert2";
-import { post, put } from "../../../../../api/funcRequest";
+import { put } from "../../../../../api/funcRequest";
+import { registrarLogAuditoria } from "../../../../../services/auditLog";
 
 
 export const useAlterarPrecoProdutosSelecionados = ({
@@ -9,33 +8,6 @@ export const useAlterarPrecoProdutosSelecionados = ({
     usuarioLogado,
     produtosSelecionados
 }) => {
-    const [ipUsuario, setIpUsuario] = useState('');
-
-
-    const getIPUsuario = async () => {
-        let usuarioIP = null;
-
-        try {
-            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-            usuarioIP = ipWhoisData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ifconfig.me:", error);
-        }
-
-        if (!usuarioIP) {
-        try {
-            const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-            usuarioIP = ipifyData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ipify.org:", error);
-        }
-        }
-        setIpUsuario(usuarioIP);
-        return usuarioIP;
-    };
-
-
-
     const onSubmit = async () => {
         if(optionsModulos[0]?.ALTERAR == 'False') {
             Swal.fire({
@@ -56,17 +28,12 @@ export const useAlterarPrecoProdutosSelecionados = ({
         try {
             const response = await put('/alteracoes-de-precos-resumo/:id', putData)
             
-                        
-            const textDados = JSON.stringify(putData)
-            let textFuncao = 'CADASTRO/EDITAR ALTERACAO DE PRECO';
-            const ipUsuario = await getIPUsuario();
-            const createtLog = {
-                IDFUNCIONARIO: String(usuarioLogado.id),
-                PATHFUNCAO: textFuncao,
-                DADOS: textDados,
-                IP: ipUsuario || 'Indisponível'
-            }
-            
+            await registrarLogAuditoria({
+                idFuncionario: usuarioLogado?.id,
+                pathFuncao: 'CADASTRO/EDITAR ALTERACAO DE PRECO',
+                dados: putData
+            })
+
             Swal.fire({
                 position: 'center',
                 icon: 'success',
@@ -78,21 +45,15 @@ export const useAlterarPrecoProdutosSelecionados = ({
                 }
             })
 
-            await post('/log-web', createtLog)
-
-
+      
             return response.data;
         } catch (error) {
-            const textDados = JSON.stringify(putData)
-            let textFuncao = 'CADASTRO/ERRO AO EDITAR ALTERACAO DE PRECO';
-            const ipUsuario = await getIPUsuario();
-            const createtLog = {
-                IDFUNCIONARIO: String(usuarioLogado.id),
-                PATHFUNCAO: textFuncao,
-                DADOS: textDados,
-                IP: ipUsuario || 'Indisponível'
-            }
-            await post('/log-web', createtLog)
+            await registrarLogAuditoria({
+                idFuncionario: usuarioLogado?.id,
+                pathFuncao: 'CADASTRO/ERRO AO EDITAR ALTERACAO DE PRECO',
+                dados: putData
+            })
+
             Swal.fire({
                 position: 'top-end',
                 icon: 'error',

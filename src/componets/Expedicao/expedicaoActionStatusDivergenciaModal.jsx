@@ -119,7 +119,6 @@ export const ExpedicaoActionStatusDivergenciaModal = ({ show, handleClose }) => 
 
         <FooterModal
           ButtonTypeCadastrar={ButtonTypeModal}
-          // onClickButtonCadastrar={inserirSD}
           onClickButtonCadastrar
           textButtonCadastrar={"Atualizar"}
 
