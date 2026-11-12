@@ -160,6 +160,7 @@ export const ActionListaVendasConvenio = ({ dadosVendasConvenio }) => {
       VRRECVOUCHER: item.VRRECVOUCHER,
       VRRECCONVENIO: item.VRRECCONVENIO,
       NumeroVenda: item.NumeroVenda,
+      DEST_CNPJ: item.DEST_CNPJ,
 
       VRRECCHEQUE: item.VRRECCHEQUE,
     }
@@ -194,6 +195,12 @@ export const ActionListaVendasConvenio = ({ dadosVendasConvenio }) => {
       field: 'NUCPF',
       header: 'CPF',
       body: row => <th style={{}}> {row.NUCPF}</th>,
+      sortable: true,
+    },
+    {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{}}>{row.DEST_CNPJ}</th>,
       sortable: true,
     },
     {
@@ -280,13 +287,14 @@ export const ActionListaVendasConvenio = ({ dadosVendasConvenio }) => {
       footer: formatMoeda(cacularTotalValorRecebidoConvenio()),
       sortable: true,
     },
+
   ]
 
   const footerGroup = (
     <ColumnGroup>
 
       <Row>
-        <Column footer="Total Valores" colSpan={6} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem', textAlign: 'center' }} />
+        <Column footer="Total Valores" colSpan={7} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem', textAlign: 'center' }} />
         <Column footer={formatMoeda(cacularTotalValorBrutoNF())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={formatMoeda(cacularTotalValorDescontoNF())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={formatMoeda(cacularTotalValorLiquidoNF())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />

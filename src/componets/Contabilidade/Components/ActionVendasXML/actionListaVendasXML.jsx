@@ -95,6 +95,9 @@ export const ActionListaVendasXML = ({
       VRTOTALPAGO: item.VRTOTALPAGO,
       PROTNFE_INFPROT_XMOTIVO: item.PROTNFE_INFPROT_XMOTIVO,
       XML_FORMATADO: item.XML_FORMATADO || '',
+      DEST_CNPJ: item.DEST_CNPJ,
+      DEST_CPF: item.DEST_CPF,
+
     }
 
   })
@@ -118,6 +121,19 @@ export const ActionListaVendasXML = ({
       body: row => <th>{row.IDVENDA}</th>,
       sortable: true,
     },
+    {
+      field: 'DEST_CPF',
+      header: 'CPF',
+      body: row => <th style={{}}>{row.DEST_CPF}</th>,
+      sortable: true,
+    },
+    {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{}}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
     {
       field: 'SERIE',
       header: 'Série',
@@ -281,6 +297,7 @@ export const ActionListaVendasXML = ({
             filterDisplay="menu"
             showGridlines
             stripedRows
+            cellMemo={false}
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
           >
             {colunasVendasContigencia.map(coluna => (

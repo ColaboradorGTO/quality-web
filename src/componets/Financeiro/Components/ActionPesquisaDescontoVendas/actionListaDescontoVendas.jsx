@@ -22,7 +22,7 @@ export const ActionListaDescontoVendas = ({ dadosDescontoVendas }) => {
   const onPageChange = (event) => {
     setFirst(event.first);
     setRows(event.rows);
-  }  
+  }
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
   };
@@ -62,18 +62,18 @@ export const ActionListaDescontoVendas = ({ dadosDescontoVendas }) => {
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(dadosExcel);
     const workbook = XLSX.utils.book_new();
-    const header = ['Venda', 'Data', 'Loja', 'Caixa', 'Operador', 'Vl. Dinheiro', 'Vl. Cartão', ];
+    const header = ['Venda', 'Data', 'Loja', 'Caixa', 'Operador', 'Vl. Dinheiro', 'Vl. Cartão',];
     worksheet['!cols'] = [
-      { wpx: 100, caption: 'Venda' }, 
-      { wpx: 150, caption: 'Data' }, 
-      { wpx: 200, caption: 'Loja' }, 
-      { wpx: 100, caption: 'Caixa' }, 
-      { wpx: 250, caption: 'Operador' }, 
-      { wpx: 100, caption: 'Vl. Dinheiro' }, 
-      { wpx: 100, caption: 'Vl. Cartão' }, 
+      { wpx: 100, caption: 'Venda' },
+      { wpx: 150, caption: 'Data' },
+      { wpx: 200, caption: 'Loja' },
+      { wpx: 100, caption: 'Caixa' },
+      { wpx: 250, caption: 'Operador' },
+      { wpx: 100, caption: 'Vl. Dinheiro' },
+      { wpx: 100, caption: 'Vl. Cartão' },
 
-      
-    ]; 
+
+    ];
     XLSX.utils.sheet_add_aoa(worksheet, [header], { origin: 'A1' });
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Desconto Vendas');
     XLSX.writeFile(workbook, 'desconto_vendas.xlsx');
@@ -136,10 +136,12 @@ export const ActionListaDescontoVendas = ({ dadosDescontoVendas }) => {
       percentualDescontoCliente: toFloat(percentualDescontoCliente),
       percentualLiquido: toFloat(percentualLiquido),
       totalVendido: totalVendido,
+      DEST_CNPJ: item.DEST_CNPJ,
+      DEST_CPF: item.DEST_CPF,
 
       contador
     }
-  }) :[];
+  }) : [];
 
   const calcularTotalVendido = () => {
     let total = dadosDescontoVendas[0]?.VLTOTALVENDIDO;
@@ -162,12 +164,12 @@ export const ActionListaDescontoVendas = ({ dadosDescontoVendas }) => {
     const totalGeral = calcularTotalGeral(field);
     const totalVendido = calcularTotalVendido();
     const percentual = totalVendido > 0 ? (totalGeral * 100) / totalVendido : 0;
-    
+
     return `${formatMoeda(totalPagina)} (${formatMoeda(totalGeral)} - ${percentual.toFixed(6)}% do total bruto da venda)`;
   };
 
 
- 
+
   const calcularTotalDinheiroPercentual = () => calcularPercentualFooter('VRRECDINHEIRO', 'Dinheiro');
   const calcularPercentualCartao = () => calcularPercentualFooter('VRRECCARTAO', 'Cartão');
   const calcularPercentualConvenio = () => calcularPercentualFooter('VRRECCONVENIO', 'Convênio');
@@ -189,25 +191,25 @@ export const ActionListaDescontoVendas = ({ dadosDescontoVendas }) => {
     {
       field: 'DTHORAFECHAMENTO',
       header: 'Data',
-      body: row => {return <p style={{width: 150, margin: '0px', fontWeight: 600}}>{row.DTHORAFECHAMENTO}</p>},
+      body: row => { return <p style={{ width: 150, margin: '0px', fontWeight: 600 }}>{row.DTHORAFECHAMENTO}</p> },
       sortable: true,
     },
     {
       field: 'NOFANTASIA',
       header: 'Loja',
-      body: row => {return <p style={{width: 170, margin: 0, fontWeight: 600}}>{row.NOFANTASIA}</p>},
+      body: row => { return <p style={{ width: 170, margin: 0, fontWeight: 600 }}>{row.NOFANTASIA}</p> },
       sortable: true,
     },
     {
       field: 'DSCAIXAFECHAMENTO',
       header: 'Caixa',
-      body: row => {return <p style={{width: 80, margin: 0,fontWeight: 600}}>{row.DSCAIXAFECHAMENTO}</p>},
+      body: row => { return <p style={{ width: 80, margin: 0, fontWeight: 600 }}>{row.DSCAIXAFECHAMENTO}</p> },
       sortable: true,
     },
     {
       field: 'MATOPERADORFECHAMENTO',
       header: 'Operador',
-      body: row => <p style={{width: 300,margin: 0,fontWeight: 600}}> {`${row.MATOPERADORFECHAMENTO} - ${row.OPERADORFECHAMENTO}`} </p>,
+      body: row => <p style={{ width: 300, margin: 0, fontWeight: 600 }}> {`${row.MATOPERADORFECHAMENTO} - ${row.OPERADORFECHAMENTO}`} </p>,
       footer: (row) => {
         return (
           <div>
@@ -222,7 +224,7 @@ export const ActionListaDescontoVendas = ({ dadosDescontoVendas }) => {
     {
       field: 'CPF_OR_CNPJ_CLIENTE',
       header: 'CPF/CNPJ Cliente',
-      body: row => <p style={{width: 300,margin: 0,fontWeight: 600}}> {row.CPF_OR_CNPJ_CLIENTE} </p>,
+      body: row => <p style={{ width: 300, margin: 0, fontWeight: 600 }}> {row.CPF_OR_CNPJ_CLIENTE} </p>,
       footer: (row) => {
         return (
           <div>
@@ -234,11 +236,25 @@ export const ActionListaDescontoVendas = ({ dadosDescontoVendas }) => {
       },
       sortable: true,
     },
+  {
+      field: 'DEST_CPF',
+      header: 'DEST CPF',
+      body: row => <th style={{ }}>{row.DEST_CPF}</th>,
+      sortable: true,
+    },
+     {
+      field: 'DEST_CNPJ',
+      header: 'DEST CNPJ',
+      body: row => <th style={{ }}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
+
     {
       field: 'VRRECDINHEIRO',
       header: 'Vl. Dinheiro',
       body: row => <th>{formatMoeda(row.VRRECDINHEIRO)}</th>,
-      footer: (row) => {return <p style={{ fontWeight: 900 }}>{calcularTotalDinheiroPercentual()}</p> },
+      footer: (row) => { return <p style={{ fontWeight: 900 }}>{calcularTotalDinheiroPercentual()}</p> },
       sortable: true,
     },
     {
@@ -252,56 +268,56 @@ export const ActionListaDescontoVendas = ({ dadosDescontoVendas }) => {
       field: 'VRRECCONVENIO',
       header: 'Vl. Convênio',
       body: row => <th>{formatMoeda(row.VRRECCONVENIO)}</th>,
-      footer: (row) => {return <p style={{ fontWeight: 600 }}>{calcularPercentualConvenio()}</p>},
+      footer: (row) => { return <p style={{ fontWeight: 600 }}>{calcularPercentualConvenio()}</p> },
       sortable: true,
     },
     {
       field: 'VRRECPOS',
       header: 'Vl. POS',
       body: row => <th>{formatMoeda(row.VRRECPOS)}</th>,
-      footer: (row) => {return <p style={{ fontWeight: 600 }}>{calcularPercentualPos()}</p>  },
+      footer: (row) => { return <p style={{ fontWeight: 600 }}>{calcularPercentualPos()}</p> },
       sortable: true,
     },
     {
       field: 'VRRECVOUCHER',
       header: 'Vl. Voucher',
       body: row => <th>{formatMoeda(row.VRRECVOUCHER)}</th>,
-      footer: (row) => {return <p style={{ fontWeight: 600 }}>{calcularPercentualVoucher()}</p>},
+      footer: (row) => { return <p style={{ fontWeight: 600 }}>{calcularPercentualVoucher()}</p> },
       sortable: true,
     },
     {
       field: 'VALORTOTALPRODUTOBRUTO',
       header: 'Vl. Bruto',
       body: row => <th>{formatMoeda(row.VALORTOTALPRODUTOBRUTO)}</th>,
-      footer: (row) => {return <p style={{ fontWeight: 600 }}>{calcularPercentualBruto()}</p>},
+      footer: (row) => { return <p style={{ fontWeight: 600 }}>{calcularPercentualBruto()}</p> },
       sortable: true,
     },
     {
       field: 'VLTOTALDESCONTOFUNCIONARIO',
       header: 'Vl. Desc. Func.',
       body: row => <th>{formatMoeda(row.VLTOTALDESCONTOFUNCIONARIO)}</th>,
-      footer: (row) => {return <p style={{ fontWeight: 600 }}>{calcularPercentualDescontoFuncionario()}</p>   },
+      footer: (row) => { return <p style={{ fontWeight: 600 }}>{calcularPercentualDescontoFuncionario()}</p> },
       sortable: true,
     },
     {
       field: 'VLTOTALDESCONTOCLIENTE',
       header: 'Vl. Desc. Cliente',
       body: row => <th>{formatMoeda(row.VLTOTALDESCONTOCLIENTE)}</th>,
-      footer: (row) => {return <p style={{ fontWeight: 600 }}>{calcularPercentualDescontoCliente()}</p> },
+      footer: (row) => { return <p style={{ fontWeight: 600 }}>{calcularPercentualDescontoCliente()}</p> },
       sortable: true,
     },
     {
       field: 'VRDESCONTO',
       header: 'Vl. Desconto Total',
       body: row => <th>{formatMoeda(row.VRDESCONTO)}</th>,
-      footer: (row) => {return <p style={{ fontWeight: 600 }}>{calcularPercentualDesconto()}</p>},
+      footer: (row) => { return <p style={{ fontWeight: 600 }}>{calcularPercentualDesconto()}</p> },
       sortable: true,
     },
     {
       field: 'TOTALLIQUIDO',
       header: 'Vl. Pago',
       body: row => <th>{formatMoeda(row.TOTALLIQUIDO)}</th>,
-      footer: (row) => {return <p style={{ fontWeight: 600 }}>{calcularPercentualLiquido()}</p>   },
+      footer: (row) => { return <p style={{ fontWeight: 600 }}>{calcularPercentualLiquido()}</p> },
       sortable: true,
     }
   ]
@@ -311,21 +327,21 @@ export const ActionListaDescontoVendas = ({ dadosDescontoVendas }) => {
   const footerGroup = (
     <ColumnGroup>
 
-      <Row> 
-        
+      <Row>
+
         {/* <Column footer={calcularTotalVendido()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} /> */}
-        <Column footer={`Total Venda Bruta do Período ${formatMoeda(calcularTotalVendido())}`} colSpan={6} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem', textAlign: 'center' }} />
+        <Column footer={`Total Venda Bruta do Período ${formatMoeda(calcularTotalVendido())}`} colSpan={8} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem', textAlign: 'center' }} />
         <Column footer={calcularTotalDinheiroPercentual()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
-        <Column footer={calcularPercentualCartao()}  footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }}/>
-   
-        <Column footer={calcularPercentualConvenio()}  footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }}/>
-        <Column footer={calcularPercentualPos()}  footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }}/>
-        <Column footer={calcularPercentualVoucher()}  footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }}/>
-        <Column footer={calcularPercentualBruto()}  footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }}/>
-        <Column footer={calcularPercentualDescontoFuncionario()}  footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }}/>
-        <Column footer={calcularPercentualDescontoCliente()}  footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }}/>
-        <Column footer={calcularPercentualDesconto()}  footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }}/>
-        <Column footer={calcularPercentualLiquido()}  footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }}/>
+        <Column footer={calcularPercentualCartao()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
+
+        <Column footer={calcularPercentualConvenio()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
+        <Column footer={calcularPercentualPos()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
+        <Column footer={calcularPercentualVoucher()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
+        <Column footer={calcularPercentualBruto()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
+        <Column footer={calcularPercentualDescontoFuncionario()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
+        <Column footer={calcularPercentualDescontoCliente()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
+        <Column footer={calcularPercentualDesconto()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
+        <Column footer={calcularPercentualLiquido()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
 
       </Row>
 
@@ -350,7 +366,7 @@ export const ActionListaDescontoVendas = ({ dadosDescontoVendas }) => {
             exportToPDF={exportToPDF}
           />
         </div>
-       
+
         <div className="card" ref={dataTableRef}>
           <DataTable
             title="Lista Detalhada"

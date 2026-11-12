@@ -146,6 +146,8 @@ export const ActionListaVendasConciliacao = ({ dadosVendasConciliacao }) => {
       NSU: item.NSU || "",
       NUAUTORIZACAO: item.NUAUTORIZACAO,
       DSADQUIRENTE: item.DSADQUIRENTE,
+      DEST_CNPJ: item.DEST_CNPJ,
+      DEST_CPF: item.DEST_CPF,
       contador
     }
   });
@@ -191,6 +193,19 @@ export const ActionListaVendasConciliacao = ({ dadosVendasConciliacao }) => {
       body: row => <th style={{}}>{row.IDVENDA}</th>,
       sortable: true,
     },
+    {
+      field: 'DEST_CPF',
+      header: 'CPF',
+      body: row => <th style={{}}>{row.DEST_CPF}</th>,
+      sortable: true,
+    },
+    {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{}}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
     {
       field: 'DATA',
       header: 'DT VENDA',

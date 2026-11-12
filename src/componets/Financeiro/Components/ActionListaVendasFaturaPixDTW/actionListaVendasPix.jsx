@@ -89,6 +89,9 @@ export const ActionListaVendasPIX = ({ dadosVendasPix, optionsModulos, usuarioLo
       DATAVENDA: item.DATAVENDA,
       DATA_COMPENSACAO: item.DATA_COMPENSACAO,
       NUAUTORIZACAO: item.NUAUTORIZACAO,
+      DEST_CNPJ: item.DEST_CNPJ,
+      DEST_CPF: item.DEST_CPF,
+
     }
   }) : [];
 
@@ -113,6 +116,19 @@ export const ActionListaVendasPIX = ({ dadosVendasPix, optionsModulos, usuarioLo
       body: row => <th style={{ color: 'blue' }}>{row.IDVENDA}</th>,
       sortable: true,
     },
+    {
+      field: 'DEST_CPF',
+      header: 'CPF',
+      body: row => <th style={{ color: 'blue' }}>{row.DEST_CPF}</th>,
+      sortable: true,
+    },
+    {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{ color: 'blue' }}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
     {
       field: 'DSTIPOPAGAMENTO',
       header: 'Tipo',
@@ -169,7 +185,7 @@ export const ActionListaVendasPIX = ({ dadosVendasPix, optionsModulos, usuarioLo
   const footerGroup = (
     <ColumnGroup>
       <Row>
-        <Column footer="Total Vendas " colSpan={4} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem', textAlign: 'center' }} />
+        <Column footer="Total Vendas " colSpan={6} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem', textAlign: 'center' }} />
         <Column footer={formatMoeda(calcularTotalValorPix())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
         <Column colSpan={5} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
       </Row>

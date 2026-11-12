@@ -20,8 +20,8 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
   const dataTableRef = useRef();
 
   const onPageChange = (event) => {
-      setFirst(event.first);
-      setRows(event.rows);
+    setFirst(event.first);
+    setRows(event.rows);
   };
 
   const onGlobalFilterChange = (e) => {
@@ -37,7 +37,7 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.autoTable({
-      head: [['Nº', 'Empresa', 'Matrícula', 'Funcionário', 'QTD Vendas', 'QTD Produtos', 'Valor Total Vendas', 'Valor Total Venda Liq', 'Valor Total Custo' ]],
+      head: [['Nº', 'Empresa', 'Matrícula', 'Funcionário', 'QTD Vendas', 'QTD Produtos', 'Valor Total Vendas', 'Valor Total Venda Liq', 'Valor Total Custo']],
       body: dados.map(item => [
         item.contador,
         item.NOFANTASIA,
@@ -59,7 +59,7 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(dados);
     const workbook = XLSX.utils.book_new();
-    const header = ['Nº', 'Empresa', 'Matrícula', 'Funcionário', 'QTD Vendas', 'QTD Produtos', 'Valor Total Vendas', 'Valor Total Venda Liq', 'Valor Total Custo' ]
+    const header = ['Nº', 'Empresa', 'Matrícula', 'Funcionário', 'QTD Vendas', 'QTD Produtos', 'Valor Total Vendas', 'Valor Total Venda Liq', 'Valor Total Custo']
     worksheet['!cols'] = [
       { wpx: 100, caption: 'Nº' },
       { wpx: 200, caption: 'Empresa' },
@@ -85,7 +85,7 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
   const dados = dadosVendasVendedor.map((item, index) => {
     let contador = index + 1;
     const valorTotalVendaLiquida = calcularValorTotalVendaLiquida(item);
-    
+
     return {
       contador,
       NOFANTASIA: item.NOFANTASIA,
@@ -97,9 +97,12 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
       VRRECVOUCHER: item.VRRECVOUCHER,
       valorTotalVendaLiquida: valorTotalVendaLiquida,
       PRECO_COMPRA: item.PRECO_COMPRA,
+      DEST_CNPJ: item.DEST_CNPJ,
+      DEST_CPF: item.DEST_CPF,
+
     }
   });
-  
+
   const colunasVendasVendedor = [
     {
       field: 'contador',
@@ -110,7 +113,7 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
     {
       field: 'NOFANTASIA',
       header: 'Empresa',
-      body: row => <p style={{margin: 0, width: '200px', fontWeight: 600}}>{row.NOFANTASIA}</p>,
+      body: row => <p style={{ margin: 0, width: '200px', fontWeight: 600 }}>{row.NOFANTASIA}</p>,
       sortable: true
     },
     {
@@ -122,9 +125,22 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
     {
       field: 'VENDEDOR_NOME',
       header: 'Funcionário',
-      body: row => <p style={{margin: 0, width: '200px', fontWeight: 600}}>{row.VENDEDOR_NOME}</p>,
+      body: row => <p style={{ margin: 0, width: '200px', fontWeight: 600 }}>{row.VENDEDOR_NOME}</p>,
       sortable: true
     },
+    {
+      field: 'DEST_CPF',
+      header: 'CPF',
+      body: row => <th style={{margin: 0, width: '200px', fontWeight: 600}}>{row.DEST_CPF}</th>,
+      sortable: true,
+    },
+    {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{margin: 0, width: '200px', fontWeight: 600}}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
     {
       field: 'QTD_VENDAS',
       header: 'Quantidade Vendas',
@@ -134,7 +150,7 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
     {
       field: 'QTD_PRODUTOS',
       header: 'Quantidade Produtos',
-      body: row =><th >{row.QTD_PRODUTOS}</th>,
+      body: row => <th >{row.QTD_PRODUTOS}</th>,
       sortable: true
     },
     {
@@ -162,7 +178,7 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
       sortable: true
     }
   ]
- 
+
   const filtrarDados = (dados, filtro) => {
     if (!filtro) return dados;
 
@@ -183,38 +199,38 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
     const dadosFiltrados = filtrarDados(dados, globalFilterValue);
     const firstIndex = first;
     const lastIndex = first + rows;
-    const dataPaginada = dadosFiltrados.slice(firstIndex, lastIndex); 
+    const dataPaginada = dadosFiltrados.slice(firstIndex, lastIndex);
     return dataPaginada.reduce((total, item) => total + toFloat(item[field] || 0), 0);
   };
 
   const calcularTotalValorCusto = () => {
     const totalPagina = calcularTotal('PRECO_COMPRA');
-    const total = calcularTotalPagina('PRECO_COMPRA' );
+    const total = calcularTotalPagina('PRECO_COMPRA');
     return `${formatMoeda(totalPagina)}   (${formatMoeda(total)} total)`;
   };
   const calcularTotalVendaLiquidaVendasVendedor = () => {
     const totalPagina = calcularTotal('valorTotalVendaLiquida');
-    const total = calcularTotalPagina('valorTotalVendaLiquida' );
+    const total = calcularTotalPagina('valorTotalVendaLiquida');
     return `${formatMoeda(totalPagina)}   (${formatMoeda(total)} total)`;
   };
   const calcularTotalValorVoucher = () => {
     const totalPagina = calcularTotal('VRRECVOUCHER');
-    const total = calcularTotalPagina('VRRECVOUCHER' );
+    const total = calcularTotalPagina('VRRECVOUCHER');
     return `${formatMoeda(totalPagina)}   (${formatMoeda(total)} total)`;
   };
   const calcularTotalVendaBrutaVendasVendedor = () => {
     const totalPagina = calcularTotal('VRTOTALVENDA');
-    const total = calcularTotalPagina('VRTOTALVENDA' );
+    const total = calcularTotalPagina('VRTOTALVENDA');
     return `${formatMoeda(totalPagina)}   (${formatMoeda(total)} total)`;
   };
   const calcularTotalQuantidadeProdutos = () => {
     const totalPagina = calcularTotal('QTD_PRODUTOS');
-    const total = calcularTotalPagina('QTD_PRODUTOS' );
+    const total = calcularTotalPagina('QTD_PRODUTOS');
     return `${formatMoeda(totalPagina)}   (${formatMoeda(total)} total)`;
   };
   const calcularTotalQuantidadeVendas = () => {
     const totalPagina = calcularTotal('QTD_VENDAS');
-    const total = calcularTotalPagina('QTD_VENDAS' );
+    const total = calcularTotalPagina('QTD_VENDAS');
     return `${formatMoeda(totalPagina)}   (${formatMoeda(total)} total)`;
   };
 
@@ -222,15 +238,15 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
   const footerGroup = (
     <ColumnGroup>
 
-      <Row> 
-        <Column footer="Total " colSpan={4} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem', textAlign: 'center' }} />
+      <Row>
+        <Column footer="Total " colSpan={6} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem', textAlign: 'center' }} />
         <Column footer={calcularTotalQuantidadeVendas()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={calcularTotalQuantidadeProdutos()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={calcularTotalVendaBrutaVendasVendedor()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={calcularTotalValorVoucher()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={calcularTotalVendaLiquidaVendasVendedor()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={calcularTotalValorCusto()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
-        <Column footer={""} colSpan={''}  footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }}/>
+        <Column footer={""} colSpan={''} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
       </Row>
     </ColumnGroup>
   )
@@ -287,7 +303,7 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
                 footer={coluna.footer}
                 sortable={coluna.sortable}
                 headerStyle={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
-                footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem'}}
+                footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }}
                 bodyStyle={{ fontSize: '0.8rem' }}
 
               />

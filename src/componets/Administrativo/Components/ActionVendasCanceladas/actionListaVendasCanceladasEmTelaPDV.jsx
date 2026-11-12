@@ -143,6 +143,8 @@ export const ActionListaVendasCanceladasEmTelaPDV = ({
       VRTOTALVENDA: item.VRTOTALVENDA,
       STCONTINGENCIA: item.STCONTINGENCIA,
       XML_FORMATADO: item.XML_FORMATADO,
+      DEST_CNPJ: item.DEST_CNPJ,
+      DEST_CPF: item.DEST_CPF,
       contador
     }
   });
@@ -161,6 +163,19 @@ export const ActionListaVendasCanceladasEmTelaPDV = ({
       body: row => <p style={{ fontWeight: 600, width: '200px', margin: '0px' }}> {row.NOFANTASIA}</p>,
       sortable: true,
     },
+    {
+      field: 'DEST_CPF',
+      header: 'CPF',
+      body: row => <th style={{}}>{row.DEST_CPF}</th>,
+      sortable: true,
+    },
+    {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{}}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
     {
       field: 'DSCAIXA',
       header: 'Caixa',

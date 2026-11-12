@@ -16,7 +16,7 @@ import { Row } from "primereact/row";
 import { toFloat } from "../../../../utils/toFloat";
 
 
-export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenioDesconto}) => {
+export const ActionListaVendasDescontoFuncionario = ({ dadosVendasConvenioDesconto }) => {
   const [modalPagamento, setModalPagamento] = useState(false);
   const [dadosPagamentoModal, setDadosPagamentoModal] = useState([]);
   const [globalFilterValue, setGlobalFilterValue] = useState('');
@@ -63,7 +63,7 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenioDescont
     const header = ['Nº', 'Caixa', 'Nº Venda', 'NFCe', 'Abertura', 'Operador', 'Conveniado', 'CPF', 'Valor Bruto', 'Desconto', 'Valor Líquido', 'OBS']
     worksheet['!cols'] = [
       { wpx: 100, caption: 'Nº' },
-      { wpx: 100, caption: 'Caixa'},
+      { wpx: 100, caption: 'Caixa' },
       { wpx: 100, caption: 'Nº Venda' },
       { wpx: 100, caption: 'NFCe' },
       { wpx: 100, caption: 'Abertura' },
@@ -97,6 +97,7 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenioDescont
       VRDESPAGO: item.VRDESPAGO,
       VRLIQPAGO: item.VRLIQPAGO,
       TXTMOTIVODESCONTO: item.TXTMOTIVODESCONTO,
+      DEST_CNPJ: item.DEST_CNPJ
     };
   });
 
@@ -105,73 +106,80 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenioDescont
     {
       field: 'contador',
       header: 'Nº',
-      body: row => <th style={{color: 'blue'}}>{row.contador}</th>,
+      body: row => <th style={{ color: 'blue' }}>{row.contador}</th>,
       sortable: true
     },
     {
       field: 'IDCAIXAWEB',
       header: 'Caixa',
-      body: row => <p style={{color: 'blue', margin: 0, width: '100px', fontWeight: 600}}>{ row.IDCAIXAWEB}</p>,
+      body: row => <p style={{ color: 'blue', margin: 0, width: '100px', fontWeight: 600 }}>{row.IDCAIXAWEB}</p>,
       sortable: true
     },
     {
       field: 'IDVENDA',
       header: 'Nº Venda',
-      body: row => <p style={{color: 'blue', margin: 0, width: '100px', fontWeight: 600}}>{row.IDVENDA}</p>,
+      body: row => <p style={{ color: 'blue', margin: 0, width: '100px', fontWeight: 600 }}>{row.IDVENDA}</p>,
       sortable: true
     },
     {
       field: 'NFE_INFNFE_IDE_NNF',
       header: 'NFCe',
-      body: row => <th style={{color: 'blue'}}>{row.NFE_INFNFE_IDE_NNF}</th>,
+      body: row => <th style={{ color: 'blue' }}>{row.NFE_INFNFE_IDE_NNF}</th>,
       sortable: true
     },
     {
       field: 'DTHORAFECHAMENTO',
       header: 'Abertura',
-      body: row => <p style={{color: 'blue', margin: 0, width: '150px', fontWeight: 600}}>{row.DTHORAFECHAMENTO}</p>,
+      body: row => <p style={{ color: 'blue', margin: 0, width: '150px', fontWeight: 600 }}>{row.DTHORAFECHAMENTO}</p>,
       sortable: true
     },
     {
       field: 'NOFUNCIONARIO',
       header: 'Operador',
-      body: row => <p style={{color: 'blue', margin: 0, width: '200px', fontWeight: 600}}>{row.NOFUNCIONARIO}</p>,
+      body: row => <p style={{ color: 'blue', margin: 0, width: '200px', fontWeight: 600 }}>{row.NOFUNCIONARIO}</p>,
       sortable: true
     },
     {
       field: 'NOCONVENIADO',
       header: 'Conveniado',
-      body: row => <p style={{color: 'blue', margin: 0, width: '300px', fontWeight: 600}}>{row.NOCONVENIADO}</p>,
+      body: row => <p style={{ color: 'blue', margin: 0, width: '300px', fontWeight: 600 }}>{row.NOCONVENIADO}</p>,
       sortable: true
     },
     {
       field: 'CPFCONVENIADO',
       header: 'CPF',
-      body: row => <th style={{color: 'blue'}}>{row.CPFCONVENIADO}</th>,
+      body: row => <th style={{ color: 'blue' }}>{row.CPFCONVENIADO}</th>,
       sortable: true
     },
     {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{ color: 'blue' }}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
+    {
       field: 'VRBRUTOPAGO',
       header: 'Valor Bruto',
-      body: row => <th style={{color: 'blue'}}>{formatMoeda(row.VRBRUTOPAGO)}</th>,
+      body: row => <th style={{ color: 'blue' }}>{formatMoeda(row.VRBRUTOPAGO)}</th>,
       sortable: true
     },
     {
       field: 'VRDESPAGO',
       header: 'Desconto',
-      body: row => <th style={{color: 'blue'}}>{formatMoeda(row.VRDESPAGO)}</th>,
+      body: row => <th style={{ color: 'blue' }}>{formatMoeda(row.VRDESPAGO)}</th>,
       sortable: true
     },
     {
       field: 'VRLIQPAGO',
       header: 'Valor Líquido',
-      body: row => <th style={{color: 'blue'}}>{formatMoeda(row.VRLIQPAGO)}</th>,
+      body: row => <th style={{ color: 'blue' }}>{formatMoeda(row.VRLIQPAGO)}</th>,
       sortable: true
     },
     {
       field: 'TXTMOTIVODESCONTO',
       header: 'OBS',
-      body: row => <p style={{color: 'blue', margin: 0, width: '200px', fontWeight: 600}}>{row.TXTMOTIVODESCONTO}</p>,
+      body: row => <p style={{ color: 'blue', margin: 0, width: '200px', fontWeight: 600 }}>{row.TXTMOTIVODESCONTO}</p>,
       sortable: true
     },
     {
@@ -197,15 +205,15 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenioDescont
     }
   ]
 
-  const calcularTotalVrBruto  = () => {
+  const calcularTotalVrBruto = () => {
     return dados.reduce((total, dados) => total + toFloat(dados.VRBRUTOPAGO), 0);
   }
 
-  const calcularTotalVrDesconto  = () => {
+  const calcularTotalVrDesconto = () => {
     return dados.reduce((total, dados) => total + toFloat(dados.VRDESPAGO), 0);
   }
 
-  const calcularTotalVrLiq  = () => {
+  const calcularTotalVrLiq = () => {
     return dados.reduce((total, dados) => total + toFloat(dados.VRLIQPAGO), 0);
   }
 
@@ -231,11 +239,11 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenioDescont
   const footerGroup = (
     <ColumnGroup>
       <Row>
-        <Column footer="Total Vendas Convenio Desconto" colSpan={8} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem', textAlign: 'center' }} />
-        <Column footer={formatMoeda(calcularTotalVrBruto())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }}/>
-        <Column footer={formatMoeda(calcularTotalVrDesconto())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }}/>
-        <Column footer={formatMoeda(calcularTotalVrLiq())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }}/>
-        <Column footer={""} colSpan={2} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }}/>
+        <Column footer="Total Vendas Convenio Desconto" colSpan={9} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem', textAlign: 'center' }} />
+        <Column footer={formatMoeda(calcularTotalVrBruto())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
+        <Column footer={formatMoeda(calcularTotalVrDesconto())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
+        <Column footer={formatMoeda(calcularTotalVrLiq())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
+        <Column footer={""} colSpan={2} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
 
       </Row>
     </ColumnGroup>
@@ -249,16 +257,16 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenioDescont
           <h2>Vendas Convenio Desconto Funcionário</h2>
         </div>
         <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
-            <HeaderTable
-              globalFilterValue={globalFilterValue}
-              onGlobalFilterChange={onGlobalFilterChange}
-              handlePrint={handlePrint}
-              exportToExcel={exportToExcel}
-              exportToPDF={exportToPDF}
-            />
+          <HeaderTable
+            globalFilterValue={globalFilterValue}
+            onGlobalFilterChange={onGlobalFilterChange}
+            handlePrint={handlePrint}
+            exportToExcel={exportToExcel}
+            exportToPDF={exportToPDF}
+          />
 
-          </div>
-          <div className="card" ref={dataTableRef}>
+        </div>
+        <div className="card" ref={dataTableRef}>
           <DataTable
             title="Vendas Convenio Desconto Funcionário"
             value={dados}
@@ -299,7 +307,7 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenioDescont
         </div>
       </div>
 
-      <ActionRelacaoRecebimentosModal 
+      <ActionRelacaoRecebimentosModal
         show={modalPagamento}
         handleClose={() => setModalPagamento(false)}
         dadosPagamentoModal={dadosPagamentoModal}
