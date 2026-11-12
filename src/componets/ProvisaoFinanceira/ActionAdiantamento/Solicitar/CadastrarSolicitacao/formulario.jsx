@@ -8,6 +8,9 @@ import { schema } from "../schema/useCadastrarSchema";
 import { useCadastrarAdiantamento } from "../hooks/useCadastrarAdiantamento";
 import { AlertError } from "../../../../Inputs/alertError"
 import { formatarMoeda } from "../../../../../utils/formatMoeda";
+import { mascaraCNPJ } from "../../../../../utils/mascaraCNPJ";
+import { mascaraCPF } from "../../../../../utils/formatCPF";
+import { mascaraTelefone } from "../../../../../utils/mascaraTelefone";
 
 export const Formulario = ({
   handleClose,
@@ -21,7 +24,7 @@ export const Formulario = ({
 
   const {
     departamento,
-    setDepartamento,
+    dataSolicitacao,
     razaoSocial,
     setRazaoSocial,
     cnpj,
@@ -34,25 +37,72 @@ export const Formulario = ({
     setVrAdiantamento,
     descricao,
     setDescricao,
-    notaFiscal,
-    setNotaFiscal,
     empresaSelecionada,
-    setEmpresaSelecionada,
     razaoSocialFaturamento,
     setRazaoSocialFaturamento,
+    anexoOrcamento,
     proposta,
     setProposta,
+    tipoBeneficiario,
+    setTipoBeneficiario,
+    cpfBeneficiario,
+    setCpfBeneficiario,
+    nomeBeneficiario,
+    setNomeBeneficiario,
+    rgBeneficiario,
+    setRgBeneficiario,
+    emailBeneficiario,
+    setEmailBeneficiario,
+    cepBeneficiario,
+    setCepBeneficiario,
+    enderecoBeneficiario,
+    setEnderecoBeneficiario,
+    telefoneBeneficiario,
+    setTelefoneBeneficiario,
+    dtNascimentoBeneficiario,
+    setDtNascimentoBeneficiario,
+    tipoDespesa,
+    setTipoDespesa,
+    nomeFavorecido,
+    setNomeFavorecido,
+    formaPagamento,
+    setFormaPagamento,
+    chavePix,
+    setChavePix,
+    banco,
+    setBanco,
+    agencia,
+    setAgencia,
+    conta,
+    setConta,
+    digitoConta,
+    setDigitoConta,
+    unidadeNegocio,
+    setUnidadeNegocio,
+    centroCusto,
+    setCentroCusto,
+    dtPagamento,
+    setDtPagamento,
     handleEmpresaChange,
     handleBlurCnpj,
+    handleBlurNomeBeneficiario,
+    handleBlurCep,
     handleUploadOrcamento,
     handleUploadNotaFiscal,
-    Departamentos,
     optionsReposicao,
-    optionsNota,
     optionsEmpresas,
+    optionsBancos,
+    optionsTipoBeneficiario,
+    optionsTipoDespesa,
+    optionsFormaPagamento,
     onSubmit
   } = useCadastrarAdiantamento({ optionsModulos, usuarioLogado, handleClose, handleClick });
-  
+  console.log(usuarioLogado, 'usuario')
+  const ehPJ = tipoBeneficiario?.value === 'PJ';
+  const ehPF = tipoBeneficiario?.value === 'PF';
+  const ehPix = formaPagamento?.value === 'PIX';
+  const exigeDadosBancarios = ['TED', 'TRANSFERENCIA'].includes(formaPagamento?.value);
+
   const handleValidatedSubmit = async () => {
     try {
       const dadosParaValidar = {
@@ -60,16 +110,35 @@ export const Formulario = ({
         empresaSolicitante: empresaSelecionada,
         cnpjSolicitante: cnpj,
         razaoSocialSolicitante: razaoSocial,
+        tipoBeneficiario: tipoBeneficiario,
         cnpjFaturamento: cnpjFaturado,
         razaoFaturamento: razaoSocialFaturamento,
+        cpfBeneficiario: cpfBeneficiario,
+        nomeBeneficiario: nomeBeneficiario,
+        rgBeneficiario: rgBeneficiario,
+        emailBeneficiario: emailBeneficiario,
+        cepBeneficiario: cepBeneficiario,
+        enderecoBeneficiario: enderecoBeneficiario,
+        telefoneBeneficiario: telefoneBeneficiario,
+        dtNascimentoBeneficiario: dtNascimentoBeneficiario,
+        tipoDespesa: tipoDespesa,
+        nomeFavorecido: nomeFavorecido,
+        formaPagamento: formaPagamento,
+        chavePix: chavePix,
+        banco: banco,
+        agencia: agencia,
+        conta: conta,
+        digitoConta: digitoConta,
         vrFaturamento: vrAdiantamento,
+        // unidadeNegocio: unidadeNegocio,
+        // centroCusto: centroCusto,
         descricaoFaturamento: descricao,
         possuiNotaFiscalFaturamento: possuiNota,
-      
+        // orcamento: anexoOrcamento,
+        dtPagamento: dtPagamento,
       }
 
       await schema.validate(dadosParaValidar, { abortEarly: false });
-      console.log(dadosParaValidar, 'dadosParaValidar')
       await onSubmit();
 
     } catch (validationError) {
@@ -92,43 +161,82 @@ export const Formulario = ({
     }
   }
 
-  
   return (
     <Fragment>
 
       <form onSubmit={handleSubmit(handleValidatedSubmit)}>
         <div className="form-group">
-          <h2>Empresa Solicitante</h2>
+          <h2>Solicitante</h2>
           <hr />
           <div className="row">
+
             <div className="col-sm-6 col-xl-3">
-              <label className="form-label" htmlFor="">Departamentos</label>
-              <Select
-                className="basic-single"
-                classNamePrefix="select"
-                name="departamentoSolicitante"
-                value={departamento}
-                options={Departamentos?.map((item) => ({
-                  value: item.value,
-                  label: item.label,
-                }))}  
-                onChange={(e) => {
-                  setDepartamento(e)
-                  clearErrors('departamentoSolicitante')
-                }}
+               <Controller
+                name="nomeSolicitante"
+                control={control}
+                render={({ field }) => (
+                  <FormField
+                    label={"Nome e Matrícula"}
+                    name="nomeSolicitante"
+                    type="text"
+                    value={`${usuarioLogado?.NOFUNCIONARIO} - ${usuarioLogado?.id} `}
+                    onChange
+                    errors={errors}
+                    clearErrors={clearErrors}
+                    readOnly={true}
+                  />
+
+                )}
               />
+            </div>
+             <div className="col-sm-6 col-xl-3">
+               <Controller
+                name="departamentoSolicitante"
+                control={control}
+                render={({ field }) => (
+                  <FormField
+                    label={"Departamento"}
+                    name="departamentoSolicitante"
+                    type="text"
+                    value={departamento}
+                    onChange
+                    errors={errors}
+                    clearErrors={clearErrors}
+                    readOnly={true}
+                  />
 
-              {errors.departamentoSolicitante && (
-                <AlertError
-                  error={errors.departamentoSolicitante}
-                  onClose={clearErrors}
-                  fieldName="departamentoSolicitante"
-                />
-              )}
-
+                )}
+              />
             </div>
             <div className="col-sm-6 col-xl-3">
-              <label className="form-label" htmlFor="">Empresa</label>
+               <Controller
+                name="dataSolicitante"
+                control={control}
+                render={({ field }) => (
+                  <FormField
+                    label={"Data"}
+                    name="dataSolicitante"
+                    type="date"
+                    value={dataSolicitacao}
+                    onChange
+                    errors={errors}
+                    clearErrors={clearErrors}
+                    readOnly={true}
+                  />
+
+                )}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="form-group">
+          <h2>Filial a ser Faturada</h2>
+          <hr />
+          <div className="row">
+
+            <div className="col-sm-6 col-xl-3">
+              <label className="form-label" htmlFor="">Filial a ser faturada (GTO) *</label>
               <Select
                 className="basic-single"
                 classNamePrefix="select"
@@ -158,13 +266,14 @@ export const Formulario = ({
                 control={control}
                 render={({ field }) => (
                   <FormField
-                    label={"CNPJ *"}
+                    label={"CNPJ a ser faturado *"}
                     name="cnpjSolicitante"
                     type="text"
-                    value={cnpj}
+                    value={mascaraCNPJ(cnpj)}
                     onChange={(e) => setCnpj(e.target.value)}
                     errors={errors}
                     clearErrors={clearErrors}
+                    readOnly={true}
                   />
 
                 )}
@@ -184,31 +293,59 @@ export const Formulario = ({
                     onChange={(e) => setRazaoSocial(e.target.value)}
                     errors={errors}
                     clearErrors={clearErrors}
+                    readOnly={true}
                   />
 
                 )}
               />
-          
+
             </div>
           </div>
-        </div>
 
-          <h2>Empresa Recebe</h2>
+        </div>
+          <h2>Dados do Beneficiário</h2>
           <hr />
         <div className="form-group">
 
-          <div class="row">      
+          <div class="row">
+            <div class="col-sm-6 col-xl-3">
+              <label className="form-label" htmlFor="">Tipo de Beneficiário *</label>
+              <Select
+                className="basic-single"
+                classNamePrefix="select"
+                name="tipoBeneficiario"
+                value={tipoBeneficiario}
+                options={optionsTipoBeneficiario?.map((item) => ({
+                  value: item.value,
+                  label: item.label,
+                }))}
+                onChange={(e) => {
+                  setTipoBeneficiario(e)
+                  setNomeFavorecido('')
+                  clearErrors()
+                }}
+              />
+              {errors.tipoBeneficiario && (
+                <AlertError
+                  error={errors.tipoBeneficiario}
+                  onClose={clearErrors}
+                  fieldName="tipoBeneficiario"
+                />
+              )}
+            </div>
+
             <div class="col-sm-6 col-xl-3">
               <Controller
                 name="cnpjFaturamento"
                 control={control}
                 render={({ field }) => (
                   <FormField
-                    label={"Cnpj de Faturamento *"}
+                    label={"CNPJ *"}
                     name="cnpjFaturamento"
+                    readOnly={!ehPJ}
                     type="text"
                     value={cnpjFaturado}
-                    onChange={(e) => setCNPJFaturado(e.target.value)}
+                    onChange={(e) => setCNPJFaturado(mascaraCNPJ(e.target.value.replace(/\D/g, '').slice(0, 14)))}
                     onBlur={handleBlurCnpj}
                     errors={errors}
                     clearErrors={clearErrors}
@@ -222,12 +359,74 @@ export const Formulario = ({
                 control={control}
                 render={({ field }) => (
                   <FormField
-                    label={"Razão Social  Faturamento *"}
+                    label={"Razão Social *"}
                     name="razaoFaturamento"
+                    readOnly={!ehPJ}
                     type="text"
                     value={razaoSocialFaturamento}
                     onChange={(e) => setRazaoSocialFaturamento(e.target.value)}
-                    onBlur={handleBlurCnpj}
+                    onBlur={(e) => handleBlurNomeBeneficiario(e.target.value)}
+                    errors={errors}
+                    clearErrors={clearErrors}
+                  />
+                )}
+              />
+            </div>
+
+            <div class="col-sm-6 col-xl-3">
+              <Controller
+                name="cpfBeneficiario"
+                control={control}
+                render={({ field }) => (
+                  <FormField
+                    label={"CPF *"}
+                    name="cpfBeneficiario"
+                    readOnly={!ehPF}
+                    type="text"
+                    value={cpfBeneficiario}
+                    onChange={(e) => setCpfBeneficiario(mascaraCPF(e.target.value))}
+                    errors={errors}
+                    clearErrors={clearErrors}
+                  />
+                )}
+              />
+            </div>
+            <div class="col-sm-6 col-xl-6">
+              <Controller
+                name="nomeBeneficiario"
+                control={control}
+                render={({ field }) => (
+                  <FormField
+                    label={"Nome Completo *"}
+                    name="nomeBeneficiario"
+                    readOnly={!ehPF}
+                    type="text"
+                    value={nomeBeneficiario}
+                    onChange={(e) => setNomeBeneficiario(e.target.value)}
+                    onBlur={(e) => handleBlurNomeBeneficiario(e.target.value)}
+                    errors={errors}
+                    clearErrors={clearErrors}
+                  />
+                )}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="form-group">
+          <div class="row">
+            <div class="col-sm-6 col-xl-3">
+              <Controller
+                name="rgBeneficiario"
+                control={control}
+                render={({ field }) => (
+                  <FormField
+                    label={"RG / Identidade *"}
+                    name="rgBeneficiario"
+                    readOnly={!ehPF}
+                    type="text"
+                    value={rgBeneficiario}
+                    onChange={(e) => setRgBeneficiario(e.target.value)}
                     errors={errors}
                     clearErrors={clearErrors}
                   />
@@ -236,11 +435,308 @@ export const Formulario = ({
             </div>
             <div class="col-sm-6 col-xl-3">
               <Controller
+                name="dtNascimentoBeneficiario"
+                control={control}
+                render={({ field }) => (
+                  <FormField
+                    label={"Data de Nascimento *"}
+                    name="dtNascimentoBeneficiario"
+                    readOnly={!ehPF}
+                    type="date"
+                    max={dataSolicitacao}
+                    value={dtNascimentoBeneficiario}
+                    onChange={(e) => setDtNascimentoBeneficiario(e.target.value)}
+                    errors={errors}
+                    clearErrors={clearErrors}
+                  />
+                )}
+              />
+            </div>
+            <div class="col-sm-6 col-xl-3">
+              <Controller
+                name="telefoneBeneficiario"
+                control={control}
+                render={({ field }) => (
+                  <FormField
+                    label={"Telefone *"}
+                    name="telefoneBeneficiario"
+                    readOnly={!ehPF}
+                    type="text"
+                    value={telefoneBeneficiario}
+                    onChange={(e) => setTelefoneBeneficiario(mascaraTelefone(e.target.value.replace(/\D/g, '').slice(0, 11)))}
+                    errors={errors}
+                    clearErrors={clearErrors}
+                  />
+                )}
+              />
+            </div>
+            <div class="col-sm-6 col-xl-3">
+              <Controller
+                name="emailBeneficiario"
+                control={control}
+                render={({ field }) => (
+                  <FormField
+                    label={"E-mail *"}
+                    name="emailBeneficiario"
+                    readOnly={!ehPF}
+                    type="email"
+                    value={emailBeneficiario}
+                    onChange={(e) => setEmailBeneficiario(e.target.value)}
+                    errors={errors}
+                    clearErrors={clearErrors}
+                  />
+                )}
+              />
+            </div>
+          </div>
+          <div class="row mt-3">
+            <div class="col-sm-6 col-xl-3">
+              <Controller
+                name="cepBeneficiario"
+                control={control}
+                render={({ field }) => (
+                  <FormField
+                    label={"CEP *"}
+                    name="cepBeneficiario"
+                    readOnly={!ehPF}
+                    type="text"
+                    value={cepBeneficiario}
+                    onChange={(e) => setCepBeneficiario(e.target.value.replace(/\D/g, '').slice(0, 8).replace(/(\d{5})(\d)/, '$1-$2'))}
+                    onBlur={handleBlurCep}
+                    errors={errors}
+                    clearErrors={clearErrors}
+                  />
+                )}
+              />
+            </div>
+            <div class="col-sm-6 col-xl-9">
+              <Controller
+                name="enderecoBeneficiario"
+                control={control}
+                render={({ field }) => (
+                  <FormField
+                    label={"Endereço *"}
+                    name="enderecoBeneficiario"
+                    readOnly={!ehPF}
+                    type="text"
+                    value={enderecoBeneficiario}
+                    onChange={(e) => setEnderecoBeneficiario(e.target.value)}
+                    errors={errors}
+                    clearErrors={clearErrors}
+                  />
+                )}
+              />
+            </div>
+          </div>
+        </div>
+
+          <h2>Dados do Pagamento</h2>
+          <hr />
+        <div className="form-group">
+
+          <div class="row">
+            <div class="col-sm-6 col-xl-3">
+              <label className="form-label" htmlFor="">Tipo de Despesa *</label>
+              <Select
+                className="basic-single"
+                classNamePrefix="select"
+                name="tipoDespesa"
+                value={tipoDespesa}
+                options={optionsTipoDespesa?.map((item) => ({
+                  value: item.value,
+                  label: item.label,
+                }))}
+                onChange={(e) => {
+                  setTipoDespesa(e)
+                  clearErrors('tipoDespesa')
+                }}
+              />
+              {errors.tipoDespesa && (
+                <AlertError
+                  error={errors.tipoDespesa}
+                  onClose={clearErrors}
+                  fieldName="tipoDespesa"
+                />
+              )}
+            </div>
+            <div class="col-sm-6 col-xl-3">
+              <Controller
+                name="nomeFavorecido"
+                control={control}
+                render={({ field }) => (
+                  <FormField
+                    label={"Nome do Beneficiário *"}
+                    name="nomeFavorecido"
+                    type="text"
+                    value={nomeFavorecido}
+                    onChange={(e) => setNomeFavorecido(e.target.value)}
+                    errors={errors}
+                    clearErrors={clearErrors}
+                  />
+                )}
+              />
+            </div>
+            <div class="col-sm-6 col-xl-3">
+              <label className="form-label" htmlFor="">Forma de Pagamento *</label>
+              <Select
+                className="basic-single"
+                classNamePrefix="select"
+                name="formaPagamento"
+                value={formaPagamento}
+                options={optionsFormaPagamento?.map((item) => ({
+                  value: item.value,
+                  label: item.label,
+                }))}
+                onChange={(e) => {
+                  setFormaPagamento(e)
+                  clearErrors('formaPagamento')
+                }}
+              />
+              {errors.formaPagamento && (
+                <AlertError
+                  error={errors.formaPagamento}
+                  onClose={clearErrors}
+                  fieldName="formaPagamento"
+                />
+              )}
+            </div>
+            <div class="col-sm-6 col-xl-3">
+              <Controller
+                name="dtPagamento"
+                control={control}
+                render={({ field }) => (
+                  <FormField
+                    label={"Data para Pagamento *"}
+                    name="dtPagamento"
+                    type="date"
+                    min={dataSolicitacao}
+                    value={dtPagamento}
+                    onChange={(e) => setDtPagamento(e.target.value)}
+                    errors={errors}
+                    clearErrors={clearErrors}
+                  />
+                )}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="form-group">
+          <div class="row">
+            <div class="col-sm-6 col-xl-3">
+              <Controller
+                name="chavePix"
+                control={control}
+                render={({ field }) => (
+                  <FormField
+                    label={"Chave PIX *"}
+                    name="chavePix"
+                    readOnly={!ehPix}
+                    type="text"
+                    value={chavePix}
+                    onChange={(e) => setChavePix(e.target.value)}
+                    errors={errors}
+                    clearErrors={clearErrors}
+                  />
+                )}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="form-group">
+          <div class="row">
+            <div class="col-sm-6 col-xl-3">
+              <label className="form-label" htmlFor="">Banco *</label>
+              <Select
+                className="basic-single"
+                classNamePrefix="select"
+                name="banco"
+                isDisabled={!exigeDadosBancarios}
+                value={banco}
+                options={optionsBancos?.map((item) => ({
+                  value: item.IDBANCO,
+                  label: item.DSBANCO,
+                }))}
+                onChange={(e) => {
+                  setBanco(e)
+                  clearErrors('banco')
+                }}
+              />
+              {errors.banco && (
+                <AlertError
+                  error={errors.banco}
+                  onClose={clearErrors}
+                  fieldName="banco"
+                />
+              )}
+            </div>
+            <div class="col-sm-6 col-xl-3">
+              <Controller
+                name="agencia"
+                control={control}
+                render={({ field }) => (
+                  <FormField
+                    label={"Agência *"}
+                    name="agencia"
+                    readOnly={!exigeDadosBancarios}
+                    type="text"
+                    value={agencia}
+                    onChange={(e) => setAgencia(e.target.value.replace(/\D/g, ''))}
+                    errors={errors}
+                    clearErrors={clearErrors}
+                  />
+                )}
+              />
+            </div>
+            <div class="col-sm-6 col-xl-3">
+              <Controller
+                name="conta"
+                control={control}
+                render={({ field }) => (
+                  <FormField
+                    label={"Conta *"}
+                    name="conta"
+                    readOnly={!exigeDadosBancarios}
+                    type="text"
+                    value={conta}
+                    onChange={(e) => setConta(e.target.value.replace(/\D/g, ''))}
+                    errors={errors}
+                    clearErrors={clearErrors}
+                  />
+                )}
+              />
+            </div>
+            <div class="col-sm-6 col-xl-3">
+              <Controller
+                name="digitoConta"
+                control={control}
+                render={({ field }) => (
+                  <FormField
+                    label={"Dígito da Conta *"}
+                    name="digitoConta"
+                    readOnly={!exigeDadosBancarios}
+                    type="text"
+                    value={digitoConta}
+                    onChange={(e) => setDigitoConta(e.target.value.replace(/[^0-9xX]/g, '').slice(0, 2).toUpperCase())}
+                    errors={errors}
+                    clearErrors={clearErrors}
+                  />
+                )}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="form-group">
+          <div class="row">
+            <div class="col-sm-6 col-xl-3">
+              <Controller
                 name="vrFaturamento"
                 control={control}
                 render={({ field }) => (
                   <FormField
-                    label={"Valor do Faturamento *"}
+                    label={"Valor a ser Pago *"}
                     name="vrFaturamento"
                     type="text"
                     value={vrAdiantamento}
@@ -253,11 +749,46 @@ export const Formulario = ({
             </div>
             <div class="col-sm-6 col-xl-3">
               <Controller
+                name="unidadeNegocio"
+                control={control}
+                render={({ field }) => (
+                  <FormField
+                    label={"Unidade de Negócio *"}
+                    name="unidadeNegocio"
+                    type="text"
+                    value={unidadeNegocio}
+                    onChange={(e) => setUnidadeNegocio(e.target.value)}
+                    errors={errors}
+                    clearErrors={clearErrors}
+                  />
+                )}
+              />
+            </div>
+            <div class="col-sm-6 col-xl-3">
+              <Controller
+                name="centroCusto"
+                control={control}
+                render={({ field }) => (
+                  <FormField
+                    label={"Centro de Custo *"}
+                    name="centroCusto"
+                    type="text"
+                    value={usuarioLogado?.DEPARTAMENTO}
+                    onChange={(e) => setCentroCusto(e.target.value)}
+                    readOnly={true}
+                    errors={errors}
+                    clearErrors={clearErrors}
+                  />
+                )}
+              />
+            </div>
+            <div class="col-sm-6 col-xl-3">
+              <Controller
                 name="descricaoFaturamento"
                 control={control}
                 render={({ field }) => (
                   <FormField
-                    label={"Descrição *"}
+                    label={"Descrição do Produto ou Serviço *"}
                     name="descricaoFaturamento"
                     type="text"
                     value={descricao}
@@ -273,9 +804,13 @@ export const Formulario = ({
 
         <div className="form-group">
 
+          <div className="alert alert-warning" role="alert">
+            <strong>Atenção!</strong> Em notas fiscais de serviço podem ocorrer deduções de ISS e a nota fiscal ser emitida com valor menor. Essa responsabilidade é do solicitante.
+          </div>
+
           <div className="row">
             <div class="col-sm-6 col-xl-3">
-              <label className="form-label" htmlFor="">Possui Nota Fiscal</label>
+              <label className="form-label" htmlFor="">Possui Nota Fiscal *</label>
               <Select
                 className="basic-single"
                 classNamePrefix="select"
@@ -285,7 +820,10 @@ export const Formulario = ({
                   value: item.value,
                   label: item.label,
                 }))}
-                onChange={(e) => setPossuiNota(e)}
+                onChange={(e) => {
+                  setPossuiNota(e)
+                  clearErrors('possuiNotaFiscalFaturamento')
+                }}
               />
               {errors.possuiNotaFiscalFaturamento && (
                 <AlertError
@@ -295,31 +833,6 @@ export const Formulario = ({
                 />
               )}
             </div>
-            {/* <div className="col-sm-6 col-xl-3">
-              <label className="form-label" htmlFor="">Nota Fiscal</label>
-              <Select
-                className="basic-single"
-                classNamePrefix="select"
-                name="notaFiscalFaturamento"
-                value={notaFiscal}
-                options={optionsNota?.map((item) => ({
-                  value: item.value,
-                  label: item.label
-                }))}
-                onChange={(e) => {
-                  setNotaFiscal(e)
-                  clearErrors('notaFiscalFaturamento')
-                }}
-              />
-              {errors.notaFiscalFaturamento && (
-                <AlertError
-                  error={errors.notaFiscalFaturamento}
-                  onClose={clearErrors}
-                  fieldName="notaFiscalFaturamento"
-                />
-              )}
-
-            </div> */}
 
             <div className="col-sm-6 col-xl-3">
               <Controller
@@ -327,11 +840,14 @@ export const Formulario = ({
                 control={control}
                 render={({ field }) => (
                   <FormField
-                    label={"Anexar Orçarmento *"}
+                    label={"Anexar Orçamento *"}
                     name="orcamento"
                     type="file"
                     accept="application/pdf,image/png,image/jpeg,image/webp"
-                    onChange={handleUploadOrcamento}
+                    onChange={(e) => {
+                      handleUploadOrcamento(e)
+                      clearErrors('orcamento')
+                    }}
                     errors={errors}
                     clearErrors={clearErrors}
                   />
@@ -339,23 +855,25 @@ export const Formulario = ({
               />
             </div>
 
-            <div className="col-sm-6 col-xl-3">
-              <Controller
-                name="anxNotaFiscal"
-                control={control}
-                render={({ field }) => (
-                  <FormField
-                    label={"Anexar Nota Fiscal *"}
-                    name="anxNotaFiscal"
-                    type="file"
-                    accept="application/pdf,image/png,image/jpeg,image/webp"
-                    onChange={handleUploadNotaFiscal}
-                    errors={errors}
-                    clearErrors={clearErrors}
-                  />
-                )}
-              />
-            </div>
+            {/* {possuiNota?.value === 'True' && (
+              <div className="col-sm-6 col-xl-3">
+                <Controller
+                  name="anxNotaFiscal"
+                  control={control}
+                  render={({ field }) => (
+                    <FormField
+                      label={"Anexar Nota Fiscal"}
+                      name="anxNotaFiscal"
+                      type="file"
+                      accept="application/pdf,image/png,image/jpeg,image/webp"
+                      onChange={handleUploadNotaFiscal}
+                      errors={errors}
+                      clearErrors={clearErrors}
+                    />
+                  )}
+                />
+              </div>
+            )} */}
 
           </div>
 
@@ -368,7 +886,7 @@ export const Formulario = ({
                   control={control}
                   render={({ field }) => (
                     <FormField
-                      label={"Orçamento / Prosposta *"}
+                      label={"Orçamento / Prosposta"}
                       name="propostaOrcamento"
                       type="textarea"
                       value={proposta}
@@ -390,8 +908,8 @@ export const Formulario = ({
           corFechar={"secondary"}
 
           ButtonTypeCadastrar={ButtonTypeModal}
-          onClickButtonCadastrar={handleSubmit(handleValidatedSubmit)}
-          tipoBtnCadastrar={"submit"}
+          onClickButtonCadastrar={handleValidatedSubmit}
+          // tipoBtnCadastrar={"button"}
           textButtonCadastrar={"Cadastrar"}
           corCadastrar={"success"}
           loadingTextCadastrar={"Cadastrando..."}

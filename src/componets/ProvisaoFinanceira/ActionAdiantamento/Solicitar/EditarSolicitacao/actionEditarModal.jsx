@@ -1,7 +1,7 @@
 import { Fragment } from "react"
 import Modal from 'react-bootstrap/Modal';
 import { HeaderModal } from "../../../../Modais/HeaderModal/HeaderModal";
-import { Formulario } from "./formulario";
+import { Formulario } from "./formularioEditarSolicitacao";
 
 export const ActionEditarModal = ({ 
   show,

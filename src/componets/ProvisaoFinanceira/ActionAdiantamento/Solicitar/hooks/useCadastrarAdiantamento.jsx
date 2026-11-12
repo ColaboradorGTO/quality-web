@@ -2,11 +2,14 @@ import { useState } from "react";
 import axios from "axios";
 import { get, post, postFile } from "../../../../../api/funcRequest";
 import Swal from "sweetalert2";
-import { Departamentos, optionsReposicao, optionsNota } from "../../../../../../parceiro.json";
+import { Departamentos, optionsReposicao, optionsNota, optionsTipoBeneficiario, optionsTipoDespesa, optionsFormaPagamento } from "../../../../../../parceiro.json";
 import { registrarLogAuditoria } from "../../../../../services/auditLog";
 import { useQuery } from 'react-query';
 import { removeMascaraCNPJ, validarCNPJ } from "../../../../../utils/mascaraCNPJ";
 import { removerFormatacaoMoeda } from "../../../../../utils/formatMoeda";
+import { removerMascaraCPF } from "../../../../../utils/formatCPF";
+import { removerMascaraTelefone } from "../../../../../utils/mascaraTelefone";
+import { getDataAtual } from "../../../../../utils/dataAtual";
 
 export const useCadastrarAdiantamento = ({
     optionsModulos,
@@ -14,7 +17,8 @@ export const useCadastrarAdiantamento = ({
     handleClick,
     handleClose
 }) => {
-    const [departamento, setDepartamento] = useState('')
+    const [departamento, setDepartamento] = useState(usuarioLogado?.DEPARTAMENTO || '')
+    const [dataSolicitacao, setDataSolicitacao] = useState(getDataAtual())
     const [razaoSocial, setRazaoSocial] = useState('')
     const [razaoSocialFaturamento, setRazaoSocialFaturamento] = useState('')
     const [cnpj, setCnpj] = useState('')
@@ -27,15 +31,44 @@ export const useCadastrarAdiantamento = ({
     const [anexoOrcamento, setAnexoOrcamento] = useState('')
     const [anexoNotaFiscal, setAnexoNotaFiscal] = useState('')
     const [proposta, setProposta] = useState('')
-    
+    const [tipoBeneficiario, setTipoBeneficiario] = useState(optionsTipoBeneficiario[0])
+    const [cpfBeneficiario, setCpfBeneficiario] = useState('')
+    const [nomeBeneficiario, setNomeBeneficiario] = useState('')
+    const [rgBeneficiario, setRgBeneficiario] = useState('')
+    const [emailBeneficiario, setEmailBeneficiario] = useState('')
+    const [cepBeneficiario, setCepBeneficiario] = useState('')
+    const [enderecoBeneficiario, setEnderecoBeneficiario] = useState('')
+    const [telefoneBeneficiario, setTelefoneBeneficiario] = useState('')
+    const [dtNascimentoBeneficiario, setDtNascimentoBeneficiario] = useState('')
+    const [tipoDespesa, setTipoDespesa] = useState('')
+    const [nomeFavorecido, setNomeFavorecido] = useState('')
+    const [formaPagamento, setFormaPagamento] = useState('')
+    const [chavePix, setChavePix] = useState('')
+    const [banco, setBanco] = useState('')
+    const [agencia, setAgencia] = useState('')
+    const [conta, setConta] = useState('')
+    const [digitoConta, setDigitoConta] = useState('')
+    const [unidadeNegocio, setUnidadeNegocio] = useState('')
+    const [centroCusto, setCentroCusto] = useState('')
+    const [dtPagamento, setDtPagamento] = useState('')
+
     const { data: optionsEmpresas = [], error: errorEmpresas, isLoading: isLoadingEmpresas, refetch: refetchEmpresas } = useQuery(
         ['empresas', ],
         async () => {
         const response = await get(`/empresas`);
-        
+
         return response.data;
         },
         {enabled: true, cacheTime: 60 * 60 * 1000,}
+    );
+
+    const { data: optionsBancos = [], error: errorBancos, isLoading: isLoadingBancos } = useQuery(
+        'banco',
+        async () => {
+            const response = await get(`/banco`);
+            return response.data;
+        },
+        { enabled: true, staleTime: 60 * 60 * 1000, cacheTime: 60 * 60 * 1000 }
     );
 
     const handleEmpresaChange = (selected) => {
@@ -44,7 +77,7 @@ export const useCadastrarAdiantamento = ({
         const empresa = optionsEmpresas.find((item) => item.IDEMPRESA === selected?.value);
 
         setCnpj(empresa?.NUCNPJ || '');
-        setRazaoSocial(empresa?.NOFANTASIA || '');
+        setRazaoSocial(empresa?.NORAZAOSOCIAL || empresa?.NOFANTASIA || '');
     }
 
     const URL_PUBLICAWS = 'https://publica.cnpj.ws/cnpj/{CNPJ}';
@@ -109,13 +142,34 @@ export const useCadastrarAdiantamento = ({
         const resultado = await refetchCNPJ();
         const fornecedorExistente = resultado?.data?.[0];
 
-        if (fornecedorExistente) {
-            setRazaoSocialFaturamento(fornecedorExistente?.NORAZAOSOCIAL || fornecedorExistente?.NOFANTASIA || '');
-            return;
-        }
+        const razaoSocialEncontrada = fornecedorExistente
+            ? (fornecedorExistente?.NORAZAOSOCIAL || fornecedorExistente?.NOFANTASIA || '')
+            : await buscarRazaoSocialCNPJExterno(cnpjLimpo);
 
-        const razaoSocialExterna = await buscarRazaoSocialCNPJExterno(cnpjLimpo);
-        setRazaoSocialFaturamento(razaoSocialExterna);
+        setRazaoSocialFaturamento(razaoSocialEncontrada);
+
+        if (!nomeFavorecido) setNomeFavorecido(razaoSocialEncontrada);
+    }
+
+    const handleBlurNomeBeneficiario = (nome) => {
+        if (!nomeFavorecido) setNomeFavorecido(nome);
+    }
+
+    const handleBlurCep = async () => {
+        const cepLimpo = cepBeneficiario.replace(/\D/g, '');
+
+        if (cepLimpo.length !== 8 || enderecoBeneficiario) return;
+
+        try {
+            const response = await axios.get(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+
+            if (response.data?.erro) return;
+
+            const { logradouro, bairro, localidade, uf } = response.data;
+            setEnderecoBeneficiario([logradouro, bairro, localidade && `${localidade}/${uf}`].filter(Boolean).join(', '));
+        } catch (error) {
+            console.error('Erro ao consultar CEP na viacep.com.br:', error);
+        }
     }
 
     const tiposArquivoPermitidos = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -172,7 +226,7 @@ export const useCadastrarAdiantamento = ({
             Swal.fire({
                 position: 'center',
                 icon: 'error',
-                html: `${usuarioLogado?.NOFUNCIONARIO} <br> Você não tem permissão para cadastrar uma conta bancária.`,
+                html: `${usuarioLogado?.NOFUNCIONARIO} <br> Você não tem permissão para cadastrar uma solicitação de adiantamento.`,
                 showConfirmButton: true,
                 timer: 5000,
                 customClass: {
@@ -207,36 +261,69 @@ export const useCadastrarAdiantamento = ({
             return;
         }
 
-        const postData = {
-            DEPARTAMENTO: departamento?.value,
+        const ehPJ = tipoBeneficiario?.value === 'PJ';
+        const ehPF = tipoBeneficiario?.value === 'PF';
+        const ehPix = formaPagamento?.value === 'PIX';
+        const exigeDadosBancarios = ['TED', 'TRANSFERENCIA'].includes(formaPagamento?.value);
+
+        const postData = { 
+            // CAMPOS EXISTENTE
+            DEPARTAMENTO: departamento,
+            DATACRIACAO: dataSolicitacao,
             IDEMPRESA: empresaSelecionada?.value,
             NUCNPJEMPRESA: cnpj,
-            POSSUINOTAFISCAL: possuiNota?.value,
-            CNPJFATURAMENTO: cnpjFaturado,
+            CNPJFATURAMENTO: ehPJ ? removeMascaraCNPJ(cnpjFaturado) : '',
+            RAZAOSOCIALFATURAMENTO: ehPJ ? razaoSocialFaturamento : '',
             VRSOLICITADO: removerFormatacaoMoeda(vrAdiantamento),
             DESCRICAO: descricao,
+            POSSUINOTAFISCAL: possuiNota?.value,
             ANEXOORCAMENTO: anexoOrcamento,
-            ANEXONOTAFISCAL: anexoNotaFiscal,
-            RAZAOSOCIALFATURAMENTO: razaoSocialFaturamento,
+            ANEXONOTAFISCAL: possuiNota?.value === 'True' ? anexoNotaFiscal : '',
             DSJUSTIFICATIVA: proposta,
-            IDUSUARIOCRIACAO: usuarioLogado?.id
+            IDUSUARIOCRIACAO: usuarioLogado?.id,
+            
+            // CAMPOS A SER CRIADOS
+            
+            RAZAOSOCIALEMPRESA: razaoSocial,
+            TPBENEFICIARIO: tipoBeneficiario?.value,
+            NUCPFBENEFICIARIO: ehPF ? removerMascaraCPF(cpfBeneficiario) : '',
+            NOBENEFICIARIO: ehPF ? nomeBeneficiario : '',
+            NURGBENEFICIARIO: ehPF ? rgBeneficiario : '',
+            EMAILBENEFICIARIO: ehPF ? emailBeneficiario : '',
+            NUCEPBENEFICIARIO: ehPF ? cepBeneficiario.replace(/\D/g, '') : '',
+            ENDERECOBENEFICIARIO: ehPF ? enderecoBeneficiario : '',
+            TELEFONEBENEFICIARIO: ehPF ? removerMascaraTelefone(telefoneBeneficiario) : '',
+            DTNASCIMENTOBENEFICIARIO: ehPF ? dtNascimentoBeneficiario : '',
+            TPDESPESA: tipoDespesa?.value,
+            NOFAVORECIDO: nomeFavorecido,
+            FORMAPAGAMENTO: formaPagamento?.value,
+            CHAVEPIX: ehPix ? chavePix : '',
+            IDBANCO: exigeDadosBancarios ? banco?.value : null,
+            NUAGENCIA: exigeDadosBancarios ? agencia : '',
+            NUCONTA: exigeDadosBancarios ? conta : '',
+            NUDIGITOCONTA: exigeDadosBancarios ? digitoConta : '',
+            UNIDADENEGOCIO: unidadeNegocio,
+            CENTROCUSTO: centroCusto,
+            DTPAGAMENTO: dtPagamento,
+            MATRICULASOLICITANTE: usuarioLogado?.id,
+            NOMESOLICITANTE: usuarioLogado?.NOFUNCIONARIO
         }
 
         try {
 
             const response = await post('/adiantamento-departamento', postData)
-      
+
             await registrarLogAuditoria({
                 idFuncionario: usuarioLogado.id,
                 pathFuncao: 'FINANCEIRO/CRIAR ADIANTAMENTO PAGAMENTO',
                 dados: postData
             });
 
-           
+
             Swal.fire({
                 position: 'center',
                 icon: 'success',
-                title: 'Conta bancária cadastrada com sucesso!',
+                title: 'Solicitação de adiantamento cadastrada com sucesso!',
                 showConfirmButton: false,
                 timer: 5000,
                 customClass: {
@@ -258,15 +345,15 @@ export const useCadastrarAdiantamento = ({
             Swal.fire({
                 position: 'center',
                 icon: 'error',
-                title: 'Ocorreu um erro ao cadastrar a conta. Por favor, tente novamente.',
+                title: 'Ocorreu um erro ao cadastrar a solicitação. Por favor, tente novamente.',
                 showConfirmButton: false,
                 timer: 5000,
                 customClass: {
                     container: 'custom-swal',
                 },
             });
-            console.error('Erro Cadastrar Conta Banco:', error);
-            return responsePost.data;
+            console.error('Erro Cadastrar Solicitação Adiantamento:', error);
+            return responsePost?.data;
         }
     }
 
@@ -275,6 +362,8 @@ export const useCadastrarAdiantamento = ({
     return {
         departamento,
         setDepartamento,
+        dataSolicitacao,
+        setDataSolicitacao,
         razaoSocial,
         setRazaoSocial,
         cnpj,
@@ -299,14 +388,62 @@ export const useCadastrarAdiantamento = ({
         setAnexoNotaFiscal,
         proposta,
         setProposta,
+        tipoBeneficiario,
+        setTipoBeneficiario,
+        cpfBeneficiario,
+        setCpfBeneficiario,
+        nomeBeneficiario,
+        setNomeBeneficiario,
+        rgBeneficiario,
+        setRgBeneficiario,
+        emailBeneficiario,
+        setEmailBeneficiario,
+        cepBeneficiario,
+        setCepBeneficiario,
+        enderecoBeneficiario,
+        setEnderecoBeneficiario,
+        telefoneBeneficiario,
+        setTelefoneBeneficiario,
+        dtNascimentoBeneficiario,
+        setDtNascimentoBeneficiario,
+        tipoDespesa,
+        setTipoDespesa,
+        nomeFavorecido,
+        setNomeFavorecido,
+        formaPagamento,
+        setFormaPagamento,
+        chavePix,
+        setChavePix,
+        banco,
+        setBanco,
+        agencia,
+        setAgencia,
+        conta,
+        setConta,
+        digitoConta,
+        setDigitoConta,
+        unidadeNegocio,
+        setUnidadeNegocio,
+        centroCusto,
+        setCentroCusto,
+        dtPagamento,
+        setDtPagamento,
         handleEmpresaChange,
         handleBlurCnpj,
+        handleBlurNomeBeneficiario,
+        handleBlurCep,
         handleUploadOrcamento,
         handleUploadNotaFiscal,
         Departamentos,
         optionsReposicao,
         optionsNota,
         optionsEmpresas,
+        optionsBancos,
+        optionsTipoBeneficiario,
+        optionsTipoDespesa,
+        optionsFormaPagamento,
         onSubmit,
     }
 }
+
+

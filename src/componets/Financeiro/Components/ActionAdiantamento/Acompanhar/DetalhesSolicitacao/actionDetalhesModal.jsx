@@ -1,15 +1,12 @@
 import { Fragment } from "react"
 import Modal from 'react-bootstrap/Modal';
 import { HeaderModal } from "../../../../../Modais/HeaderModal/HeaderModal";
-import { Formulario } from "./formularioEditarSolicitacao";
+import { Formulario } from "./formulario";
 
-export const ActionEditarModal = ({ 
+export const ActionDetalhesModal = ({ 
   show,
   handleClose, 
   dadosDetalheAdiantamento,
-  optionsModulos,
-  usuarioLogado,
-  handleClick
 }) => {
   
   return (
@@ -26,8 +23,8 @@ export const ActionEditarModal = ({
         aria-hidden="true"
       >
         <HeaderModal
-          title={"Solicitação de Adiantamento"}
-          subTitle={"Edição de Adiantamento"}
+          title={"Solicitação de Pagamento"}
+          subTitle={"Solicitação de Pagamento"}
           handleClose={handleClose}
         />
        
@@ -36,9 +33,6 @@ export const ActionEditarModal = ({
           <Formulario
             handleClose={handleClose}
             dadosDetalheAdiantamento={dadosDetalheAdiantamento}
-            optionsModulos={optionsModulos}
-            usuarioLogado={usuarioLogado}
-            handleClick={handleClick}
           />
        
         </Modal.Body>

@@ -84,3 +84,24 @@ export const validarCPF = async (cpf) => {
   return true;
 
 }
+
+// Validação pura (sem efeitos colaterais), útil para schemas de validação.
+export const cpfEhValido = (cpf) => {
+  cpf = String(cpf || '').replace(/\D/g, '');
+
+  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+
+  const calcularDigito = (base, pesoInicial) => {
+    let soma = 0;
+    for (let i = 0; i < base.length; i++) {
+      soma += parseInt(base.charAt(i)) * (pesoInicial - i);
+    }
+    const resto = 11 - (soma % 11);
+    return resto >= 10 ? 0 : resto;
+  };
+
+  const digito1 = calcularDigito(cpf.substring(0, 9), 10);
+  const digito2 = calcularDigito(cpf.substring(0, 10), 11);
+
+  return digito1 === parseInt(cpf.charAt(9)) && digito2 === parseInt(cpf.charAt(10));
+}

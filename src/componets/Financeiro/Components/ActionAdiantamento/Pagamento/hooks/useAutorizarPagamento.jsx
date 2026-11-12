@@ -1,31 +1,71 @@
 import { useState, useEffect } from "react";
-import { get, post, postFile } from "../../../../../../api/funcRequest";
+import { get, post, put, postFile } from "../../../../../../api/funcRequest";
 import { BASE_URL } from "../../../../../../api/api";
 import Swal from "sweetalert2";
 import { registrarLogAuditoria } from "../../../../../../services/auditLog";
 import { getDataAtual } from "../../../../../../utils/dataAtual";
 import { useQuery } from 'react-query';
 
-export const optionsFormaPagamento = [
-    {value: '', label: 'Seleicone'},
-    { value: 'PIX', label: 'PIX' },
-    { value: 'TED', label: 'TED' },
-    { value: 'DINHEIRO', label: 'Dinheiro' },
-    { value: 'CARTAO', label: 'Cartão' },
-    { value: 'BOLETO', label: 'Boleto' },
-]
+import { Departamentos, optionsReposicao, optionsNota, optionsTipoBeneficiario, optionsTipoDespesa, optionsAndamento, optionsFormaPagamento } from "../../../../../../../parceiro.json";
+import { mascaraCNPJ } from "../../../../../../utils/mascaraCNPJ";
+import { mascaraCPF } from "../../../../../../utils/formatCPF";
+import { mascaraTelefone } from "../../../../../../utils/mascaraTelefone";
+
+// export const optionsFormaPagamento = [
+//     {value: '', label: 'Seleicone'},
+//     { value: 'PIX', label: 'PIX' },
+//     { value: 'TED', label: 'TED' },
+//     { value: 'DINHEIRO', label: 'Dinheiro' },
+//     { value: 'CARTAO', label: 'Cartão' },
+//     { value: 'BOLETO', label: 'Boleto' },
+// ]
 
 export const optionsStatus = [
     {value: 'PAGO', label: 'PAGO'},
+    {value: 'PENDENTE', label: 'PENDENTE'},
     {value: 'REPROVADO', label: 'REPROVADO'}
 ]
 export const useAutorizarPagamento = ({
     dadosDetalheAdiantamento,
+    dadosDetalhePagamento,
     optionsModulos,
     usuarioLogado,
     handleClick,
     handleClose
 }) => {
+    const [departamento, setDepartamento] = useState('')
+    const [dataSolicitacao, setDataSolicitacao] = useState('')
+    const [razaoSocialFaturamento, setRazaoSocialFaturamento] = useState('')
+    const [cnpj, setCnpj] = useState('')
+    const [possuiNota, setPossuiNota] = useState('')
+    const [cnpjFaturado, setCNPJFaturado] = useState('')
+    const [vrAdiantamento, setVrAdiantamento] = useState('')
+    const [descricao, setDescricao] = useState('')
+    const [notaFiscal, setNotaFiscal] = useState('')
+    const [anexoOrcamento, setAnexoOrcamento] = useState('')
+    const [anexoNotaFiscal, setAnexoNotaFiscal] = useState('')
+    const [proposta, setProposta] = useState('')
+    const [tipoBeneficiario, setTipoBeneficiario] = useState(optionsTipoBeneficiario[0])
+    const [cpfBeneficiario, setCpfBeneficiario] = useState('')
+    const [nomeBeneficiario, setNomeBeneficiario] = useState('')
+    const [rgBeneficiario, setRgBeneficiario] = useState('')
+    const [emailBeneficiario, setEmailBeneficiario] = useState('')
+    const [cepBeneficiario, setCepBeneficiario] = useState('')
+    const [enderecoBeneficiario, setEnderecoBeneficiario] = useState('')
+    const [telefoneBeneficiario, setTelefoneBeneficiario] = useState('')
+    const [dtNascimentoBeneficiario, setDtNascimentoBeneficiario] = useState('')
+    const [tipoDespesa, setTipoDespesa] = useState('')
+    const [nomeFavorecido, setNomeFavorecido] = useState('')
+    const [chavePix, setChavePix] = useState('')
+    const [banco, setBanco] = useState('')
+    const [agencia, setAgencia] = useState('')
+    const [conta, setConta] = useState('')
+    const [digitoConta, setDigitoConta] = useState('')
+    const [unidadeNegocio, setUnidadeNegocio] = useState('')
+    const [centroCusto, setCentroCusto] = useState('')
+    const [dtPagamento, setDtPagamento] = useState('')
+
+    // STATES PAGAMENTO
     const [valorPagamento, setValorPagamento] = useState('')
     const [dataPagamento, setDataPagamento] = useState(getDataAtual())
     const [formaPagamento, setFormaPagamento] = useState('')
@@ -45,28 +85,90 @@ export const useAutorizarPagamento = ({
         {enabled: true, staleTime: 60 * 60 * 1000, cacheTime: 60 * 60 * 1000,}
     );
 
-    useEffect(() => {
-        if (dadosDetalheAdiantamento?.length > 0) {
-            setValorPagamento(dadosDetalheAdiantamento[0]?.VRSOLICITADO || '')
+    const { data: optionsBancos = [], error: errorBancos, isLoading: isLoadingBancos } = useQuery(
+        'banco',
+        async () => {
+            const response = await get(`/banco`);
+            return response.data;
+        },
+        { enabled: true, staleTime: 60 * 60 * 1000, cacheTime: 60 * 60 * 1000 }
+    );
+  
 
-            const empresaEncontrada = optionsEmpresas.find(item => item.IDEMPRESA == dadosDetalheAdiantamento[0]?.IDEMPRESA)
-            setEmpresaSelecionada(
-                empresaEncontrada ? { value: empresaEncontrada.IDEMPRESA, label: empresaEncontrada.NOFANTASIA } : null
-            )
-            setRazaoSocial(dadosDetalheAdiantamento[0]?.RAZAOSOCIALFATURAMENTO);
-            
-            setObservacao(dadosDetalheAdiantamento[0]?.DSJUSTIFICATIVA)
-            const pagamentoEncontrada = optionsFormaPagamento.find(item => item.value == dadosDetalheAdiantamento[0]?.FORMAPAGAMENTO)
+    useEffect(() => {
+        if (dadosDetalheAdiantamento.length && dadosDetalhePagamento?.length > 0) {
+            setValorPagamento(dadosDetalhePagamento[0]?.VLPAGAMENTO || '')
+            setObservacao(dadosDetalhePagamento[0]?.DSOBSERVACAO)
+
+            const pagamentoEncontrada = optionsFormaPagamento.find(item => item.value == dadosDetalhePagamento[0]?.FORMAPAGAMENTO)
             setFormaPagamento(
                 pagamentoEncontrada ? { value: pagamentoEncontrada.value, label: pagamentoEncontrada.label} : null
             )
-          
-            const statusEncontrada = optionsStatus.find(item => item.value == dadosDetalheAdiantamento[0]?.STATUS)
-            setStatusPagamento(
-                statusEncontrada ? { value: statusEncontrada.STATUS, label: statusEncontrada.STATUS == 'PAGO' ? 'PAGO' : 'REPROVADO FINANCEIRO'} : null
-            )
+            setAnexoComprovante(dadosDetalhePagamento[0]?.ANEXOCOMPROVANTE)
+            const statusEncontrada = optionsStatus.find(item => item.value == (dadosDetalhePagamento[0]?.STPAGAMENTO || dadosDetalheAdiantamento[0]?.STATUS))
+            setStatusPagamento(statusEncontrada ?? null)
+            
         }
-    }, [dadosDetalheAdiantamento])
+    }, [dadosDetalheAdiantamento, dadosDetalhePagamento])
+
+       const formatarDataInput = (data) => data ? String(data).substring(0, 10) : '';
+
+    useEffect(() => {
+        if(dadosDetalheAdiantamento.length && dadosDetalheAdiantamento.length > 0) {
+            const detalhe = dadosDetalheAdiantamento[0]
+
+            setDepartamento(detalhe?.DEPARTAMENTO || '')
+            setDataSolicitacao(formatarDataInput(detalhe?.DATACRIACAO))
+            const empresaEncontrada = optionsEmpresas.find(item => item.IDEMPRESA == detalhe?.IDEMPRESA)
+            setEmpresaSelecionada(
+               empresaEncontrada ? { value: empresaEncontrada.IDEMPRESA, label: empresaEncontrada.NOFANTASIA} : null
+            )
+            setCnpj(detalhe?.NUCNPJEMPRESA)
+            setRazaoSocial(detalhe?.RAZAOSOCIALEMPRESA || detalhe?.NOFANTASIA || '')
+
+            const tipoBeneficiarioEncontrado = optionsTipoBeneficiario.find(item => item.value == (detalhe?.TPBENEFICIARIO || 'PJ'))
+            setTipoBeneficiario(tipoBeneficiarioEncontrado || optionsTipoBeneficiario[0])
+            setCNPJFaturado(mascaraCNPJ(detalhe?.CNPJFATURAMENTO || ''))
+            setRazaoSocialFaturamento(detalhe?.RAZAOSOCIALFATURAMENTO || '')
+            setCpfBeneficiario(mascaraCPF(detalhe?.NUCPFBENEFICIARIO || ''))
+            setNomeBeneficiario(detalhe?.NOBENEFICIARIO || '')
+            setRgBeneficiario(detalhe?.NURGBENEFICIARIO || '')
+            setEmailBeneficiario(detalhe?.EMAILBENEFICIARIO || '')
+            setCepBeneficiario(String(detalhe?.NUCEPBENEFICIARIO || '').replace(/(\d{5})(\d)/, '$1-$2'))
+            setEnderecoBeneficiario(detalhe?.ENDERECOBENEFICIARIO || '')
+            setTelefoneBeneficiario(mascaraTelefone(detalhe?.TELEFONEBENEFICIARIO || ''))
+            setDtNascimentoBeneficiario(formatarDataInput(detalhe?.DTNASCIMENTOBENEFICIARIO))
+
+            const tipoDespesaEncontrado = optionsTipoDespesa.find(item => item.value == detalhe?.TPDESPESA)
+            setTipoDespesa(tipoDespesaEncontrado || '')
+            setNomeFavorecido(detalhe?.NOFAVORECIDO || detalhe?.RAZAOSOCIALFATURAMENTO || detalhe?.NOBENEFICIARIO || '')
+            const formaPagamentoEncontrada = optionsFormaPagamento.find(item => item.value == detalhe?.FORMAPAGAMENTO)
+            setFormaPagamento(formaPagamentoEncontrada || '')
+            setChavePix(detalhe?.CHAVEPIX || '')
+            const bancoEncontrado = optionsBancos.find(item => item.IDBANCO == detalhe?.IDBANCO)
+            setBanco(bancoEncontrado ? { value: bancoEncontrado.IDBANCO, label: bancoEncontrado.DSBANCO } : '')
+            setAgencia(detalhe?.NUAGENCIA || '')
+            setConta(detalhe?.NUCONTA || '')
+            setDigitoConta(detalhe?.NUDIGITOCONTA || '')
+
+            setVrAdiantamento(detalhe?.VRSOLICITADO)
+            setUnidadeNegocio(detalhe?.UNIDADENEGOCIO || '')
+            setCentroCusto(detalhe?.CENTROCUSTO || '')
+            setDescricao(detalhe?.DESCRICAO)
+            setDtPagamento(formatarDataInput(detalhe?.DTPAGAMENTO))
+            setPossuiNota({
+                value: detalhe?.POSSUINOTAFISCAL,
+                label: detalhe?.POSSUINOTAFISCAL == 'True' ? 'SIM' : 'NÃO'
+            })
+            setAnexoOrcamento(detalhe?.ANEXOORCAMENTO || '')
+            setAnexoNotaFiscal(detalhe?.ANEXONOTAFISCAL || '')
+            setProposta(detalhe?.DSJUSTIFICATIVA || '')
+        }
+    }, [
+        dadosDetalheAdiantamento,
+        optionsEmpresas,
+        optionsBancos
+    ])
 
     
     const handleEmpresaChange = (selected) => {
@@ -164,7 +266,7 @@ export const useAutorizarPagamento = ({
 
     const handleExportarOrcamento = () => exportarAnexo(dadosDetalheAdiantamento?.[0]?.ANEXOORCAMENTO);
     const handleExportarNotaFiscal = () => exportarAnexo(dadosDetalheAdiantamento?.[0]?.ANEXONOTAFISCAL);
-
+ 
     const onSubmit = async () => {
         if (optionsModulos[0]?.CRIAR == 'False') {
             Swal.fire({
@@ -180,31 +282,39 @@ export const useAutorizarPagamento = ({
             return;
         }
 
+        const idPagamento = dadosDetalhePagamento?.[0]?.IDPAGAMENTO;
+        const isEdicao = !!idPagamento;
+
         const postData = {
+            ...(isEdicao && { IDPAGAMENTO: idPagamento }),
             IDADIANTAMENTO: dadosDetalheAdiantamento?.[0]?.IDADIANTAMENTO,
-            VLPAGAMENTO: valorPagamento,
+            VLPAGAMENTO: parseFloat(valorPagamento),
             DATAPAGAMENTO: dataPagamento,
             FORMAPAGAMENTO: formaPagamento?.value || '',
             ANEXOCOMPROVANTE: anexoComprovante,
-            DSOBSERVACAO: observacao?.value,
-            STATUS: statusPagamento?.value,
+            DSOBSERVACAO: observacao,
+            STPAGAMENTO: statusPagamento?.value,
             IDUSUARIOCRIACAO: usuarioLogado?.id
         }
 
         try {
 
-            const response = await post(`/pagamento-departamento`, postData)
+            const response = isEdicao
+                ? await put(`/pagamento-departamento/${idPagamento}`, postData)
+                : await post(`/pagamento-departamento`, postData)
 
             await registrarLogAuditoria({
                 idFuncionario: usuarioLogado.id,
-                pathFuncao: 'FINANCEIRO/REGISTRAR PAGAMENTO ADIANTAMENTO',
+                pathFuncao: isEdicao
+                    ? 'FINANCEIRO/ATUALIZAR PAGAMENTO ADIANTAMENTO'
+                    : 'FINANCEIRO/REGISTRAR PAGAMENTO ADIANTAMENTO',
                 dados: postData
             });
 
             Swal.fire({
                 position: 'center',
                 icon: 'success',
-                title: 'Pagamento registrado com sucesso!',
+                title: isEdicao ? 'Pagamento atualizado com sucesso!' : 'Pagamento registrado com sucesso!',
                 showConfirmButton: false,
                 timer: 5000,
                 customClass: {
@@ -219,7 +329,9 @@ export const useAutorizarPagamento = ({
         } catch (error) {
             const responsePost = await registrarLogAuditoria({
                 idFuncionario: usuarioLogado.id,
-                pathFuncao: 'FINANCEIRO/ERRO AO REGISTRAR PAGAMENTO ADIANTAMENTO',
+                pathFuncao: isEdicao
+                    ? 'FINANCEIRO/ERRO AO ATUALIZAR PAGAMENTO ADIANTAMENTO'
+                    : 'FINANCEIRO/ERRO AO REGISTRAR PAGAMENTO ADIANTAMENTO',
                 dados: postData
             });
 
@@ -239,6 +351,67 @@ export const useAutorizarPagamento = ({
     }
 
     return {
+        departamento,
+        dataSolicitacao,
+        cnpj,
+        setCnpj,
+        possuiNota,
+        setPossuiNota,
+        cnpjFaturado,
+        setCNPJFaturado,
+        vrAdiantamento,
+        setVrAdiantamento,
+        descricao,
+        setDescricao,
+        razaoSocialFaturamento,
+        setRazaoSocialFaturamento,
+        anexoOrcamento,
+        proposta,
+        setProposta,
+        tipoBeneficiario,
+        setTipoBeneficiario,
+        cpfBeneficiario,
+        setCpfBeneficiario,
+        nomeBeneficiario,
+        setNomeBeneficiario,
+        rgBeneficiario,
+        setRgBeneficiario,
+        emailBeneficiario,
+        setEmailBeneficiario,
+        cepBeneficiario,
+        setCepBeneficiario,
+        enderecoBeneficiario,
+        setEnderecoBeneficiario,
+        telefoneBeneficiario,
+        setTelefoneBeneficiario,
+        dtNascimentoBeneficiario,
+        setDtNascimentoBeneficiario,
+        tipoDespesa,
+        setTipoDespesa,
+        nomeFavorecido,
+        setNomeFavorecido,
+        chavePix,
+        setChavePix,
+        banco,
+        setBanco,
+        agencia,
+        setAgencia,
+        conta,
+        setConta,
+        digitoConta,
+        setDigitoConta,
+        unidadeNegocio,
+        setUnidadeNegocio,
+        centroCusto,
+        setCentroCusto,
+        dtPagamento,
+        setDtPagamento,
+        optionsReposicao,
+        optionsBancos,
+        optionsTipoBeneficiario,
+        optionsTipoDespesa,
+        optionsAndamento,
+
         valorPagamento,
         setValorPagamento,
         dataPagamento,

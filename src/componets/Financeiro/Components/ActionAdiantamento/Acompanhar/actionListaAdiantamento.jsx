@@ -3,6 +3,8 @@ import { ButtonTable } from "../../../../ButtonsTabela/ButtonTable"
 import { formatMoeda } from "../../../../../utils/formatMoeda"
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { ColumnGroup } from "primereact/columngroup";
+import { Row } from "primereact/row";
 import HeaderTable from "../../../../Tables/headerTable"
 import { useReactToPrint } from "react-to-print";
 import { jsPDF } from 'jspdf';
@@ -10,9 +12,14 @@ import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import Swal from "sweetalert2";
 import { MdEdit, MdMoneyOff, MdOutlineAttachMoney } from "react-icons/md";
-import { ActionEditarModal } from "./EditarSolicitacao/actionEditarModal";
 import { get } from "../../../../../api/funcRequest";
 import { ActionPagamentoModal } from "../Pagamento/actionPagamentoModal";
+import { formatarDataParaBR } from "../../../../../utils/dataFormatada";
+import { GrDocumentDownload, GrView } from "react-icons/gr";
+import { ActionDetalhesModal } from "./DetalhesSolicitacao/actionDetalhesModal";
+import { IoMdDownload } from "react-icons/io";
+import { BASE_URL } from "../../../../../api/api";
+import { useAutorizar } from "./hooks/useAutorizar";
 
 export const ActionListaAdiantamento = ({
   dadosAdiantamentos,
@@ -22,11 +29,18 @@ export const ActionListaAdiantamento = ({
 }) => {
   const [rowSelection, setRowSelection] = useState(null);
   const [dadosDetalheAdiantamento, setDadosDetalheAdiantamento] = useState([]);
+  const [dadosDetalhePagamento, setDadosDetalhePagamento] = useState([]);
   const [modalEditarVisivel, setModalEditarVisivel] = useState(false);
   const [modalPagamento, setModalPagamento] = useState(false);
   const [globalFilterValue, setGlobalFilterValue] = useState('');
+  const [modalDetalhesVisivel, setModaDetalhesVisivel] = useState(false);
+  const [anexoComprovante, setAnexoComprovante] = useState('')
+  const [anexoNotaFiscal, setAnexoNotaFiscal] = useState('')
   const dataTableRef = useRef();
 
+  const {
+    handleAutorizar
+  } =  useAutorizar({optionsModulos, usuarioLogado, handleClick})
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
   };
@@ -38,55 +52,108 @@ export const ActionListaAdiantamento = ({
   });
 
   const exportToPDF = () => {
-    const doc = new jsPDF();
-    doc.autoTable({
-      head: [['Nº', 'Departamento', 'CNPJ Faturado', 'Rz. Social', 'Vr.Lançado', 'Decrição', 'Status', 'Possui Nota', 'Orçamento']],
-      body: dados.map(item => [
-        item.contador,
-        item.DEPARTAMENTO,
-        item.CNPJFATURAMENTO,
-        item.RAZAOSOCIALFATURAMENTO,
-        formatMoeda(item.VRSOLICITADO),
-        item.DESCRICAO,
-        item.STATUS,
-        item.POSSUINOTAFISCAL == 'True' ? 'SIM' : 'NÃO',
-        item.ANEXOORCAMENTO ? 'SIM' : 'NÃO'
-      ]),
-      horizontalPageBreak: true,
-      horizontalPageBreakBehaviour: 'immediately'
-    });
-    doc.save('adiantamento_departamento.pdf');
-  };
-
-  const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(dados.map(item => ({
-      'Nº': item.contador,
-      'Departamento': item.DEPARTAMENTO,
-      'CNPJ Faturado': item.CNPJFATURAMENTO,
-      'Rz. Social': item.RAZAOSOCIALFATURAMENTO,
-      'Vr.Lançado': formatMoeda(item.VRSOLICITADO),
-      'Decrição': item.DESCRICAO,
-      'Status': item.STATUS,
-      'Possui Nota': item.POSSUINOTAFISCAL == 'True' ? 'SIM' : 'NÃO',
-      'Orçamento': item.ANEXOORCAMENTO ? 'SIM' : 'NÃO'
-    })));
-    const workbook = XLSX.utils.book_new();
-    const header = ['Nº', 'Departamento', 'CNPJ Faturado', 'Rz. Social', 'Vr.Lançado', 'Descrição', 'Status', 'Possui Nota', 'Orçamento'];
-    worksheet['!cols'] = [
-      { wpx: 50, caption: 'Nº' },
-      { wpx: 100, caption: 'Departamento' },
-      { wpx: 100, caption: 'CNPJ Faturado' },
-      { wpx: 200, caption: 'Rz. Social' },
-      { wpx: 100, caption: 'Vr.Lançado' },
-      { wpx: 100, caption: 'Descrição' },
-      { wpx: 100, caption: 'Status' },
-      { wpx: 100, caption: 'Possui Nota' },
-      { wpx: 100, caption: 'Orçamento' },
-    ];
-    XLSX.utils.sheet_add_aoa(worksheet, [header], { origin: 'A1' });
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Adiantamento Departamento');
-    XLSX.writeFile(workbook, 'adiantamento_departamento.xlsx');
-  };
+      const doc = new jsPDF();
+      doc.autoTable({
+        head: [[
+          'Nº', 
+          'Dt Solicitação', 
+          'Dt. Pagamento', 
+          'Departamento', 
+          'CNPJ/CPF', 
+          'Rz.Social', 
+          'Vr.Lançado', 
+          'Solicitante', 
+          'Justificativa', 
+          'Possui Orçamento', 
+          'Status',
+          'Possui Nota',
+          'Justificativa',
+          'Status Final'
+        ]],
+        body: dados.map(item => [
+          item.contador,
+          item.DATACRIACAO,
+          item.DTPAGAMENTO,
+          item.DEPARTAMENTO,
+          item.CNPJFATURAMENTO || item.NUCPFBENEFICIARIO,
+          item.RAZAOSOCIALFATURAMENTO || item.NOBENEFICIARIO,
+          item.VRSOLICITADO,
+          item.NOMESOLICITANTE,
+          item.DSJUSTIFICATIVA,
+          item.ANEXOORCAMENTO ? 'SIM' : 'NÃO',
+          item.STATUS, 
+          item.POSSUINOTAFISCAL == 'True' ? 'SIM' : 'NÃO',
+          item.DSJUSTIFICATIVAPAGAMENTO,
+          item.STATIVO == 'False' ? 'FINALIZADO' : 'ABERTO'
+        ]),
+        horizontalPageBreak: true,
+        horizontalPageBreakBehaviour: 'immediately'
+      });
+      doc.save('adiantamento_departamento.pdf');
+    };
+  
+    const exportToExcel = () => {
+      const worksheet = XLSX.utils.json_to_sheet(dados.map(item => ({
+        'Nº': item.contador,
+        'Dt Solicitação': item.DATACRIACAO,
+        'Dt Pagamento': item.DTPAGAMENTO,
+        'Departamento': item.DEPARTAMENTO,
+        'CNPJ/CPF': item.CNPJFATURAMENTO || item.NUCPFBENEFICIARIO,
+        'Rz.Social': item.RAZAOSOCIALFATURAMENTO || item.NOBENEFICIARIO,
+        'Vr.Lançado': item.VRSOLICITADO,
+        'Solicitante': item.NOMESOLICITANTE,
+        'Justificativa': item.DSJUSTIFICATIVA,
+        'Possui Orçamento': item.ANEXOORCAMENTO ? 'SIM' : 'NÃO',
+        'STATUS': [
+          'AGUARDANDO FINANCEIRO',
+          'REPROVADO',
+          'PENDENTE',
+          'COMPROVANTE ANEXADO',
+          'AGUARDANDO NOTA FISCAL',
+          'PAGAMENTO RECUSADO',
+          'NOTA FISCAL EM ATRASO'
+        ].includes(item.STATUS) ? item.STATUS : '',
+        'Possui Nota': item.POSSUINOTAFISCAL == 'True' ? 'SIM' : 'NÃO',
+        'Justificativa': item.DSJUSTIFICATIVAPAGAMENTO,
+        'Status Final': item.STATIVO == 'False' ? 'FINALIZADO' : 'ABERTO'
+      })));
+      const workbook = XLSX.utils.book_new();
+      const header = [
+        'Nº', 
+        'Dt Solicitação', 
+        'Dt. Pagamento', 
+        'Departamento', 
+        'CNPJ/CPF', 
+        'Rz.Social', 
+        'Vr.Lançado', 
+        'Solicitante', 
+        'Justificativa', 
+        'Possui Orçamento', 
+        'Status',
+        'Possui Nota',
+        'Justificativa',
+        'Status Final'
+      ];
+      worksheet['!cols'] = [
+        { wpx: 50, caption: 'Nº' },
+        { wpx: 100, caption: 'Dt Solicitação' },
+        { wpx: 100, caption: 'Dt. Pagamento' },
+        { wpx: 100, caption: 'Departamento' },
+        { wpx: 100, caption: 'CNPJ/CPF' },
+        { wpx: 200, caption: 'Rz. Social' },
+        { wpx: 100, caption: 'Vr.Lançado' },
+        { wpx: 200, caption: 'Solicitante' },
+        { wpx: 100, caption: 'Justificativa' },
+        { wpx: 100, caption: 'Possui Orçamento' },
+        { wpx: 100, caption: 'Status' },
+        { wpx: 100, caption: 'Possui Nota' },
+        { wpx: 100, caption: 'Justificativa' },
+        { wpx: 100, caption: 'Status Final' },
+      ];
+      XLSX.utils.sheet_add_aoa(worksheet, [header], { origin: 'A1' });
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Adiantamento Departamento');
+      XLSX.writeFile(workbook, 'adiantamento_departamento.xlsx');
+    };
 
 
   const dados = dadosAdiantamentos.map((item, index) => {
@@ -98,8 +165,8 @@ export const ActionListaAdiantamento = ({
       DEPARTAMENTO: item.DEPARTAMENTO,
       NUCNPJEMPRESA: item.NUCNPJEMPRESA,
       POSSUINOTAFISCAL: item.POSSUINOTAFISCAL,
-      CNPJFATURAMENTO: item.CNPJFATURAMENTO,
-      RAZAOSOCIALFATURAMENTO: item.RAZAOSOCIALFATURAMENTO,
+      CNPJFATURAMENTO: item.CNPJFATURAMENTO || item.NUCPFBENEFICIARIO,
+      RAZAOSOCIALFATURAMENTO: item.RAZAOSOCIALFATURAMENTO || item.NOBENEFICIARIO,
       VRSOLICITADO: item.VRSOLICITADO,
       DESCRICAO: item.DESCRICAO,
       ANEXOORCAMENTO: item.ANEXOORCAMENTO,
@@ -108,11 +175,15 @@ export const ActionListaAdiantamento = ({
       DSJUSTIFICATIVA: item.DSJUSTIFICATIVA,
       IDUSUARIOCRIACAO: item.IDUSUARIOCRIACAO,
       DATACRIACAO: item.DATACRIACAO,
+      DTPAGAMENTO: item.DTPAGAMENTO,
       IDUSUARIOALTERACAO: item.IDUSUARIOALTERACAO,
       DATAALTERACAO: item.DATAALTERACAO,
       DATAFINALIZACAO: item.DATAFINALIZACAO,
       STATIVO: item.STATIVO,
       FORMAPAGAMENTO: item.FORMAPAGAMENTO,
+      STATUSPAGAMENTO: item.STATUSPAGAMENTO,
+      NOMESOLICITANTE: item.NOMESOLICITANTE,
+      DSJUSTIFICATIVAPAGAMENTO: item.DSJUSTIFICATIVAPAGAMENTO,
       STATUSPAGAMENTO: item.STATUSPAGAMENTO
     }
   });
@@ -128,6 +199,18 @@ export const ActionListaAdiantamento = ({
       width: "10%"
     },
     {
+      field: 'DATACRIACAO',
+      header: 'Data Solocitação',
+      body: row => <th style={{ color: 'blue' }}>{formatarDataParaBR(row.DATACRIACAO)}</th>,
+      sortable: true,
+    },
+    {
+      field: 'DTPAGAMENTO',
+      header: 'Data Pagamento',
+      body: row => <th style={{ color: 'blue' }}>{formatarDataParaBR(row.DTPAGAMENTO)}</th>,
+      sortable: true,
+    },
+    {
       field: 'DEPARTAMENTO',
       header: 'Departamento',
       body: row => <th style={{ color: 'blue' }}>{row.DEPARTAMENTO}</th>,
@@ -136,7 +219,7 @@ export const ActionListaAdiantamento = ({
     },
     {
       field: 'CNPJFATURAMENTO',
-      header: 'CNPJ Faturado',
+      header: 'CNPJ/CPF',
       body: row => <th style={{ color: 'blue' }}>{row.CNPJFATURAMENTO}</th>,
       sortable: true,
     },
@@ -153,31 +236,22 @@ export const ActionListaAdiantamento = ({
       sortable: true,
     },
     {
-      field: 'DESCRICAO',
-      header: 'Descrição',
-      sortable: true,
+      field: 'NOMESOLICITANTE',
+      header: 'Solicitante',
       body: row => (
-        <th style={{ color: 'blue', }}>
+        <th style={{ color: 'blue' }}>
 
-          {row.DESCRICAO}
+          {row.NOMESOLICITANTE}
         </th>
       ),
     },
     {
-      field: 'STATUS',
-      header: 'Status',
-      sortable: true,
+      field: 'DSJUSTIFICATIVA',
+      header: 'Justificativa',
       body: row => (
-        <th style={{
-          color: row.STATUS == 'APROVADO' ? '#1DC9B7' : 
-             row.STATUS == 'PAGO' ? '#1DC9B7' 
-            : row.STATUS == 'AGUARDANDO FINANCEIRO' ? '#6e4e9e' 
-            : row.STATUS == 'REPROVADO' ? '#FD1381' 
-            : row.STATUS == 'PENDENTE' ? '#ffc241' : '',
-          fontWeight: 700
-        }}>
+        <th style={{ color: 'blue' }}>
 
-          {row.STATUS}
+          {row.DSJUSTIFICATIVA}
         </th>
       ),
     },
@@ -204,6 +278,60 @@ export const ActionListaAdiantamento = ({
       ),
     },
     {
+      field: 'DSJUSTIFICATIVAPAGAMENTO',
+      header: 'Orçamento',
+      sortable: true,
+      body: row => (
+        <th style={{ color: 'blue' }}>
+          {row.DSJUSTIFICATIVAPAGAMENTO}
+        </th>
+      ),
+    },
+    {
+      field: 'STATUS',
+      header: 'Status Solicitação',
+      sortable: true,
+      body: row => (
+        <th style={{
+             color: row.STATUS == 'APROVADO' ? '#1DC9B7' 
+            : row.STATUS == 'AGUARDANDO FINANCEIRO' ? '#6e4e9e' 
+            : row.STATUS == 'REPROVADO' ? '#FD1381' 
+            : row.STATUS == 'PENDENTE' ? '#ffc241' : row.STATUS == 'PAGO' ? '#1DC9B7'
+            : row.STATUS == 'COMPROVANTE ANEXADO' ? 'blue'
+            : row.STATUS == 'AGUARDANDO NOTA FISCAL' ? '#567ebb'
+            : row.STATUS == 'PAGAMENTO RECUSADO' ? 'black'
+            : row.STATUS == 'NOTA FISCAL EM ATRASO' ? '#FB0C06' :
+            row.STATUS == 'AUTORIZADO' ? '#1DC9B7' : '',
+          fontWeight: 800
+        }}>
+
+          {row.STATUS}
+        </th>
+      ),
+    },
+    {
+      field: 'STATUSPAGAMENTO',
+      header: 'Status Pagamento',
+      sortable: true,
+      body: row => (
+        <th style={{ color: row.STATUSPAGAMENTO == 'False' ? '#FD1381' : 'blue', fontWeight: 800  }}>
+
+          {row.STATUSPAGAMENTO}
+        </th>
+      ),
+    },
+    {
+      field: 'STATIVO',
+      header: 'Status Final',
+      sortable: true,
+      body: row => (
+        <th style={{ color: row.STATIVO == 'False' ? '#FD1381' : 'blue', fontWeight: 800  }}>
+
+          {row.STATIVO == 'False' ? 'FINALIZADO' : 'ABERTO'}
+        </th>
+      ),
+    },
+    {
       field: 'STATIVO',
       header: 'Opções',
       button: true,
@@ -213,39 +341,73 @@ export const ActionListaAdiantamento = ({
             style={{ justifyContent: "space-between", display: 'flex' }}
           >
             <div className="p-1">
-              <ButtonTable
-                titleButton={"Aprovar Pagamento"}
-                cor={"success"}
-                Icon={MdOutlineAttachMoney}
-                iconSize={30}
-                width="35px"
-                height="35px"
-                onClickButton={() => handleClickAprovar(row)}
-                // disabledBTN={row.STATUS == 'PAGO' ? true : false}
-              />
+             {row.STATIVO == 'True' && (
+
+                <ButtonTable
+                  titleButton={"Aprovar Pagamento"}
+                  cor={"success"}
+                  Icon={MdOutlineAttachMoney}
+                  iconSize={30}
+                  width="35px"
+                  height="35px"
+                  onClickButton={() => handleClickAprovar(row)}
+                  // disabledBTN={row.STATIVO == 'False' ? true : false}
+                />
+              )} 
+            </div>
+            <div className="p-1">
+            
+              {row.STATIVO == 'True' &&
+                (row.ANEXOCOMPROVANTE == '' || row.ANEXOCOMPROVANTE == null) && (
+                    <ButtonTable
+                        titleButton={"Autorizar Pagamento"}
+                        cor={"danger"}
+                        Icon={MdOutlineAttachMoney}
+                        iconSize={30}
+                        width="35px"
+                        height="35px"
+                        onClickButton={() => handleAutorizar(row.IDADIANTAMENTO)}
+                    />
+                )}
+            
             </div>
             <div className="p-1">
               <ButtonTable
-                titleButton={"Reprovar Pagamento"}
-                cor={"danger"}
-                Icon={MdMoneyOff}
-                iconSize={30}
-                width="35px"
-                height="35px"
-                onClickButton={() => handleClickAprovar(row)}
-                // disabledBTN={row.STATUS == 'PAGO' ? false : true}
-              />
-            </div>
-            <div className="p-1">
-              <ButtonTable
-                titleButton={"Editar Solicitação"}
+                titleButton={"Detalhes"}
                 cor={"primary"}
-                Icon={MdEdit}
-                iconSize={30}
+                Icon={GrView}
+                iconSize={20}
                 width="35px"
                 height="35px"
-                onClickButton={() => handleClickEditar(row)}
+                onClickButton={() => handleClickVisualizar(row)}
               />
+            </div>
+       
+            <div className="p-1">
+              {['PAGO', 'AUTORIZADO', 'COMPROVANTE ANEXADO', 'AGUARDANDO NOTA FISCAL', ].includes(row.STATUS) && (
+                <ButtonTable
+                  titleButton={"Exportar Comprovante"}
+                  cor={"info"}
+                  Icon={IoMdDownload}
+                  iconSize={20}
+                  width="35px"
+                  height="35px"
+                  onClickButton={() => handleComprovantePagamento(row.IDADIANTAMENTO)}
+                />
+              )}
+            </div>
+            <div className="p-1">
+              {['PAGO', 'AUTORIZADO', 'COMPROVANTE ANEXADO', 'AGUARDANDO NOTA FISCAL', ].includes(row.STATUS) && (
+                <ButtonTable
+                  titleButton={"Exportar Nota Fiscal"}
+                  cor={"warning"}
+                  Icon={IoMdDownload}
+                  iconSize={20}
+                  width="35px"
+                  height="35px"
+                  onClickButton={() => handleNotaFiscal(row.IDADIANTAMENTO)}
+                />
+              )}
             </div>
           </div>
         )
@@ -278,9 +440,12 @@ export const ActionListaAdiantamento = ({
   const handleAprovar = async (IDADIANTAMENTO) => {
     try {
       const response = await get(`/lista-adiantamento-departamento?idAdiantamento=${IDADIANTAMENTO}`);
+      const responsePagamento = await get(`/pagamento-adiantamento?idAdiantamento=${IDADIANTAMENTO}`);
 
-      if (response.data && response.data.length > 0) {
+      if (response.data && responsePagamento.data &&  response.data.length > 0) {
         setDadosDetalheAdiantamento(response.data);
+        setDadosDetalhePagamento(responsePagamento.data);
+
         setModalPagamento(true);
       } else {
         Swal.fire({
@@ -298,13 +463,13 @@ export const ActionListaAdiantamento = ({
     }
   };
 
-  const handleEditar = async (IDADIANTAMENTO) => {
+  const handleVisualizar = async (IDADIANTAMENTO) => {
     try {
       const response = await get(`/lista-adiantamento-departamento?idAdiantamento=${IDADIANTAMENTO}`);
-
+    
       if (response.data && response.data.length > 0) {
         setDadosDetalheAdiantamento(response.data);
-        setModalEditarVisivel(true);
+        setModaDetalhesVisivel(true);
       } else {
         Swal.fire({
           position: 'center',
@@ -317,15 +482,18 @@ export const ActionListaAdiantamento = ({
         return;
       }
     } catch (error) {
-      console.error('Erro ao buscar detalhes ', error);
+      console.error('Erro ao buscar detalhes: ', error);
+      Swal.fire({
+        icon: 'info',
+        title: 'Não existe dados nesta solicitação'
+      })
     }
   };
 
-
-  const handleClickEditar = (row) => {
+  const handleClickVisualizar = (row) => {
     if (optionsModulos[0]?.ALTERAR == 'True') {
       if (row && row.IDADIANTAMENTO) {
-        handleEditar(row.IDADIANTAMENTO);
+        handleVisualizar(row.IDADIANTAMENTO);
       }
 
     } else {
@@ -335,7 +503,7 @@ export const ActionListaAdiantamento = ({
         title: 'Acesso Negado!',
         html: `${usuarioLogado?.NOFUNCIONARIO} <br> Você não tem permissão.`,
         showConfirmButton: true,
-        timer: 5000,
+        timer: 30000,
         customClass: {
           container: 'custom-swal',
         }
@@ -343,7 +511,259 @@ export const ActionListaAdiantamento = ({
     }
   };
 
+  async function exportarAnexo(caminhoArquivo) {
+    if (!caminhoArquivo) {
+      Swal.fire({
+        position: 'center',
+        icon: 'info',
+        title: 'Nenhum arquivo anexado.',
+        showConfirmButton: false,
+        timer: 3000,
+        customClass: { container: 'custom-swal' },
+      });
+      return;
+    }
 
+    const url = caminhoArquivo.startsWith('/files/')
+      ? `${BASE_URL}${caminhoArquivo}`
+      : `${BASE_URL}/download-anexo-adiantamento?path=${encodeURIComponent(caminhoArquivo)}`;
+
+    try {
+      const response = await fetch(url);
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const blob = await response.blob();
+      const nomeArquivo = caminhoArquivo.substring(caminhoArquivo.lastIndexOf('/') + 1).replace(/^\d+-/, '');
+
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = nomeArquivo;
+      link.click();
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Erro ao baixar anexo:', error);
+      Swal.fire({
+        position: 'center',
+        icon: 'error',
+        title: 'Não foi possível baixar o arquivo. Por favor, tente novamente.',
+        showConfirmButton: false,
+        timer: 3000,
+        customClass: { container: 'custom-swal' },
+      });
+    }
+  }
+
+
+  const handleComprovantePagamento = async (IDADIANTAMENTO) => {
+    try {
+      const response = await get(`/pagamento-adiantamento?idAdiantamento=${IDADIANTAMENTO}`);
+
+      if (response.data && response.data.length > 0) {
+        setDadosDetalhePagamento(response.data);
+
+        const pagamentoComAnexo = response.data.find(item => item.ANEXOCOMPROVANTE);
+
+        if (!pagamentoComAnexo) {
+          Swal.fire({
+            position: 'center',
+            icon: 'info',
+            title: 'Nenhum comprovante de Pagamento anexado para este adiantamento.',
+            showConfirmButton: false,
+            timer: 3000,
+            customClass: { container: 'custom-swal' },
+          });
+          return;
+        }
+
+        setAnexoComprovante(pagamentoComAnexo.ANEXOCOMPROVANTE);
+        await exportarAnexo(pagamentoComAnexo.ANEXOCOMPROVANTE);
+      } else {
+        Swal.fire({
+          position: 'center',
+          icon: 'error',
+          title: 'Comprovante de pagamento não encontrados.',
+          customClass: {
+            container: 'custom-swal',
+          }
+        });
+        return;
+      }
+    } catch (error) {
+      console.error('Erro ao buscar detalhe conta bancária: ', error);
+    }
+  };
+
+  const handleNotaFiscal = async (IDADIANTAMENTO) => {
+    try {
+      const response = await get(`/lista-adiantamento-departamento?idAdiantamento=${IDADIANTAMENTO}`);
+
+      if (response.data && response.data.length > 0) {
+        setDadosDetalhePagamento(response.data);
+
+        const pagamentoComAnexo = response.data.find(item => item.ANEXONOTAFISCAL);
+        console.log(response.data, 'data')
+        if (!pagamentoComAnexo) {
+          Swal.fire({
+            position: 'center',
+            icon: 'info',
+            title: 'Nenhuma Nota Fiscal anexada para este adiantamento.',
+            showConfirmButton: false,
+            timer: 3000,
+            customClass: { container: 'custom-swal' },
+          });
+          return;
+        }
+
+        setAnexoNotaFiscal(pagamentoComAnexo.ANEXONOTAFISCAL);
+        await exportarAnexo(pagamentoComAnexo.ANEXONOTAFISCAL);
+      } else {
+        Swal.fire({
+          position: 'center',
+          icon: 'error',
+          title: 'Nota Fiscal não encontrada.',
+          customClass: {
+            container: 'custom-swal',
+          }
+        });
+        return;
+      }
+    } catch (error) {
+      console.error('Erro ao buscar detalhe conta bancária: ', error);
+    }
+  };
+
+  const headerGrupo = (
+    <ColumnGroup  >
+      <Row>
+        <Column
+          colSpan="11"
+          headerStyle={{ fontSize: '1rem', textAlign: 'center', justifyContent: 'center', backgroundColor: "#7a59ad", color: 'white' }}
+          headerClassName="grupo-meta-geral"
+          header="SOLICITAÇÃO"
+        />
+        <Column
+          colSpan="5"
+          headerStyle={{ fontSize: '1rem', textAlign: 'center', justifyContent: 'center', backgroundColor: "#FD1381", color: 'black' }}
+          headerClassName="grupo-meta-geral"
+          header="PAGAMENTO"
+        />
+      </Row>
+
+      <Row>
+
+        <Column
+          field="contador"
+          header="#"
+          sortable={true}
+          style={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
+        />
+        <Column
+          field="DATACRIACAO"
+          header="Dt Solocitação"
+          sortable={true}
+          style={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
+        />
+        <Column
+          field="DTPAGAMENTO"
+          header="Dt Pagamento"
+          sortable={true}
+          style={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
+        />
+        <Column
+          field="DEPARTAMENTO"
+          header="Departamento"
+          sortable={true}
+          style={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
+        />
+        <Column
+          field="CNPJFATURAMENTO"
+          header="CNPJ/CPF"
+          sortable={true}
+          style={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
+        />
+        <Column
+          field="RAZAOSOCIALFATURAMENTO"
+          header="Rz. Social"
+          sortable={true}
+          style={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
+        />
+        <Column
+          field="VRSOLICITADO"
+          header="Vr Lançado"
+          sortable={true}
+          style={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
+        />
+        <Column
+          field="NOMESOLICITANTE"
+          header="Solicitante"
+          sortable={true}
+          style={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
+        />
+
+        <Column
+          field="DSJUSTIFICATIVA"
+          header="Justificativa"
+          sortable={true}
+          style={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
+        />
+
+        <Column
+          field="POSSUINOTAFISCA"
+          header="Possui Nota"
+          sortable={true}
+          style={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
+        />
+
+        <Column
+          field="ANEXOORCAMENTO"
+          header="Possui Orçamento"
+          sortable={true}
+          style={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
+        />
+
+       
+
+       
+        <Column
+          field="DSJUSTIFICATIVAPAGAMENTO"
+          header="Justificativa"
+          sortable={true}
+          style={{ color: 'white', backgroundColor: "#FD1381", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
+        />
+        <Column
+          field="STATUS"
+          header="Status Solicitação"
+          sortable={true}
+          style={{ color: 'white', backgroundColor: "#FD1381", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
+        />
+
+        <Column
+          field="STATUSPAGAMENTO"
+          header="Status Pagamento"
+          sortable={true}
+          style={{ color: 'white', backgroundColor: "#FD1381", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
+        />
+
+        <Column 
+          field="STATIVO" 
+          header="Status Final" 
+          sortable={true} 
+          style={{color: 'white', backgroundColor: "#FD1381", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}   
+        />
+
+        <Column
+          field="IDADIANTAMENTO"
+          header="Opções"
+          sortable={true}
+          style={{ color: 'white', backgroundColor: "#FD1381", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
+        /> 
+      </Row>
+
+
+    </ColumnGroup>
+  )
 
   return (
 
@@ -368,6 +788,7 @@ export const ActionListaAdiantamento = ({
             title="Vendas por Loja"
             value={dados}
             globalFilter={globalFilterValue}
+            headerColumnGroup={headerGrupo}
             size="small"
             sortOrder={-1}
             paginator={true}
@@ -401,24 +822,24 @@ export const ActionListaAdiantamento = ({
           </DataTable>
         </div>
 
-        <ActionEditarModal
-          show={modalEditarVisivel}
-          handleClose={() => setModalEditarVisivel(false)}
-          handleClick={handleClick}
-          dadosDetalheAdiantamento={dadosDetalheAdiantamento}
-          optionsModulos={optionsModulos}
-          usuarioLogado={usuarioLogado}
-        />
 
         <ActionPagamentoModal
           show={modalPagamento}
           handleClose={() => setModalPagamento(false)}
           handleClick={handleClick}
           dadosDetalheAdiantamento={dadosDetalheAdiantamento}
+          dadosDetalhePagamento={dadosDetalhePagamento}
           optionsModulos={optionsModulos}
           usuarioLogado={usuarioLogado}
+        />
+
+        <ActionDetalhesModal
+          show={modalDetalhesVisivel}
+          handleClose={() => setModaDetalhesVisivel(false)}
+          dadosDetalheAdiantamento={dadosDetalheAdiantamento}
         />
       </div>
     </Fragment>
   )
 }
+
