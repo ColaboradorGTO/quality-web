@@ -16,7 +16,7 @@ export const ActionListaVendas = ({ dadosVendas }) => {
   const [rowSelection, setRowSelection] = useState(null);
   const dataTableRef = useRef();
 
- 
+
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
   };
@@ -43,7 +43,7 @@ export const ActionListaVendas = ({ dadosVendas }) => {
         formatMoeda(item.VRRECVOUCHER),
         formatMoeda(item.VRTOTALPAGO),
         parseFloat(item.NRNOTA)
-       
+
       ]),
       horizontalPageBreak: true,
       horizontalPageBreakBehaviour: 'immediately'
@@ -93,7 +93,7 @@ export const ActionListaVendas = ({ dadosVendas }) => {
   })
 
   const dados = Array.isArray(dadosVendas) ? dadosVendas.map((item) => {
-   
+
     return {
       IDVENDA: item.venda.IDVENDA,
       NOFANTASIA: item.venda.NOFANTASIA,
@@ -107,12 +107,16 @@ export const ActionListaVendas = ({ dadosVendas }) => {
       VRRECVOUCHER: toFloat(item.venda.VRRECVOUCHER),
       VRTOTALPAGO: toFloat(item.venda.VRTOTALPAGO),
       NRNOTA: item.venda.NRNOTA,
+      DEST_CNPJ: item.venda.DEST_CNPJ,
+      DEST_CPF: item.venda.DEST_CPF,
+
 
       NUCODBARRAS: item.detalhe[0].det.NUCODBARRAS,
       XPROD: item.detalhe[0].det.XPROD,
       VPROD: item.detalhe[0].det.VPROD,
       QTD: item.detalhe[0].det.QTD,
       CPROD: item.detalhe[0].det.CPROD,
+
 
 
       DSTIPOPAGAMENTO: item.pagamento[0].pag.DSTIPOPAGAMENTO,
@@ -123,7 +127,7 @@ export const ActionListaVendas = ({ dadosVendas }) => {
 
     }
   }) : [];
-   
+
 
   const ExpandedCompenent = ({ data }) => {
     return (
@@ -140,7 +144,7 @@ export const ActionListaVendas = ({ dadosVendas }) => {
 
                 <h2 className="p-3">Detalhe Venda</h2>
               </tr>
-              <tr style={{color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem'}}>
+              <tr style={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}>
                 <th >
                   Cod. Produto:
                 </th>
@@ -162,7 +166,7 @@ export const ActionListaVendas = ({ dadosVendas }) => {
               <tr >
                 <th >
                   {data.CPROD}
-               
+
                 </th>
                 <th >
                   {data.NUCODBARRAS}
@@ -190,7 +194,7 @@ export const ActionListaVendas = ({ dadosVendas }) => {
             <thead className="pad-1" >
 
               <h2 className="p-3">Detalhe Pagamento</h2>
-              <tr style={{color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem'}} >
+              <tr style={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem' }} >
                 <th >
                   Descrição
                 </th>
@@ -240,6 +244,19 @@ export const ActionListaVendas = ({ dadosVendas }) => {
       body: row => <th>{row.IDVENDA}</th>,
       sortable: true,
     },
+    {
+      field: 'DEST_CPF',
+      header: 'CPF',
+      body: row => <th style={{}}>{row.DEST_CPF}</th>,
+      sortable: true,
+    },
+    {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{}}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
     {
       field: 'NOFANTASIA',
       header: 'Empresa',
@@ -308,7 +325,7 @@ export const ActionListaVendas = ({ dadosVendas }) => {
     },
 
   ]
-  
+
 
   return (
 

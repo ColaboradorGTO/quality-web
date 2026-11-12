@@ -19,7 +19,7 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
   const onPageChange = (event) => {
     setFirst(event.first);
     setRows(event.rows);
-  }  
+  }
 
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
@@ -35,8 +35,8 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
     doc.autoTable({
       head: [['Nº', 'Loja', 'Vl. Dinheiro', 'Vl. Cartão', 'Vl. Convênio', 'Vl. POS', 'Vl. Voucher', 'Vl. Bruto', 'Vl. Desconto Total', 'Vl. Desconto Funcionário', 'Vl. Desconto Cliente', 'Vl. Pago']],
       body: dadosListaDetalhada.map(item => [
-        item.contador, 
-        item.NOFANTASIA, 
+        item.contador,
+        item.NOFANTASIA,
         formatMoeda(item.VRRECDINHEIRO),
         formatMoeda(item.VRRECCARTAO),
         formatMoeda(item.VRRECCONVENIO),
@@ -59,25 +59,25 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
     const workbook = XLSX.utils.book_new();
     const header = ['Nº', 'Loja', 'Vl. Dinheiro', 'Vl. Cartão', 'Vl. Convênio', 'Vl. POS', 'Vl. Voucher', 'Vl. Bruto', 'Vl. Desconto Total', 'Vl. Desconto Funcionário', 'Vl. Desconto Cliente', 'Vl. Pago'];
     worksheet['!cols'] = [
-      { wpx: 50, caption: 'Nº' }, 
-      { wpx: 200, caption: 'Loja' }, 
-      { wpx: 100, caption: 'Vl. Dinheiro' }, 
-      { wpx: 100, caption: 'Vl. Cartão' }, 
-      { wpx: 100, caption: 'Vl. Convênio' }, 
-      { wpx: 100, caption: 'Vl. POS' }, 
-      { wpx: 100, caption: 'Vl. Voucher' }, 
-      { wpx: 100, caption: 'Vl. Bruto' }, 
-      { wpx: 100, caption: 'Vl. Desconto Total' }, 
-      { wpx: 100, caption: 'Vl. Desconto Funcionário' }, 
-      { wpx: 100, caption: 'Vl. Desconto Cliente' }, 
+      { wpx: 50, caption: 'Nº' },
+      { wpx: 200, caption: 'Loja' },
+      { wpx: 100, caption: 'Vl. Dinheiro' },
+      { wpx: 100, caption: 'Vl. Cartão' },
+      { wpx: 100, caption: 'Vl. Convênio' },
+      { wpx: 100, caption: 'Vl. POS' },
+      { wpx: 100, caption: 'Vl. Voucher' },
+      { wpx: 100, caption: 'Vl. Bruto' },
+      { wpx: 100, caption: 'Vl. Desconto Total' },
+      { wpx: 100, caption: 'Vl. Desconto Funcionário' },
+      { wpx: 100, caption: 'Vl. Desconto Cliente' },
       { wpx: 100, caption: 'Vl. Pago' }
-      
-    ]; 
+
+    ];
     XLSX.utils.sheet_add_aoa(worksheet, [header], { origin: 'A1' });
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Desconto Vendas Simplificada');
     XLSX.writeFile(workbook, 'vendas_desconto_simplificada.xlsx');
   };
-  
+
   const calcularTotalDinheiro = () => {
     let total = 0;
     for (let dado of dadosDescontoVendasSimplificado) {
@@ -173,6 +173,9 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
       VLTOTALDESCONTOCLIENTE: formatMoeda(item.VLTOTALDESCONTOCLIENTE),
       VRDESCONTO: formatMoeda(item.VRDESCONTO),
       TOTALLIQUIDO: formatMoeda(item.TOTALLIQUIDO),
+      DEST_CNPJ: item.DEST_CNPJ,
+      DEST_CPF: item.DEST_CPF,
+
 
     }
   }) : [];
@@ -208,6 +211,8 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
       VLTOTALDESCONTOCLIENTE: item.VLTOTALDESCONTOCLIENTE,
       TOTALLIQUIDO: item.TOTALLIQUIDO,
       VLTOTALVENDIDO: item.VLTOTALVENDIDO,
+      DEST_CNPJ: item.DEST_CNPJ,
+      DEST_CPF: item.DEST_CPF,
       percentualDinheiro: percentualDinheiro,
       percentualCartao: percentualCartao,
       percentualConvenio: percentualConvenio,
@@ -222,7 +227,7 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
       contador
     }
   })
-  
+
   const calcularTotalVendido = () => {
     let total = dadosDescontoVendasSimplificado[0]?.VLTOTALVENDIDO;
     return total;
@@ -244,11 +249,11 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
     const totalGeral = calcularTotalGeral(field);
     const totalVendido = calcularTotalVendido();
     const percentual = totalVendido > 0 ? (totalGeral * 100) / totalVendido : 0;
-    
+
     return `${formatMoeda(totalPagina)} (${formatMoeda(totalGeral)} - ${percentual.toFixed(6)}% do total bruto da venda)`;
   };
 
-    const calcularTotalDinheiroPercentual = () => calcularPercentualFooter('VRRECDINHEIRO', 'Dinheiro');
+  const calcularTotalDinheiroPercentual = () => calcularPercentualFooter('VRRECDINHEIRO', 'Dinheiro');
   const calcularPercentualCartao = () => calcularPercentualFooter('VRRECCARTAO', 'Cartão');
   const calcularPercentualConvenio = () => calcularPercentualFooter('VRRECCONVENIO', 'Convênio');
   const calcularPercentualPos = () => calcularPercentualFooter('VRRECPOS', 'POS');
@@ -258,7 +263,7 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
   const calcularPercentualDescontoCliente = () => calcularPercentualFooter('VLTOTALDESCONTOCLIENTE', 'Desconto Cliente');
   const calcularPercentualDesconto = () => calcularPercentualFooter('VRDESCONTO', 'Desconto Total');
   const calcularPercentualLiquido = () => calcularPercentualFooter('TOTALLIQUIDO', 'Líquido');
-  
+
   const colunasDetalhada = [
     {
       field: 'contador',
@@ -269,11 +274,11 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
     {
       field: 'NOFANTASIA',
       header: 'Loja',
-      body: row => {return <p style={{width: 200, margin: 0}}>{row.NOFANTASIA}</p>},
+      body: row => { return <p style={{ width: 200, margin: 0 }}>{row.NOFANTASIA}</p> },
       footer: (row) => {
         return (
           <div>
-            <th style={{ fontWeight: 600,color: 'blue'  }}>Total Venda Bruta do Período</th>
+            <th style={{ fontWeight: 600, color: 'blue' }}>Total Venda Bruta do Período</th>
             <hr />
             <th style={{ fontWeight: 600, color: 'blue' }}>{formatMoeda(calcularTotalVendido())}</th>
           </div>
@@ -284,7 +289,7 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
     {
       field: 'VRRECDINHEIRO',
       header: 'Vl. Dinheiro',
-      body: row => {return <p style={{width: 100, margin: 0}}>{formatMoeda(row.VRRECDINHEIRO)}</p>},
+      body: row => { return <p style={{ width: 100, margin: 0 }}>{formatMoeda(row.VRRECDINHEIRO)}</p> },
       footer: (row) => {
         return (
           <div>
@@ -297,7 +302,7 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
     {
       field: 'VRRECCARTAO',
       header: 'Vl. Cartão',
-      body: row => {return <p style={{width: 100, margin: 0}}>{formatMoeda(row.VRRECCARTAO)}</p>},
+      body: row => { return <p style={{ width: 100, margin: 0 }}>{formatMoeda(row.VRRECCARTAO)}</p> },
       footer: (row) => {
         return (
           <div>
@@ -310,7 +315,7 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
     {
       field: 'VRRECCONVENIO',
       header: 'Vl. Convênio',
-      body: row => {return <p style={{width: 100, margin: 0}}>{formatMoeda(row.VRRECCONVENIO)}</p>},
+      body: row => { return <p style={{ width: 100, margin: 0 }}>{formatMoeda(row.VRRECCONVENIO)}</p> },
       footer: (row) => {
         return (
           <div>
@@ -323,7 +328,7 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
     {
       field: 'VRRECPOS',
       header: 'Vl. POS',
-      body: row => {return <p style={{width: 100, margin: 0}}>{formatMoeda(row.VRRECPOS)}</p>},
+      body: row => { return <p style={{ width: 100, margin: 0 }}>{formatMoeda(row.VRRECPOS)}</p> },
       footer: (row) => {
         return (
           <div>
@@ -336,7 +341,7 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
     {
       field: 'VRRECVOUCHER',
       header: 'Vl. Voucher',
-      body: row => {return <p style={{width: 100, margin: 0}}>{formatMoeda(row.VRRECVOUCHER)}</p>},
+      body: row => { return <p style={{ width: 100, margin: 0 }}>{formatMoeda(row.VRRECVOUCHER)}</p> },
       footer: (row) => {
         return (
           <div>
@@ -349,7 +354,7 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
     {
       field: 'VALORTOTALPRODUTOBRUTO',
       header: 'Vl. Bruto',
-      body: row => {return <p style={{width: 100, margin: 0}}>{formatMoeda(row.VALORTOTALPRODUTOBRUTO)}</p>},
+      body: row => { return <p style={{ width: 100, margin: 0 }}>{formatMoeda(row.VALORTOTALPRODUTOBRUTO)}</p> },
       footer: (row) => {
         return (
           <div>
@@ -362,7 +367,7 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
     {
       field: 'VLTOTALDESCONTOFUNCIONARIO',
       header: 'Vl. Desc. Func.',
-      body: row => {return <p style={{width: 150, margin: 0}}>{formatMoeda(row.VLTOTALDESCONTOFUNCIONARIO)}</p>},
+      body: row => { return <p style={{ width: 150, margin: 0 }}>{formatMoeda(row.VLTOTALDESCONTOFUNCIONARIO)}</p> },
       footer: (row) => {
         return (
           <div>
@@ -375,7 +380,7 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
     {
       field: 'VLTOTALDESCONTOCLIENTE',
       header: 'Vl. Desc. Cliente',
-      body: row => {return <p style={{width: 150, margin: 0}}>{formatMoeda(row.VLTOTALDESCONTOCLIENTE)}</p>},
+      body: row => { return <p style={{ width: 150, margin: 0 }}>{formatMoeda(row.VLTOTALDESCONTOCLIENTE)}</p> },
       footer: (row) => {
         return (
           <div>
@@ -388,7 +393,7 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
     {
       field: 'VRDESCONTO',
       header: 'Vl. Desconto Total',
-      body: row => {return <p style={{width: 150, margin: 0}}>{formatMoeda(row.VRDESCONTO)}</p>},
+      body: row => { return <p style={{ width: 150, margin: 0 }}>{formatMoeda(row.VRDESCONTO)}</p> },
       footer: (row) => {
         return (
           <div>
@@ -401,7 +406,7 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
     {
       field: 'TOTALLIQUIDO',
       header: 'Vl. Pago',
-      body: row => {return <p style={{width: 150, margin: 0}}>{formatMoeda(row.TOTALLIQUIDO)}</p>},
+      body: row => { return <p style={{ width: 150, margin: 0 }}>{formatMoeda(row.TOTALLIQUIDO)}</p> },
       footer: (row) => {
         return (
           <div>
@@ -410,7 +415,20 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
         )
       },
       sortable: true,
-    }
+    },
+      {
+      field: 'DEST_CPF',
+      header: 'CPF',
+      body: row => <th style={{ width: 150, margin: 0 }}>{row.DEST_CPF}</th>,
+      sortable: true,
+    },
+     {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{width: 150, margin: 0  }}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
   ]
 
   return (
@@ -424,13 +442,13 @@ export const ActionListaDescontoVendasSimplificada = ({ dadosDescontoVendasSimpl
         </div>
         <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
           <HeaderTable
-              globalFilterValue={globalFilterValue}
-              onGlobalFilterChange={onGlobalFilterChange}
-              handlePrint={handlePrint}
-              exportToExcel={exportToExcel}
-              exportToPDF={exportToPDF}
-            />
-          </div>
+            globalFilterValue={globalFilterValue}
+            onGlobalFilterChange={onGlobalFilterChange}
+            handlePrint={handlePrint}
+            exportToExcel={exportToExcel}
+            exportToPDF={exportToPDF}
+          />
+        </div>
         <div className="card">
           <DataTable
             title="Lista Simplificada"

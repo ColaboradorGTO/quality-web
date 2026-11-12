@@ -137,7 +137,9 @@ export const ActionPesquisaVendasMarca = () => {
       />
 
       {tabelaVisivel &&
-        <ActionListaVendasMarca dadosVendasMarca={dadosVendasMarca} />
+        <ActionListaVendasMarca 
+        dadosVendasMarca={dadosVendasMarca}
+        />
       }
 
     </Fragment>

@@ -10,6 +10,7 @@ import HeaderTable from "../../../Tables/headerTable";
 import { ColumnGroup } from "primereact/columngroup";
 import { Row } from "primereact/row";
 import { toFloat } from "../../../../utils/toFloat";
+import { mascaraCPF } from "../../../../utils/formatCPF";
 
 
 export const ActionListaVendasVendedor = ({ dadosVendasVendedor, percComissaoSelecionada }) => {
@@ -29,18 +30,18 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor, percComissaoSel
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.autoTable({
-      head: [['Nº','Empresa', 'Matrícula', 'CPF', 'Nome', 'Qtd Produto', 'Valor Vendido', 'Voucher Recebido', 'Valor Liquido', 'Comissão']],
+      head: [['Nº', 'Empresa', 'Matrícula', 'CPF', 'Nome', 'Qtd Produto', 'Valor Vendido', 'Voucher Recebido', 'Valor Liquido', 'Comissão']],
       body: dados.map(item => [
         item.contador,
         item.NOFANTASIA,
         parseFloat(item.VENDEDOR_MATRICULA),
-        parseFloat(item.VENDEDOR_CPF), 
-        item.VENDEDOR_NOME, 
-        parseFloat(item.QTDVENDIDOVENDEDOR), 
-        formatMoeda(item.TOTALVENDIDOVENDEDOR), 
-        formatMoeda(item.Vouchers), 
-        formatMoeda(item.totalVendido), 
-        formatMoeda(item.VrComissao) 
+        parseFloat(item.VENDEDOR_CPF),
+        item.VENDEDOR_NOME,
+        parseFloat(item.QTDVENDIDOVENDEDOR),
+        formatMoeda(item.TOTALVENDIDOVENDEDOR),
+        formatMoeda(item.Vouchers),
+        formatMoeda(item.totalVendido),
+        formatMoeda(item.VrComissao)
 
       ]),
       horizontalPageBreak: true,
@@ -52,7 +53,7 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor, percComissaoSel
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(dados);
     const workbook = XLSX.utils.book_new();
-    const header = ['Nº','Empresa', 'Matrícula', 'CPF', 'Nome', 'Qtd Produto', 'Valor Vendido', 'Voucher Recebido', 'Valor Liquido', 'Comissão'];
+    const header = ['Nº', 'Empresa', 'Matrícula', 'CPF', 'Nome', 'Qtd Produto', 'Valor Vendido', 'Voucher Recebido', 'Valor Liquido', 'Comissão'];
     worksheet['!cols'] = [
       { wpx: 50, caption: 'Nº' },
       { wpx: 200, caption: 'Empresa' },
@@ -64,7 +65,7 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor, percComissaoSel
       { wpx: 100, caption: 'Voucher Recebido' },
       { wpx: 100, caption: 'Valor Liquido' },
       { wpx: 100, caption: 'Comissão' },
-     
+
     ];
     XLSX.utils.sheet_add_aoa(worksheet, [header], { origin: 'A1' });
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Vendas por Vendedor');
@@ -96,7 +97,7 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor, percComissaoSel
     const percComissao = percComissaoSelecionada;
     let VrComissao = 0;
 
-    if(percComissao == 0) {
+    if (percComissao == 0) {
       VrComissao = 0;
     } else {
       VrComissao = totalVendido * (percComissao / 100);
@@ -113,7 +114,10 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor, percComissaoSel
       Vouchers: item.Vouchers,
       totalVendido: totalVendido,
       VrComissao: VrComissao,
-      
+      DEST_CNPJ: item.vendedor.DEST_CNPJ,
+      DEST_CPF: item.vendedor.DEST_CPF,
+
+
     }
   });
 
@@ -182,17 +186,30 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor, percComissaoSel
       body: row => <th style={{ color: 'green' }}> {formatMoeda(row.VrComissao)}</th>,
       sortable: true,
     },
+    {
+      field: 'DEST_CPF',
+      header: 'DEST_CPF',
+      body: row => <th style={{}}>{row.DEST_CPF}</th>,
+      sortable: true,
+    },
+     {
+      field: 'DEST_CNPJ',
+      header: 'DEST_CNPJ',
+      body: row => <th style={{}}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
   ]
 
   const footerGroup = (
     <ColumnGroup>
-      <Row> 
+      <Row>
         <Column footer="Total Vendas " colSpan={6} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem', textAlign: 'center' }} />
         <Column footer={formatMoeda(calcularTotalVendidoVendedor())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
-        <Column footer={formatMoeda(calcularTotalVoucher())}  footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }}/>
-   
-        <Column footer={formatMoeda(calcularValorVendido())}  footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }}/>
-        <Column footer={""}  footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }}/>
+        <Column footer={formatMoeda(calcularTotalVoucher())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
+
+        <Column footer={formatMoeda(calcularValorVendido())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
+        <Column footer={""} colSpan={3}footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
       </Row>
     </ColumnGroup>
   )
@@ -200,58 +217,59 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor, percComissaoSel
 
     <Fragment>
 
-    <div className="panel">
-      <div className="panel-hdr">
-        <h2>Vendas por Vendedor</h2>
-      </div>
-      <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
-        <HeaderTable
-          globalFilterValue={globalFilterValue}
-          onGlobalFilterChange={onGlobalFilterChange}
-          handlePrint={handlePrint}
-          exportToExcel={exportToExcel}
-          exportToPDF={exportToPDF}
-        />
-        
-      </div>
-      <div className="card" ref={dataTableRef}>
-        <DataTable
-          title="Vendas Vendedor por Loja"
-          value={dados}
-          globalFilter={globalFilterValue}
-          size="small"
-          selectionMode="single"
-          selection={rowSelection}
-          onSelectionChange={(e) => setRowSelection(e.value)}
-          footerColumnGroup={footerGroup}
-          sortOrder={-1}
-          paginator={true}
-          rows={10}
-          rowsPerPageOptions={[10, 20, 50, 100, dados.length]}
-          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
-          filterDisplay="menu"
-          showGridlines
-          stripedRows
-          emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
-        >
-          {colunasVendas.map(coluna => (
-            <Column
-              key={coluna.field}
-              field={coluna.field}
-              header={coluna.header}
-              body={coluna.body}
-              footer={coluna.footer}
-              sortable={coluna.sortable}
-              headerStyle={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
-              footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }}
-              bodyStyle={{ fontSize: '0.8rem' }}
+      <div className="panel">
+        <div className="panel-hdr">
+          <h2>Vendas por Vendedor</h2>
+        </div>
+        <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
+          <HeaderTable
+            globalFilterValue={globalFilterValue}
+            onGlobalFilterChange={onGlobalFilterChange}
+            handlePrint={handlePrint}
+            exportToExcel={exportToExcel}
+            exportToPDF={exportToPDF}
+          />
 
-            />
-          ))}
-        </DataTable>
+        </div>
+        <div className="card" ref={dataTableRef}>
+          <DataTable
+            title="Vendas Vendedor por Loja"
+            value={dados}
+            globalFilter={globalFilterValue}
+            size="small"
+            selectionMode="single"
+            selection={rowSelection}
+            onSelectionChange={(e) => setRowSelection(e.value)}
+            footerColumnGroup={footerGroup}
+            sortOrder={-1}
+            paginator={true}
+            rows={10}
+            rowsPerPageOptions={[10, 20, 50, 100, dados.length]}
+            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
+            filterDisplay="menu"
+            showGridlines
+            cellMemo={'false'}
+            stripedRows
+            emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
+          >
+            {colunasVendas.map(coluna => (
+              <Column
+                key={coluna.field}
+                field={coluna.field}
+                header={coluna.header}
+                body={coluna.body}
+                footer={coluna.footer}
+                sortable={coluna.sortable}
+                headerStyle={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
+                footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }}
+                bodyStyle={{ fontSize: '0.8rem' }}
+
+              />
+            ))}
+          </DataTable>
+        </div>
       </div>
-    </div>
 
     </Fragment>
   )

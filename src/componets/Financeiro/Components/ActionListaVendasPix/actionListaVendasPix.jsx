@@ -66,6 +66,8 @@ export const ActionListaVendasPIX = ({ dadosVendasPix }) => {
       PIX: item.PIX,
       DATAVENDA: item.DATAVENDA,
       NUAUTORIZACAO: item.NUAUTORIZACAO,
+      DEST_CNPJ: item.DEST_CNPJ,
+      DEST_CPF: item.DEST_CPF
     }
   }) : [];
 
@@ -88,6 +90,19 @@ export const ActionListaVendasPIX = ({ dadosVendasPix }) => {
       body: row => <th style={{ color: 'blue' }}>{row.IDVENDA}</th>,
       sortable: true,
     },
+    {
+      field: 'DEST_CPF',
+      header: 'CPF',
+      body: row => <th style={{ color: 'blue' }}>{row.DEST_CPF}</th>,
+      sortable: true,
+    },
+    {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{ color: 'blue' }}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
     {
       field: 'DSTIPOPAGAMENTO',
       header: 'Tipo',

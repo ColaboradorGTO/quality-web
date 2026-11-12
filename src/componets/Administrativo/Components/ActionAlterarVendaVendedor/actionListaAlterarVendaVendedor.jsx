@@ -99,6 +99,8 @@ export const ActionListaAlterarVendaVendedor = ({dadosVendasAtivas, empresaSelec
       VRTOTALPAGO: item.VRTOTALPAGO,
       STCONFERIDO: item.STCONFERIDO,
       STCONTINGENCIA: item.STCONTINGENCIA,
+      DEST_CNPJ: item.DEST_CNPJ,
+      DEST_CPF: item.DEST_CPF,
     }
   });
 
@@ -131,6 +133,19 @@ export const ActionListaAlterarVendaVendedor = ({dadosVendasAtivas, empresaSelec
       body: row => <th style={{color: 'blue'}}>{row.IDVENDA}</th>,
       sortable: true,
     },
+    {
+      field: 'DEST_CPF',
+      header: 'CPF',
+      body: row => <th style={{ color: 'blue' }}>{row.DEST_CPF}</th>,
+      sortable: true,
+    },
+    {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{ color: 'blue' }}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
     {
       field: 'NFE_INFNFE_IDE_NNF',
       header: 'NFCe',
@@ -258,6 +273,7 @@ export const ActionListaAlterarVendaVendedor = ({dadosVendasAtivas, empresaSelec
             cellMemo={false}
             showGridlines
             stripedRows
+            cellMemo={false}
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
           >
             {colunasVendas.map(coluna => (
