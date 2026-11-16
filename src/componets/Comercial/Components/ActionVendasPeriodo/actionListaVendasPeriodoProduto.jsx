@@ -113,8 +113,6 @@ export const ActionListaVendasPeriodoProduto = ({ dadosVendasConsolidadas }) => 
       CODPRODUTO: item.CODPRODUTO,
       DESCRICAO: item.DESCRICAO,
       NCM: item.NCM,
-      DEST_CNPJ: item.DEST_CNPJ,
-      DEST_CPF: item.DEST_CPF,
 
     }
   })
@@ -183,18 +181,6 @@ export const ActionListaVendasPeriodoProduto = ({ dadosVendasConsolidadas }) => 
       field: 'NCM',
       header: 'NCM',
       body: row => <th>{row.NCM}</th>,
-      sortable: true,
-    },
-    {
-      field: 'DEST_CPF',
-      header: 'CPF',
-      body: row => <th style={{}}>{row.DEST_CPF}</th>,
-      sortable: true,
-    },
-    {
-      field: 'DEST_CNPJ',
-      header: 'CNPJ',
-      body: row => <th style={{}}>{row.DEST_CNPJ}</th>,
       sortable: true,
     },
 

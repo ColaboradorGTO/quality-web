@@ -176,8 +176,6 @@ export const ActionListaVendasEstrutura = ({ dadosVendasEstrutura }) => {
       margemProduto: margemProduto,
       custoPercentualProduto: custoPercentualProduto,
       margemPercentualProduto: margemPercentualProduto,
-       DEST_CNPJ: item.vendaMarca.DEST_CNPJ,
-      DEST_CPF: item.vendaMarca.DEST_CPF,
 
     }
   });
@@ -267,19 +265,6 @@ export const ActionListaVendasEstrutura = ({ dadosVendasEstrutura }) => {
       body: row => <th>{formatMoeda(row.valorTotalLiquido)}</th>,
       sortable: true,
     },
-    {
-      field: 'DEST_CPF',
-      header: 'CPF',
-      body: row => <th style={{}}>{row.DEST_CPF}</th>,
-      sortable: true,
-    },
-    {
-      field: 'DEST_CNPJ',
-      header: 'CNPJ',
-      body: row => <th style={{}}>{row.DEST_CNPJ}</th>,
-      sortable: true,
-    },
-
 
   ]
 
@@ -350,7 +335,6 @@ export const ActionListaVendasEstrutura = ({ dadosVendasEstrutura }) => {
         <Column footer={calcularTotalVendaBrutaDesconto()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={calcularTotalVoucherVendasEstrutura()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={calcularTotalVendaLiquidaEstrutura()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
-        <Column footer={""} colSpan={2} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
       </Row>
     </ColumnGroup>
   )
