@@ -16,7 +16,7 @@ export const ActionListaVendasPIXCompensacaoCredito = ({ dadosVendasPixCompensac
   const [globalFilterValue, setGlobalFilterValue] = useState('');
   const [rowSelection, setRowSelection] = useState(null);
   const dataTableRef = useRef();
-  
+
 
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
@@ -128,6 +128,8 @@ export const ActionListaVendasPIXCompensacaoCredito = ({ dadosVendasPixCompensac
       NUAUTORIZACAO: item.NUAUTORIZACAO,
       DATA_COMP: formatarDataDTW(item.DATA_COMPENSACAO),
       IDEMPRESA: item.NOFANTASIA.substring(1, 5),
+      DEST_CNPJ: item.DEST_CNPJ,
+      DEST_CPF: item.DEST_CPF,
     }
   }) : [];
 
@@ -210,6 +212,20 @@ export const ActionListaVendasPIXCompensacaoCredito = ({ dadosVendasPixCompensac
       body: row => <th style={{ color: '#212529' }}>{row.IDEMPRESA}</th>,
       sortable: true,
     },
+    {
+      field: 'DEST_CPF',
+      header: 'CPF',
+      body: row => <th style={{ color: '#212529' }}>{row.DEST_CPF}</th>,
+      sortable: true,
+    },
+    {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{ color: '#212529 ' }}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
+
   ]
 
   const footerGroup = (
@@ -217,7 +233,7 @@ export const ActionListaVendasPIXCompensacaoCredito = ({ dadosVendasPixCompensac
       <Row>
         <Column footer="Total Vendas " colSpan={5} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem', textAlign: 'center' }} />
         <Column footer={formatMoeda(calcularTotalValorPix())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
-        <Column colSpan={7} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
+        <Column colSpan={9} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
       </Row>
     </ColumnGroup>
   )

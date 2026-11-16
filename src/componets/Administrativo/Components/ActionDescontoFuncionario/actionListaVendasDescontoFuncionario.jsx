@@ -16,8 +16,7 @@ import { ColumnGroup } from "primereact/columngroup";
 import { Row } from "primereact/row";
 import Swal from "sweetalert2";
 
-
-export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenio, usuarioLogado, optionsModulos}) => {
+export const ActionListaVendasDescontoFuncionario = ({ dadosVendasConvenio, usuarioLogado, optionsModulos }) => {
   const [modalPagamentoVisivel, setModalPagamentoVisivel] = useState(false);
   const [dadosDetalheRecebimentos, setDadosDetalheRecebimentos] = useState([]);
   const [globalFilterValue, setGlobalFilterValue] = useState('');
@@ -25,12 +24,12 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenio, usuar
   const [rows, setRows] = useState(10);
   const [rowSelection, setRowSelection] = useState(null);
   const dataTableRef = useRef();
-    
+
   const onPageChange = (event) => {
     setFirst(event.first);
     setRows(event.rows);
-  }  
-  
+  }
+
 
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
@@ -70,7 +69,7 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenio, usuar
     const workbook = XLSX.utils.book_new();
     const header = ['Nº', 'Caixa', 'Nº Venda', 'NFCe', 'Abertura', 'Operador', 'Conveniado', 'CPF', 'Valor Bruto', 'Valor Liquido', 'Obs'];
     worksheet['!cols'] = [
-      { wpx: 50, caption: 'Nº' }, 
+      { wpx: 50, caption: 'Nº' },
       { wpx: 150, caption: 'Caixa' },
       { wpx: 150, caption: 'Nº Venda' },
       { wpx: 150, caption: 'NFCe' },
@@ -81,7 +80,7 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenio, usuar
       { wpx: 150, caption: 'Valor Bruto' },
       { wpx: 150, caption: 'Valor Liquido' },
       { wpx: 250, caption: 'Obs' }
-    ]; 
+    ];
     XLSX.utils.sheet_add_aoa(worksheet, [header], { origin: 'A1' });
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Vendas Desconto');
     XLSX.writeFile(workbook, 'vendas_desconto_funcionario.xlsx');
@@ -89,7 +88,7 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenio, usuar
 
   const dados = dadosVendasConvenio.map((item, index) => {
     let contador = index + 1;
-   
+
     return {
       contador,
       IDCAIXAWEB: item.IDCAIXAWEB,
@@ -104,6 +103,7 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenio, usuar
       VRBRUTOPAGO: item.VRBRUTOPAGO,
       VRDESPAGO: item.VRDESPAGO,
       VRLIQPAGO: item.VRLIQPAGO,
+      DEST_CNPJ: item.DEST_CNPJ
     }
   });
 
@@ -120,7 +120,7 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenio, usuar
     const total = calcularTotal('VRDESPAGO');
     return `${formatMoeda(total)}`;
   };
- 
+
   const calcularTotalValorLiquido = () => {
     const total = calcularTotal('VRLIQPAGO');
     return `${formatMoeda(total)}`;
@@ -130,73 +130,79 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenio, usuar
     {
       field: 'contador',
       header: 'Nº',
-      body: row => <th style={{color: 'blue'}}>{row.contador}</th>,
+      body: row => <th style={{ color: 'blue' }}>{row.contador}</th>,
       sortable: true,
     },
     {
       field: 'IDCAIXAWEB',
       header: 'Caixa',
-      body: row => <p style={{width: '100px', margin: '0px', fontWeight: 600, color: 'blue'}}>{row.IDCAIXAWEB} - {row.DSCAIXA}</p>,
+      body: row => <p style={{ width: '100px', margin: '0px', fontWeight: 600, color: 'blue' }}>{row.IDCAIXAWEB} - {row.DSCAIXA}</p>,
       sortable: true,
     },
     {
       field: 'IDVENDA',
       header: 'Nº Venda',
-      body: row => <th style={{color: 'blue'}}>{row.IDVENDA}</th>,
+      body: row => <th style={{ color: 'blue' }}>{row.IDVENDA}</th>,
       sortable: true,
     },
     {
       field: 'NFE_INFNFE_IDE_NNF',
       header: 'NFCe',
-      body: row => <th style={{color: 'blue'}}>{row.NFE_INFNFE_IDE_NNF}</th>,
+      body: row => <th style={{ color: 'blue' }}>{row.NFE_INFNFE_IDE_NNF}</th>,
       sortable: true,
     },
     {
       field: 'DTHORAFECHAMENTO',
       header: 'Abertura',
-      body: row => <p style={{width: '120px', margin: '0px', fontWeight: 600, color: 'blue'}}>{row.DTHORAFECHAMENTO}</p>,
+      body: row => <p style={{ width: '120px', margin: '0px', fontWeight: 600, color: 'blue' }}>{row.DTHORAFECHAMENTO}</p>,
       sortable: true,
     },
     {
       field: 'NOFUNCIONARIO',
       header: 'Operador',
-      body: row => <p style={{width: '250px', margin: '0px', fontWeight: 600, color: 'blue'}}>{row.NOFUNCIONARIO}</p>,
+      body: row => <p style={{ width: '250px', margin: '0px', fontWeight: 600, color: 'blue' }}>{row.NOFUNCIONARIO}</p>,
       sortable: true,
     },
     {
       field: 'NOCONVENIADO',
       header: 'Conveniado',
-      body: row => <p style={{width: '250px', margin: '0px', fontWeight: 600, color: 'blue'}}>{row.NOCONVENIADO}</p>,
+      body: row => <p style={{ width: '250px', margin: '0px', fontWeight: 600, color: 'blue' }}>{row.NOCONVENIADO}</p>,
       sortable: true,
     },
     {
       field: 'CPFCONVENIADO',
       header: 'CPF',
-      body: row => <th style={{color: 'blue'}}>{row.CPFCONVENIADO}</th>,
+      body: row => <th style={{ color: 'blue' }}>{row.CPFCONVENIADO || row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+    {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{ color: 'blue' }}>{row.DEST_CNPJ}</th>,
       sortable: true,
     },
     {
       field: 'VRBRUTOPAGO',
       header: 'Valor Bruto',
-      body: row => <th style={{color: 'blue'}}>{formatMoeda(toFloat(row.VRBRUTOPAGO))}</th>,
+      body: row => <th style={{ color: 'blue' }}>{formatMoeda(toFloat(row.VRBRUTOPAGO))}</th>,
       sortable: true,
     },
     {
       field: 'VRDESPAGO',
       header: 'Desconto',
-      body: row => <th style={{color: 'blue'}}>{formatMoeda(toFloat(row.VRDESPAGO))}</th>,
+      body: row => <th style={{ color: 'blue' }}>{formatMoeda(toFloat(row.VRDESPAGO))}</th>,
       sortable: true,
     },
     {
       field: 'VRLIQPAGO',
       header: 'Valor Liquido',
-      body: row => <th style={{color: 'blue'}}>{formatMoeda(toFloat(row.VRLIQPAGO))}</th>,
+      body: row => <th style={{ color: 'blue' }}>{formatMoeda(toFloat(row.VRLIQPAGO))}</th>,
       sortable: true,
     },
     {
       field: 'TXTMOTIVODESCONTO',
       header: 'Obs',
-      body: row => <p style={{width: '250px', margin: '0px', fontWeight: 600, color: 'blue'}}>{row.TXTMOTIVODESCONTO}</p>,
+      body: row => <p style={{ width: '250px', margin: '0px', fontWeight: 600, color: 'blue' }}>{row.TXTMOTIVODESCONTO}</p>,
       sortable: true,
     },
     {
@@ -206,7 +212,7 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenio, usuar
         <div className="p-1 "
           style={{ justifyContent: "space-between", display: "flex" }}
         >
-          
+
           <div className="p-1">
             <ButtonTable
               titleButton={"Detalhar Recebimentos"}
@@ -226,8 +232,8 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenio, usuar
 
   const handleEditPagamento = async (IDVENDA) => {
     try {
-      const response = await get(`/recebimento?idVenda=${IDVENDA}`)    
-      if(response.data && response.data.length > 0) {
+      const response = await get(`/recebimento?idVenda=${IDVENDA}`)
+      if (response.data && response.data.length > 0) {
         setDadosDetalheRecebimentos(response.data)
         setModalPagamentoVisivel(true)
 
@@ -239,7 +245,7 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenio, usuar
         })
         return;
       }
-    
+
       return response.data;
     } catch (error) {
       console.log(error, 'não foi possivel pegar os dados da tabela')
@@ -247,7 +253,7 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenio, usuar
   }
 
   const handleClickPagamento = (row) => {
-    if(optionsModulos[0]?.ALTERAR == 'True'){
+    if (optionsModulos[0]?.ALTERAR == 'True') {
       if (row && row.IDVENDA) {
         handleEditPagamento(row.IDVENDA)
       }
@@ -265,12 +271,12 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenio, usuar
   const footerGroup = (
     <ColumnGroup>
 
-      <Row> 
-        <Column footer="Total Vendas Convênio Desconto" colSpan={8} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem', textAlign: 'center' }} />
-        <Column footer={calcularTotalValorBruto()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />  
-        <Column footer={calcularTotalValorDesconto()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />  
-        <Column footer={calcularTotalValorLiquido()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />  
-        <Column footer={""} colSpan={6}  footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }}/>
+      <Row>
+        <Column footer="Total Vendas Convênio Desconto" colSpan={9} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem', textAlign: 'center' }} />
+        <Column footer={calcularTotalValorBruto()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
+        <Column footer={calcularTotalValorDesconto()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
+        <Column footer={calcularTotalValorLiquido()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
+        <Column footer={""} colSpan={6} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
       </Row>
     </ColumnGroup>
   )
@@ -290,7 +296,7 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenio, usuar
             exportToExcel={exportToExcel}
             exportToPDF={exportToPDF}
           />
-          
+
         </div>
         <div className="card" ref={dataTableRef}>
           <DataTable
@@ -340,8 +346,8 @@ export const ActionListaVendasDescontoFuncionario = ({dadosVendasConvenio, usuar
         show={modalPagamentoVisivel}
         handleClose={() => setModalPagamentoVisivel(false)}
         dadosDetalheRecebimentos={dadosDetalheRecebimentos}
-        optionsModulos={optionsModulos} 
-        usuarioLogado={usuarioLogado} 
+        optionsModulos={optionsModulos}
+        usuarioLogado={usuarioLogado}
       />
     </Fragment>
   )

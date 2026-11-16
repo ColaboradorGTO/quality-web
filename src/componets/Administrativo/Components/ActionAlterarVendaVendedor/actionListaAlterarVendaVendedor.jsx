@@ -99,6 +99,7 @@ export const ActionListaAlterarVendaVendedor = ({dadosVendasAtivas, empresaSelec
       VRTOTALPAGO: item.VRTOTALPAGO,
       STCONFERIDO: item.STCONFERIDO,
       STCONTINGENCIA: item.STCONTINGENCIA,
+  
     }
   });
 

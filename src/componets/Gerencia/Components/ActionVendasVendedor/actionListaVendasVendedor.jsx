@@ -74,24 +74,28 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
       contador,
       NOFANTASIA: item.vendedor.NOFANTASIA,
       VENDEDOR_MATRICULA: item.vendedor.VENDEDOR_MATRICULA,
+      DEST_CNPJ: item.vendedor.DEST_CNPJ,
+      DEST_CPF: item.vendedor.DEST_CPF,
       VENDEDOR_NOME: item.vendedor.VENDEDOR_NOME,
       QTDVENDIDOVENDEDOR: item.totalVendido[0].QTDVENDIDOVENDEDOR,
       TOTALVENDIDOVENDEDOR: item.totalVendido[0].TOTALVENDIDOVENDEDOR,
       Vouchers: item.Vouchers,
       vrVendidoVendedor: vrVendidoVendedor,
 
+
     }
   });
 
-  const calcularVendidoVendedor  = () => {
+
+  const calcularVendidoVendedor = () => {
     return dados.reduce((total, dados) => total + toFloat(dados.TOTALVENDIDOVENDEDOR), 0);
   }
- 
-  const calcularVouchers  = () => {
+
+  const calcularVouchers = () => {
     return dados.reduce((total, dados) => total + toFloat(dados.Vouchers), 0);
   }
- 
-  const calcularVendidoLiquido  = () => {
+
+  const calcularVendidoLiquido = () => {
     return dados.reduce((total, dados) => total + toFloat(dados.vrVendidoVendedor), 0);
   }
 
@@ -109,6 +113,7 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
       body: row => <th style={{ color: 'blue' }}>{row.NOFANTASIA}</th>,
       sortable: true,
     },
+
     {
       field: 'VENDEDOR_MATRICULA',
       header: 'Matrícula',
@@ -152,11 +157,11 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
   const footerGroup = (
     <ColumnGroup>
 
-      <Row> 
+      <Row>
         <Column footer="Total Vendas" colSpan={5} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem', textAlign: 'center' }} />
         <Column footer={formatMoeda(calcularVendidoVendedor())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={formatMoeda(calcularVouchers())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
-        <Column footer={formatMoeda(calcularVendidoLiquido())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} /> 
+        <Column footer={formatMoeda(calcularVendidoLiquido())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
       </Row>
     </ColumnGroup>
   )
@@ -194,6 +199,7 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
             rows={10}
             rowsPerPageOptions={[10, 20, 50, 100, dados.length]}
             showGridlines
+            cellMemo={false}
             stripedRows
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado </div>}
           >

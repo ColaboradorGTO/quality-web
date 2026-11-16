@@ -101,6 +101,8 @@ export const ActionListaVendasPIXCompensacaoCapa = ({ dadosVendasPixCompensacao 
       DATAVENDA: item.DATAVENDA,
       DATA_COMPENSACAO: item.DATA_COMPENSACAO,
       NUAUTORIZACAO: item.NUAUTORIZACAO,
+      DEST_CNPJ: item.DEST_CNPJ,
+      DEST_CPF: item.DEST_CPF,
       contaCreditoSap: contaCreditoSap,
       contaDebitoSap: contaDebitoSap
     }
@@ -149,6 +151,20 @@ export const ActionListaVendasPIXCompensacaoCapa = ({ dadosVendasPixCompensacao 
       body: row => <p style={{ color: '#212529', width: 100, fontWeight: 600 }}>{row.DATA_COMPENSACAO || 'NÃO INFORMADO'}</p>,
       sortable: true,
     },
+    {
+      field: 'DEST_CPF',
+      header: 'CPF',
+      body: row => <th style={{ color: '#212529', width: 100, fontWeight: 600 }}>{row.DEST_CPF}</th>,
+      sortable: true,
+    },
+    {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{ color: '#212529', width: 100, fontWeight: 600 }}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
+
 
   ]
 

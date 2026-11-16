@@ -68,6 +68,8 @@ export const ActionListaVendasContigencia = ({ dadosVendasContigencia }) => {
       DSCAIXA: item.DSCAIXA,
       NFE_INFNFE_IDE_NNF: item.NFE_INFNFE_IDE_NNF,
       PROTNFE_INFPROT_XMOTIVO: item.PROTNFE_INFPROT_XMOTIVO,
+      DEST_CPF: item.DEST_CPF,
+      DEST_CNPJ: item.DEST_CNPJ,
     }
   });
 
@@ -96,6 +98,19 @@ export const ActionListaVendasContigencia = ({ dadosVendasContigencia }) => {
       body: row => <th style={{ color: 'blue' }}>{row.IDVENDA}</th>,
       sortable: true,
     },
+    {
+      field: 'DEST_CPF',
+      header: 'CPF',
+      body: row => <th style={{ color: 'blue' }}>{row.DEST_CPF}</th>,
+      sortable: true,
+    },
+    {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{ color: 'blue' }}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
     {
       field: 'DSCAIXA',
       header: 'Caixa',

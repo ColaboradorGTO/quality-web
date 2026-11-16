@@ -41,7 +41,7 @@ export const ActionListaVendasPIXCompensacao = ({
     setFirst(0);
     setRows(10);
   };
-  
+
   useEffect(() => {
     if (resetPaginacaoKey) resetPaginacao();
   }, [resetPaginacaoKey]);
@@ -145,11 +145,14 @@ export const ActionListaVendasPIXCompensacao = ({
       STATUS_BLOQUEIO_ATUALIZACAO: item.STATUS_BLOQUEIO_ATUALIZACAO == 'True',
       DOCENTRY_SAP_CONTAS_A_RECEBER_PGTO_PIX: Number(item.DOCENTRY_SAP_CONTAS_A_RECEBER_PGTO_PIX || 0),
       ERROR_LOG_SAP_PIX: item.ERROR_LOG_SAP_PIX || '',
+      DEST_CNPJ: item.DEST_CNPJ,
+      DEST_CPF: item.DEST_CPF,
+
     }
   }) : [];
 
 
-  
+
   const obterStatusIntegracao = (row) => {
     const docEntryContasReceber = row.DOCENTRY_SAP_CONTAS_A_RECEBER_PGTO_PIX;
     const stEmFilaParaIntegracao = row.STATUS_BLOQUEIO_ATUALIZACAO;
@@ -417,6 +420,21 @@ export const ActionListaVendasPIXCompensacao = ({
       body: row => <th style={{ color: '#212529', width: 100 }}>{row.IDVENDA}</th>,
       sortable: true,
     },
+
+    {
+      field: 'DEST_CPF',
+      header: 'CPF',
+      body: row => <th style={{ color: '#212529', width: 100 }}>{row.DEST_CPF}</th>,
+      sortable: true,
+    },
+    {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{ color: '#212529', width: 100 }}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
+
     {
       field: 'DSTIPOPAGAMENTO',
       header: 'Tipo',
@@ -529,7 +547,7 @@ export const ActionListaVendasPIXCompensacao = ({
   const footerGroup = (
     <ColumnGroup>
       <Row>
-        <Column footer="Total Vendas " colSpan={5} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem', textAlign: 'center' }} />
+        <Column footer="Total Vendas " colSpan={7} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem', textAlign: 'center' }} />
         <Column footer={formatMoeda(calcularTotalValorPix())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '1rem' }} />
         <Column colSpan={7} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
       </Row>
