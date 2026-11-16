@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { get, post, postFile, put } from "../../../../../api/funcRequest";
+import { enviarAnexoAdiantamento, ErroAnexo } from "../../../../../api/uploadAnexoAdiantamento";
 import Swal from "sweetalert2";
 import { registrarLogAuditoria } from "../../../../../services/auditLog";
 
@@ -44,17 +45,13 @@ export const useAnexarPagamento = ({
         }
 
         try {
-            const formData = new FormData();
-            formData.append('arquivo', arquivo);
-
-            const response = await postFile('/upload-anexo-adiantamento', formData);
-            return response?.data?.path || '';
+            return await enviarAnexoAdiantamento(arquivo);
         } catch (error) {
             console.error('Erro ao enviar anexo:', error);
             Swal.fire({
                 position: 'center',
                 icon: 'error',
-                title: 'Não foi possível enviar o arquivo. Por favor, tente novamente.',
+                title: error instanceof ErroAnexo ? error.message : 'Não foi possível enviar o arquivo. Por favor, tente novamente.',
                 showConfirmButton: false,
                 timer: 3000,
                 customClass: { container: 'custom-swal' },
