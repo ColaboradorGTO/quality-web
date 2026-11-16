@@ -97,8 +97,6 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
       VRRECVOUCHER: item.VRRECVOUCHER,
       valorTotalVendaLiquida: valorTotalVendaLiquida,
       PRECO_COMPRA: item.PRECO_COMPRA,
-      DEST_CNPJ: item.DEST_CNPJ,
-      DEST_CPF: item.DEST_CPF,
 
     }
   });
@@ -128,19 +126,6 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
       body: row => <p style={{ margin: 0, width: '200px', fontWeight: 600 }}>{row.VENDEDOR_NOME}</p>,
       sortable: true
     },
-    {
-      field: 'DEST_CPF',
-      header: 'CPF',
-      body: row => <th style={{margin: 0, width: '200px', fontWeight: 600}}>{row.DEST_CPF}</th>,
-      sortable: true,
-    },
-    {
-      field: 'DEST_CNPJ',
-      header: 'CNPJ',
-      body: row => <th style={{margin: 0, width: '200px', fontWeight: 600}}>{row.DEST_CNPJ}</th>,
-      sortable: true,
-    },
-
     {
       field: 'QTD_VENDAS',
       header: 'Quantidade Vendas',
@@ -239,14 +224,13 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
     <ColumnGroup>
 
       <Row>
-        <Column footer="Total " colSpan={6} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem', textAlign: 'center' }} />
+        <Column footer="Total " colSpan={4} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem', textAlign: 'center' }} />
         <Column footer={calcularTotalQuantidadeVendas()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={calcularTotalQuantidadeProdutos()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={calcularTotalVendaBrutaVendasVendedor()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={calcularTotalValorVoucher()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={calcularTotalVendaLiquidaVendasVendedor()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={calcularTotalValorCusto()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
-        <Column footer={""} colSpan={''} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
       </Row>
     </ColumnGroup>
   )

@@ -114,9 +114,6 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor, percComissaoSel
       Vouchers: item.Vouchers,
       totalVendido: totalVendido,
       VrComissao: VrComissao,
-      DEST_CNPJ: item.vendedor.DEST_CNPJ,
-      DEST_CPF: item.vendedor.DEST_CPF,
-
 
     }
   });
@@ -184,18 +181,6 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor, percComissaoSel
       field: 'VrComissao',
       header: 'Comissão',
       body: row => <th style={{ color: 'green' }}> {formatMoeda(row.VrComissao)}</th>,
-      sortable: true,
-    },
-    {
-      field: 'DEST_CPF',
-      header: 'DEST_CPF',
-      body: row => <th style={{}}>{row.DEST_CPF}</th>,
-      sortable: true,
-    },
-     {
-      field: 'DEST_CNPJ',
-      header: 'DEST_CNPJ',
-      body: row => <th style={{}}>{row.DEST_CNPJ}</th>,
       sortable: true,
     },
 

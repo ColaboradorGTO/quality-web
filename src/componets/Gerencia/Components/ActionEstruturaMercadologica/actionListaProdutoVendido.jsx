@@ -85,8 +85,6 @@ export const ActionListaProdutoVendido = ({ dadosProdutosMaisVendidos }) => {
       QTD: item.QTD,
       VALOR_UNITARIO: item.VALOR_UNITARIO,
       VALOR_TOTAL: item.VALOR_TOTAL,
-      DEST_CNPJ: item.DEST_CNPJ,
-      DEST_CPF: item.DEST_CPF,
 
     }
   });
@@ -175,18 +173,6 @@ export const ActionListaProdutoVendido = ({ dadosProdutosMaisVendidos }) => {
       body: row => <th>{formatMoeda(row.VALOR_TOTAL)}</th>,
       sortable: true
     },
-    {
-      field: 'DEST_CPF',
-      header: 'CPF',
-      body: row => <th style={{}}>{row.DEST_CPF}</th>,
-      sortable: true,
-    },
-    {
-      field: 'DEST_CNPJ',
-      header: 'CNPJ',
-      body: row => <th style={{}}>{row.DEST_CNPJ}</th>,
-      sortable: true,
-    },
 
   ]
 
@@ -198,7 +184,7 @@ export const ActionListaProdutoVendido = ({ dadosProdutosMaisVendidos }) => {
         <Column footer={calcularTotalQuantidade()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={calcularTotalValorUnitario()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={calcularTotalValorTotal()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
-        <Column footer={""} colSpan={2} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
+        <Column footer={""} colSpan={''} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
       </Row>
     </ColumnGroup>
   )

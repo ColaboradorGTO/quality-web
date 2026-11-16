@@ -86,8 +86,6 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
     }
   });
 
-  console.log(dados, 'cpf ')
-  console.log(dadosVendasVendedor, 'cpf ')
 
   const calcularVendidoVendedor = () => {
     return dados.reduce((total, dados) => total + toFloat(dados.TOTALVENDIDOVENDEDOR), 0);
@@ -130,18 +128,6 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
       sortable: true,
     },
     {
-      field: 'DEST_CPF',
-      header: 'CPF',
-      body: row => <th style={{ color: 'blue' }}>{row.DEST_CPF}</th>,
-      sortable: true,
-    },
-    {
-      field: 'DEST_CNPJ',
-      header: 'CNPJ',
-      body: row => <th style={{ color: 'blue' }}>{row.DEST_CNPJ}</th>,
-      sortable: true,
-    },
-    {
       field: 'QTDVENDIDOVENDEDOR',
       header: 'QTD Produto',
       body: row => <th style={{ color: 'blue' }}>{parseFloat(row.QTDVENDIDOVENDEDOR)}</th>,
@@ -172,7 +158,7 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
     <ColumnGroup>
 
       <Row>
-        <Column footer="Total Vendas" colSpan={7} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem', textAlign: 'center' }} />
+        <Column footer="Total Vendas" colSpan={5} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem', textAlign: 'center' }} />
         <Column footer={formatMoeda(calcularVendidoVendedor())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={formatMoeda(calcularVouchers())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={formatMoeda(calcularVendidoLiquido())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
