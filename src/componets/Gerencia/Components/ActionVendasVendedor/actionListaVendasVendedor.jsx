@@ -74,8 +74,6 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
       contador,
       NOFANTASIA: item.vendedor.NOFANTASIA,
       VENDEDOR_MATRICULA: item.vendedor.VENDEDOR_MATRICULA,
-      DEST_CNPJ: item.vendedor.DEST_CNPJ,
-      DEST_CPF: item.vendedor.DEST_CPF,
       VENDEDOR_NOME: item.vendedor.VENDEDOR_NOME,
       QTDVENDIDOVENDEDOR: item.totalVendido[0].QTDVENDIDOVENDEDOR,
       TOTALVENDIDOVENDEDOR: item.totalVendido[0].TOTALVENDIDOVENDEDOR,
@@ -85,7 +83,6 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
 
     }
   });
-
 
   const calcularVendidoVendedor = () => {
     return dados.reduce((total, dados) => total + toFloat(dados.TOTALVENDIDOVENDEDOR), 0);

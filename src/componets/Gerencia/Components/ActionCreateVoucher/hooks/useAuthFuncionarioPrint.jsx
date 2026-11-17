@@ -55,7 +55,18 @@ export const useAuthFuncionarioPrint = ({ usuarioLogado }) => {
                     }
                 } catch (error) {
                     //console.log(error, 'response.data')
-                    Swal.showValidationMessage(`Erro ao autenticar: ${error.message}`);
+                    //Swal.showValidationMessage(`Erro ao autenticar: ${error.message}`);
+                    let errorMessage = 'Erro desconhecido';
+
+                    if (typeof error.response.data.error === 'string') {
+                        errorMessage = error.response.data.error;
+                    } else if (error.response.data.error?.error) {
+                        errorMessage = error.response.data.error.error;
+                    } else if (typeof error.response.data.error === 'object') {
+                        errorMessage = JSON.stringify(error.response.data.error);
+                    }
+
+                    Swal.showValidationMessage(`Erro ao autenticar: ${errorMessage}`);
                 }
             }
         });
