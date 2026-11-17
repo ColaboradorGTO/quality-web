@@ -28,22 +28,22 @@ export const ActionPesquisaAdiantamentoSalarioLoja = ({ optionsEmpresas, usuario
       setMenuFilhoAtual(menuParsed);
     }
   }, []);
-  
+
   useEffect(() => {
     const dataInicial = getDataAtual();
     const dataFinal = getDataAtual();
     setDataPesquisaInicio(dataInicial);
     setDataPesquisaFim(dataFinal);
   }, []);
-  
+
   const { data: optionsModulos = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
     ['menus-usuario-excecao', menuFilhoAtual?.ID],
     async () => {
       const response = await get(`/menus-usuario-excecao?idUsuario=${usuarioLogado?.id}&idMenuFilho=${menuFilhoAtual?.ID}`);
-     
+
       return response.data;
     },
-    { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000,}
+    { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000, }
   );
 
   const fetchAdiantamentos = async () => {
@@ -94,7 +94,7 @@ export const ActionPesquisaAdiantamentoSalarioLoja = ({ optionsEmpresas, usuario
   );
 
   const handleClick = () => {
-    
+
     refetchAdiantamentos();
     setTabelaVisivel(true);
   }
@@ -107,9 +107,9 @@ export const ActionPesquisaAdiantamentoSalarioLoja = ({ optionsEmpresas, usuario
   };
 
   const handleShowModal = () => {
-    if(optionsModulos[0]?.CRIAR == 'True') {
+    if (optionsModulos[0]?.CRIAR == 'True') {
       setModalVisivel(true);
-    } else  {
+    } else {
       Swal.fire({
         position: 'center',
         icon: 'error',
@@ -180,16 +180,17 @@ export const ActionPesquisaAdiantamentoSalarioLoja = ({ optionsEmpresas, usuario
 
 
       {tabelaVisivel &&
-        <ActionListaAdiantamentoSalarioLoja 
+        <ActionListaAdiantamentoSalarioLoja
           dadosAdiantamentoFuncionarios={dadosAdiantamentoFuncionarios}
         />
       }
 
-      <ActionCadastrarAdiantamentoSalarial 
+      <ActionCadastrarAdiantamentoSalarial
         show={modalVisivel}
         handleClose={handleCloseModal}
         usuarioLogado={usuarioLogado}
         optionsModulos={optionsModulos}
+        handleClick={handleClick}
 
       />
     </Fragment>

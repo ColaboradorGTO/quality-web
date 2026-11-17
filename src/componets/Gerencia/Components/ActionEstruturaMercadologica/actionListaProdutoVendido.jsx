@@ -173,7 +173,6 @@ export const ActionListaProdutoVendido = ({ dadosProdutosMaisVendidos }) => {
       body: row => <th>{formatMoeda(row.VALOR_TOTAL)}</th>,
       sortable: true
     },
-
   ]
 
   const footerGroup = (
@@ -184,7 +183,6 @@ export const ActionListaProdutoVendido = ({ dadosProdutosMaisVendidos }) => {
         <Column footer={calcularTotalQuantidade()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={calcularTotalValorUnitario()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={calcularTotalValorTotal()} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
-        <Column footer={""} colSpan={''} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
       </Row>
     </ColumnGroup>
   )

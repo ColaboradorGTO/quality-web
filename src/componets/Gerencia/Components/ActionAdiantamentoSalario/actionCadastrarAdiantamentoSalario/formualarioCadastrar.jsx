@@ -11,7 +11,7 @@ import { schema } from "./schemaActionsCadastrarAdiantamento";
 import { mascaraValor } from "../../../../../utils/mascaraValor";
 import { formatarMoeda } from "../../../../../utils/formatMoeda";
 
-export const FormularioCadastrar = ({ handleClose, optionsModulos, usuarioLogado }) => {
+export const FormularioCadastrar = ({ handleClose, optionsModulos, usuarioLogado, handleClick }) => {
     const { handleSubmit, formState: { errors }, clearErrors, control, setError } = useForm({
         mode: "onChange"
     });
@@ -28,7 +28,7 @@ export const FormularioCadastrar = ({ handleClose, optionsModulos, usuarioLogado
         setUsuarioSelecionado,
         dadosFuncionarios,
         onSubmit
-    } = useCadastrarAdiantamentoSalarial({ handleClose, optionsModulos, usuarioLogado })
+    } = useCadastrarAdiantamentoSalarial({ handleClose, optionsModulos, usuarioLogado, handleClick })
 
     const handleValidatedSubmit = async () => {
         try {

@@ -175,6 +175,7 @@ export const useEditarStatusVoucher = ({
 
     const handleChangeTroca = (e) => {
         setTrocaSelecionado(e.value)
+        setStatusFoiTrocado(true);
     }
 
     const handleChangeStatus = (e) => {
