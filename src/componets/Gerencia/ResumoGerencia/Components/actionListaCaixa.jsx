@@ -83,29 +83,33 @@ export const ActionListaCaixa = ({ dadosListaCaixa, dadosDespesas, dadosAdiantam
     XLSX.writeFile(workbook, 'lista_caixa_resumo.xlsx');
   };
 
+
   const calcularTotalVendido = (item) => {
     return (
-      toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDODINHEIRO) +
-      toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOCARTAO) +
-      toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOPOS) +
-      toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOCONVENIO) +
-      toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOVOUCHER) +
-      toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOPIX) +
-      toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOMOOVPAY)
+      Math.max(toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDODINHEIRO), 0) +
+      Math.max(toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOCARTAO), 0) +
+      Math.max(toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOPOS), 0) +
+      Math.max(toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOCONVENIO), 0) +
+      Math.max(toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOVOUCHER), 0) +
+      Math.max(toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOPIX), 0) +
+      Math.max(toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOMOOVPAY), 0)
     );
   }
   const calcularTotalVrDisponivel = (item) => {
     return (
-      toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDODINHEIRO) +
-      toFloat(item.fatura[0]['fatura-movimento'].TOTALRECEBIDOFATURA)
+      Math.max(toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDODINHEIRO), 0) +
+      Math.max(toFloat(item.fatura[0]['fatura-movimento'].TOTALRECEBIDOFATURA), 0)
     )
   }
 
   const calcularTotalPCJTotal = (item) => {
     const vrPCJ18 = toFloat(item.vendapcj[0]['venda-pcj'].TOTALPCJ18);
     const vrPCJ78 = toFloat(item.vendapcj[0]['venda-pcj'].TOTALPCJ78);
+    if (!Number.isFinite(vrPCJ18) || !Number.isFinite(vrPCJ78) || vrPCJ18 <= 0) {
+      return 0;
+    }
     const totalPCJ = (vrPCJ78 / vrPCJ18) * 100;
-    return totalPCJ;
+    return Number.isFinite(totalPCJ) && totalPCJ > 0 ? totalPCJ : 0;
   }
 
   const dadosExcel = dadosListaCaixa.map((item, index) => {
@@ -131,7 +135,7 @@ export const ActionListaCaixa = ({ dadosListaCaixa, dadosDespesas, dadosAdiantam
       TOTALVENDIDOVOUCHER: toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOVOUCHER),
       TOTALVENDIDOCONVENIO: toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOCONVENIO),
       totalVendido: totalVendido,
-      vrDisponivel: vrDisponivel,
+      vrDisponivel: Math.max(vrDisponivel, 0),
       STFECHADO: item.caixa.STFECHADO === 'FALSE' ? 'ABERTO' : 'FECHADO',
     };
   });
@@ -153,24 +157,24 @@ export const ActionListaCaixa = ({ dadosListaCaixa, dadosDespesas, dadosAdiantam
       VRRECDINHEIRO: item.caixa.VRRECDINHEIRO,
 
 
-      TOTALRECEBIDOFATURA: toFloat(item.fatura[0]['fatura-movimento'].TOTALRECEBIDOFATURA),
-      TOTALRECEBIDOFATURAPIX: toFloat(item.faturapix[0]['fatura-movimento-pix'].TOTALRECEBIDOFATURAPIX),
+      TOTALRECEBIDOFATURA: Math.max(toFloat(item.fatura[0]['fatura-movimento'].TOTALRECEBIDOFATURA), 0),
+      TOTALRECEBIDOFATURAPIX: Math.max(toFloat(item.faturapix[0]['fatura-movimento-pix'].TOTALRECEBIDOFATURAPIX), 0),
 
-      TOTALVENDIDODINHEIRO: toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDODINHEIRO),
-      TOTALVENDIDOCARTAO: toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOCARTAO),
-      TOTALVENDIDOPOS: toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOPOS),
-      TOTALVENDIDOPIX: toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOPIX),
-      TOTALVENDIDOMOOVPAY: toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOMOOVPAY),
-      TOTALVENDIDOVOUCHER: toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOVOUCHER),
-      TOTALVENDIDOCONVENIO: toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOCONVENIO),
-      TOTALVENDIDO: item.venda[0]['venda-movimento'].TOTALVENDIDO,
+      TOTALVENDIDODINHEIRO: Math.max(toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDODINHEIRO), 0),
+      TOTALVENDIDOCARTAO: Math.max(toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOCARTAO), 0),
+      TOTALVENDIDOPOS: Math.max(toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOPOS), 0),
+      TOTALVENDIDOPIX: Math.max(toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOPIX), 0),
+      TOTALVENDIDOMOOVPAY: Math.max(toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOMOOVPAY), 0),
+      TOTALVENDIDOVOUCHER: Math.max(toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOVOUCHER), 0),
+      TOTALVENDIDOCONVENIO: Math.max(toFloat(item.venda[0]['venda-movimento'].TOTALVENDIDOCONVENIO), 0),
+      TOTALVENDIDO: Math.max(item.venda[0]['venda-movimento'].TOTALVENDIDO, 0),
       TOTALNOTA: item.venda[0]['venda-movimento'].TOTALNOTA,
 
       TOTALPCJ18: item.vendapcj[0]['venda-pcj'].TOTALPCJ18,
       TOTALPCJ78: item.vendapcj[0]['venda-pcj'].TOTALPCJ78,
 
       totalVendido: totalVendido,
-      vrDisponivel: vrDisponivel,
+      vrDisponivel: Math.max(vrDisponivel, 0),
       pcjTotal: pcjTotal,
       vrFaturasTotal,
 
@@ -191,7 +195,7 @@ export const ActionListaCaixa = ({ dadosListaCaixa, dadosDespesas, dadosAdiantam
     quebraCaixaOP = quebraCaixaDinheiro - item.VRFISICODINHEIRO;
 
     return {
-      IDMOVCAIXAOP: toFloat(item.IDMOVCAIXAOP),
+      IDMOVCAIXAOP: item.IDMOVCAIXAOP,
       VRFISICODINHEIRO: item.VRFISICODINHEIRO,
       VRRECDINHEIRO: item.VRRECDINHEIRO,
       VRRECDINHEIROAJUSTE: item.VRRECDINHEIROAJUSTE,
@@ -199,7 +203,8 @@ export const ActionListaCaixa = ({ dadosListaCaixa, dadosDespesas, dadosAdiantam
       quebraCaixaOP: toFloat(quebraCaixaOP),
     }
   })
-  
+
+
   const calcularQuebra = (field) => {
     return dadosQuebra?.reduce((total, item) => total + toFloat(item[field]), 0);
   };
@@ -214,16 +219,16 @@ export const ActionListaCaixa = ({ dadosListaCaixa, dadosDespesas, dadosAdiantam
 
 
   const calcularTotalvrPCJ18 = () => {
-    const total = calcularTotal('TOTALPCJ18');  
+    const total = calcularTotal('TOTALPCJ18');
     return total;
   }
 
-  const calcularTotalvrPCJ78  = () => {
+  const calcularTotalvrPCJ78 = () => {
     const total = calcularTotal('TOTALPCJ78');
     return total;
   }
 
-  const calcularTotalFatura  = () => {
+  const calcularTotalFatura = () => {
     const total = calcularTotal('TOTALRECEBIDOFATURA');
     return total;
   }
@@ -252,12 +257,12 @@ export const ActionListaCaixa = ({ dadosListaCaixa, dadosDespesas, dadosAdiantam
     const total = calcularTotal('TOTALVENDIDOPOS');
     return total;
   }
-  
+
   const calcularTotalPIX = () => {
     const total = calcularTotal('TOTALVENDIDOPIX');
     return total;
   }
-  
+
   const calcularTotalVoucher = () => {
     const total = calcularTotal('TOTALVENDIDOVOUCHER');
     return total;
@@ -281,9 +286,16 @@ export const ActionListaCaixa = ({ dadosListaCaixa, dadosDespesas, dadosAdiantam
   const calcularTotalPCJ = () => {
     const vrPCJ18 = calcularTotalvrPCJ18('TOTALPCJ18');
     const vrPCJ78 = calcularTotalvrPCJ78('TOTALPCJ78');
+    if (!Number.isFinite(vrPCJ18) || !Number.isFinite(vrPCJ78) || vrPCJ18 <= 0) {
+      return 0;
+    }
+
     const total = (vrPCJ78 / vrPCJ18) * 100;
 
-    return parseFloat(total.toFixed(2));
+    return Number.isFinite(total) && total > 0
+      ? Number(total.toFixed(2))
+      : 0;
+    //return parseFloat(total.toFixed(2));
   }
 
   const colunasListaCaixa = [
@@ -409,7 +421,7 @@ export const ActionListaCaixa = ({ dadosListaCaixa, dadosDespesas, dadosAdiantam
       body: row => (
         <th style={{ color: row.STFECHADO == 'False' ? 'blue' : 'red' }}>
           {row.STFECHADO == 'False' ? 'ABERTO' : 'FECHADO'}
-         
+
         </th>
       ),
       sortable: true,
@@ -470,7 +482,7 @@ export const ActionListaCaixa = ({ dadosListaCaixa, dadosDespesas, dadosAdiantam
 
               footerStyle={{ color: '#212529', textAlign: 'center', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }}
             />
-            <Column footer={toFloat(item.IDMOVCAIXAOP)} colSpan={10} footerStyle={{ textAlign: 'center', color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
+            <Column footer={item.IDMOVCAIXAOP} colSpan={10} footerStyle={{ textAlign: 'center', color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
             <Column
               footer={toFloat(item.quebraCaixaOP) > 0 ? `+${formatMoeda(toFloat(item.quebraCaixaOP))}` : `-${formatMoeda(Math.abs(item.quebraCaixaOP))}`}
 
