@@ -88,20 +88,23 @@ export const ActionListaDetalhe = ({ dadosDetalheFechamento }) => {
     }
 
     const calcularTotalQuebraCaixa = (item) => {
-        return (
-            // toFloat(item.totalDinheiroInformado) -
-            toFloat(item.VALORTOTALDINHEIRO)
-        )
-    }
+        const dinheiroAjuste = toFloat(item.VALORINFORMADO?.DINHEIROAJUSTE);
+        const dinheiroInformado = toFloat(item.VALORINFORMADO?.DINHEIRO);
+        const dinheiroRecebido = toFloat(item.VALORTOTALDINHEIRO);
 
-    const dadosExcel = dadosDetalheFechamento.map((item, index) => {
-        let totalDinheiroInformado = 0;
-        if (item.VALORINFORMADO.DINHEIROAJUSTE > 0) {
-            totalDinheiroInformado = item.VALORINFORMADO.DINHEIROAJUSTE;
-        } else {
-            totalDinheiroInformado = item.VALORINFORMADO.DINHEIRO;
-        }
-        const totalQuebraCaixa = totalDinheiroInformado - item.VALORTOTALDINHEIRO;
+        const valorInformado = dinheiroAjuste > 0
+            ? dinheiroAjuste
+            : dinheiroInformado;
+
+        return valorInformado - dinheiroRecebido;
+    };
+
+    const dadosExcel = dadosDetalheFechamento.map((item) => {
+
+        const totalDinheiroInformado =
+            toFloat(item.VALORINFORMADO?.DINHEIROAJUSTE) > 0
+                ? toFloat(item.VALORINFORMADO.DINHEIROAJUSTE)
+                : toFloat(item.VALORINFORMADO?.DINHEIRO);
 
         return {
             DSCAIXA: item.DSCAIXA,
@@ -110,37 +113,37 @@ export const ActionListaDetalhe = ({ dadosDetalheFechamento }) => {
             VALORTOTALCARTAO: item.VALORTOTALCARTAO,
             VALORTOTALPOS: item.VALORTOTALPOS,
             VALORTOTALFATURA: item.VALORTOTALFATURA,
-            totalDinheiroInformado: totalDinheiroInformado,
+            totalDinheiroInformado,
             CARTAO: item.VALORINFORMADO.CARTAO,
             POS: item.VALORINFORMADO.POS,
             FATURA: item.VALORINFORMADO.FATURA,
-            totalQuebraCaixa: parseFloat(totalQuebraCaixa).toFixed(2),
-            DINHEIRO: item.VALORINFORMADO.DINHEIRO,
-            DINHEIROAJUSTE: item.VALORINFORMADO.DINHEIROAJUSTE,
-
-        }
+            totalQuebraCaixa: calcularTotalQuebraCaixa(item)
+        };
     });
 
-    const dadosFechamento = dadosDetalheFechamento.map((item, index) => {
+  
+    const dadosFechamento = dadosDetalheFechamento.map((item) => {
+
+        const totalDinheiroInformado =
+            toFloat(item.VALORINFORMADO?.DINHEIROAJUSTE) > 0
+                ? toFloat(item.VALORINFORMADO.DINHEIROAJUSTE)
+                : toFloat(item.VALORINFORMADO?.DINHEIRO);
+
         const totalQuebraCaixa = calcularTotalQuebraCaixa(item);
+
         const quebraCaixa = item.VALORTOTALDINHEIRO;
+
         const totalDespesasAdiantamento = calcularTotalDespesasAdiantamento(item);
         const totalDisponivel = calcularTotalDisponivel(item);
-        let totalDinheiroInformado = 0;
-        if (item.VALORINFORMADO.DINHEIROAJUSTE > 0) {
-            totalDinheiroInformado = item.VALORINFORMADO.DINHEIROAJUSTE;
-        } else {
-            totalDinheiroInformado = item.VALORINFORMADO.DINHEIRO;
-        }
 
         return {
-
             DSCAIXA: item.DSCAIXA,
             IDCAIXAWEB: item.IDCAIXAWEB,
             IDEMPRESA: item.IDEMPRESA,
             IDMOVIMENTOCAIXAWEB: item.IDMOVIMENTOCAIXAWEB,
             NOFANTASIA: item.NOFANTASIA,
             NOFUNCIONARIO: item.NOFUNCIONARIO,
+
             DINHEIRO: item.VALORINFORMADO.DINHEIRO,
             DINHEIROAJUSTE: item.VALORINFORMADO.DINHEIROAJUSTE,
             CARTAO: item.VALORINFORMADO.CARTAO,
@@ -155,17 +158,18 @@ export const ActionListaDetalhe = ({ dadosDetalheFechamento }) => {
             VALORTOTALFATURA: item.VALORTOTALFATURA,
             VALORTOTALPOS: item.VALORTOTALPOS,
             VALORTOTALVOUCHER: item.VALORTOTALVOUCHER,
-            totalQuebraCaixa: parseFloat(totalQuebraCaixa).toFixed(2),
-            quebraCaixa: parseFloat(quebraCaixa).toFixed(2),
-            totalDinheiroInformado: totalDinheiroInformado,
+
+            totalQuebraCaixa,
+            quebraCaixa,
+            totalDinheiroInformado,
 
             VRDEPOSITO: item.DEPOSITOS[0]?.VRDEPOSITO,
             NUDOCDEPOSITO: item.DEPOSITOS[0]?.NUDOCDEPOSITO,
             DSHISTORIO: item.DEPOSITOS[0]?.DSHISTORIO,
 
             totalDespesasAdiantamento: formatMoeda(totalDespesasAdiantamento),
-            totalDisponivel: totalDisponivel,
-        }
+            totalDisponivel
+        };
     });
 
     const calcularTotalDinheiroColuna = () => {
@@ -226,13 +230,12 @@ export const ActionListaDetalhe = ({ dadosDetalheFechamento }) => {
         }
         return total;
     }
+
     const calcularTotalQuebra = () => {
-        let total = 0;
-        for (let venda of dadosFechamento) {
-            total += parseFloat(venda.quebraCaixa);
-        }
-        return total;
-    }
+        return dadosFechamento.reduce((total, venda) => {
+            return total + toFloat(venda.totalQuebraCaixa);
+        }, 0);
+    };
 
     const colunasFechamento = [
         {
@@ -307,25 +310,37 @@ export const ActionListaDetalhe = ({ dadosDetalheFechamento }) => {
         {
             field: 'totalQuebraCaixa',
             header: 'Quebra',
-            body: (row) => {
-                const sinal = parseFloat(row.totalQuebraCaixa) > 0 ? ' + ' : ' - ';
-                return (
-                    <th style={{ color: row.totalQuebraCaixa > 0 ? 'blue' : 'red' }}>
-                        {`${sinal}${row.totalQuebraCaixa}`}
-                    </th>
-                )
-            },
-            sortable: true,
-            footer: (row) => {
-                const sinal = parseFloat(row.calcularTotalQuebra) > 0 ? ' + ' : ' - ';
-                return (
-                    <th style={{ color: row.totalQuebraCaixa > 0 ? 'red' : 'blue' }}>
-                        {` ${formatMoeda(calcularTotalQuebra())}`}
-                    </th>
-                )
-            },
-        },
 
+            body: (row) => {
+                const valor = toFloat(row.totalQuebraCaixa);
+
+                return (
+                    <th style={{
+                        color: valor > 0 ? 'blue' : valor <= 0 ? 'red' : 'black'
+                    }}>
+                        {valor > 0 ? '+' : valor <= 0 ? '-' : ''}
+                        {' '}
+                        {formatMoeda(Math.abs(valor))}
+                    </th>
+                );
+            },
+
+            sortable: true,
+
+            footer: () => {
+                const valor = calcularTotalQuebra();
+
+                return (
+                    <th style={{
+                        color: valor > 0 ? 'blue' : valor <= 0 ? 'red' : 'black'
+                    }}>
+                        {valor > 0 ? '+' : valor <= 0 ? '-' : ''}
+                        {' '}
+                        {formatMoeda(Math.abs(valor))}
+                    </th>
+                );
+            }
+        },
     ]
 
     return (
@@ -355,6 +370,7 @@ export const ActionListaDetalhe = ({ dadosDetalheFechamento }) => {
                     currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
                     filterDisplay="menu"
                     showGridlines
+                    cellMemo={false}
                     stripedRows
                     emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
                 >
@@ -376,55 +392,55 @@ export const ActionListaDetalhe = ({ dadosDetalheFechamento }) => {
                 </DataTable>
             </div>
 
-             {dadosFechamento.length > 0 && (
-              <Fragment >
-                <div
-                  style={{
-                    textAlign: "center",
-                    marginTop: "20px",
-                  }}>
-                  <h2 style={{ fontWeight: 700 }}>Relação de Depósitos</h2>
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    textAlign: "center",
-                    marginTop: "20px",
-                    justifyContent: "space-around",
+            {dadosFechamento.length > 0 && (
+                <Fragment >
+                    <div
+                        style={{
+                            textAlign: "center",
+                            marginTop: "20px",
+                        }}>
+                        <h2 style={{ fontWeight: 700 }}>Relação de Depósitos</h2>
+                    </div>
+                    <div
+                        style={{
+                            display: "flex",
+                            textAlign: "center",
+                            marginTop: "20px",
+                            justifyContent: "space-around",
 
-                    width: "100%",
-                  }}>
+                            width: "100%",
+                        }}>
 
-                  <div className="col-sm-4 col-xl-2" >
-                    <span style={{ fontSize: "15px", fontWeight: 400 }}>Valor Depositado (R$) </span>
-                    <p style={{ fontSize: "16px", fontWeight: 600 }}>{formatMoeda(toFloat(dadosFechamento[0]?.VRDEPOSITO))} </p>
-                  </div>
+                        <div className="col-sm-4 col-xl-2" >
+                            <span style={{ fontSize: "15px", fontWeight: 400 }}>Valor Depositado (R$) </span>
+                            <p style={{ fontSize: "16px", fontWeight: 600 }}>{formatMoeda(toFloat(dadosFechamento[0]?.VRDEPOSITO))} </p>
+                        </div>
 
-                  <div className="col-sm-4 col-xl-2">
-                    <span style={{ fontSize: "16px", fontWeight: 400 }}>
+                        <div className="col-sm-4 col-xl-2">
+                            <span style={{ fontSize: "16px", fontWeight: 400 }}>
 
-                      Histórico
-                      <p style={{ fontSize: "16px", fontWeight: 600 }}>
+                                Histórico
+                                <p style={{ fontSize: "16px", fontWeight: 600 }}>
 
-                        {dadosFechamento[0]?.DSHISTORIO}
-                      </p>
-                    </span>
-                  </div>
+                                    {dadosFechamento[0]?.DSHISTORIO}
+                                </p>
+                            </span>
+                        </div>
 
-                  <div className="col-sm-4 col-xl-2">
-                    <span style={{ fontSize: "16px", fontWeight: 400 }}>
+                        <div className="col-sm-4 col-xl-2">
+                            <span style={{ fontSize: "16px", fontWeight: 400 }}>
 
-                      Documento:
-                    </span>
-                    <p style={{ fontSize: "16px", fontWeight: 600 }}>
+                                Documento:
+                            </span>
+                            <p style={{ fontSize: "16px", fontWeight: 600 }}>
 
-                      {toFloat(dadosFechamento[0]?.NUDOCDEPOSITO)}
-                    </p>
-                  </div>
+                                {toFloat(dadosFechamento[0]?.NUDOCDEPOSITO)}
+                            </p>
+                        </div>
 
-                </div>
+                    </div>
 
-              </Fragment>
+                </Fragment>
             )}
         </div>
     )
