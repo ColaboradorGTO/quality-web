@@ -48,7 +48,7 @@ export const ResumoDashBoardAdministrativo = ({ usuarioLogado, menuFilhoAtual })
     },
     { enabled: Boolean(usuarioLogado?.id && menuFilhoAtual?.ID), staleTime: 5 * 60 * 1000, }
   );
-
+  
   const { data: dadosEmpresas = [], } = useFetchData('empresas', '/empresas');
 
   const { data: dadosAdiantamentoSalarial = [], error: errorFuncionarios, isLoading: isLoadingFuncionarios, refetch: refetchAdiantamento } = useQuery(

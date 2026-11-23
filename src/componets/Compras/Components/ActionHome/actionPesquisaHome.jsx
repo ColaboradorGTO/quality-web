@@ -15,7 +15,7 @@ import { useQuery } from "react-query";
 import { ActionEditarPedido } from "./ActionEditarPedido/actionEditarPedido";
 
 
-export const ActionPesquisaHome = ({usuarioLogado, ID}) => {
+export const ActionPesquisaHome = ({ usuarioLogado, ID, menuFilhoAtual }) => {
   const [actionHome, setActionHome] = useState(true)
   const [actionListaPedidos, setActionListaPedidos] = useState(true)
   const [actionPedidoResumido, setActionPedidoResumido] = useState(false)
@@ -32,7 +32,7 @@ export const ActionPesquisaHome = ({usuarioLogado, ID}) => {
   const [pageSize, setPageSize] = useState(1000);
   const [dadosVisualizarPedido, setDadosVisualizarPedido] = useState([]);
   const [dadosDetalhePedido, setDadosDetalhePedido] = useState([]);
-  const [actionVisualizarPedido, setActionVisualizarPedido] = useState(false); 
+  const [actionVisualizarPedido, setActionVisualizarPedido] = useState(false);
 
   useEffect(() => {
     const dataInicial = getDataDoisMesesAtras();
@@ -40,16 +40,16 @@ export const ActionPesquisaHome = ({usuarioLogado, ID}) => {
     setDataPesquisaInicio(dataInicial);
     setDataPesquisaFim(dataFinal);
   }, [])
- 
-  
+
+
   const { data: optionsModulos = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
-    'menus-usuario-excecao',
+    ['menus-usuario-excecao', menuFilhoAtual?.ID],
     async () => {
-      const response = await get(`/menus-usuario-excecao?idUsuario=${usuarioLogado?.id}&idMenuFilho=${ID}`);
+      const response = await get(`/menus-usuario-excecao?idUsuario=${usuarioLogado?.id}&idMenuFilho=${menuFilhoAtual?.ID}`);
 
       return response.data;
     },
-    { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000, }
+    { enabled: Boolean(usuarioLogado?.id && menuFilhoAtual?.ID), staleTime: 5 * 60 * 1000, }
   );
 
   const { data: dadosFonecedores = [], error: errorFornecedor, isLoading: isLoadingFornecedor } = useFetchData('fornecedores', '/fornecedores');
@@ -59,14 +59,14 @@ export const ActionPesquisaHome = ({usuarioLogado, ID}) => {
 
   const fetchListaPedidos = async () => {
     try {
-    
+
       const urlApi = `/lista-pedidos?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idFornPesquisa=${fornecedorSelecionado}&idMarcaPesquisa=${marcaSelecionada}&NuPedidoPesquisa=${numeroPedido}`;
       const response = await get(urlApi);
-      
+
       if (response.data.length && response.data.length === pageSize) {
         let allData = [...response.data];
         animacaoCarregamento(`Carregando... Página ${currentPage} de ${response.data.length}`, true);
-  
+
         async function fetchNextPage(currentPage) {
           try {
             currentPage++;
@@ -82,14 +82,14 @@ export const ActionPesquisaHome = ({usuarioLogado, ID}) => {
             throw error;
           }
         }
-  
+
         await fetchNextPage(currentPage);
         return allData;
       } else {
-        
+
         return response.data;
       }
-  
+
     } catch (error) {
       console.error('Error fetching data:', error);
       throw error;
@@ -97,7 +97,7 @@ export const ActionPesquisaHome = ({usuarioLogado, ID}) => {
       fecharAnimacaoCarregamento();
     }
   };
-    
+
   const { data: dadosPedidos = [], error: errorPedidos, isLoading: isLoadingPedidos, refetch: refetchListaPedidos } = useQuery(
     ['lista-pedidos', dataPesquisaInicio, dataPesquisaFim, fornecedorSelecionado, marcaSelecionada, numeroPedido, currentPage, pageSize],
     () => fetchListaPedidos(dataPesquisaInicio, dataPesquisaFim, fornecedorSelecionado, marcaSelecionada, numeroPedido, currentPage, pageSize),
@@ -106,14 +106,14 @@ export const ActionPesquisaHome = ({usuarioLogado, ID}) => {
 
   const fetchListaPedidosDetalhados = async () => {
     try {
-    
+
       const urlApi = `/lista-pedidosDetalhado?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idFornecedor=${fornecedorSelecionado}&idMarca=${marcaSelecionada}&idPedido=${numeroPedido}`;
       const response = await get(urlApi);
-      
+
       if (response.data.length && response.data.length === pageSize) {
         let allData = [...response.data];
         animacaoCarregamento(`Carregando... Página ${currentPage} de ${response.data.length}`, true);
-  
+
         async function fetchNextPage(currentPage) {
           try {
             currentPage++;
@@ -129,14 +129,14 @@ export const ActionPesquisaHome = ({usuarioLogado, ID}) => {
             throw error;
           }
         }
-  
+
         await fetchNextPage(currentPage);
         return allData;
       } else {
-        
+
         return response.data;
       }
-  
+
     } catch (error) {
       console.error('Error fetching data:', error);
       throw error;
@@ -144,13 +144,13 @@ export const ActionPesquisaHome = ({usuarioLogado, ID}) => {
       fecharAnimacaoCarregamento();
     }
   };
-    
+
   const { data: dadosPedidosDetalhados = [], error: errorPedidosDetalhados, isLoading: isLoadingPedidosDetalhados, refetch: refetchListaPedidosDetalhados } = useQuery(
     ['lista-pedidosDetalhado', dataPesquisaInicio, dataPesquisaFim, fornecedorSelecionado, marcaSelecionada, numeroPedido, currentPage, pageSize],
     () => fetchListaPedidosDetalhados(dataPesquisaInicio, dataPesquisaFim, fornecedorSelecionado, marcaSelecionada, numeroPedido, currentPage, pageSize),
     { enabled: false, staleTime: 5 * 60 * 1000, cacheTime: 5 * 60 * 1000 }
   )
-  
+
   const handleSelectFornecedor = (e) => {
     setFornecedorSelecionado(e.value);
   }
@@ -269,53 +269,53 @@ export const ActionPesquisaHome = ({usuarioLogado, ID}) => {
         />
       )}
 
- 
+
       {!actionPedidoResumido && actionListaPedidos && actionHome && (
         <Fragment>
-        <div className="panel" style={{width: "100%", marginTop: '0' }}>
-          <div className="panel-hdr">
-            <h2>
-              Lista de Pedidos <span class="fw-300"><i>Por Período</i></span>
-            </h2>
-          </div>
-          <div style={{display: "flex",  width: '100%', marginBottom: '1rem'}}>
-  
-            <ButtonType
-              textButton="Relatório Resumido"
-              onClickButtonType={handleClickRelatorioResumido}
-              cor="primary"
-              Icon={AiOutlineSearch}
-              iconColor="white"
-              iconSize={25}
-            />
-      
-  
-            <ButtonType
-              textButton="Relatório Detalhado"
-              onClickButtonType={handleClickRelatorioDetalhado}
-              cor="info"
-              Icon={AiOutlineSearch}
-              iconColor="white"
-              iconSize={25}
-            />
-          </div>
-  
-          <ActionListaPedidos 
-            dadosPedidos={dadosPedidos} 
-            dadosVisualizarPedido={dadosVisualizarPedido} 
-            setDadosVisualizarPedido={setDadosVisualizarPedido}
-            setDadosDetalhePedido={setDadosDetalhePedido}
-            dadosDetalhePedido={dadosDetalhePedido} 
-            setActionVisualizarPedido={setActionVisualizarPedido}
-            actionVisualizarPedido={actionVisualizarPedido}
-            setActionPedidoResumido={setActionPedidoResumido}
-            actionHome={actionHome}
-            setActionHome={setActionHome}
-            actionListaPedidos={actionListaPedidos}
-            setActionListaPedidos={setActionListaPedidos}
+          <div className="panel" style={{ width: "100%", marginTop: '0' }}>
+            <div className="panel-hdr">
+              <h2>
+                Lista de Pedidos <span class="fw-300"><i>Por Período</i></span>
+              </h2>
+            </div>
+            <div style={{ display: "flex", width: '100%', marginBottom: '1rem' }}>
 
-          />
-        </div>
+              <ButtonType
+                textButton="Relatório Resumido"
+                onClickButtonType={handleClickRelatorioResumido}
+                cor="primary"
+                Icon={AiOutlineSearch}
+                iconColor="white"
+                iconSize={25}
+              />
+
+
+              <ButtonType
+                textButton="Relatório Detalhado"
+                onClickButtonType={handleClickRelatorioDetalhado}
+                cor="info"
+                Icon={AiOutlineSearch}
+                iconColor="white"
+                iconSize={25}
+              />
+            </div>
+
+            <ActionListaPedidos
+              dadosPedidos={dadosPedidos}
+              dadosVisualizarPedido={dadosVisualizarPedido}
+              setDadosVisualizarPedido={setDadosVisualizarPedido}
+              setDadosDetalhePedido={setDadosDetalhePedido}
+              dadosDetalhePedido={dadosDetalhePedido}
+              setActionVisualizarPedido={setActionVisualizarPedido}
+              actionVisualizarPedido={actionVisualizarPedido}
+              setActionPedidoResumido={setActionPedidoResumido}
+              actionHome={actionHome}
+              setActionHome={setActionHome}
+              actionListaPedidos={actionListaPedidos}
+              setActionListaPedidos={setActionListaPedidos}
+
+            />
+          </div>
         </Fragment>
       )}
 
@@ -325,7 +325,7 @@ export const ActionPesquisaHome = ({usuarioLogado, ID}) => {
       )}
 
       {actionPedidoDetalhado && (
-        <ActionPDFPedidoDetalhado dadosPedidosDetalhados={dadosPedidosDetalhados}/>
+        <ActionPDFPedidoDetalhado dadosPedidosDetalhados={dadosPedidosDetalhados} />
       )}
 
       {actionVisualizarPedido && (
@@ -333,7 +333,7 @@ export const ActionPesquisaHome = ({usuarioLogado, ID}) => {
         <ActionEditarPedido
           usuarioLogado={usuarioLogado}
           ID={ID}
-          dadosVisualizarPedido={dadosVisualizarPedido} 
+          dadosVisualizarPedido={dadosVisualizarPedido}
           dadosDetalhePedido={dadosDetalhePedido}
           actionVisualizarPedido={actionVisualizarPedido}
           setActionVisualizarPedido={setActionVisualizarPedido}

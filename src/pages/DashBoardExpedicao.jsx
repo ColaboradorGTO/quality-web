@@ -52,11 +52,15 @@ export const DashBoardExpedicao = () => {
     { enabled: Boolean(usuarioLogado?.id), staleTime: 5 * 60 * 1000, }
   );
 
+  const menuFilhoResumo = selectedModule?.menuPai?.menuFilho?.find(
+    menu => menu.URL === "/expedicao/ActionPesquisaOT"
+  );
+
   let component = null;
 
   switch (componentToShow) {
     case "/expedicao/ActionPesquisaOT":
-      component = <ActionPesquisaOT usuarioLogado={usuarioLogado} />;
+      component = <ActionPesquisaOT usuarioLogado={usuarioLogado} menuFilhoAtual={menuFilhoResumo} />;
       break;
     case "/expedicao/ActionPesquisaFaturamentoOT":
       component = <ActionPesquisaFaturamentoOT usuarioLogado={usuarioLogado} />
@@ -88,7 +92,7 @@ export const DashBoardExpedicao = () => {
                         <div className="panel-container show">
                           <div className="panel-content">
                             <Suspense fallback={<div>Loading...</div>}>
-                              {actionVisivel && !componentToShow && <ActionPesquisaOT />}
+                              {actionVisivel && !componentToShow && <ActionPesquisaOT menuFilhoAtual={menuFilhoResumo} />}
                               {componentToShow && component}
                             </Suspense>
                           </div>

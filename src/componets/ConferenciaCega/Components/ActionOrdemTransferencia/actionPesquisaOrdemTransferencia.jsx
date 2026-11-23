@@ -11,7 +11,7 @@ import { animacaoCarregamento, fecharAnimacaoCarregamento } from "../../../../ut
 import { getDataAtual } from "../../../../utils/dataAtual";
 import { ActionIncluirOTModal } from "./ActionIncluirModalOT/actionIncluirOTModal";
 
-export const ActionPesquisaOrdemTransferencia = ({ usuarioLogado }) => {
+export const ActionPesquisaOrdemTransferencia = ({ usuarioLogado, menuFilhoAtual }) => {
 
   const [tabelaVisivel, setTabelaVisivel] = useState(false);
   const [dataPesquisaInicio, setDataPesquisaInicio] = useState('')
@@ -20,7 +20,7 @@ export const ActionPesquisaOrdemTransferencia = ({ usuarioLogado }) => {
   const [empresaSelecionadaOrigem, setEmpresaSelecionadaOrigem] = useState('')
   const [empresaSelecionadaDestino, setEmpresaSelecionadaDestino] = useState('')
   const [modalVisivel, setModalVisivel] = useState(false);
-  const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
+  //const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
 
   useEffect(() => {
     const dataAtual = getDataAtual();
@@ -29,13 +29,13 @@ export const ActionPesquisaOrdemTransferencia = ({ usuarioLogado }) => {
 
   }, []);
 
-  useEffect(() => {
-    const menuSalvo = localStorage.getItem('menuFilhoSelecionado');
-    if (menuSalvo) {
-      const menuParsed = JSON.parse(menuSalvo);
-      setMenuFilhoAtual(menuParsed);
-    }
-  }, []);
+  /*   useEffect(() => {
+      const menuSalvo = localStorage.getItem('menuFilhoSelecionado');
+      if (menuSalvo) {
+        const menuParsed = JSON.parse(menuSalvo);
+        setMenuFilhoAtual(menuParsed);
+      }
+    }, []); */
 
   const { data: optionsModulos = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
     ['menus-usuario-excecao', menuFilhoAtual?.ID],
@@ -44,7 +44,7 @@ export const ActionPesquisaOrdemTransferencia = ({ usuarioLogado }) => {
 
       return response.data;
     },
-    { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000, }
+    { enabled: Boolean(usuarioLogado?.id && menuFilhoAtual?.ID), staleTime: 5 * 60 * 1000, }
   );
 
   const { data: dadosEmpresa = [], error: errorMarcas, isLoading: isLoadingMarcas } = useQuery(

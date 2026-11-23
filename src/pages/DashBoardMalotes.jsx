@@ -42,7 +42,7 @@ export const DashBoardMalotes = () => {
     if (storedMenuFilho) {
       setMenuSelected(selectedModule);
     }
-  
+
   }, [usuarioLogado])
 
 
@@ -50,7 +50,7 @@ export const DashBoardMalotes = () => {
     'menus-usuario',
     async () => {
       const response = await get(`/menus-usuario?idUsuario=${usuarioLogado?.id}&idModulo=${ID}`);
-      
+
       return response.data;
     },
     { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000, }
@@ -60,7 +60,7 @@ export const DashBoardMalotes = () => {
     const menuFilhoSelecionado = selectedModule.menuPai.menuFilho.find(
       menu => menu.URL === componentName
     );
-  
+
     if (menuFilhoSelecionado) {
       // Salvar todas as informações do menu selecionado no localStorage
       localStorage.setItem('menuFilhoSelecionado', JSON.stringify({
@@ -81,9 +81,14 @@ export const DashBoardMalotes = () => {
     setComponentToShow(componentName);
   }
 
+  const menuFilhoResumo = selectedModule?.menuPai?.menuFilho?.find(
+    menu => menu.URL === "/malotes/ActionPesquisaRecebimentoMalote"
+  );
+
+
   const permissaoUsuario = selectedModule.menuPai.menuFilho;
-  const {   
-    ID, 
+  const {
+    ID,
   } = permissaoUsuario.map(item => ({
     ID: item.ID,
   })).reduce((acc, curr) => {
@@ -92,12 +97,12 @@ export const DashBoardMalotes = () => {
 
 
   let component = null;
-  
+
   switch (componentToShow) {
-   
+
     case "/malotes/ActionPesquisaRecebimentoMalote":
-        component = <ActionPesquisaRecebimentoMalote usuarioLogado={usuarioLogado} ID={ID} />
-        break;
+      component = <ActionPesquisaRecebimentoMalote usuarioLogado={usuarioLogado} ID={ID} menuFilhoAtual={menuFilhoResumo} />
+      break;
     default:
       component = null;
       break;
@@ -117,7 +122,7 @@ export const DashBoardMalotes = () => {
                 handleShowComponent={handleShowComponent}
               />
               <div className="page-content-wrapper">
-                <HeaderMain optionsModulosPage={optionsModulosPage}/>
+                <HeaderMain optionsModulosPage={optionsModulosPage} />
 
                 <main id="js-page-content" role="main" className="page-content">
                   <div className="row">
@@ -127,9 +132,9 @@ export const DashBoardMalotes = () => {
                           <div className="panel-content">
                             <Suspense fallback={<div>Loading...</div>}>
                               {resumoVisivel && !componentToShow && (
-                           
-                               <ActionPesquisaRecebimentoMalote usuarioLogado={usuarioLogado} ID={ID}/>         
-                              )} 
+
+                                <ActionPesquisaRecebimentoMalote usuarioLogado={usuarioLogado} ID={ID} />
+                              )}
                               {componentToShow && component}
                             </Suspense>
                           </div>

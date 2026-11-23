@@ -16,7 +16,7 @@ import { CiEdit } from "react-icons/ci"
 import { ActionImprimirEtiquetaModal } from "./actionImprimirEtiquetaModal"
 import { ActionEtiquetaOculosModal } from "./ActionEtiquetaOculos/actionEtiquetaOculosModal"
 
-export const ActionPesquisaProdutoEtiqueta = ({ usuarioLogado }) => {
+export const ActionPesquisaProdutoEtiqueta = ({ usuarioLogado, menuFilhoAtual }) => {
   const [descricaoProduto, setDescricaoProduto] = useState('')
   const [codBarrasProduto, setCodBarrasProduto] = useState('')
   const [idProduto, setIDProduto] = useState('')

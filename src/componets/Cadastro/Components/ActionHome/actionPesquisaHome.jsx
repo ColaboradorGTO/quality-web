@@ -30,7 +30,7 @@ import { ActionNovoPedido } from "../ActionNovoPedido/actionNovoPedido"
 import { formatMoeda } from "../../../../utils/formatMoeda"
 import HeaderTable from "../../../Tables/headerTable"
 
-export const ActionPesquisaHome = () => {
+export const ActionPesquisaHome = ({ menuFilhoAtual }) => {
   const [dataInicio, setDataInicio] = useState('')
   const [dataFim, setDataFim] = useState('')
   const [tabelaPedidoPeriodo, setTabelaPedidoPeriodo] = useState(true);
@@ -101,13 +101,13 @@ export const ActionPesquisaHome = () => {
 
   const { data: dadosFabricantes = [], error: errorFabricantes, isLoading: isLoadingFabricantes, refetch } = useQuery(
     ['fabricantes', currentPage, pageSize],
-    () => fetchListaFabricantes( currentPage, pageSize),
+    () => fetchListaFabricantes(currentPage, pageSize),
     { enabled: false, cacheTime: 5 * 60 * 1000 }
   );
 
   const fetchListaPedidos = async () => {
     try {
-                                                                                                                                                                      
+
       const urlApi = `/listaTodosPedidos?dataPesquisaInicio=${dataInicio}&dataPesquisaFim=${dataFim}&idMarca=${marcaSelecionada}&idFornecedor=${fornecedorSelecionado}&idFabricante=${fabricanteSelecionado}&idComprador=${compradorSelecionado}&stSituacaoSap=${situacaoSelecionada}`;
       const response = await get(urlApi);
 
@@ -312,7 +312,7 @@ export const ActionPesquisaHome = () => {
   }
 
   const handleClick = () => {
-   
+
     setTabelaPedidoPeriodo(true)
     setIsQueryPedidoResumido(true)
     // refetchPedidosResumido()
@@ -375,7 +375,7 @@ export const ActionPesquisaHome = () => {
 
     <Fragment>
 
-      
+
       <Fragment>
         <ActionMain
           title="Dashboard Cadastros"
@@ -461,7 +461,7 @@ export const ActionPesquisaHome = () => {
           IconSearch={AiOutlineSearch}
         />
 
-    
+
         <div className="panel"
           style={{ backgroundColor: "#fff", padding: "15px" }}
         >
@@ -495,13 +495,13 @@ export const ActionPesquisaHome = () => {
               cor="info"
               tipo="button"
               onClickButtonType={handleClickRelatorioProdutosCriados}
-            /> 
+            />
           </div>
           <ActionListaPedidosPeriodo dadosListaPedidos={dadosListaPedidos} tabelaPedidoPeriodo={tabelaPedidoPeriodo} setTabelaPedidoPeriodo={setTabelaPedidoPeriodo} />
-          
+
         </div>
       </Fragment>
-      
+
 
       {actionPedidoResumido && (
         <Fragment>

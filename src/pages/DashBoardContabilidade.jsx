@@ -7,7 +7,7 @@ import { MenuButton } from "../componets/Buttons/menuButton";
 import { FooterMain } from "../componets/Footer";
 import { useQuery } from "react-query";
 import { get } from "../api/funcRequest";
- 
+
 const ResumoDashBoardContabilidade = lazy(() => import("../componets/Contabilidade/Components/ResumoContabilidade/ResumoDashBoardContabilidade").then(module => ({ default: module.ResumoDashBoardContabilidade })));
 const ActionPesquisaVendasMarca = lazy(() => import("../componets/Contabilidade/Components/ActionVendasMarca/actionPesquisaVendasMarca").then(module => ({ default: module.ActionPesquisaVendasMarca })));
 const ActionPesquisaVendasContingencia = lazy(() => import("../componets/Contabilidade/Components/ActionVendas/actionPesquisaVendasContingencia").then(module => ({ default: module.ActionPesquisaVendasContingencia })));
@@ -78,6 +78,10 @@ export const DashBoardContabilidade = () => {
     setComponentToShow(componentName);
   }
 
+  const menuFilhoResumo = selectedModule?.menuPai?.menuFilho?.find(
+    menu => menu.URL === "/contabilidade/ResumoDashBoardContabilidade"
+  );
+
   const permissaoUsuario = selectedModule.menuPai.menuFilho;
   const {
     ID,
@@ -92,7 +96,7 @@ export const DashBoardContabilidade = () => {
 
   switch (componentToShow) {
     case "/contabilidade/ResumoDashBoardContabilidade":
-      component = <ResumoDashBoardContabilidade usuarioLogado={usuarioLogado} />;
+      component = <ResumoDashBoardContabilidade usuarioLogado={usuarioLogado} menuFilhoAtual={menuFilhoResumo} />;
       break;
     case "/contabilidade/ActionPesquisaVendasMarca":
       component = <ActionPesquisaVendasMarca />;
@@ -139,7 +143,7 @@ export const DashBoardContabilidade = () => {
                           <div className="panel-content">
                             <Suspense fallback={<div>Loading...</div>}>
                               {resumoVisivel && !componentToShow && (
-                                <ResumoDashBoardContabilidade usuarioLogado={usuarioLogado} ID={ID} />
+                                <ResumoDashBoardContabilidade usuarioLogado={usuarioLogado} ID={ID} menuFilhoAtual={menuFilhoResumo} />
                               )}
                               {componentToShow && component}
                             </Suspense>

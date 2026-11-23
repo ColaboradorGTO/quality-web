@@ -8,7 +8,7 @@ import { FooterMain } from "../componets/Footer";
 import { get } from "../api/funcRequest";
 import { useQuery } from "react-query";
 
-const ActionPesquisaCriarAdiantamento = lazy(() => import("../componets/ProvisaoFinanceira/ActionAdiantamento/Solicitar/actionPesquisaCriarAdiantamento").then(module => ({default: module.ActionPesquisaCriarAdiantamento })));
+const ActionPesquisaCriarAdiantamento = lazy(() => import("../componets/ProvisaoFinanceira/ActionAdiantamento/Solicitar/actionPesquisaCriarAdiantamento").then(module => ({ default: module.ActionPesquisaCriarAdiantamento })));
 
 export const DashBoardProvisaoFinanceira = () => {
   const [actionVisivel, setActionVisivel] = useState(true);
@@ -36,12 +36,12 @@ export const DashBoardProvisaoFinanceira = () => {
     }
 
   }, [usuarioLogado]);
- 
+
   const { data: optionsModulosPage = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
     'menus-usuario',
     async () => {
       const response = await get(`/menus-usuario?idUsuario=${usuarioLogado?.id}&idModulo=${selectedModule?.id}`);
-      
+
       return response.data;
     },
     { enabled: Boolean(usuarioLogado?.id), staleTime: 5 * 60 * 1000, }
@@ -51,7 +51,7 @@ export const DashBoardProvisaoFinanceira = () => {
     const menuFilhoSelecionado = selectedModule.menuPai.menuFilho.find(
       menu => menu.URL === componentName
     );
-  
+
     if (menuFilhoSelecionado) {
       // Salvar todas as informações do menu selecionado no localStorage
       localStorage.setItem('menuFilhoSelecionado', JSON.stringify({
@@ -71,22 +71,26 @@ export const DashBoardProvisaoFinanceira = () => {
 
     setComponentToShow(componentName);
   }
-  
+
+  const menuFilhoResumo = selectedModule?.menuPai?.menuFilho?.find(
+    menu => menu.URL === "/provisaoFinanceiro/ActionPesquisaCriarAdiantamento"
+  );
+
   const permissaoUsuario = selectedModule.menuPai.menuFilho;
-  const {   
-    ID, 
+  const {
+    ID,
   } = permissaoUsuario.map(item => ({
     ID: item.ID,
   })).reduce((acc, curr) => {
     return { ...acc, ...curr };
   }, {});
 
-  
+
   let component = null;
 
   switch (componentToShow) {
     case "/provisaoFinanceiro/ActionPesquisaCriarAdiantamento":
-      component = <ActionPesquisaCriarAdiantamento usuarioLogado={usuarioLogado} />;
+      component = <ActionPesquisaCriarAdiantamento usuarioLogado={usuarioLogado} menuFilhoAtual={menuFilhoResumo} />;
       break;
     default:
       component = null;
@@ -96,46 +100,46 @@ export const DashBoardProvisaoFinanceira = () => {
   return (
 
 
-  <Fragment>
-  {usuarioLogado && (
-    <SidebarProvider>
+    <Fragment>
+      {usuarioLogado && (
+        <SidebarProvider>
 
-      <div className="page-wrapper">
-        <div className="page-inner">
-          <MenuSidebarAdmin
-            componentToShow={componentToShow}
-            handleShowComponent={handleShowComponent}
-          />
-          <div className="page-content-wrapper">
-            <HeaderMain optionsModulosPage={optionsModulosPage}/>
+          <div className="page-wrapper">
+            <div className="page-inner">
+              <MenuSidebarAdmin
+                componentToShow={componentToShow}
+                handleShowComponent={handleShowComponent}
+              />
+              <div className="page-content-wrapper">
+                <HeaderMain optionsModulosPage={optionsModulosPage} />
 
-            <main id="js-page-content" role="main" className="page-content">
-              <div className="row">
-                <div className="col-xl-12">
-                  <div id="panel-1" className="panel">
-                    <div className="panel-container show">
-                      <div className="panel-content">
-                        <Suspense fallback={<div>Loading...</div>}>
-                        {actionVisivel && !componentToShow && (<ActionPesquisaCriarAdiantamento usuarioLogado={usuarioLogado}  />)}
+                <main id="js-page-content" role="main" className="page-content">
+                  <div className="row">
+                    <div className="col-xl-12">
+                      <div id="panel-1" className="panel">
+                        <div className="panel-container show">
+                          <div className="panel-content">
+                            <Suspense fallback={<div>Loading...</div>}>
+                              {actionVisivel && !componentToShow && (<ActionPesquisaCriarAdiantamento usuarioLogado={usuarioLogado} menuFilhoAtual={menuFilhoResumo}/>)}
 
-                          {componentToShow && component}
-                        </Suspense>
+                              {componentToShow && component}
+                            </Suspense>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </main>
+                </main>
 
-            <Fragment>
-              <MenuButton />
-              <FooterMain />
-            </Fragment>
+                <Fragment>
+                  <MenuButton />
+                  <FooterMain />
+                </Fragment>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    </SidebarProvider>
-  )}
-  </Fragment>
+        </SidebarProvider>
+      )}
+    </Fragment>
   )
 }
