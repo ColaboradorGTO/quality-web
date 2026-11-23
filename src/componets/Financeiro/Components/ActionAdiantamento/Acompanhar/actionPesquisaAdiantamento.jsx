@@ -12,7 +12,7 @@ import { useQuery } from "react-query"
 import { animacaoCarregamento, fecharAnimacaoCarregamento, foiCancelado } from "../../../../../utils/animationCarregamento"
 import { get } from "../../../../../api/funcRequest"
 import { useState, useEffect, useRef } from "react"
-import { IoMdAdd } from "react-icons/io"
+
 
 export const ActionPesquisaAdiantamento = ({ usuarioLogado, ID }) => {
   const [dataPesquisaInicio, setDataPesquisaInicio] = useState('');
@@ -46,7 +46,10 @@ export const ActionPesquisaAdiantamento = ({ usuarioLogado, ID }) => {
 
 
   const fetchListaVendasConciliacao = async (status = statusSelecionado, exibirCarregamento = true) => {
-    const urlBase = `/lista-adiantamento-departamento?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&status=${status}&departamento=${departamentoSelecionado}`;
+   
+    const statusPagamento = status === 'PAGO' ? 'PAGO' : '';
+    const statusFiltro = status === 'AGUARDANDO NOTA FISCAL' ? 'COMPROVANTE ANEXADO' : status === 'PAGO' ? '' : status;
+    const urlBase = `/lista-adiantamento-departamento?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&status=${statusFiltro}&statusPagamento=${statusPagamento}&departamento=${departamentoSelecionado}`;
     let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
     urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
     const controller = new AbortController();

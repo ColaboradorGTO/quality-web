@@ -18,7 +18,7 @@ import { Cards } from "../../../Financeiro/Components/ActionAdiantamento/Cards/c
 import { getDataAtual } from "../../../../utils/dataAtual"
 import { useQuery } from "react-query"
 
-export const ActionPesquisaCriarAdiantamento = ({ usuarioLogado, ID, menuFilhoAtual }) => {
+export const ActionPesquisaCriarAdiantamento = ({ usuarioLogado, menuFilhoAtual }) => {
   const [dataPesquisaInicio, setDataPesquisaInicio] = useState('');
   const [dataPesquisaFim, setDataPesquisaFim] = useState('');
   const [empresaSelecionada, setEmpresaSelecionada] = useState('');
@@ -42,7 +42,7 @@ export const ActionPesquisaCriarAdiantamento = ({ usuarioLogado, ID, menuFilhoAt
 
       return response.data;
     },
-    { enabled: Boolean(usuarioLogado?.id && menuFilhoAtual?.ID), staleTime: 5 * 60 * 1000, }
+    { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000, }
   );
 
 
@@ -63,7 +63,9 @@ export const ActionPesquisaCriarAdiantamento = ({ usuarioLogado, ID, menuFilhoAt
       return [];
     }
 
-    const urlBase = `/lista-adiantamento-departamento?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&status=${status}&departamento=${encodeURIComponent(departamentoUsuario)}`;
+    const statusPagamento = status === 'PAGO' ? 'PAGO' : '';
+    const statusFiltro = status === 'AGUARDANDO NOTA FISCAL' ? 'COMPROVANTE ANEXADO' : status === 'PAGO' ? '' : status;
+    const urlBase = `/lista-adiantamento-departamento?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&status=${statusFiltro}&statusPagamento=${statusPagamento}&departamento=${encodeURIComponent(departamentoUsuario)}`;
     let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
     urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
     const controller = new AbortController();
@@ -199,7 +201,7 @@ export const ActionPesquisaCriarAdiantamento = ({ usuarioLogado, ID, menuFilhoAt
           }
         ]}
         valueSelectMarca={departamentoUsuario}
-        onChangeSelectMarcas={() => { }}
+        onChangeSelectMarcas={() => {}}
 
         InputSelectEmpresaComponent={InputSelectAction}
         onChangeSelectEmpresa={(e) => setStatusSelecionado(e.value)}
@@ -226,15 +228,15 @@ export const ActionPesquisaCriarAdiantamento = ({ usuarioLogado, ID, menuFilhoAt
         IconCadastro={IoMdAdd}
 
       />
-
+      
       {possuiNotaFiscalEmAtraso && (
-
-        <div className="alert alert-warning" role="alert" style={{ fontSize: '15px' }}>
-          <h1 style={{ fontWeight: 700 }}>Atenção!</h1>
-          <strong style={{ fontSize: '16px' }}>{usuarioLogado?.NOFUNCIONARIO}!</strong> Você não pode solicitar adiantamento, você Possui notas fiscais em atraso, entre em contato com o Gerente do Financeiro Wendel.
+      
+        <div className="alert alert-warning" role="alert" style={{fontSize: '15px'}}>
+          <h1 style={{fontWeight: 700}}>Atenção!</h1>
+            <strong style={{fontSize: '16px'}}>{usuarioLogado?.NOFUNCIONARIO}!</strong> Você não pode solicitar adiantamento, você Possui notas fiscais em atraso, entre em contato com o Gerente do Financeiro Wendel.
         </div>
       )}
-
+      
       <Cards
         dados={dadosCards}
         statusSelecionado={statusSelecionado}
