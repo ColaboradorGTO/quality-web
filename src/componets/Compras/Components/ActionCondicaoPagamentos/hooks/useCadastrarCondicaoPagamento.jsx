@@ -17,7 +17,6 @@ export const useCadastrarCondicaoPagamento = ({handleClose, usuarioLogado, optio
     const [tipoDocumentoSelecionado, setTipoDocumentoSelecionado] = useState('')
     const [dataUltimaAlteracao, setDataUltimaAlteracao] = useState('')
     const [ipUsuario, setIpUsuario] = useState('');
-   
 
     const { data: dadosTipoDocumentos = [], error: errorDocumento, isLoading: isLoadingDocumento } = useQuery(
         'tipoDocumento', 
@@ -32,7 +31,7 @@ export const useCadastrarCondicaoPagamento = ({handleClose, usuarioLogado, optio
     useEffect(() => {
         const dataAtual = getDataAtual();
         setDataUltimaAlteracao(dataAtual);
-    })
+    }, [])
 
     const getIPUsuario = async () => {
         let usuarioIP = null;
@@ -98,10 +97,10 @@ export const useCadastrarCondicaoPagamento = ({handleClose, usuarioLogado, optio
             NUNDIA10PAG: diasParcelas[9] || 0,
             NUNDIA11PAG: diasParcelas[10] || 0,
             NUNDIA12PAG: diasParcelas[11] || 0,
+            IDTPDOCUMENTO: toFloat(tipoDocumentoSelecionado.value),
             DTULTALTERACAO: dataUltimaAlteracao,
             STATIVO: statusSelecionado.value,
             QTDDIAS: toFloat(qtdDiasPagamento),
-            IDTPDOCUMENTO: toFloat(tipoDocumentoSelecionado.value),
         }
         try {
 

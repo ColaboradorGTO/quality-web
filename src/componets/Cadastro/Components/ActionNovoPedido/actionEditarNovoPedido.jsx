@@ -566,12 +566,12 @@ export const ActionEditarNovoPedido = ({dadosEditarPedido, dadosDetalhePedido}) 
       />
 
       <div id="resultadoListaPdido" style={{ backgroundColor: "#fff", padding: "15px" }}>
-        <ActionListaNovoPedido dadosEditarPedido={dadosEditarPedido} dadosDetalhe={dadosDetalhe} />
+        <ActionListaNovoPedido dadosVisualizarPedido={dadosEditarPedido} dadosDetalhe={dadosDetalhe} />
       </div>
 
-      {tabelaCadastroProduto && (
+      {/* {tabelaCadastroProduto && (
         <ActionListaProdutosParaCadastro dadosProdutosPedidos={dadosProdutosPedidos}/>
-      )}
+      )} */}
       
       <ActionPDFPedido 
         show={modalPedidoNota}
@@ -583,3 +583,4 @@ export const ActionEditarNovoPedido = ({dadosEditarPedido, dadosDetalhePedido}) 
     </Fragment>
   )
 }
+// 586 linhas

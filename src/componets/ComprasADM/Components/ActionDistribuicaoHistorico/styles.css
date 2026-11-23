@@ -5,3 +5,11 @@
     height: 100%; /* Ajuste a altura para caber na tela após a rotação */
     overflow: auto; /* Permite rolagem se necessário */
   }
+
+.td {
+  vertical-align: baseline;
+  text-align: center;
+  border: solid 1px #000 !important;
+  padding: 1px;
+  margin: 0px;
+}

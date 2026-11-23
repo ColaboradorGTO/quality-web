@@ -3,22 +3,28 @@ import Modal from 'react-bootstrap/Modal';
 import { HeaderModal } from "../../../../../Modais/HeaderModal/HeaderModal";
 import { FooterModal } from "../../../../../Modais/FooterModal/footerModal";
 import { ButtonTypeModal } from "../../../../../Buttons/ButtonTypeModal";
-import { ActionListaProdutosDestino } from "./actionListaProdutosDestino";
-import { ActionListaProdutosOrigem } from "./actionListaProdutosOrigem";
+import { ActionListaProdutosPromocao } from "./actionListaProdutosPromocao";
+import './styles.css'
 
-
-export const ActionDetalheProdutoPromocao = ({ show, handleClose, dadosProdutoOrigem, dadosProdutoDestino, dadosListaPromocao }) => {
+export const ActionDetalheProdutoPromocao = ({ 
+  show, 
+  handleClose, 
+  dadosListaPromocao,
+  dadosProdutoPromocao,
+  usuarioLogado,
+  optionsModulos 
+}) => {
 
   return (
     <Fragment>
       <Modal
         show={show}
         onHide={handleClose}
-        size="xl"
-        className="modal fade"
+        aria-hidden="true"
         tabIndex={-1}
         role="dialog"
-        aria-hidden="true"
+        size="xl"
+        className="modal fade"
       >
 
         <HeaderModal
@@ -27,18 +33,19 @@ export const ActionDetalheProdutoPromocao = ({ show, handleClose, dadosProdutoOr
           handleClose={handleClose}
         />
 
-        <Modal.Body>
-          <div className="row">
-
-            <ActionListaProdutosOrigem dadosProdutoOrigem={dadosProdutoOrigem} />
-            <ActionListaProdutosDestino dadosProdutoDestino={dadosProdutoDestino} />
-          </div>
+        <Modal.Body >
+          <ActionListaProdutosPromocao
+            dadosProdutoPromocao={dadosProdutoPromocao} 
+            handleClose={handleClose}
+            usuarioLogado={usuarioLogado}
+            optionsModulos={optionsModulos}
+          />
         </Modal.Body>
 
         <FooterModal
           ButtonTypeFechar={ButtonTypeModal}
           textButtonFechar={"Fechar"}
-          onButtonClickFechar={handleClose}
+          onClickButtonFechar={handleClose}
           corFechar={"secondary"}
         />
       </Modal>

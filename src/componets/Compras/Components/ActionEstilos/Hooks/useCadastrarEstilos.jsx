@@ -65,6 +65,7 @@ export const useCadastrarEstilos = ({ handleClose, handleClick, usuarioLogado, o
             IDGRUPOESTRUTURA: Number(subGrupoSelecionado?.value),
             STATIVO: statusSelecionado?.value,
         }
+
         try {
 
             const response = await post('/criarlistaEstilos', putData)

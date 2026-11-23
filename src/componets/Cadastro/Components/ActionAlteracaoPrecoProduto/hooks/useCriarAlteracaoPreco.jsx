@@ -363,9 +363,7 @@ export const useCriarAlteracaoPreco = ({
         }));
 
         try {
-            // TODO: ainda não existe rota POST em api/src/routes.js para criação de Alteração de Preço
-            // (hoje só existem GET /alteracoes-de-precos-resumo e PUT /alteracoes-de-precos-resumo/:id).
-            // Quando o endpoint de criação existir no backend, trocar o bloco abaixo por:
+
             const response = await post('/alteracao-preco-produto', dadosProd);
             const IDRESUMOALTERACAOPRECO = response.IDRESUMOALTERACAOPRECO;
             const ultimaAlteracao = await get(`/alteracoes-de-precos-resumo?idResumoAlteracao=${IDRESUMOALTERACAOPRECO}`);

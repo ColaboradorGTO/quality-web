@@ -5,7 +5,6 @@ import { InputSelectAction } from "../../../Inputs/InputSelectAction"
 import { ButtonType } from "../../../Buttons/ButtonType"
 
 
-
 export const ComprasActionAlteracaoPedido = () => {
   const [dataPesquisaInicio, setDataPesquisaInicio] = useState('');
   const [dataPesquisaFim, setDataPesquisaFim] = useState('');

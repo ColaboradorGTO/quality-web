@@ -70,7 +70,7 @@ export const useEditarFabricanteFornecedor = ({handleClose, dadosDetalheFabrican
         }
         try {
 
-            const response = await put('/fabricante-fornecedor/:id', postData)
+            const response = await put('/fabricante/:id', postData)
 
             Swal.fire({
                 position: 'center',

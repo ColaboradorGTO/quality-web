@@ -55,11 +55,18 @@ export const useCadastroCores = ({handleClose, usuarioLogado, refetchListaCores,
             });
             return;
         }
-        
+        //  Produçao
+        // const postData = {
+        //     IDGRUPOCOR: Number(grupoCorSelecionado.value),
+        //     DSCOR: descricao,
+        //     STATIVO: statusSelecionado.value
+        // }
+       
         const postData = {
             IDGRUPOCOR: Number(grupoCorSelecionado.value),
             DSCOR: descricao,
-            STATIVO: statusSelecionado.value
+            STATIVO: statusSelecionado.value,
+            IDFUNCIONARIO: parseInt(usuarioLogado.id)
         }
 
         try {
@@ -76,7 +83,7 @@ export const useCadastroCores = ({handleClose, usuarioLogado, refetchListaCores,
             }
             
             await post('/log-web', createtLog)
-            
+             
             Swal.fire({
                 position: 'center',
                 icon: 'success',

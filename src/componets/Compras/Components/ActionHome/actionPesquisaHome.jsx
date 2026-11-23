@@ -9,10 +9,11 @@ import { ButtonType } from "../../../Buttons/ButtonType";
 import { ActionListaPedidos } from "./actionListaPedidos";
 import { ActionPDFPedidoResumido } from "./comprasActionPDFPedidoResumido";
 import { ActionPDFPedidoDetalhado } from "./comprasActionPDFPedidoDetalhado";
-import { useFetchData } from "../../../../hooks/useFetchData";
 import { animacaoCarregamento, fecharAnimacaoCarregamento } from "../../../../utils/animationCarregamento";
 import { useQuery } from "react-query";
 import { ActionEditarPedido } from "./ActionEditarPedido/actionEditarPedido";
+import { ActionVisualizarPedido } from "./ActionVisualizar/actionVisualizarPedido";
+ 
 
 
 export const ActionPesquisaHome = ({ usuarioLogado, ID, menuFilhoAtual }) => {
@@ -22,14 +23,12 @@ export const ActionPesquisaHome = ({ usuarioLogado, ID, menuFilhoAtual }) => {
   const [actionPedidoDetalhado, setActionPedidoDetalhado] = useState(false)
   const [dataPesquisaInicio, setDataPesquisaInicio] = useState('');
   const [dataPesquisaFim, setDataPesquisaFim] = useState('');
-  const [dadosPedidoResumido, setDadosPedidoResumido] = useState([]);
   const [fornecedorSelecionado, setFornecedorSelecionado] = useState('');
   const [fabricanteSelecionado, setFabricanteSelecionado] = useState('');
   const [marcaSelecionada, setMarcaSelecionada] = useState('');
   const [compradorSelecionado, setCompradorSelecionado] = useState('');
   const [numeroPedido, setNumeroPedido] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(1000);
+  const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
   const [dadosVisualizarPedido, setDadosVisualizarPedido] = useState([]);
   const [dadosDetalhePedido, setDadosDetalhePedido] = useState([]);
   const [actionVisualizarPedido, setActionVisualizarPedido] = useState(false);
@@ -52,46 +51,73 @@ export const ActionPesquisaHome = ({ usuarioLogado, ID, menuFilhoAtual }) => {
     { enabled: Boolean(usuarioLogado?.id && menuFilhoAtual?.ID), staleTime: 5 * 60 * 1000, }
   );
 
-  const { data: dadosFonecedores = [], error: errorFornecedor, isLoading: isLoadingFornecedor } = useFetchData('fornecedores', '/fornecedores');
-  const { data: dadosFabricantes = [], error: errorFabricantes, isLoading: isLoadingFabricantes } = useFetchData('fabricantes', '/fabricantes');
-  const { data: dadosMarcas = [], error: errorMarcas, isLoading: isLoadingMarcas } = useFetchData('marcasLista', '/marcasLista');
-  const { data: dadosCompradores = [], error: errorCompradores, isLoading: isLoadingCompradores } = useFetchData('compradores', '/compradores');
+  const { data: dadosFonecedores = [], error: errorFornecedor, isLoading: isLoadingFornecedo } = useQuery(
+    'fornecedores',
+    async () => {
+      const response = await get(`/fornecedores`);
+
+      return response.data;
+    },
+    { enabled: true, staleTime: 60 * 60 * 1000, }
+  );
+
+  const { data: dadosFabricantes = [], error: errorFabricantes, isLoading: isLoadingFabricante } = useQuery(
+    'fabricantes',
+    async () => {
+      const response = await get(`/fabricantes`);
+
+      return response.data;
+    },
+    { enabled: true, staleTime: 60 * 60 * 1000, }
+  );
+
+  const { data: dadosMarcas = [], error: errorMarcas, isLoading: isLoadingMarcas } = useQuery(
+    'marcasLista',
+    async () => {
+      const response = await get(`/marcasLista`);
+
+      return response.data;
+    },
+    { enabled: true, staleTime: 60 * 60 * 1000, }
+  );
+
+  const { data: dadosCompradores = [], error: errorCompradores, isLoading: isLoadingCompradores } = useQuery(
+    'compradores',
+    async () => {
+      const response = await get(`/compradores`);
+
+      return response.data;
+    },
+    { enabled: true, staleTime: 60 * 60 * 1000, }
+  );
 
   const fetchListaPedidos = async () => {
+    const urlBase = `/lista-pedidos?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idFornPesquisa=${fornecedorSelecionado}&idMarcaPesquisa=${marcaSelecionada}&NuPedidoPesquisa=${numeroPedido}`;
+    let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
+    urlApi = urlApi.replace('&page=1', '').replace('page=1', '')
     try {
+      animacaoCarregamento('Carregando dados...', true);
 
-      const urlApi = `/lista-pedidos?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idFornPesquisa=${fornecedorSelecionado}&idMarcaPesquisa=${marcaSelecionada}&NuPedidoPesquisa=${numeroPedido}`;
-      const response = await get(urlApi);
+      const primeiraPagina = 1;
+      const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`);
+      const page = primeiraResposta.page || primeiraPagina;
+      const pageSize = primeiraResposta.pageSize || 1000;
+      const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
+      const totalPages = Math.ceil(totalRows / pageSize);
 
-      if (response.data.length && response.data.length === pageSize) {
-        let allData = [...response.data];
-        animacaoCarregamento(`Carregando... Página ${currentPage} de ${response.data.length}`, true);
+      let allData = [...(primeiraResposta.data || [])];
 
-        async function fetchNextPage(currentPage) {
-          try {
-            currentPage++;
-            const responseNextPage = await get(`${urlApi}&page=${currentPage}`);
-            if (responseNextPage.length) {
-              allData.push(...responseNextPage.data);
-              return fetchNextPage(currentPage);
-            } else {
-              return allData;
-            }
-          } catch (error) {
-            console.error('Erro ao buscar próxima página:', error);
-            throw error;
-          }
+      if (totalPages > 1) {
+        for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
+          animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true);
+          const responsePage = await get(`${urlApi}&page=${currentPage}`);
+          allData.push(...(responsePage.data || []));
         }
-
-        await fetchNextPage(currentPage);
-        return allData;
-      } else {
-
-        return response.data;
       }
 
+      return allData;
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Erro ao buscar dados da api:', error);
       throw error;
     } finally {
       fecharAnimacaoCarregamento();
@@ -99,46 +125,38 @@ export const ActionPesquisaHome = ({ usuarioLogado, ID, menuFilhoAtual }) => {
   };
 
   const { data: dadosPedidos = [], error: errorPedidos, isLoading: isLoadingPedidos, refetch: refetchListaPedidos } = useQuery(
-    ['lista-pedidos', dataPesquisaInicio, dataPesquisaFim, fornecedorSelecionado, marcaSelecionada, numeroPedido, currentPage, pageSize],
-    () => fetchListaPedidos(dataPesquisaInicio, dataPesquisaFim, fornecedorSelecionado, marcaSelecionada, numeroPedido, currentPage, pageSize),
-    { enabled: false, staleTime: 5 * 60 * 1000, cacheTime: 5 * 60 * 1000 }
+    ['lista-pedidos', ],
+    () => fetchListaPedidos(),
+    { enabled: true, staleTime: 60 * 60 * 1000 }
   )
 
   const fetchListaPedidosDetalhados = async () => {
+    const urlBase = `/listaPedidosDetalhado?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idFornecedor=${fornecedorSelecionado}&idMarca=${marcaSelecionada}&idPedido=${numeroPedido}`;
+    let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
+    urlApi = urlApi.replace('&page=1', '').replace('page=1', '')
     try {
+      animacaoCarregamento('Carregando dados...', true);
 
-      const urlApi = `/lista-pedidosDetalhado?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idFornecedor=${fornecedorSelecionado}&idMarca=${marcaSelecionada}&idPedido=${numeroPedido}`;
-      const response = await get(urlApi);
+      const primeiraPagina = 1;
+      const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`);
+      const page = primeiraResposta.page || primeiraPagina;
+      const pageSize = primeiraResposta.pageSize || 1000;
+      const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
+      const totalPages = Math.ceil(totalRows / pageSize);
 
-      if (response.data.length && response.data.length === pageSize) {
-        let allData = [...response.data];
-        animacaoCarregamento(`Carregando... Página ${currentPage} de ${response.data.length}`, true);
+      let allData = [...(primeiraResposta.data || [])];
 
-        async function fetchNextPage(currentPage) {
-          try {
-            currentPage++;
-            const responseNextPage = await get(`${urlApi}&page=${currentPage}`);
-            if (responseNextPage.length) {
-              allData.push(...responseNextPage.data);
-              return fetchNextPage(currentPage);
-            } else {
-              return allData;
-            }
-          } catch (error) {
-            console.error('Erro ao buscar próxima página:', error);
-            throw error;
-          }
+      if (totalPages > 1) {
+        for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
+          animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true);
+          const responsePage = await get(`${urlApi}&page=${currentPage}`);
+          allData.push(...(responsePage.data || []));
         }
-
-        await fetchNextPage(currentPage);
-        return allData;
-      } else {
-
-        return response.data;
       }
 
+      return allData;
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Erro ao buscar dados da api:', error);
       throw error;
     } finally {
       fecharAnimacaoCarregamento();
@@ -146,31 +164,17 @@ export const ActionPesquisaHome = ({ usuarioLogado, ID, menuFilhoAtual }) => {
   };
 
   const { data: dadosPedidosDetalhados = [], error: errorPedidosDetalhados, isLoading: isLoadingPedidosDetalhados, refetch: refetchListaPedidosDetalhados } = useQuery(
-    ['lista-pedidosDetalhado', dataPesquisaInicio, dataPesquisaFim, fornecedorSelecionado, marcaSelecionada, numeroPedido, currentPage, pageSize],
-    () => fetchListaPedidosDetalhados(dataPesquisaInicio, dataPesquisaFim, fornecedorSelecionado, marcaSelecionada, numeroPedido, currentPage, pageSize),
-    { enabled: false, staleTime: 5 * 60 * 1000, cacheTime: 5 * 60 * 1000 }
+    ['listaPedidosDetalhado', ],
+    () => fetchListaPedidosDetalhados(),
+    { enabled: false, staleTime: 60 * 60 * 1000, }
   )
 
-  const handleSelectFornecedor = (e) => {
-    setFornecedorSelecionado(e.value);
-  }
-
-  const handleSelectFabricante = (e) => {
-    setFabricanteSelecionado(e.value);
-  }
-
-  const handleSelectMarca = (e) => {
-    setMarcaSelecionada(e.value);
-  }
-
-  const handleSelectComprador = (e) => {
-    setCompradorSelecionado(e.value);
-  }
 
   const handleClick = () => {
     setActionListaPedidos(true);
     refetchListaPedidos();
   }
+  
   const handleClickRelatorioResumido = () => {
     setActionPedidoResumido(true);
     setActionListaPedidos(false);
@@ -186,6 +190,7 @@ export const ActionPesquisaHome = ({ usuarioLogado, ID, menuFilhoAtual }) => {
     refetchListaPedidosDetalhados();
   }
 
+  
   return (
     <Fragment>
 
@@ -216,7 +221,7 @@ export const ActionPesquisaHome = ({ usuarioLogado, ID, menuFilhoAtual }) => {
             }))
           ]}
           valueSelectMarcas={marcaSelecionada}
-          onChangeSelectMarcas={handleSelectMarca}
+          onChangeSelectMarcas={(e) => setMarcaSelecionada(e.value)}
 
           InputSelectEmpresaComponent={InputSelectAction}
           labelSelectEmpresa={"Fornecedor"}
@@ -228,7 +233,7 @@ export const ActionPesquisaHome = ({ usuarioLogado, ID, menuFilhoAtual }) => {
             }))
           ]}
           valueSelectEmpresa={fornecedorSelecionado}
-          onChangeSelectEmpresa={handleSelectFornecedor}
+          onChangeSelectEmpresa={(e) => setFornecedorSelecionado(e.value)}
 
           InputSelectGrupoComponent={InputSelectAction}
           labelSelectGrupo={"Comprador"}
@@ -240,7 +245,7 @@ export const ActionPesquisaHome = ({ usuarioLogado, ID, menuFilhoAtual }) => {
             }))
           ]}
           valueSelectGrupo={compradorSelecionado}
-          onChangeSelectGrupo={handleSelectComprador}
+          onChangeSelectGrupo={(e) => setCompradorSelecionado(e.value)}
 
 
           InputSelectFabricanteComponent={InputSelectAction}
@@ -253,7 +258,7 @@ export const ActionPesquisaHome = ({ usuarioLogado, ID, menuFilhoAtual }) => {
             }))
           ]}
           valueSelectFabricantes={fabricanteSelecionado}
-          onChangeSelectFabricantes={handleSelectFabricante}
+          onChangeSelectFabricantes={(e) => setFabricanteSelecionado(e.value)}
 
           InputFieldComponent={InputField}
           labelInputField={"Nº Pedido"}
@@ -308,18 +313,22 @@ export const ActionPesquisaHome = ({ usuarioLogado, ID, menuFilhoAtual }) => {
               dadosDetalhePedido={dadosDetalhePedido}
               setActionVisualizarPedido={setActionVisualizarPedido}
               actionVisualizarPedido={actionVisualizarPedido}
+              actionEditarPedido={actionEditarPedido}
+              setActionEditarPedido={setActionEditarPedido}
               setActionPedidoResumido={setActionPedidoResumido}
               actionHome={actionHome}
               setActionHome={setActionHome}
               actionListaPedidos={actionListaPedidos}
               setActionListaPedidos={setActionListaPedidos}
-
+              handleClick={handleClick}
+              usuarioLogado={usuarioLogado}
+              optionsModulos={optionsModulos}
             />
           </div>
         </Fragment>
       )}
 
-      {/* preciso que ActionPDFPedidoResumido esteja visivel as outras não esteja visivel quando for clicado no button resumo relatorio */}
+      
       {actionPedidoResumido && (
         <ActionPDFPedidoResumido dadosPedidos={dadosPedidos} />
       )}
@@ -328,20 +337,37 @@ export const ActionPesquisaHome = ({ usuarioLogado, ID, menuFilhoAtual }) => {
         <ActionPDFPedidoDetalhado dadosPedidosDetalhados={dadosPedidosDetalhados} />
       )}
 
-      {actionVisualizarPedido && (
+      {actionEditarPedido && (
 
         <ActionEditarPedido
           usuarioLogado={usuarioLogado}
-          ID={ID}
+          optionsModulos={optionsModulos}
+          dadosVisualizarPedido={dadosVisualizarPedido}
+          setDadosVisualizarPedido={setDadosVisualizarPedido}
+          dadosDetalhePedido={dadosDetalhePedido}
+          setDadosDetalhePedido={setDadosDetalhePedido}
+          actionEditarPedido={actionEditarPedido}
+          setActionEditarPedido={setActionEditarPedido}
+          setActionVisualizarPedido={setActionVisualizarPedido}
+          actionHome={actionHome}
+          setActionHome={setActionHome}
+        />
+      )}
+     
+      {actionVisualizarPedido && (
+
+        <ActionVisualizarPedido
+          usuarioLogado={usuarioLogado}
+          optionsModulos={optionsModulos}
           dadosVisualizarPedido={dadosVisualizarPedido}
           dadosDetalhePedido={dadosDetalhePedido}
           actionVisualizarPedido={actionVisualizarPedido}
           setActionVisualizarPedido={setActionVisualizarPedido}
+          setActionEditarPedido={setActionEditarPedido}
           actionHome={actionHome}
           setActionHome={setActionHome}
         />
       )}
     </Fragment>
   )
-
 }

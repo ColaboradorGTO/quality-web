@@ -5,38 +5,35 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 
-export const useExcluirImagemProduto = () => {
-    const [usuarioLogado, setUsuarioLogado] = useState(null);
+export const useExcluirImagemProduto = ({
+    usuarioLogado,
+    optionsModulos,
+    handleClick
+}) => {
     const [ipUsuario, setIpUsuario] = useState('');
 
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        const usuarioArmazenado = localStorage.getItem('usuario');
-
-        if (usuarioArmazenado) {
-            try {
-                const parsedUsuario = JSON.parse(usuarioArmazenado);
-                setUsuarioLogado(parsedUsuario);;
-            } catch (error) {
-                console.error('Erro ao parsear o usuário do localStorage:', error);
-            }
-        } else {
-            navigate('/');
-        }
-    }, [navigate]);
-
-    useEffect(() => {
-        getIPUsuario();
-    }, [usuarioLogado]);
 
     const getIPUsuario = async () => {
-        const response = await axios.get('http://ipwho.is/')
-        if (response.data) {
-            setIpUsuario(response.data.ip);
+        let usuarioIP = null;
+
+        try {
+            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
+            usuarioIP = ipWhoisData?.ip;
+        } catch (error) {
+            console.error("Erro ao buscar IP via ifconfig.me:", error);
         }
-        return response.data;
-    }
+
+        if (!usuarioIP) {
+        try {
+            const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
+            usuarioIP = ipifyData?.ip;
+        } catch (error) {
+            console.error("Erro ao buscar IP via ipify.org:", error);
+        }
+        }
+        setIpUsuario(usuarioIP);
+        return usuarioIP;
+    };
 
     const handleExcluir = async (IDIMAGEM, STATIVO) => {
         Swal.fire({
@@ -49,8 +46,8 @@ export const useExcluirImagemProduto = () => {
             cancelButtonText: 'Cancelar',
             confirmButtonText: 'OK',
             customClass: {
-              confirmButton: 'btn btn-primary',
-              cancelButton: 'btn btn-danger',
+              confirmButton: 'btn btn-primary mr-2',
+              cancelButton: 'btn btn-danger  ',
               loader: 'custom-loader'
             },
             buttonsStyling: false
@@ -61,20 +58,20 @@ export const useExcluirImagemProduto = () => {
                 IDIMAGEM: IDIMAGEM,
                 STATIVO: STATIVO
             }
-            const response = await put(`/imagemProdutos/:id`, putData)
+            const response = await put(`/atualiza-imagem/:id`, putData)
             const textDados = JSON.stringify(putData)
             let textoFuncao = 'COMPRAS/EXCLUSÃO IMAGEM PRODUTO'
-    
+            const ipUsuario = await getIPUsuario()
             const postData = {
                 IDFUNCIONARIO: usuarioLogado.id,
                 PATHFUNCAO: textoFuncao,
                 DADOS: textDados,
-                IP: ipUsuario
+                IP: ipUsuario || 'Indisponível'
             }
     
-            const responsePost = await post('/log-web', postData)
+            await post('/log-web', postData)
     
-            return responsePost.data;
+            return response.data;
             } catch (error) {
             Swal.fire({
                 title: 'Erro!',

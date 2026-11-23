@@ -1,13 +1,11 @@
 import { Fragment, useEffect, useState } from "react"
 import { InputField } from "../../../Buttons/Input"
-import { ButtonSearch } from "../../../Buttons/ButtonSearch"
 import { ActionMain } from "../../../Actions/actionMain"
 import { get } from "../../../../api/funcRequest"
 import { AiOutlineSearch } from "react-icons/ai"
 import { InputSelectAction } from "../../../Inputs/InputSelectAction"
 import { ActionListaProdutoEtiqueta } from "./actionListaProdutoEtiqueta"
 import { ButtonType } from "../../../Buttons/ButtonType"
-import { useFetchData } from "../../../../hooks/useFetchData"
 import { useQuery } from "react-query"
 import { animacaoCarregamento, fecharAnimacaoCarregamento, foiCancelado } from "../../../../utils/animationCarregamento"
 import { GoDownload } from "react-icons/go"
@@ -35,9 +33,6 @@ export const ActionPesquisaProdutoEtiqueta = ({ usuarioLogado }) => {
 
     getListaEmpresas()
   }, [])
-
-  // const { data: dadosEmpresas = [] } = useFetchData('empresas', '/empresas');
-  // const { data: dadosListaPrecos = [] } = useFetchData('lista-de-preco', '/lista-de-preco');
 
   const { data: dadosListaPrecos = [], error: errorListaPrecos, isLoading: isLoadingListaPrecos, refetch } = useQuery(
     'listas-de-precos-sap',

@@ -1,47 +1,49 @@
 import Swal from "sweetalert2";
 import { post, put } from "../../../../../api/funcRequest";
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import axios from "axios";
 
-
-export const useEditarProdutoImagem = () => {
-    const [usuarioLogado, setUsuarioLogado] = useState(null);
+export const useEditarProdutoImagem = ({usuarioLogado, optionsModulos, handleClick}) => {
     const [ipUsuario, setIpUsuario] = useState('');
-
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        const usuarioArmazenado = localStorage.getItem('usuario');
-
-        if (usuarioArmazenado) {
-            try {
-                const parsedUsuario = JSON.parse(usuarioArmazenado);
-                setUsuarioLogado(parsedUsuario);;
-            } catch (error) {
-                console.error('Erro ao parsear o usuário do localStorage:', error);
-            }
-        } else {
-            navigate('/');
-        }
-    }, [navigate]);
-
-    useEffect(() => {
-        getIPUsuario();
-    }, [usuarioLogado]);
-
+  
     const getIPUsuario = async () => {
-        const response = await axios.get('http://ipwho.is/')
-        if (response.data) {
-            setIpUsuario(response.data.ip);
+        let usuarioIP = null;
+
+        try {
+            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
+            usuarioIP = ipWhoisData?.ip;
+        } catch (error) {
+            console.error("Erro ao buscar IP via ifconfig.me:", error);
         }
-        return response.data;
-    }
+
+        if (!usuarioIP) {
+        try {
+            const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
+            usuarioIP = ipifyData?.ip;
+        } catch (error) {
+            console.error("Erro ao buscar IP via ipify.org:", error);
+        }
+        }
+        setIpUsuario(usuarioIP);
+        return usuarioIP;
+    };
 
     const handleExcluir = async (IDIMAGEM, STATIVO) => {
+        if(optionsModulos[0]?.ALTERAR == 'False') {
+            Swal.fire({
+                title: 'Erro!',
+                html: `${usuarioLogado?.NOFUNCIONARIO} <br/> Você não tem permissão para alterar um Produto Imagem!`,
+                icon: 'error',
+                customClass: {
+                    container: 'custom-swal',
+                },
+            });
+            return;
+        }
+
         Swal.fire({
             position: 'center',
-            title: `Certeza que Deseja Cancelar essa Imagem?`,
+            title: `Certeza que Deseja Cancelar esse Produto do Vinculo com a Imagem?`,
             text: 'Você não poderá reverter a ação!',
             icon: 'warning',
             showCancelButton: true,
@@ -52,36 +54,63 @@ export const useEditarProdutoImagem = () => {
               confirmButton: 'btn btn-primary',
               cancelButton: 'btn btn-danger',
               loader: 'custom-loader',
-              container: 'custom-swal'
+              container: 'custom-swal',
             },
             buttonsStyling: false
         }).then(async (result) => {
         if (result.isConfirmed) {
             try {
-            const putData = {
-                IDIMAGEM: IDIMAGEM,
-                STATIVO: STATIVO
-            }
-            const response = await put(`/produtosImagem/:id`, putData)
-            const textDados = JSON.stringify(putData)
-            let textoFuncao = 'COMPRAS/EXCLUSÃO IMAGEM PRODUTO'
-    
-            const postData = {
-                IDFUNCIONARIO: usuarioLogado.id,
-                PATHFUNCAO: textoFuncao,
-                DADOS: textDados,
-                IP: ipUsuario
-            }
-    
-            const responsePost = await post('/log-web', postData)
-    
-            return responsePost.data;
+                const putData = {
+                    IDIMAGEMPRODUTO: IDIMAGEM,
+                    STATIVO: STATIVO
+                }
+                const response = await put(`/atualizarProdutoImagem`, putData)
+                const textDados = JSON.stringify(putData)
+                let textoFuncao = 'COMPRAS/EXCLUSÃO IMAGEM PRODUTO'
+                const ipUsuario = await getIPUsuario();
+                const postData = {
+                    IDFUNCIONARIO: String(usuarioLogado.id),
+                    PATHFUNCAO: textoFuncao,
+                    DADOS: textDados,
+                    IP: ipUsuario || 'Indisponível'
+                }
+        
+                await post('/log-web', postData)
+                handleClick();
+                Swal.fire({
+                    title: 'Sucesso!',
+                    text: `Imagem do Produto excluída com sucesso!`,
+                    icon: 'success',
+                    customClass: {
+                        container: 'custom-swal',
+                    },
+                });
+                return response.data;
             } catch (error) {
-            Swal.fire({
-                title: 'Erro!',
-                text: `Erro ao excluir a Imagem do Produto: ${error}`,
-                icon: 'success'
-            });
+                const putData = {
+                    IDIMAGEMPRODUTO: IDIMAGEM,
+                    STATIVO: STATIVO
+                }
+                const textDados = JSON.stringify(putData)
+                let textoFuncao = 'COMPRAS/EXCLUSÃO IMAGEM PRODUTO'
+                const ipUsuario = await getIPUsuario();
+                const postData = {
+                    IDFUNCIONARIO: String(usuarioLogado.id),
+                    PATHFUNCAO: textoFuncao,
+                    DADOS: textDados,
+                    IP: ipUsuario || 'Indisponível'
+                }
+        
+                const responsePost = await post('/log-web', postData)
+                Swal.fire({
+                    title: 'Erro!',
+                    text: `Erro ao excluir a Imagem do Produto: ${error}`,
+                    icon: 'error',
+                    customClass: {
+                        container: 'custom-swal',
+                    },
+                });
+                return responsePost.data;
             }
         }
         })

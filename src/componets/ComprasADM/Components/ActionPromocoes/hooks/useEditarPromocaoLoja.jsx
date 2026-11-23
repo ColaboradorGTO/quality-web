@@ -6,7 +6,7 @@ import axios from "axios";
 import { getDataHoraAtual } from "../../../../../utils/dataAtual";
 
 
-export const useEditarPromocaoLoja = () => {
+export const useEditarPromocaoLoja = ({handleClose, usuarioLogado, optionsModulos}) => {
     const [dataInicio, setDataInicio] = useState('')
     const [dataFim, setDataFim] = useState('')
     const [descricao, setDescricao] = useState('')
@@ -18,7 +18,6 @@ export const useEditarPromocaoLoja = () => {
     const [fatorSelecionado, setFatorSelecionado] = useState('')
     const [valorDesconto, setValorDesconto] = useState('')
     const [percentual, setPercentual] = useState('')
-    const [usuarioLogado, setUsuarioLogado] = useState(null);
     const [ipUsuario, setIpUsuario] = useState('');
 
     const optionsAplicaocao = [
@@ -40,32 +39,27 @@ export const useEditarPromocaoLoja = () => {
         setDataFim(dataHoraAtual)
     })
     
-    useEffect(() => {
-        const usuarioArmazenado = localStorage.getItem('usuario');
-
-        if (usuarioArmazenado) {
-            try {
-                const parsedUsuario = JSON.parse(usuarioArmazenado);
-                setUsuarioLogado(parsedUsuario);;
-            } catch (error) {
-                console.error('Erro ao parsear o usuário do localStorage:', error);
-            }
-        } else {
-            navigate('/');
-        }
-    }, [navigate]);
-
-    useEffect(() => {
-        getIPUsuario();
-    }, [usuarioLogado]);
-
     const getIPUsuario = async () => {
-        const response = await axios.get('http://ipwho.is/')
-        if (response.data) {
-            setIpUsuario(response.data.ip);
+        let usuarioIP = null;
+
+        try {
+            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
+            usuarioIP = ipWhoisData?.ip;
+        } catch (error) {
+            console.error("Erro ao buscar IP via ipwho.is:", error);
         }
-        return response.data;
-    }
+
+        if (!usuarioIP) {
+            try {
+                const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
+                usuarioIP = ipifyData?.ip;
+            } catch (error) {
+                console.error("Erro ao buscar IP via ipify.org:", error);
+            }
+        }
+        setIpUsuario(usuarioIP);
+        return usuarioIP;
+    };
 
     const handleEditar = async () => {
         if (descricao == '') {
@@ -158,8 +152,7 @@ export const useEditarPromocaoLoja = () => {
             return false;
         }
 
-        const postData = [{
-
+        const putData = {
             DSPROMOCAOMARKETING: descricao,
             DTHORAINICIO: dataInicio,
             DTHORAFIM: dataFim,
@@ -174,10 +167,11 @@ export const useEditarPromocaoLoja = () => {
             STEMPRESAPROMO: 'False',
             STDETPROMOORIGEM: 'False',
             STDETPROMODESTINO: 'False',
-        }]
+        }
+
         try {
 
-            const response = await put('/criar-listaPromocoes', postData)
+            const response = await put('/lista-promocao/:id', putData)
 
             Swal.fire({
                 position: 'center',
@@ -190,21 +184,32 @@ export const useEditarPromocaoLoja = () => {
                 }
             })
 
-            const textDados = JSON.stringify(postData)
-            let textFuncao = 'COMPRASADM/CADASTRAR PROGRAMAÇÃO DE PROMOÇÕES';
-
+            const textDados = JSON.stringify(putData)
+            let textFuncao = 'COMPRASADM/EDITAR PROGRAMAÇÃO DE PROMOÇÕES';
+            const ipUsuario = await getIPUsuario();
             const createtLog = {
-                IDFUNCIONARIO: usuarioLogado.id,
+                IDFUNCIONARIO: String(usuarioLogado.id),
                 PATHFUNCAO: textFuncao,
                 DADOS: textDados,
-                IP: ipUsuario
+                IP: ipUsuario || 'Indisponível'
             }
 
-            const responseLog = await post('/log-web', createtLog)
+            await post('/log-web', createtLog)
 
 
-            return responseLog.data;
+            return response.data;
         } catch (error) {
+            let textFuncao = 'COMPRASADM/ERRO AO EDITAR PROGRAMAÇÃO DE PROMOÇÕES'
+            const textDados = JSON.stringify(putData)
+            const ipUsuario = await getIPUsuario();
+            const createtLog = {
+                IDFUNCIONARIO: String(usuarioLogado.id),
+                PATHFUNCAO: textFuncao,
+                DADOS: textDados,
+                IP: ipUsuario || 'Indisponível'
+            }
+            
+            const responseLog = await post('/log-web', createtLog)
             Swal.fire({
                 position: 'top-end',
                 icon: 'error',
@@ -216,16 +221,6 @@ export const useEditarPromocaoLoja = () => {
                 },
             });
             
-            let textFuncao = 'COMPRASADM/ERRO AO CADASTRAR PROGRAMAÇÃO DE PROMOÇÕES'
-
-            const createtLog = {
-                IDFUNCIONARIO: usuarioLogado.id,
-                PATHFUNCAO: textFuncao,
-                DADOS: 'Erro ao criar Cadastro de Programações de Promoções',
-                IP: ipUsuario
-            }
-
-            const responseLog = await post('/log-web', createtLog)
 
 
             console.error('Erro ao criar Cadastro de Progamação de Promoções:', error);

@@ -12,23 +12,32 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { toFloat } from '../../../../../utils/toFloat';
-import { ActionIncluirProdutoPedidoModal } from './IncluirProdutoPedido/actionIncluirProdutoPedidoModal';
 import { get } from '../../../../../api/funcRequest';
+import { useProdutoPedido } from './hook/useProdutoPedido';
+import Swal from 'sweetalert2';
+import { ActionEditarProdutoPedidoModal } from './EditarProdutoPedido/actionEditarProdutoPedidoModal';
 
-
-export const ActionListaPedidos = ({ 
+ 
+export const ActionListaPedidos = ({
   dadosDetalhePedido,
+  setDadosDetalhePedido,
   dadosVisualizarPedido,
+  setDadosVisualizarPedido,
   setModalIncluirProdutoPedido,
   usuarioLogado,
-  optionsModulos
+  optionsModulos,
+  dadosUltimosPedidos,
+  checkboxIntermediario,
+  idResumoPedido,
+  setIdResumoPedido
 }) => {
   const [globalFilterValue, setGlobalFilterValue] = useState('');
   const [rowSelection, setRowSelection] = useState(null);
   const [modalEditar, setModalEditar] = useState(false);
-  const [dadosDetalheGradePedido, setDadosDetalheGradePedido] = useState();
+  const [dadosPedidosDetalhe, setDadosPedidosDetalhe] = useState([]);
+  const [dadosDetalheGradePedido, setDadosDetalheGradePedido] = useState([]);
   const dataTableRef = useRef();
-
+  const { handleAtivarCancelarProdutoPedido } = useProdutoPedido({ usuarioLogado, status, setDadosDetalhePedido, setDadosVisualizarPedido });
 
   const onGlobalFilterChange = (e) => {
     setGlobalFilterValue(e.target.value);
@@ -66,7 +75,7 @@ export const ActionListaPedidos = ({
   };
 
   const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(dados);
+    const worksheet = XLSX.utils.json_to_sheet(dadosListaPedidos);
     const workbook = XLSX.utils.book_new();
     const header = ['Nº', 'Categoria', 'Qtd', 'Unid', 'Ref', 'Descrição', 'Estrutura', 'Cor', 'Desc I', 'Desc II', 'Desc III', 'Vr Unit', 'Vr Venda', 'Total'];
     worksheet['!cols'] = [
@@ -101,7 +110,7 @@ export const ActionListaPedidos = ({
   const dadosListaPedidos = dadosDetalhePedido?.map((item, index) => {
     let contador = index + 1;
     let setorAndamento = 'COMPRAS';
-
+  
     return {
       contador,
       IDDETPEDIDO: item.IDDETPEDIDO,
@@ -117,15 +126,21 @@ export const ActionListaPedidos = ({
       VRVENDADETALHEPEDIDO: toFloat(item.VRVENDADETALHEPEDIDO),
       STTRANSFORMADO: item.STTRANSFORMADO,
       DSSUBGRUPOESTRUTURA: item.DSSUBGRUPOESTRUTURA,
+      DSTIPOTECIDO: item.DSTIPOTECIDO,
       DSCOR: item.DSCOR,
+      OBSPRODUTO: item.OBSPRODUTO,
       IDANDAMENTO: item.IDANDAMENTO,
       VRTOTALDETALHEPEDIDO: toFloat(item.VRTOTALDETALHEPEDIDO),
       IDPEDIDO: item.IDPEDIDO,
+      IDDETALHEPEDIDOPRIMARIO: toFloat(item.IDDETALHEPEDIDOPRIMARIO) || 0,
+      DETALHEPEDIDOGRADE: item.DETALHEPEDIDOGRADE,
+      DSTAMANHO: item.DSTAMANHO,
+      INDICETAMANHO: item.INDICETAMANHO,
       setorAndamento
     }
   });
 
-  
+
   const colunasPedidos = [
     {
       field: 'contador',
@@ -166,13 +181,55 @@ export const ActionListaPedidos = ({
     {
       field: 'DSSUBGRUPOESTRUTURA',
       header: 'Estrutura',
-      body: row => <th>{row.DSSUBGRUPOESTRUTURA}</th>, 
+      body: row => <th>{row.DSSUBGRUPOESTRUTURA}</th>,
+      sortable: true,
+    },
+    {
+      field: 'DSTIPOTECIDO',
+      header: 'Mat. Fab.',
+      body: row => <th>{row.DSTIPOTECIDO}</th>,
       sortable: true,
     },
     {
       field: 'DSCOR',
       header: 'Cor',
       body: row => <th>{row.DSCOR}</th>,
+      sortable: true,
+    },
+    {
+      field: 'OBSPRODUTO',
+      header: 'Obs',
+      body: row => <th>{row.OBSPRODUTO}</th>,
+      sortable: true,
+    },
+    {
+      field: 'INDICETAMANHO',
+      header: 'Grade',
+      body: row => {
+        const listaGradeamento = Array.isArray(row.DETALHEPEDIDOGRADE) ? row.DETALHEPEDIDOGRADE : [];
+
+        if (listaGradeamento.length === 0) {
+          return (
+            <div style={{ flex: 1, textAlign: 'center', border: '1px solid #000', padding: '2px' }}>
+              <b>{row.DSTAMANHO?.trim?.() || ''}</b>
+              <br />
+              <b>{row.INDICETAMANHO || ''}</b>
+            </div>
+          )
+        }
+
+        return (
+          <div style={{ width: '100%', display: 'flex', alignItems: 'stretch', fontSize: '10px', overflow: 'hidden' }}>
+            {listaGradeamento.map((item, index) => (
+              <div key={`${item?.DSTAMANHO || 'tam'}-${item?.INDICETAMANHO || index}-${index}`} style={{ flex: 1, textAlign: 'center', border: '1px solid #000', padding: '2px' }}>
+                <b>{item?.DSTAMANHO?.trim?.() || ''}</b>
+                <br />
+                <b>{item?.INDICETAMANHO || ''}</b>
+              </div>
+            ))}
+          </div>
+        )
+      },
       sortable: true,
     },
     {
@@ -212,112 +269,149 @@ export const ActionListaPedidos = ({
       sortable: true,
     },
     {
-      field: 'STTRANSFORMADO',
-      header: 'Opções',
-      body: (row) => {
-        if (row.setorAndamento == 'COMPRAS' && row.STTRANSFORMADO == 'False') {
-          return (
-            <div className="p-1 "
-            style={{ justifyContent: "space-between", width: "100%", display: "flex" }}
-            >
-             
-              <div className="p-1">
-                <ButtonTable
-                  Icon={CiEdit}
-                  cor={"warning"}
-                  iconColor={"white"}
-                  iconSize={20}
-                  width="30px"
-                  height="30px"
-                  onClickButton={() => handleClickEditarPedido(row)}
-                  titleButton={"Editar Item do Pedido"}
-                />
-              </div>
-              <div className="p-1">
-                <ButtonTable
-                  Icon={AiOutlineDelete}
-                  cor={"danger"}
-                  iconColor={"white"}
-                  iconSize={20}
-                  width="30px"
-                  height="30px"
-                  onClickButton
-                  titleButton={"Cancelar Item do Pedido"}
-                />
-              </div>
-            </div>
-          )
-        } else if (row.setorAndamento == 'COMPRAS' && row.STTRANSFORMADO == 'True') {
-          return (
-            <div className="p-1 "
-              style={{ justifyContent: "space-between", width: "150px", display: "flex" }}
-            >
-              <div className="p-1">
-                <ButtonTable
-                  Icon={CiEdit}
-                  cor={"warning"}
-                  iconColor={"white"}
-                  iconSize={20}
-                  width="30px"
-                  height="30px"
-                  onClickButton={() => handleClickEditarPedido(row)}
-                  titleButton={"Editar Item do Pedido 11"}
-                />
-              </div>
-            </div>
-          )
-        } else {
-          if(row.STTRANSFORMADO == 'True' && row.setorAndamento == 'CADASTRO') { 
-            return (
-              <div className="p-1 "
-                style={{ justifyContent: "space-between", width: "150px", display: "flex" }}
-              >
-                <div className="p-1">
-                  <ButtonTable
-                    Icon={MdOutlineLockOpen}
-                    cor={"success"}
-                    iconColor={"white"}
-                    iconSize={20}
-                    width="30px"
-                    height="30px"
-                    onClickButton
-                    titleButton={"Item Não Pode Ser Alterado ou Cancelado, Produtos Criados!"}
-                  />
-                </div>
-              </div>
-            )
-          } else {
-            return (
-              <div className="p-1 "
-                style={{ justifyContent: "space-between", width: "150px", display: "flex" }}
-              >
-                <div className="p-1">
-                  <ButtonTable
-                    Icon={MdOutlineLockOpen}
-                    cor={"danger"}
-                    iconColor={"white"}
-                    iconSize={20}
-                    width="30px"
-                    height="30px"
-                    onClickButton
-                    titleButton={"Item Não Pode Ser Alterado ou Cancelado"}
-                    disabledBTN={true}
-                  />
-                </div>
-              </div>
-            )
-          }
-        } 
-      },
-    },
-  ]
+  field: 'STTRANSFORMADO',
+  header: 'Opções',
+  body: (row) => {
+
+    // 🔹 Normalizações (CRÍTICO)
+    const tpSetorAndamento = String(dadosVisualizarPedido[0]?.DSSETOR || '')
+      .trim()
+      .toUpperCase();
    
+    const isTransformado =
+      String(row.STTRANSFORMADO).toUpperCase() === 'TRUE';
+
+    const idDetalhePedido = row.IDDETPEDIDO;
+    const idPedidoDetalhe = row.IDPEDIDO;
+
+    const idDetalhePedidoPrimario = Number(row.IDDETALHEPEDIDOPRIMARIO || 0);
+
+    const idResumoPedidoPrimario = Number(
+      dadosVisualizarPedido[0]?.IDRESUMOPEDIDOPRIMARIO || 0
+    );
+
+    let btnOpcoes = null;
+
+    // 🔹 MESMA LÓGICA DO JQUERY
+    if (tpSetorAndamento === 'COMPRAS' && !isTransformado) {
+      btnOpcoes = (
+        <div style={{ display: "flex", gap: "5px" }}>
+          <ButtonTable
+            Icon={CiEdit}
+            cor={"warning"}
+            iconColor={"white"}
+            iconSize={20}
+            width="30px"
+            height="30px"
+            onClickButton={() => handleClickEditarPedido(row)}
+            titleButton={"Editar Item do Pedido"}
+          />
+
+          <ButtonTable
+            Icon={AiOutlineDelete}
+            cor={"danger"}
+            iconColor={"white"}
+            iconSize={20}
+            width="30px"
+            height="30px"
+            onClickButton={() =>
+              handleAtivarCancelarProdutoPedido(row, 'True')
+            }
+            titleButton={"Cancelar Item do Pedido"}
+          />
+        </div>
+      );
+    } else if (tpSetorAndamento === 'COMPRAS' && isTransformado) {
+      btnOpcoes = (
+        <div>
+          <ButtonTable
+            Icon={CiEdit}
+            cor={"warning"}
+            iconColor={"white"}
+            iconSize={20}
+            width="30px"
+            height="30px"
+            onClickButton={() => handleClickEditarPedido(row)}
+            titleButton={"Editar Item do Pedido"}
+          />
+        </div>
+      );
+    } else {
+      if (isTransformado && tpSetorAndamento === 'CADASTRO') {
+        btnOpcoes = (
+          <ButtonTable
+            Icon={MdOutlineLockOpen}
+            cor={"success"}
+            iconColor={"white"}
+            iconSize={20}
+            width="30px"
+            height="30px"
+            titleButton={
+              "Item Não Pode Ser Alterado ou Cancelado, Produtos Criados!"
+            }
+            disabledBTN={true}
+          />
+        );
+      } else {
+        btnOpcoes = (
+          <ButtonTable
+            Icon={MdOutlineLockOpen}
+            cor={"danger"}
+            iconColor={"white"}
+            iconSize={20}
+            width="30px"
+            height="30px"
+            titleButton={
+              "Item Não Pode Ser Alterado ou Cancelado"
+            }
+            disabledBTN={true}
+          />
+        );
+      }
+    }
+
+    // 🔴 OVERRIDE FINAL (igual jQuery)
+    if (idDetalhePedidoPrimario > 0) {
+      btnOpcoes = (
+        <ButtonTable
+          Icon={MdOutlineLockOpen}
+          cor={"danger"}
+          iconColor={"white"}
+          iconSize={20}
+          width="30px"
+          height="30px"
+          onClickButton={() =>
+            Swal.fire({
+              icon: 'info',
+              title: 'Atenção',
+              text: `Item só pode ser manipulado através do Pedido Primário: ${idResumoPedidoPrimario}`
+            })
+          }
+          titleButton={`Item só pode ser manipulado através do Pedido Primário: ${idResumoPedidoPrimario}`}
+          style={{ animation: 'blink 1.5s infinite ease-in-out' }}
+        />
+      );
+    }
+
+    return btnOpcoes;
+  },
+}
+  ]
+
   const handleEditarPedido = async (IDDETPEDIDO) => {
     try {
-      
-      const response = await get(`/lista-detalhe-pedidos-grade?idDetalhePedido=${IDDETPEDIDO}`)
-      if (response.data ) {
+
+      const response = await get(`/lista-detalhe-pedidos?idDetalhePedido=${IDDETPEDIDO}`)
+      const responseDetalheGrade = await get(`/lista-detalhe-pedidos-grade?idDetalhePedido=${IDDETPEDIDO}`)
+      if (response.data && responseDetalheGrade.data) {
         setDadosDetalheGradePedido(response.data)
+        setDadosPedidosDetalhe(responseDetalheGrade.data)
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro',
+          text: 'Não foi possível obter os detalhes do pedido para edição.',
+        })
       }
     } catch (error) {
       console.log(error, "não foi possivel pegar os dados da tabela ")
@@ -328,14 +422,18 @@ export const ActionListaPedidos = ({
     if (row.IDDETPEDIDO) {
       handleEditarPedido(row.IDDETPEDIDO)
       setModalEditar(true)
-      // setModalIncluirProdutoPedido(true)
     }
   }
 
+
   return (
     <Fragment>
-      <div className="">
-        
+      <div className="panel">
+        <div className="panel-hdr"> 
+
+         {/* <h2>LISTA DOS ITENS DO PEDIDO Nº: {dadosVisualizarPedido[0]?.IDPEDIDO}</h2> */}
+         <h2>LISTA DOS ITENS DO PEDIDO Nº: {idResumoPedido}</h2>
+        </div>
         <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
           <HeaderTable
             globalFilterValue={globalFilterValue}
@@ -346,19 +444,19 @@ export const ActionListaPedidos = ({
           />
 
         </div>
-        <div className="card mb-4" ref={dataTableRef}>
+        <div className="panel-container" ref={dataTableRef}>
           <DataTable
             title="Pedidos"
             value={dadosListaPedidos}
-            globalFilterValue={globalFilterValue}
+            globalFilter={globalFilterValue}
             size="small"
             sortOrder={-1}
             paginator={true}
             rows={10}
             rowsPerPageOptions={[10, 20, 50, 100]}
-            // selectionMode="single"
-            // selection={rowSelection}
-            // onSelectionChange={(e) => setRowSelection(e.value)}
+            selectionMode="single"
+            selection={rowSelection}
+            onSelectionChange={(e) => setRowSelection(e.value)}
             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
             filterDisplay="menu"
@@ -385,14 +483,19 @@ export const ActionListaPedidos = ({
         </div>
       </div>
 
-      <ActionIncluirProdutoPedidoModal 
+      <ActionEditarProdutoPedidoModal
         show={modalEditar}
         handleClose={() => setModalEditar(false)}
         usuarioLogado={usuarioLogado}
         optionsModulos={optionsModulos}
         dadosDetalheGradePedido={dadosDetalheGradePedido}
+        dadosPedidosDetalhe={dadosPedidosDetalhe}
         dadosDetalhePedido={dadosDetalhePedido}
+        setDadosDetalhePedido={setDadosDetalhePedido}
         dadosVisualizarPedido={dadosVisualizarPedido}
+        dadosUltimosPedidos={dadosUltimosPedidos}
+        checkboxIntermediario={checkboxIntermediario}
+        handleClickEditarPedido={handleClickEditarPedido}
       />
     </Fragment>
   )

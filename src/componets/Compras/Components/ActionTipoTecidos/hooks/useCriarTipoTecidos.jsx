@@ -45,9 +45,15 @@ export const useCriarTipoTecido = ({ handleClose, usuarioLogado, optionsModulos 
       return;
     }
 
+    // const postData = {
+    //   DSTIPOTECIDO: descricao,
+    //   STATIVO: statusSelecionado?.value,
+    // }
+
     const postData = {
       DSTIPOTECIDO: descricao,
       STATIVO: statusSelecionado?.value,
+      IDFUNCIONARIO: parseInt(usuarioLogado.id),
     }
 
     try {
@@ -61,7 +67,7 @@ export const useCriarTipoTecido = ({ handleClose, usuarioLogado, optionsModulos 
         IDFUNCIONARIO: String(usuarioLogado.id),
         PATHFUNCAO: textoFuncao,
         DADOS: textDados,
-        IP: ipUsuario || 'IP não disponível'
+        IP: ipUsuario || 'Indisponível'
       }
 
       await post('/log-web', createData)
@@ -86,7 +92,7 @@ export const useCriarTipoTecido = ({ handleClose, usuarioLogado, optionsModulos 
         IDFUNCIONARIO: String(usuarioLogado.id),
         PATHFUNCAO: textoFuncao,
         DADOS: textDados,
-        IP: ipUsuario || 'IP não disponível'
+        IP: ipUsuario || 'Indisponível'
       }
 
       const responsePost = await post('/log-web', createData)

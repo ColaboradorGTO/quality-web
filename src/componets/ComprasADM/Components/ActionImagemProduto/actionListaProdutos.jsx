@@ -13,12 +13,19 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { useExcluirImagemProduto } from "./hooks/useExluirImagemProduto";
+import Swal from "sweetalert2";
 
-export const ActionListaImagemProduto = ({ dadosProdutos }) => {
-  const { handleExcluir } = useExcluirImagemProduto();
+export const ActionListaProduto = ({ 
+  dadosProdutos,
+  usuarioLogado,
+  optionsModulos,
+  handleClick
+ }) => {
+  const { handleExcluir } = useExcluirImagemProduto({usuarioLogado, optionsModulos, handleClick});
   const [dadosDetalheProdutos, setDadosDetalheProdutos] = useState([])
   const [modalDetalhe, setModalDetalhe] = useState(false)
   const [globalFilterValue, setGlobalFilterValue] = useState('');
+  const [rowSelection, setRowSelection] = useState(null);
   const dataTableRef = useRef();
 
   const onGlobalFilterChange = (e) => {
@@ -118,17 +125,19 @@ export const ActionListaImagemProduto = ({ dadosProdutos }) => {
       header: 'Opções',
       body: row => {
         return (
-          <div className="p-1 "
-            style={{ justifyContent: "space-between", display: "flex" }}
+          <div className=""
+            style={{ justifyContent: "", display: "flex" }}
           >
             <div className="p-1">
               <ButtonTable
                 Icon={GrView}
                 cor={"info"}
                 iconColor={"white"}
-                iconSize={18}
                 onClickButton={(e) => clickDetalheProduto(row)}
                 titleButton={"Detalher Produtos da Imagem"}
+                iconSize={25}
+                width="35px"
+                height="35px"
               />
             </div>
 
@@ -137,14 +146,13 @@ export const ActionListaImagemProduto = ({ dadosProdutos }) => {
                 Icon={BsTrash3}
                 cor={"danger"}
                 iconColor={"white"}
-                iconSize={18}
                 onClickButton={() => handleExcluir(row.IDIMAGEM, 'False')}
                 titleButton={"Cancelar Imagem do Produto"}
+                iconSize={25}
+                width="35px"
+                height="35px"
               />
             </div>
-
-
-
           </div>
         )
       },
@@ -161,24 +169,38 @@ export const ActionListaImagemProduto = ({ dadosProdutos }) => {
 
   const handleDetalhe = async (IDIMAGEM) => {
     try {
+      Swal.fire({
+        title: 'Carregando...',
+        html: 'Carregando dados do produtos',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
       const response = await get(`/listaProdutosImagem?idImagem=${IDIMAGEM}`);
-      setDadosDetalheProdutos(response.data);
-      setModalDetalhe(true);
+      if(response.data && response.data.length > 0) {
+        Swal.close();
+        setDadosDetalheProdutos(response.data);
+        setModalDetalhe(true);
+        return response.data;
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro',
+          text: 'Detalhes do produto não encontrados.',
+          customClass: {
+            container: 'custom-swal',
+          }
+        })
+        return;
+      }
     } catch (error) {
       console.error(error);
-    }
-  }
-
-  const handleClickDelete = (row) => {
-    if (row && row.IDIMAGEMPRODUTO) {
-      handleDelete(row.IDIMAGEMPRODUTO);
     }
   }
 
 
   return (
     <Fragment>
-      <div className="panel" style={{ marginTop: "5rem" }}>
+      <div className="panel" >
         <div className="panel-hdr">
           <h2>Relatório dos Produtos </h2>
         </div>
@@ -196,12 +218,18 @@ export const ActionListaImagemProduto = ({ dadosProdutos }) => {
           <DataTable
             title="Vendas por Loja"
             value={dados}
-            size="small"
             globalFilter={globalFilterValue}
+            size="small"
+            selectionMode="single"
+            selection={rowSelection}
+            onSelectionChange={(e) =>  setRowSelection(e.value)}
             sortOrder={-1}
             paginator={true}
             rows={10}
             rowsPerPageOptions={[10, 20, 50, 100, dados.length]}
+            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
+            filterDisplay="menu"
             showGridlines
             stripedRows
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado </div>}
@@ -229,7 +257,11 @@ export const ActionListaImagemProduto = ({ dadosProdutos }) => {
         show={modalDetalhe}
         handleClose={() => setModalDetalhe(false)}
         dadosDetalheProdutos={dadosDetalheProdutos}
+        usuarioLogado={usuarioLogado}
+        optionsModulos={optionsModulos}
+        handleClick={handleClick}
       />
+      
     </Fragment>
   )
 }

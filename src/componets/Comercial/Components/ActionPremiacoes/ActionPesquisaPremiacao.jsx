@@ -19,7 +19,7 @@ import { ActionListaProvador } from "./actionListaProvador";
 import { ActionListaSubGerente } from "./actionListaSubGerente";
 import { ActionCadastroModalPremiacao } from "./ActionModalCadastroPremiacao/actionModalCadastro";
 import { useQuery } from "react-query";
-import { animacaoCarregamento, fecharAnimacaoCarregamento, foiCancelado } from "../../../../utils/animationCarregamento";
+import { animacaoCarregamento, fecharAnimacaoCarregamento } from "../../../../utils/animationCarregamento";
 import Swal from "sweetalert2";
 
 export const ActionPesquisaPremiacoes = ({ usuarioLogado }) => {
@@ -76,36 +76,29 @@ export const ActionPesquisaPremiacoes = ({ usuarioLogado }) => {
     const urlBase = `/listaPremiacoes`;
     let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
     urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
-    const controller = new AbortController();
-    let allData = [];
-
     try {
-      animacaoCarregamento('Carregando dados...', true, true, () => controller.abort());
+      animacaoCarregamento('Carregando dados...', true);
 
       const primeiraPagina = 1;
-      const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`, { signal: controller.signal });
+      const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`);
       const page = primeiraResposta.page || primeiraPagina;
       const pageSize = primeiraResposta.pageSize || 1000;
       const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
       const totalPages = Math.ceil(totalRows / pageSize);
 
-      allData = [...(primeiraResposta.data || [])];
+      let allData = [...(primeiraResposta.data || [])];
 
       if (totalPages > 1) {
         for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
-          if (foiCancelado()) break;
-          animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true, true);
-          const responsePage = await get(`${urlApi}&page=${currentPage}`, { signal: controller.signal });
+          animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true);
+          const responsePage = await get(`${urlApi}&page=${currentPage}`);
           allData.push(...(responsePage.data || []));
         }
       }
 
       return allData;
     } catch (error) {
-      if (error.code === 'ERR_CANCELED') {
-        return allData;
-      }
-      console.error('Erro ao buscar dados:', error);
+      console.error('Erro ao buscar dados da api:', error);
       throw error;
     } finally {
       fecharAnimacaoCarregamento();
@@ -133,7 +126,7 @@ export const ActionPesquisaPremiacoes = ({ usuarioLogado }) => {
   };
 
   const handleCadastrar = () => {
-    if (marcaSelecionada == '') {
+    if(marcaSelecionada == '') {
       Swal.fire({
         title: 'Marca Não Selecionada',
         html: `Por favor, selecione uma marca para cadastrar a premiação!`,
@@ -148,8 +141,10 @@ export const ActionPesquisaPremiacoes = ({ usuarioLogado }) => {
     } else {
 
       setModalVisivel(true);
-    }
+    } 
   }
+
+ 
 
   return (
 
@@ -181,8 +176,8 @@ export const ActionPesquisaPremiacoes = ({ usuarioLogado }) => {
           }))
         ]}
         labelSelectEmpresa={"Marca"}
-        valueSelectEmpresa={marcaSelecionada}
-
+        valueSelectEmpresa={marcaSelecionada} 
+        
         onChangeSelectEmpresa={(e) => {
           setMarcaSelecionada(e);
           setMarcas(e.value)
@@ -277,7 +272,7 @@ export const ActionPesquisaPremiacoes = ({ usuarioLogado }) => {
         optionsModulos={optionsModulos}
         marcaSelecionada={marcaSelecionada}
       />
-
+   
     </Fragment>
   )
 }

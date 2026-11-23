@@ -8,10 +8,16 @@ export const ActionIncluirProdutoPedidoModal = ({
   handleClose,
   usuarioLogado,
   optionsModulos,
-  fornecedorSelecionado,
   tipoPedidoSelecionado,
   marcaSelecionada,
-  idResumoPedido
+  fornecedorSelecionado,
+  idResumoPedido,
+  dadosUltimosPedidos,
+  dadosDetalhePedido,
+  refetchListaProdutoPedidos,
+  setDadosDetalhe,
+  checkboxIntermediario,
+  checked
 }) => {
 
   return (
@@ -21,7 +27,7 @@ export const ActionIncluirProdutoPedidoModal = ({
         show={show}
         onHide={handleClose}
         class="modal-content"
-        size="lg"
+        size="xl"
         centered
       >
 
@@ -37,10 +43,16 @@ export const ActionIncluirProdutoPedidoModal = ({
             handleClose={handleClose}
             usuarioLogado={usuarioLogado}
             optionsModulos={optionsModulos}
-            fornecedorSelecionado={fornecedorSelecionado}
             tipoPedidoSelecionado={tipoPedidoSelecionado}
             marcaSelecionada={marcaSelecionada}
+            fornecedorSelecionado={fornecedorSelecionado}
             idResumoPedido={idResumoPedido}
+            dadosUltimosPedidos={dadosUltimosPedidos}
+            dadosDetalhePedido={dadosDetalhePedido}
+            refetchListaProdutoPedidos={refetchListaProdutoPedidos}
+            setDadosDetalhe={setDadosDetalhe}
+            checkboxIntermediario={checkboxIntermediario}
+            checked={checked}
          />
           
         </Modal.Body>

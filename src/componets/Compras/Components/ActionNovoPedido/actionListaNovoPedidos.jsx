@@ -18,6 +18,7 @@ import { GrView } from 'react-icons/gr';
 export const ActionListaNovoPedidos = ({dadosVisualizarPedido, dadosDetalhe }) => {
   const [actionListaPedidos, setActionListaPedidos] = useState(true)
   const [actionPedidoResumido, setActionPedidoResumido] = useState(true)
+  const [rowSelection, setRowSelection] = useState(null);
   const [globalFilterValue, setGlobalFilterValue] = useState('');
   const dataTableRef = useRef();
   const navigate = useNavigate();
@@ -330,10 +331,16 @@ export const ActionListaNovoPedidos = ({dadosVisualizarPedido, dadosDetalhe }) =
           value={dadosListaPedidos}
           size="small"
           globalFilter={globalFilterValue}
+          selectionMode="single"
+          selection={rowSelection}
+          onSelectionChange={(e) => setRowSelection(e.value)}
           sortOrder={-1}
           paginator={true}
           rows={10}
           rowsPerPageOptions={[10, 20, 50, 100, dadosListaPedidos.length]}
+          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
+          filterDisplay="menu"
           showGridlines
           stripedRows
           emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado </div>}

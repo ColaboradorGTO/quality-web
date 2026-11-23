@@ -56,12 +56,12 @@ export const HeadTitleComponent = ({
           {tittuloComponent}
         </h1>
           <h2
-            style={{fontSize: "1.5rem", fontWeight: "400", color: "#22282d"}}
+            style={{fontSize: "1.5rem", fontWeight: "500", color: "#22282d"}}
           >
             {nomeLoja}
           </h2>
 
-          <button
+          {/* <button
             type={typeButton}
             className={`${btnClasses} ${className}`}
             onClick={() => onClickButtonTypeHeader()}
@@ -71,7 +71,7 @@ export const HeadTitleComponent = ({
             {Icon && <Icon size={iconSize}  color={iconColor} />}
 
             {textButtonHeader}
-          </button>
+          </button> */}
       </div>
     </Fragment>
   )

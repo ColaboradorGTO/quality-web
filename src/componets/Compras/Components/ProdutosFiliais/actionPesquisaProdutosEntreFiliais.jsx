@@ -106,7 +106,7 @@ export const ActionPesquisaProdutosEntreFiliais = () => {
       <ActionMain
         linkComponentAnterior={["Home"]}
         linkComponent={[""]}
-        title="Etiquetagem"
+        title="Lista de Produtos"
         subTitle="Nome da Loja"
 
         InputSelectEmpresaComponent={InputSelectAction}

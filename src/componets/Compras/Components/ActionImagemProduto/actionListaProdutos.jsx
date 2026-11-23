@@ -126,7 +126,7 @@ export const ActionListaProduto = ({
       body: row => {
         return (
           <div className="p-1 "
-            style={{ justifyContent: "space-between", display: "flex" }}
+            style={{ justifyContent: "space-around", display: "flex" }}
           >
             <div className="p-1">
               <ButtonTable

@@ -1,6 +1,5 @@
 import { Fragment, useEffect, useState } from "react";
 import { ActionMain } from "../../../Actions/actionMain"
-import { ButtonSearch } from "../../../Buttons/ButtonSearch"
 import { InputField } from "../../../Buttons/Input"
 import { getDataAtual, getDataDoisMesesAtras } from "../../../../utils/dataAtual";
 import { get } from "../../../../api/funcRequest";
@@ -14,8 +13,10 @@ import { ActionListaProdutosCriados } from "./actionListaProdutosCriados";
 import { useFetchData } from "../../../../hooks/useFetchData";
 import { useQuery } from "react-query";
 import { animacaoCarregamento, fecharAnimacaoCarregamento } from "../../../../utils/animationCarregamento";
+import { ActionVisualizarPedido } from "./ActionVisualizar/actionVisualizarPedido";
 
-export const ActionComprasADMHome = () => {
+
+export const ActionComprasADMHome = ({usuarioLogado}) => {
   const [actionHome, setActionHome] = useState(true)
   const [actionBTN, setActionBTN] = useState(true)
   const [actionListaPedidos, setActionListaPedidos] = useState(true)
@@ -30,8 +31,11 @@ export const ActionComprasADMHome = () => {
   const [compradorSelecionado, setCompradorSelecionado] = useState('');
   const [numeroPedido, setNumeroPedido] = useState('');
   const [actionProdutosCriados, setActionProdutosCriados] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(1000);
+  const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
+  const [dadosVisualizarPedido, setDadosVisualizarPedido] = useState([]);
+  const [dadosDetalhePedido, setDadosDetalhePedido] = useState([]);
+  const [actionVisualizarPedido, setActionVisualizarPedido] = useState(false);
+  const [actionEditarPedido, setActionEditarPedido] = useState(false);
 
   useEffect(() => {
     const dataInicial = getDataDoisMesesAtras();
@@ -41,46 +45,57 @@ export const ActionComprasADMHome = () => {
 
   }, [])
 
+  useEffect(() => {
+    const menuSalvo = localStorage.getItem('menuFilhoSelecionado');
+    if (menuSalvo) {
+      const menuParsed = JSON.parse(menuSalvo);
+      setMenuFilhoAtual(menuParsed);
+    }
+  }, []);
+
+  
+  const { data: optionsModulos = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
+    ['menus-usuario-excecao', menuFilhoAtual?.ID],
+    async () => {
+      const response = await get(`/menus-usuario-excecao?idUsuario=${usuarioLogado?.id}&idMenuFilho=${menuFilhoAtual?.ID}`);
+  
+      return response.data;
+    },
+    { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000, }
+  );
+
   const { data: dadosFonecedores = [], error: errorFornecedor, isLoading: isLoadingFornecedor } = useFetchData('fornecedores', '/fornecedores');
   const { data: dadosFabricantes = [], error: errorFabricantes, isLoading: isLoadingFabricantes } = useFetchData('fabricantes', '/fabricantes');
   const { data: dadosMarcas = [], error: errorMarcas, isLoading: isLoadingMarcas } = useFetchData('marcasLista', '/marcasLista');
   const { data: dadosCompradores = [], error: errorCompradores, isLoading: isLoadingCompradores } = useFetchData('compradores', '/compradores');
 
   const fetchListaPedidos = async () => {
+    const urlBase = `/lista-pedidos?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idFornPesquisa=${fornecedorSelecionado}&idMarcaPesquisa=${marcaSelecionada}&NuPedidoPesquisa=${numeroPedido}`;
+    let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
+    urlApi = urlApi.replace('&page=1', '').replace('page=1', '')
     try {
+      animacaoCarregamento('Carregando dados...', true);
 
-      const urlApi = `/lista-pedidos?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idFornPesquisa=${fornecedorSelecionado}&idMarcaPesquisa=${marcaSelecionada}&NuPedidoPesquisa=${numeroPedido}`;
-      const response = await get(urlApi);
+      const primeiraPagina = 1;
+      const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`);
+      const page = primeiraResposta.page || primeiraPagina;
+      const pageSize = primeiraResposta.pageSize || 1000;
+      const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
+      const totalPages = Math.ceil(totalRows / pageSize);
 
-      if (response.data.length && response.data.length === pageSize) {
-        let allData = [...response.data];
-        animacaoCarregamento(`Carregando... Página ${currentPage} de ${response.data.length}`, true);
+      let allData = [...(primeiraResposta.data || [])];
 
-        async function fetchNextPage(currentPage) {
-          try {
-            currentPage++;
-            const responseNextPage = await get(`${urlApi}&page=${currentPage}`);
-            if (responseNextPage.length) {
-              allData.push(...responseNextPage.data);
-              return fetchNextPage(currentPage);
-            } else {
-              return allData;
-            }
-          } catch (error) {
-            console.error('Erro ao buscar próxima página:', error);
-            throw error;
-          }
+      if (totalPages > 1) {
+        for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
+          animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true);
+          const responsePage = await get(`${urlApi}&page=${currentPage}`);
+          allData.push(...(responsePage.data || []));
         }
-
-        await fetchNextPage(currentPage);
-        return allData;
-      } else {
-
-        return response.data;
       }
 
+      return allData;
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Erro ao buscar dados da api:', error);
       throw error;
     } finally {
       fecharAnimacaoCarregamento();
@@ -88,46 +103,38 @@ export const ActionComprasADMHome = () => {
   };
 
   const { data: dadosPedidos = [], error: errorPedidos, isLoading: isLoadingPedidos, refetch: refetchListaPedidos } = useQuery(
-    ['lista-pedidos', dataPesquisaInicio, dataPesquisaFim, fornecedorSelecionado, marcaSelecionada, numeroPedido, currentPage, pageSize],
-    () => fetchListaPedidos(dataPesquisaInicio, dataPesquisaFim, fornecedorSelecionado, marcaSelecionada, numeroPedido, currentPage, pageSize),
-    { enabled: false, staleTime: 5 * 60 * 1000, cacheTime: 5 * 60 * 1000 }
+    ['lista-pedidos', ],
+    () => fetchListaPedidos(),
+    { enabled:true, staleTime: 5 * 60 * 1000 }
   )
 
   const fetchListaPedidosDetalhados = async () => {
+    const urlBase = `/lista-pedidosDetalhado?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idFornecedor=${fornecedorSelecionado}&idMarca=${marcaSelecionada}&idPedido=${numeroPedido}`;
+    let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
+    urlApi = urlApi.replace('&page=1', '').replace('page=1', '')
     try {
+      animacaoCarregamento('Carregando dados...', true);
 
-      const urlApi = `/lista-pedidosDetalhado?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idFornecedor=${fornecedorSelecionado}&idMarca=${marcaSelecionada}&idPedido=${numeroPedido}`;
-      const response = await get(urlApi);
+      const primeiraPagina = 1;
+      const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`);
+      const page = primeiraResposta.page || primeiraPagina;
+      const pageSize = primeiraResposta.pageSize || 1000;
+      const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
+      const totalPages = Math.ceil(totalRows / pageSize);
 
-      if (response.data.length && response.data.length === pageSize) {
-        let allData = [...response.data];
-        animacaoCarregamento(`Carregando... Página ${currentPage} de ${response.data.length}`, true);
+      let allData = [...(primeiraResposta.data || [])];
 
-        async function fetchNextPage(currentPage) {
-          try {
-            currentPage++;
-            const responseNextPage = await get(`${urlApi}&page=${currentPage}`);
-            if (responseNextPage.length) {
-              allData.push(...responseNextPage.data);
-              return fetchNextPage(currentPage);
-            } else {
-              return allData;
-            }
-          } catch (error) {
-            console.error('Erro ao buscar próxima página:', error);
-            throw error;
-          }
+      if (totalPages > 1) {
+        for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
+          animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true);
+          const responsePage = await get(`${urlApi}&page=${currentPage}`);
+          allData.push(...(responsePage.data || []));
         }
-
-        await fetchNextPage(currentPage);
-        return allData;
-      } else {
-
-        return response.data;
       }
 
+      return allData;
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Erro ao buscar dados da api:', error);
       throw error;
     } finally {
       fecharAnimacaoCarregamento();
@@ -135,46 +142,38 @@ export const ActionComprasADMHome = () => {
   };
 
   const { data: dadosPedidosDetalhados = [], error: errorPedidosDetalhados, isLoading: isLoadingPedidosDetalhados, refetch: refetchListaPedidosDetalhados } = useQuery(
-    ['lista-pedidosDetalhado', dataPesquisaInicio, dataPesquisaFim, fornecedorSelecionado, marcaSelecionada, numeroPedido, currentPage, pageSize],
-    () => fetchListaPedidosDetalhados(dataPesquisaInicio, dataPesquisaFim, fornecedorSelecionado, marcaSelecionada, numeroPedido, currentPage, pageSize),
-    { enabled: false, staleTime: 5 * 60 * 1000, cacheTime: 5 * 60 * 1000 }
+    ['lista-pedidosDetalhado', ],
+    () => fetchListaPedidosDetalhados(),
+    { enabled: false, staleTime: 5 * 60 * 1000 }
   )
 
   const fetchListaProdutos = async () => {
+    const urlBase = `/cadastrar-produto-Pedido?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}`;
+    let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
+    urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
     try {
+      animacaoCarregamento('Carregando dados...', true);
 
-      const urlApi = `/cadastrar-produto-Pedido?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}`;
-      const response = await get(urlApi);
+      const primeiraPagina = 1;
+      const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`);
+      const page = primeiraResposta.page || primeiraPagina;
+      const pageSize = primeiraResposta.pageSize || 1000;
+      const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
+      const totalPages = Math.ceil(totalRows / pageSize);
 
-      if (response.data.length && response.data.length === pageSize) {
-        let allData = [...response.data];
-        animacaoCarregamento(`Carregando... Página ${currentPage} de ${response.data.length}`, true);
+      let allData = [...(primeiraResposta.data || [])];
 
-        async function fetchNextPage(currentPage) {
-          try {
-            currentPage++;
-            const responseNextPage = await get(`${urlApi}&page=${currentPage}`);
-            if (responseNextPage.length) {
-              allData.push(...responseNextPage.data);
-              return fetchNextPage(currentPage);
-            } else {
-              return allData;
-            }
-          } catch (error) {
-            console.error('Erro ao buscar próxima página:', error);
-            throw error;
-          }
+      if (totalPages > 1) {
+        for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
+          animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true);
+          const responsePage = await get(`${urlApi}&page=${currentPage}`);
+          allData.push(...(responsePage.data || []));
         }
-
-        await fetchNextPage(currentPage);
-        return allData;
-      } else {
-
-        return response.data;
       }
 
+      return allData;
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Erro ao buscar dados da api:', error);
       throw error;
     } finally {
       fecharAnimacaoCarregamento();
@@ -182,9 +181,9 @@ export const ActionComprasADMHome = () => {
   };
 
   const { data: dadosProdutosCriados = [], error: errorProdutos, isLoading: isLoadingProdutos, refetch: refetchListaProdutos } = useQuery(
-    ['cadastrar-produto-Pedido', dataPesquisaInicio, dataPesquisaFim, fornecedorSelecionado, marcaSelecionada, numeroPedido, currentPage, pageSize],
-    () => fetchListaProdutos(dataPesquisaInicio, dataPesquisaFim, fornecedorSelecionado, marcaSelecionada, numeroPedido, currentPage, pageSize),
-    { enabled: false, staleTime: 5 * 60 * 1000, cacheTime: 5 * 60 * 1000 }
+    ['cadastrar-produto-Pedido', ],
+    () => fetchListaProdutos(),
+    { enabled: false, staleTime: 5 * 60 * 1000 }
   )
 
   const handleSelectFornecedor = (e) => {
@@ -215,7 +214,7 @@ export const ActionComprasADMHome = () => {
     setActionProdutosCriados(false);
     setActionHome(false);
     setActionBTN(false);
-    getListaPedidos();
+    refetchListaPedidos();
   }
 
   const handleClickRelatorioDetalhado = () => {
@@ -264,7 +263,7 @@ export const ActionComprasADMHome = () => {
             { value: '', label: 'Selecione a Marca' },
             ...dadosMarcas.map(item => ({
               value: item.IDGRUPOEMPRESARIAL,
-              label: item.GRUPOEMPRESARIAL
+              label: item.DSGRUPOEMPRESARIAL
             }))
           ]}
           valueSelectMarcas={marcaSelecionada}
@@ -317,59 +316,54 @@ export const ActionComprasADMHome = () => {
           linkNomeSearch={"Atualizar Dados"}
           onButtonClickSearch={handleClick}
           corSearch={"primary"}
+          IconSearch={AiOutlineSearch}
+
+          ButtonTypeCadastro={ButtonType}
+          linkNome={"Relatório Resumido"}
+          corCadastro={"warning"}
+          onButtonClickCadastro={handleClickRelatorioResumido}
+          IconCadastro={AiOutlineSearch}
+
+          ButtonTypeCancelar={ButtonType}
+          linkCancelar={"Relatório Detalhado"}
+          corCancelar={"secondary"}
+          onButtonClickCancelar={handleClickRelatorioDetalhado}
+          IconCancelar={AiOutlineSearch}
+
+          ButtonTypeVendasEstrutura={ButtonType}
+          linkNomeVendasEstrutura={"Produtos Criados"}
+          corVendasEstrutura={"info"}
+          onButtonClickVendasEstrutura={handleClickRelatorioProdutosCriados}
+          iconVendasEstrutura={AiOutlineSearch}
         />
       )}
 
-      {actionBTN && (
-        <div className="panel" style={{ width: "100%", marginTop: '10rem' }}>
-          <div className="panel-hdr">
-            <h2>
-              Lista de Pedidos <span class="fw-300"><i>Por Período</i></span>
-            </h2>
-          </div>
-          <div className="row p-1 mb-2" style={{ width: '75%' }}>
-
-
-            <ButtonType
-              textButton="Relatório Resumido"
-              onClickButtonType={handleClickRelatorioResumido}
-              cor="primary"
-              Icon={AiOutlineSearch}
-              iconColor="white"
-              iconSize={16}
-            />
-
-            <ButtonType
-              Icon={AiOutlineSearch}
-              iconSize={16}
-              textButton="Relatório Detalhado"
-              cor="secondary"
-              tipo="button"
-              onClickButtonType={handleClickRelatorioDetalhado}
-            />
-
-
-            <ButtonType
-              textButton="Produtos Criados"
-              onClickButtonType={handleClickRelatorioProdutosCriados}
-              cor="info"
-              Icon={AiOutlineSearch}
-              iconColor="white"
-              iconSize={16}
-            />
-
-
-          </div>
-        </div>
-      )}
 
       {!actionPedidoResumido && actionListaPedidos && actionHome && (
         <Fragment>
-          <ActionListaPedidos dadosPedidos={dadosPedidos} />
+          <ActionListaPedidos 
+            dadosPedidos={dadosPedidos}
+            dadosVisualizarPedido={dadosVisualizarPedido}
+            setDadosVisualizarPedido={setDadosVisualizarPedido}
+            setDadosDetalhePedido={setDadosDetalhePedido}
+            dadosDetalhePedido={dadosDetalhePedido}
+            setActionVisualizarPedido={setActionVisualizarPedido}
+            actionVisualizarPedido={actionVisualizarPedido}
+            actionEditarPedido={actionEditarPedido}
+            setActionEditarPedido={setActionEditarPedido}
+            setActionPedidoResumido={setActionPedidoResumido}
+            actionHome={actionHome}
+            setActionHome={setActionHome}
+            actionListaPedidos={actionListaPedidos}
+            setActionListaPedidos={setActionListaPedidos}
+            handleClick={handleClick}
+            usuarioLogado={usuarioLogado}
+            optionsModulos={optionsModulos}
+            
+          />
         </Fragment>
       )}
 
-      {/* preciso que ActionPDFPedidoResumido esteja visivel as outras não esteja visivel quando for clicado no button resumo relatorio */}
       {actionPedidoResumido && (
         <ActionPDFPedidoResumido dadosPedidoResumido={dadosPedidoResumido} />
       )}
@@ -381,7 +375,30 @@ export const ActionComprasADMHome = () => {
       {actionProdutosCriados && (
         <ActionListaProdutosCriados dadosProdutosCriados={dadosProdutosCriados} />
       )}
+
+
+      {actionVisualizarPedido && (
+      
+        <ActionVisualizarPedido
+          dadosPedidos={dadosPedidos}
+          dadosVisualizarPedido={dadosVisualizarPedido}
+          setDadosVisualizarPedido={setDadosVisualizarPedido}
+          setDadosDetalhePedido={setDadosDetalhePedido}
+          dadosDetalhePedido={dadosDetalhePedido}
+          setActionVisualizarPedido={setActionVisualizarPedido}
+          actionVisualizarPedido={actionVisualizarPedido}
+          actionEditarPedido={actionEditarPedido}
+          setActionEditarPedido={setActionEditarPedido}
+          setActionPedidoResumido={setActionPedidoResumido}
+          actionHome={actionHome}
+          setActionHome={setActionHome}
+          actionListaPedidos={actionListaPedidos}
+          setActionListaPedidos={setActionListaPedidos}
+          handleClick={handleClick}
+          usuarioLogado={usuarioLogado}
+          optionsModulos={optionsModulos}
+        />
+      )}
     </Fragment>
   )
-
 }

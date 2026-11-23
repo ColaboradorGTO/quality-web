@@ -10,9 +10,17 @@ export const ActionIncluirProdutoPedidoModal = ({
   optionsModulos,
   dadosDetalheGradePedido,
   dadosDetalhePedido,
-  dadosVisualizarPedido
+  setDadosDetalhePedido,
+  dadosPedidosDetalhe,
+  dadosVisualizarPedido,
+  dadosUltimosPedidos,
+  checkboxIntermediario,
+  handleClickEditarPedido
 }) => {
-  
+  const stReposicao = dadosVisualizarPedido?.[0]?.STREPOSICAO;
+  const tipoCategoriaPedido = dadosVisualizarPedido?.[0]?.TIPOCATEGORIAPEDIDO || dadosVisualizarPedido?.[0]?.TIPOPEDIDO || "tipoPedido";
+  const idResumoPedido = dadosVisualizarPedido?.[0]?.IDPEDIDO;
+
   return (
 
     <Fragment>
@@ -23,14 +31,17 @@ export const ActionIncluirProdutoPedidoModal = ({
         size="lg"
         centered
       >
+  
+        <header className="p-3"> 
+          <h3 className="modal-title"> Pedido de Produtos{" "} {stReposicao === "True" ? ( 
+              <> de <label className="text-danger">REPOSIÇÃO</label> </> ) :
+              ( <label className="text-info">NOVOS</label> )}
+              {" "} para {tipoCategoriaPedido} Nº <b>{idResumoPedido}</b> 
+              <small className="m-0 text-muted"> Edição de Itens do Pedido </small> 
+          </h3> 
+        </header>
 
-        <HeaderModal
-          title={`Pedido para VESTUARIO Nº ${dadosDetalhePedido[0]?.IDPEDIDO}`}
-          subTitle={"Inclusão de Itens do Pedido"}
-          handleClose={handleClose}
-        />
-
-        <Modal.Body>
+        <Modal.Body>  
 
           <FormularioIncluirProdutoPedido 
             handleClose={handleClose}
@@ -38,7 +49,11 @@ export const ActionIncluirProdutoPedidoModal = ({
             optionsModulos={optionsModulos}
             dadosDetalheGradePedido={dadosDetalheGradePedido}
             dadosDetalhePedido={dadosDetalhePedido}
+            setDadosDetalhePedido={setDadosDetalhePedido}
+            dadosPedidosDetalhe={dadosPedidosDetalhe}
             dadosVisualizarPedido={dadosVisualizarPedido}
+            checkboxIntermediario={checkboxIntermediario}
+            handleClickEditarPedido={handleClickEditarPedido}
          />
           
         </Modal.Body>

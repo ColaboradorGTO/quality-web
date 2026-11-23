@@ -2,8 +2,50 @@ import { Fragment } from "react";
 import { HeadTitleComponent } from "../HeadTitle";
 import { ButtonType } from "../Buttons/ButtonType";
 
+import { AiOutlineUser } from "react-icons/ai";
+import { BsGem, BsGlobe } from "react-icons/bs";
+import { FaCashRegister, FaRegLightbulb } from "react-icons/fa";
+import { MdOutlinePayment } from "react-icons/md";
+import { FaRegMoneyBillAlt } from "react-icons/fa";
 
 export const ActionMainNovoPedido = ({
+  cardVoucher,
+  cardVendas,
+  cardCliente,
+  cardTicketMedio,
+  cardDespesas,
+  cardEcommerce,
+  cardCartao,
+
+
+  valorVendas,
+  nomeVendas,
+  valorTicketMedio,
+  nomeTicketMedio,
+  valorDespesas,
+  nomeDespesas,
+  valorEcommerce,
+  nomeEcommerce,
+  valorCartao,
+  nomeCartao,
+  nomeCliente,
+  numeroCliente,
+  valorVoucher,
+  nomeVoucher,
+  
+  Icon,
+  IconVendas,
+  IconNumeroCliente,
+  IconTicketMedio,
+  IconValorDespesas,
+  IconValorEcommerce,
+  IconCartao,
+  IconVoucher,
+
+
+  iconSize,
+  iconColor,
+
   title,
   subTitle,
   linkComponentAnterior,
@@ -129,36 +171,57 @@ export const ActionMainNovoPedido = ({
   valueCheckBoxPedido,
   onChangeCheckBoxPedido,
   readOnlyCheckBoxTipoPedido,
+  disabledCheckBoxTipoPedido,
 
   ButtonSearchComponent,
   ButtonTypeCadastro,
   ButtonTypeCancelar,
   ButtonTypePedido,
   ButtonTypeTXT,
+  ButtonTypeClonar,
+  ButtonTypeRetornar,
+  ButtonTypeMigrar,
+  ButtonTypeAtualizar,
 
   linkNomeSearch,
   linkNome,
   linkCancelar,
   linkPedido,
   linkTXT,
+  linkClonar,
+  linkRetornar,
+  linkMigrar,
+  linkAtualizar,
 
   onButtonClickSearch,
   onButtonClickCadastro,
   onButtonClickCancelar,
   onButtonClickPedido,
   onButtonClickTXT,
+  onButtonClickClonar,
+  onButtonClickRetornar,
+  onButtonClickMigrar,
+  onButtonClickAtualizar,
 
   corSearch,
   corCadastro,
   corCancelar,
   corPedido,
   corTXT,
+  corClonar,
+  corRetornar,
+  corMigrar,
+  corAtualizar,
 
   IconSearch,
   IconCadastro,
   IconCancelar,
   IconPedido,
   IconTXT,
+  IconClonar,
+  IconRetornar,
+  IconMigrar,
+  IconAtualizar,
 
   readOnlyDTInicio,
   readOnlyDTFim,
@@ -190,7 +253,19 @@ export const ActionMainNovoPedido = ({
   defaultValueSelectTipoPedido,
   defaultValueSelectTransportadora,
   defaultValueSelectFrete,
- 
+  Alerta,
+  typeAlerta,
+  messageAlerta,
+  indiceAlerta,
+  styleSearch,
+  styleCadastro,
+  styleCancelar,
+  stylePedido,
+  styleTXT,
+  styleClonar,
+  styleRetornar,
+  styleMigrar,
+  styleAtualizar
 
 }) => {
   const handleSubmit = (e) => {
@@ -205,6 +280,166 @@ export const ActionMainNovoPedido = ({
           linkComponentAnterior={linkComponentAnterior}
           linkComponent={linkComponent}
         />
+
+        <Fragment>
+      <div className="row">
+        <div className="col-sm-6 col-lg-4 col-xl-4 col-xxl-3" >
+          {cardVendas && (
+            <div className="p-3 bg-primary-300 rounded overflow-hidden position-relative text-white mb-g">
+              <div className="vendaLoja">
+                <h3 className="display-4 d-block l-h-n m-0 fw-500">
+                  {valorVendas}
+                  <small className="m-0 l-h-n"> {nomeVendas}</small>
+                </h3>
+              </div>
+              {/* <AiOutlineUser size={100} style={{ fontSize: "8rem" }} className="fa position-absolute pos-right pos-bottom opacity-15 mb-n1 mr-n1" /> */}
+              { IconVendas && 
+                <IconVendas 
+                  className="position-absolute pos-right pos-bottom opacity-15 mb-n1 mr-n1"
+                  size={iconSize}  
+                  color={iconColor} 
+                />
+              }
+            </div>
+
+          )}
+        </div>
+
+        <div className="col-sm-6 col-lg-4 col-xl-4 col-xxl-3 " >
+          {cardTicketMedio && (
+            <div className="p-3 bg-success-200 rounded overflow-hidden position-relative text-white mb-g">
+              <div className="ticketMedioVenda">
+                <h3 className="display-4 d-block l-h-n m-0 fw-500">
+                  {valorTicketMedio}
+                  <small className="m-0 l-h-n">{nomeTicketMedio}</small>
+                </h3>
+              </div>
+              {/* <FaRegLightbulb className="fal fa-lightbulb position-absolute pos-right pos-bottom opacity-15 mb-n1 mr-n1" size={100} style={{ fontSize: "6rem" }} /> */}
+              { IconTicketMedio && 
+                <IconTicketMedio 
+                  className="position-absolute pos-right pos-bottom opacity-15 mb-n1 mr-n1"
+                  size={iconSize}  
+                  color={iconColor} 
+                />
+              }
+            </div>
+
+          )}
+        </div>
+
+        <div className="col-sm-6 col-lg-4 col-xl-4 col-xxl-3 " >
+          {cardCliente && (
+            <div className="p-3 bg-warning-400 rounded overflow-hidden position-relative text-white mb-g">
+              <div className="quantidadeClienteVenda">
+                <h3 className="display-4 d-block l-h-n m-0 fw-500">
+                  {numeroCliente}
+                  <small className="m-0 l-h-n"> {nomeCliente}</small>
+                </h3>
+              </div>
+              {/* <BsGem className="fal  position-absolute pos-right pos-bottom opacity-15 mb-n1 mr-n1" size={100} style={{ fontSize: "8rem" }} /> */}
+              { IconNumeroCliente && 
+                <IconNumeroCliente 
+                  className="position-absolute pos-right pos-bottom opacity-15 mb-n1 mr-n1"
+                  size={iconSize}  
+                  color={iconColor} 
+                />
+              }
+            </div>
+
+          )}
+        </div>
+
+        <div className="col-sm-6 col-lg-4 col-xl-4 col-xxl-3 " >
+          {cardDespesas && (
+            <div className="p-3 bg-info-200 rounded overflow-hidden position-relative text-white mb-g">
+              <div className="despesaLoja">
+                <h3 className="display-4 d-block l-h-n m-0 fw-500">
+                    {valorDespesas}
+                  <small className="m-0 l-h-n"> {nomeDespesas} </small>
+                </h3>
+              </div>
+              {/* <FaCashRegister className="fal fa-lightbulb position-absolute pos-right pos-bottom opacity-15 mb-n1 mr-n1" size={100} style={{ fontSize: "6rem" }} /> */}
+              { IconValorDespesas && 
+                <IconValorDespesas 
+                  className="position-absolute pos-right pos-bottom opacity-15 mb-n1 mr-n1"
+                  size={iconSize}  
+                  color={iconColor} 
+                />
+              }
+            </div>
+
+          )}
+        </div>
+
+        <div className="col-sm-6 col-lg-4 col-xl-4 col-xxl-3 " >
+          {cardEcommerce && ( 
+            <div className="p-3 bg-danger-200 rounded overflow-hidden position-relative text-white mb-g">
+              <div className="ecommerce">
+                <h3 className="display-4 d-block l-h-n m-0 fw-500">
+                  {valorEcommerce}
+                  <small className="m-0 l-h-n">  {nomeEcommerce}</small>
+                </h3>
+              </div>
+              {/* <BsGlobe className="fal fa-lightbulb position-absolute pos-right pos-bottom opacity-15 mb-n1 mr-n1" size={100} style={{ fontSize: "6rem" }}  /> */}
+              { IconValorEcommerce && 
+                <IconValorEcommerce 
+                  className="position-absolute pos-right pos-bottom opacity-15 mb-n1 mr-n1"
+                  size={iconSize}  
+                  color={iconColor} 
+                />
+              }
+            </div>
+
+          )}
+        </div>
+
+        <div className="col-sm-6 col-lg-4 col-xl-4 col-xxl-3 " >
+          {cardCartao && (
+            <div className="p-3 bg-warning-400 rounded overflow-hidden position-relative text-white mb-g">
+              <div className="ecommerce">
+                <h3 className="display-4 d-block l-h-n m-0 fw-500">
+                  {valorCartao}
+                  <small className="m-0 l-h-n">  {nomeCartao}</small>
+                </h3>
+              </div>
+              {/* <MdOutlinePayment className="fal fa-lightbulb position-absolute pos-right pos-bottom opacity-15 mb-n1 mr-n1" size={100} style={{ fontSize: "6rem" }}  /> */}
+              { IconCartao && 
+                <IconCartao 
+                  className="position-absolute pos-right pos-bottom opacity-15 mb-n1 mr-n1"
+                  size={iconSize}  
+                  color={iconColor} 
+                />
+              }
+            </div>
+
+          )}
+        </div>
+        <div className="col-sm-6 col-lg-4 col-xl-4 col-xxl-3">
+          {cardVoucher && (
+            <div className="p-3 bg-info-200 rounded overflow-hidden position-relative text-white mb-g">
+              <div className="ecommerce">
+                <h3 className="display-4 d-block l-h-n m-0 fw-500">
+                  {valorVoucher}
+                  <small className="m-0 l-h-n">  {nomeVoucher}</small>
+                </h3>
+              </div>
+              {/* <MdOutlinePayment className="fal fa-lightbulb position-absolute pos-right pos-bottom opacity-15 mb-n1 mr-n1" size={100} style={{ fontSize: "6rem" }}  /> */}
+
+
+              { IconVoucher && 
+                <IconVoucher 
+                  className="position-absolute pos-right pos-bottom opacity-15 mb-n1 mr-n1"
+                  size={iconSize}  
+                  color={iconColor} 
+                />
+              }
+            </div>
+
+          )}
+        </div>
+      </div> 
+    </Fragment>
+
         <div className="row">
           <div className="col-xl-12">
             <div id="panel-1" className="panel">
@@ -218,6 +453,7 @@ export const ActionMainNovoPedido = ({
                       <InputCheckBoxPedido 
                         label={labelCheckBoxPedido}
                         readOnly={readOnlyCheckBoxTipoPedido}
+                        disabledChecked={disabledCheckBoxTipoPedido}
                         checkedCheckBoxPedido={checkedCheckBoxPedido}
                         valueCheckBoxPedido={valueCheckBoxPedido}
                         onChangeCheckBoxPedido={onChangeCheckBoxPedido}
@@ -226,12 +462,12 @@ export const ActionMainNovoPedido = ({
                   </div>
                   <div className="row mt-3" >
 
-                    <div class="col-sm-6 col-md-8 col-xl-6 mt-2">
+                    <div className="col-sm-6 col-md-8 col-xl-6 mt-2">
                       <label htmlFor="">{labelSelectFornecedor}</label>
                       {InputSelectFornecedorComponent && (
                         <InputSelectFornecedorComponent
                           label={labelSelectFornecedor}
-                          readOnly={readOnlyFornecedor}
+                          isDisabled={readOnlyFornecedor}
                           id={id}
                           options={optionsFornecedores}
                           onChange={onChangeSelectFornecedor}
@@ -243,7 +479,7 @@ export const ActionMainNovoPedido = ({
                     </div>
 
                     <div className="col-sm-4 col-md-4 col-xl-3 mt-2">
-                      <label htmlFor="">{labelInputDTFim}</label>
+                      <label htmlFor="">{labelInputDTInicio}</label>
                       {InputFieldDTInicioComponent && (
                         <InputFieldDTInicioComponent
                           label={labelInputDTInicio}
@@ -276,7 +512,7 @@ export const ActionMainNovoPedido = ({
 
                   <div className="row mt-3">
                
-                    <div class="col-sm-6 col-xl-6 ">
+                    <div className="col-sm-6 col-xl-6 ">
                       <label htmlFor="">{labelSelectFiscal}</label>
                       {InputSelectFiscalComponent && (
                         <InputSelectFiscalComponent
@@ -287,20 +523,20 @@ export const ActionMainNovoPedido = ({
                           onChange={onChangeSelectFiscal}
                           value={valueSelectFiscal}
                           defaultValue={defaultValueSelectFiscal}
-                          readOnly={readOnlyFiscal}
+                          isDisabled={readOnlyFiscal}
                         />
 
                       )}
                     </div>
 
-                    <div class="col-sm-6 col-xl-6 ">
+                    <div className="col-sm-6 col-xl-6 ">
                       <label htmlFor="">{labelSelectEnviar}</label>
                       {InputSelectEnviarComponent && (
                         <InputSelectEnviarComponent
                           label={labelSelectEnviar}
                           type="select"
                           id={id}
-                          readOnly={readOnlyEnviar}
+                          isDisabled={readOnlyEnviar}
                           options={optionsSelectEnviar}
                           value={valueSelectEnviar}
                           onChange={onChangeSelectEnviar}
@@ -319,7 +555,7 @@ export const ActionMainNovoPedido = ({
                       {InputSelectCompradorComponent && (
                         <InputSelectCompradorComponent
                           label={labelSelectComprador}
-                          readOnly={readOnlyComprador}
+                          isDisabled={readOnlyComprador}
                           id={id}
                           options={optionsCompradores}
                           defaultValue={defaultValueSelectComprador}
@@ -345,7 +581,7 @@ export const ActionMainNovoPedido = ({
                       {InputSelectMarcasComponent && (
                         <InputSelectMarcasComponent
                           label={labelSelectMarcas}
-                          readOnly={readOnlyMarcas}
+                          isDisabled={readOnlyMarcas}
                           id={id}
                           options={optionsMarcas}
                           onChange={onChangeSelectMarcas}
@@ -360,7 +596,7 @@ export const ActionMainNovoPedido = ({
                   <hr />
 
                   <div className="row mt-3">
-                    <div class="col-sm-6 col-xl-4 ">
+                    <div className="col-sm-6 col-xl-4 ">
                       <label htmlFor="">{labelSelectCondicoesPagamentos}</label>
                       {InputSelectCondicoesPagamentos && (
                         <InputSelectCondicoesPagamentos
@@ -370,13 +606,13 @@ export const ActionMainNovoPedido = ({
                           options={optionsCondicoesPagamentos}
                           value={valueSelectCondicoesPagamentos}
                           onChange={onChangeSelectCondicoesPagamentos}
-                          readOnly={readOnlyCondicoesPagamentos}
+                          isDisabled={readOnlyCondicoesPagamentos}
                           defaultValue={defaultValueSelectCondicoesPagamentos}
                         />
                       )}
                     </div>
 
-                    <div class="col-sm-6 col-xl-4 ">
+                    <div className="col-sm-6 col-xl-4 ">
                       <label htmlFor="">{labelInputFieldObsFornecedor}</label>
                       {InputFieldObsFornecedor && (
                         <InputFieldObsFornecedor
@@ -392,7 +628,7 @@ export const ActionMainNovoPedido = ({
                       )}
                     </div>
 
-                    <div class="col-sm-6 col-xl-4 ">
+                    <div className="col-sm-6 col-xl-4 ">
                       <label htmlFor="">{labelInputFieldObsInterna}</label>
                       {InputFieldObsInterna && (
                         <InputFieldObsInterna
@@ -408,7 +644,7 @@ export const ActionMainNovoPedido = ({
                   </div>
                   <hr />
                   <div className="row">
-                    <div class="col-sm-6 col-xl-4 ">
+                    <div className="col-sm-6 col-xl-4 ">
                       <label htmlFor="">{labelSelectTipoPedido}</label>
                       {InputSelectTipoPedido && (
                         <InputSelectTipoPedido
@@ -418,12 +654,12 @@ export const ActionMainNovoPedido = ({
                           options={optionsTipoPedido}
                           value={valueSelectTipoPedido}
                           onChange={onChangeSelectTipoPedido}
-                          readOnly={readOnlyTipoPedido}
+                          isDisabled={readOnlyTipoPedido}
                           defaultValue={defaultValueSelectTipoPedido}
                         />
                       )}
                     </div>
-                    <div class="col-sm-6 col-xl-4">
+                    <div className="col-sm-6 col-xl-4">
                       <label htmlFor="">{labelInputFieldVendedor}</label>
                       {InputFieldVendedor && (
                         <InputFieldVendedor
@@ -436,7 +672,7 @@ export const ActionMainNovoPedido = ({
                         />
                       )}
                     </div>
-                    <div class="col-sm-6 col-xl-4 ">
+                    <div className="col-sm-6 col-xl-4 ">
                       <label htmlFor="">{labelInputFieldEmailVendedor}</label>
                       {InputFieldEmailVendedor && (
                         <InputFieldEmailVendedor
@@ -452,7 +688,7 @@ export const ActionMainNovoPedido = ({
                   </div>
                   <hr style={{}} />
                   <div className="row mt-3">
-                    <div class="col-sm-6 col-xl-2">
+                    <div className="col-sm-6 col-xl-2">
                       <label htmlFor="">{labelInputFieldDesconto1}</label>
                       {InputFieldDescontoComponent1 && (
                         <InputFieldDescontoComponent1
@@ -465,7 +701,7 @@ export const ActionMainNovoPedido = ({
                         />
                       )}
                     </div>
-                    <div class="col-sm-6 col-xl-2">
+                    <div className="col-sm-6 col-xl-2">
                       <label htmlFor="">{labelInputFieldDesconto2}</label>
                       {InputFieldDescontoComponent2 && (
                         <InputFieldDescontoComponent2
@@ -479,7 +715,7 @@ export const ActionMainNovoPedido = ({
                       )}
                     </div>
 
-                    <div class="col-sm-6 col-xl-2 ">
+                    <div className="col-sm-6 col-xl-2 ">
                       <label htmlFor="">{labelInputFieldDesconto3}</label>
                       {InputFieldDescontoComponent3 && (
                         <InputFieldDescontoComponent3
@@ -493,7 +729,7 @@ export const ActionMainNovoPedido = ({
                       )}
                     </div>
 
-                    <div class="col-sm-6 col-xl-4 ">
+                    <div className="col-sm-6 col-xl-4 ">
                       <label htmlFor="">{labelInputFieldTotalLiq}</label>
                       {InputFieldTotalLiq && (
                         <InputFieldTotalLiq
@@ -506,7 +742,7 @@ export const ActionMainNovoPedido = ({
                         />
                       )}
                     </div>
-                    <div class="col-sm-6 col-xl-2 ">
+                    <div className="col-sm-6 col-xl-2 ">
                       <label htmlFor="">{labelInputFieldComissao}</label>
                       {InputFieldComissao && (
                         <InputFieldComissao
@@ -522,14 +758,14 @@ export const ActionMainNovoPedido = ({
                   </div>
 
                   <div className="row mt-4">
-                    <div class="col-sm-6 col-xl-6 ">
+                    <div className="col-sm-6 col-xl-6 ">
                       <label htmlFor="">{labelSelectTransportadora}</label>
                       {InputSelectTransportadora && (
                         <InputSelectTransportadora
                           label={labelSelectTransportadora}
                           nome="idloja"
                           id={id}
-                          readOnly={readOnlyTransportadora}
+                          isDisabled={readOnlyTransportadora}
                           options={optionsSelectTransportadora}
                           value={valueSelectTransportadora}
                           onChange={onChangeSelectTransportadora}
@@ -539,7 +775,7 @@ export const ActionMainNovoPedido = ({
 
                     </div>
 
-                    <div class="col-sm-6 col-xl-6 ">
+                    <div className="col-sm-6 col-xl-6 ">
                       <label htmlFor="">{labelSelectFrete}</label>
                       {InputSelectFreteComponent && (
 
@@ -547,7 +783,7 @@ export const ActionMainNovoPedido = ({
                           label={labelSelectFrete}
                           nome="idloja"
                           id={id}
-                          readOnly={readOnlyFrete}
+                          isDisabled={readOnlyFrete}
                           options={optionsFrete}
                           value={valueSelectFrete}
                           onChange={onChangeSelectFrete}
@@ -556,6 +792,15 @@ export const ActionMainNovoPedido = ({
                       )}
                     </div>
 
+                  </div>
+                  <div className="row">
+                    {Alerta && (
+                      <Alerta
+                        messageAlerta={messageAlerta}
+                        type={typeAlerta}
+                        text={typeAlerta}
+                      />
+                    )}
                   </div>
 
                   <div className="row " style={{marginTop: '5rem'}}>
@@ -569,6 +814,8 @@ export const ActionMainNovoPedido = ({
                         Icon={IconSearch}
                         iconColor="#fff"
                         iconSize={16}
+                        // style={styleSearch}
+                        visibilityBTN={styleSearch}
                       />
                     )}
 
@@ -582,6 +829,8 @@ export const ActionMainNovoPedido = ({
                         Icon={IconCadastro}
                         iconColor="#fff"
                         iconSize={16}
+                        // style={styleCadastro}
+                        visibilityBTN={styleCadastro}
                       />
                     )}
 
@@ -595,6 +844,8 @@ export const ActionMainNovoPedido = ({
                         Icon={IconCancelar}
                         iconColor="#fff"
                         iconSize={16}
+                        // style={styleCancelar}
+                        visibilityBTN={styleCancelar}
                       />
                     )}
                      {ButtonTypePedido && (
@@ -607,8 +858,11 @@ export const ActionMainNovoPedido = ({
                         Icon={IconPedido}
                         iconColor="#fff"
                         iconSize={16}
+                        // style={stylePedido}
+                        visibilityBTN={stylePedido}
                       />
                     )}
+                  
                     {ButtonTypeTXT && (
                       <ButtonType
                         textButton={linkTXT}
@@ -619,7 +873,69 @@ export const ActionMainNovoPedido = ({
                         Icon={IconTXT}
                         iconColor="#000"
                         iconSize={16}
-                        style={{color: 'white'}}
+                        // style={styleTXT}
+                        visibilityBTN={styleTXT}
+
+                      />
+                    )}
+
+                    {ButtonTypeClonar && (
+                      <ButtonTypeClonar
+                        textButton={linkClonar}
+                        onClickButtonType={onButtonClickClonar}
+                        // cor="danger"
+                        cor={corClonar}
+                        tipo="button"
+                        Icon={IconClonar}
+                        iconColor="#000"
+                        iconSize={16}
+                        visibilityBTN={styleClonar}
+                      />
+                    )}
+
+                    {ButtonTypeRetornar && (
+                      <ButtonTypeRetornar
+                        textButton={linkRetornar}
+                        onClickButtonType={onButtonClickRetornar}
+                        // cor="danger"
+                        cor={corRetornar}
+                        tipo="button"
+                        Icon={IconRetornar}
+                        iconColor="#000"
+                        iconSize={16}
+                        // style={styleRetornar}
+                        visibilityBTN={styleRetornar}
+
+                      />
+                    )}
+
+                    {ButtonTypeMigrar && (
+                      <ButtonType
+                        textButton={linkMigrar}
+                        onClickButtonType={onButtonClickMigrar}
+                        // cor="danger"
+                        cor={corMigrar}
+                        tipo="button"
+                        Icon={IconMigrar}
+                        iconColor="#000"
+                        iconSize={16}
+                        visibilityBTN={styleMigrar}
+
+                      />
+                    )}
+                    
+                    {ButtonTypeAtualizar && (
+                      <ButtonType
+                        textButton={linkAtualizar}
+                        onClickButtonType={onButtonClickAtualizar}
+                        // cor="danger"
+                        cor={corAtualizar}
+                        tipo="button"
+                        Icon={IconAtualizar}
+                        iconColor="#000"
+                        iconSize={16}
+                        visibilityBTN={styleAtualizar}
+
                       />
                     )}
 

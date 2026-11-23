@@ -11,9 +11,10 @@ export const ButtonType = ({
   iconColor,
   iconSize,
   disabledBTN,
-  visibilityBTN,
-  style
+  visibilityBTN = true,
+  style = {}
 }) => {
+  
   let btnClasses = "btn waves-effect waves-themed";
 
   if(cor === "primary") {
@@ -39,15 +40,19 @@ export const ButtonType = ({
     ...style 
   };
 
+  const wrapperStyle = {
+    display: visibilityBTN ? 'block' : 'none'
+  };
+
   return (
     <Fragment>
-      <div >
+      <div style={wrapperStyle} >
 
         <button
           id={id}
           className={`${btnClasses} ${className}`}
           type={typeButton}
-          onClick={() => onClickButtonType()}
+          onClick={() => onClickButtonType?.()}
           style={defaultStyle}
           disabled={disabledBTN}
           visible={visibilityBTN}

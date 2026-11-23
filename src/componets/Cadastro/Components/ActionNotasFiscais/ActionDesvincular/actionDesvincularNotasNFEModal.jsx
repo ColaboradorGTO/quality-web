@@ -1,6 +1,5 @@
-import { Fragment, useEffect, useRef, useState } from "react"
+import { Fragment } from "react"
 import { Modal } from "react-bootstrap"
-import { useForm } from "react-hook-form";
 import { HeaderModal } from "../../../../Modais/HeaderModal/HeaderModal";
 import { Formulario } from "./formulario";
 

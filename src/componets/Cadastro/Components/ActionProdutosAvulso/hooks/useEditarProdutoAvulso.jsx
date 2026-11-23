@@ -1,12 +1,6 @@
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
-import { adicionarMeses, getDataAtual } from "../../../../../utils/dataAtual";
 import { get, post, put } from "../../../../../api/funcRequest";
-import { useNavigate } from "react-router-dom";
-import { toFloat } from "../../../../../utils/toFloat";
-import { useFetchData } from "../../../../../hooks/useFetchData";
-import { optionsTipoPedido, optionsReposicao } from "../../../../../../parceiro.json"
-import axios from "axios"
 import { useQuery } from "react-query";
 import { formatMoeda, removerFormatacaoMoeda } from "../../../../../utils/formatMoeda";
 
@@ -34,30 +28,8 @@ export const useEditarProdutoAvulso = ({ usuarioLogado, optionsModulos, handleCl
     const [tipoFiscalSelecionado, setTipoFiscalSelecionado] = useState('')   
     const [vrCusto, setVrCusto] = useState('')
     const [vrVenda, setVrVenda] = useState('')
-    const [ipUsuario, setIpUsuario] = useState('');
     
-    const getIPUsuario = async () => {
-        let usuarioIP = null;
 
-        try {
-            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-            usuarioIP = ipWhoisData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ifconfig.me:", error);
-        }
-
-        if (!usuarioIP) {
-        try {
-            const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-            usuarioIP = ipifyData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ipify.org:", error);
-        }
-        }
-        setIpUsuario(usuarioIP);
-        return usuarioIP;
-    };
-   
     const { data: dadosUnidadeMedida  = [], error: errorUnidadeMedida, isLoading: isLoadingUnidadeMedida, refetch: refetchUnidadeMedida } = useQuery(
         'unidadeMedida',
         async () => { const response = await get(`/unidadeMedida`);  return response.data},
@@ -172,7 +144,7 @@ export const useEditarProdutoAvulso = ({ usuarioLogado, optionsModulos, handleCl
             setCodBarras(dadosDetalheProduto[0].NUCODBARRAS)
             setDescricao(dadosDetalheProduto[0].DSNOME)
             setReferencia(dadosDetalheProduto[0].NUREFERENCIA)
-            console.log(dados, 'dados')
+        
             const marcaEncontrada = dadosMarcas.find((item) => String(item.IDGRUPOEMPRESARIAL) === String(dados?.IDGRUPOEMPRESARIAL));
             if(marcaEncontrada) {
                 setMarcaSelecionada({
@@ -394,28 +366,17 @@ export const useEditarProdutoAvulso = ({ usuarioLogado, optionsModulos, handleCl
         };
 
         try {
-
-            // Envia para o backend
             const response = await put('/produto-avulso/:id', data);
 
-            // Cria log somente após o retorno do backend
-            const textDados = JSON.stringify(data);
-            const textFuncao = 'CADASTRO/EDITAR DADOS PRODUTO';
-            const ipUsuario = await getIPUsuario();
-
-            const createtLog = {
-                IDFUNCIONARIO: String(usuarioLogado.id),
-                PATHFUNCAO: textFuncao,
-                DADOS: textDados,
-                IP: ipUsuario || 'Indisponível'
-            };
-
-            await post('/log-web', createtLog);
-
-            // Fecha o loading
+            await registrarLogAuditoria({
+                idFuncionario: usuarioLogado?.id,
+                pathFuncao: 'CADASTRO/EDITAR DADOS PRODUTO',
+                dados: data
+            })
+          
             Swal.close();
 
-            // Exibe sucesso
+         
             await Swal.fire({
                 icon: 'success',
                 title: 'Produto cadastrado com sucesso!',
@@ -432,31 +393,14 @@ export const useEditarProdutoAvulso = ({ usuarioLogado, optionsModulos, handleCl
             return response.data;
 
         } catch (error) {
-            console.error('Erro ao cadastrar produto:', error);
+            console.error('Erro ao cadastrar produto:', error)
 
-            // Tenta registrar o erro no log
-            try {
-                const textDados = JSON.stringify(data);
-                const textFuncao = 'CADASTRO/ERRO AO CADASTRAR PRODUTO';
-                const ipUsuario = await getIPUsuario();
+            await registrarLogAuditoria({
+                idFuncionario: usuarioLogado?.id,
+                pathFuncao: 'CADASTRO/ERRO AO CADASTRAR PRODUTO',
+                dados: data
+            })
 
-                const createtLog = {
-                    IDFUNCIONARIO: String(usuarioLogado.id),
-                    PATHFUNCAO: textFuncao,
-                    DADOS: textDados,
-                    IP: ipUsuario || 'Indisponível'
-                };
-
-                await post('/log-web', createtLog);
-
-            } catch (logError) {
-                console.error('Erro ao registrar log:', logError);
-            }
-
-            // Fecha o loading
-            Swal.close();
-
-            // Exibe erro
             await Swal.fire({
                 icon: 'error',
                 title: 'Erro!',
@@ -465,6 +409,8 @@ export const useEditarProdutoAvulso = ({ usuarioLogado, optionsModulos, handleCl
                     container: 'custom-swal'
                 }
             });
+
+            return;
         }
     };
 

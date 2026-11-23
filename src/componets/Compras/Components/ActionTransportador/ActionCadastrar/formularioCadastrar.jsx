@@ -54,8 +54,9 @@ export const FormularioCadastrar = ({ handleClose, usuarioLogado, optionsModulos
         setTelefone3,
         situacao,
         handleFechar,
+        handleBlurCnpj,
         onSubmit,
-    } = useCadastrarTransportadora({handleClose, usuarioLogado, optionsModulos,handleClick}); 
+    } = useCadastrarTransportadora({handleClose, usuarioLogado, optionsModulos,handleClick});
 
     const handleValidatedSubmit = async () => {
         try {
@@ -122,6 +123,7 @@ export const FormularioCadastrar = ({ handleClose, usuarioLogado, optionsModulos
                                         type="text"
                                         value={cnpj}
                                         onChange={(e) => setCnpj(e.target.value)}
+                                        onBlur={handleBlurCnpj}
                                         errors={errors}
                                         clearErrors={clearErrors}
                                     />

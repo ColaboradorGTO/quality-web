@@ -1,15 +1,13 @@
 import { useState } from "react";
 import Swal from "sweetalert2";
 import { get, post  } from "../../../../../api/funcRequest";
-import axios from 'axios';
 import { useQuery } from "react-query";
-
+import { registrarLogAuditoria } from "../../../../../services/auditLog";
 
 export const useCadastrarEstilos = ({ handleClose, handleClick, usuarioLogado, optionsModulos }) => {
     const [descricao, setDescricao] = useState('')
     const [statusSelecionado, setStatusSelecionado] = useState([])
     const [subGrupoSelecionado, setSubGrupoSelecionado] = useState("")
-    const [ipUsuario, setIpUsuario] = useState('');
 
     const { data: dadosGrupoEstrutura = [], error: errorGrupoEstrutura, isLoading: isLoadingGrupoEstrutura, refetch: refetchGrupoEstrutura } = useQuery(
         'grupoEstrutura',
@@ -21,27 +19,6 @@ export const useCadastrarEstilos = ({ handleClose, handleClick, usuarioLogado, o
         { enabled: true, staleTime: 60 * 60 * 1000, }
     );
 
-    const getIPUsuario = async () => {
-        let usuarioIP = null;
-
-        try {
-            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-            usuarioIP = ipWhoisData?.ip;
-        } catch (error) {
-            console.error("Erro ao buscar IP via ifconfig.me:", error);
-        }
-
-        if (!usuarioIP) {
-            try {
-            const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-            usuarioIP = ipifyData?.ip;
-            } catch (error) {
-            console.error("Erro ao buscar IP via ipify.org:", error);
-            }
-        }
-        setIpUsuario(usuarioIP);
-        return usuarioIP;
-    };
 
     const onSubmit = async () => {
 
@@ -68,17 +45,12 @@ export const useCadastrarEstilos = ({ handleClose, handleClick, usuarioLogado, o
         try {
 
             const response = await post('/criarlistaEstilos', putData)
-            const textDados = JSON.stringify(putData)
-            let textFuncao = 'CADASTRO / CADASTRANDO ESTILOS';
-            const ip = await getIPUsuario();
-            const createtLog = {
-                IDFUNCIONARIO: String(usuarioLogado.id),
-                PATHFUNCAO: textFuncao,
-                DADOS: textDados,
-                IP: ip || 'Indisponível'
-            }
-
-            await post('/log-web', createtLog)
+   
+            await registrarLogAuditoria({
+                idFuncionario: usuarioLogado?.id,
+                pathFuncao: 'CADASTRO / CADASTRANDO ESTILOS',
+                dados: putData
+            })
 
             Swal.fire({
                 position: 'top-end',
@@ -93,20 +65,14 @@ export const useCadastrarEstilos = ({ handleClose, handleClick, usuarioLogado, o
             handleClick();
             handleClose();
             return response.data;
-
         } catch (error) {
-              
-            const textDados = JSON.stringify(putData)
-            let textFuncao = 'CADASTRO / ERRO AO CADASTRAR ESTILOS';
-            const ip = await getIPUsuario();
-            const createtLog = {
-                IDFUNCIONARIO: String(usuarioLogado.id),
-                PATHFUNCAO: textFuncao,
-                DADOS: textDados,
-                IP: ip || 'Indisponível'
-            }
+            
+            await registrarLogAuditoria({
+                idFuncionario: usuarioLogado?.id,
+                pathFuncao: 'CADASTRO / ERRO AO CADASTRAR ESTILOS',
+                dados: putData
+            })
 
-            const responseLog = await post('/log-web', createtLog)
             Swal.fire({
                 position:   'center',
                 icon: 'error',
@@ -118,12 +84,9 @@ export const useCadastrarEstilos = ({ handleClose, handleClick, usuarioLogado, o
                 },
             });
             console.error('Erro ao cadastrar estilo:', error);
-            return responseLog.data;
+            return;
         }
     }
-
-
-
 
     return {
         descricao,

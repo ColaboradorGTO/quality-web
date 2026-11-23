@@ -5,10 +5,16 @@ import { ButtonTable } from "../../../ButtonsTabela/ButtonTable";
 import { CiEdit } from "react-icons/ci";
 import { get } from "../../../../api/funcRequest";
 import { ActionEditarCategoriaPedidoModal } from "./ActionEditar/actionEditarCategoriaPedidoModal";
+import { useRef } from "react";
+import Swal from "sweetalert2";
 
 
 export const ActionListaCategoriaPedidos = ({ dadosCategoria, usuarioLogado, optionsModulos, handleClick }) => {
   const [modalEditar, setModalEditar] = useState(false);
+  const [rowSelection, setRowSelection] = useState(null);
+  const [globalFilterValue, setGlobalFilterValue] = useState('');
+  const dataTableRef = useRef();
+
   const [dadosDetalheCategoriaPedido, setDadosDetalheCategoriaPedido] = useState([]);
   
   const dados = dadosCategoria.map((item, index) => {
@@ -83,16 +89,26 @@ export const ActionListaCategoriaPedidos = ({ dadosCategoria, usuarioLogado, opt
   const handleEditar = async (IDCATEGORIAPEDIDO) => {
     try {
       const response = await get(`/categoriaPedidos?idCategoriaPedido=${IDCATEGORIAPEDIDO}`);
-      setDadosDetalheCategoriaPedido(response.data);
-      setModalEditar(true)
+      if(response.data && response.data.length > 0) {
+        setDadosDetalheCategoriaPedido(response.data);
+        setModalEditar(true)
+      } else {
+        Swal.fire({
+          title: 'Erro!',
+          html: `Não foi possível obter os detalhes da Categoria de Pedido selecionada. Por favor, tente novamente.`,
+          icon: 'error',
+          customClass: {
+            container: 'custom-swal',
+          }
+
+        })
+        return;
+      }
     } catch (error) {
       console.error(error);
     }
   }
 
-  const handleModal = () => {
-    setModalEditar(true)
-  }
 
   return (
     <Fragment>

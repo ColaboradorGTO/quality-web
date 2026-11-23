@@ -6,7 +6,14 @@ import { FooterModal } from "../../../../../Modais/FooterModal/footerModal";
 import { ButtonTypeModal } from "../../../../../Buttons/ButtonTypeModal";
 
 
-export const ActionDetalheEmpresaPromocao = ({ show, handleClose, dadosListaPromocaoEmpresa, dadosListaPromocao }) => {
+export const ActionDetalheEmpresaPromocao = ({ 
+  show, 
+  handleClose, 
+  dadosListaPromocaoEmpresa, 
+  dadosListaPromocao, 
+  usuarioLogado, 
+  optionsModulos  
+}) => {
   return (
 
     <Fragment>
@@ -28,7 +35,12 @@ export const ActionDetalheEmpresaPromocao = ({ show, handleClose, dadosListaProm
 
         <Modal.Body>
 
-          <ActionListaEmpresaPromocao dadosListaPromocaoEmpresa={dadosListaPromocaoEmpresa} />
+          <ActionListaEmpresaPromocao 
+            dadosListaPromocaoEmpresa={dadosListaPromocaoEmpresa} 
+            usuarioLogado={usuarioLogado}
+            optionsModulos={optionsModulos}  
+            handleClose={handleClose}
+          />
         </Modal.Body>
 
          <FooterModal

@@ -18,19 +18,19 @@ export const useCadastrarVinculoFabricanteFornecedor = ({
         let usuarioIP = null;
 
         try {
-            const { data: ipWhoisData } = await axios.get("http://ipwho.is/");
+            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
             usuarioIP = ipWhoisData?.ip;
         } catch (error) {
-            console.error("Erro ao buscar IP via ipwho.is:", error);
+            console.error("Erro ao buscar IP via ifconfig.me:", error);
         }
 
         if (!usuarioIP) {
-            try {
-                const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-                usuarioIP = ipifyData?.ip;
-            } catch (error) {
-                console.error("Erro ao buscar IP via ipify.org:", error);
-            }
+        try {
+            const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
+            usuarioIP = ipifyData?.ip;
+        } catch (error) {
+            console.error("Erro ao buscar IP via ipify.org:", error);
+        }
         }
         setIpUsuario(usuarioIP);
         return usuarioIP;
@@ -39,8 +39,8 @@ export const useCadastrarVinculoFabricanteFornecedor = ({
     const handleCadastrarVinculo = async () => {
         if(optionsModulos[0]?.CRIAR == 'False') {
             Swal.fire({
-                title: 'Erro!',
-                text: `${usuarioLogado?.NOFUNCIONARIO},\nVocê não tem permissão para criar o Vínculo!`,
+                title: 'Acesso Negado!',
+                html: `${usuarioLogado?.NOFUNCIONARIO}, <br/> Você não tem permissão para criar o Vínculo!`,
                 icon: 'error',
                 customClass: {
                     container: 'custom-swal',
@@ -57,7 +57,7 @@ export const useCadastrarVinculoFabricanteFornecedor = ({
                 title: `O Fornecedor deve ser Informado!.`,
                 type: 'warning',
                 showConfirmButton: false,
-                timer: 3000,
+                timer: 5000,
                 customClass: {
                     container: 'custom-swal',
                 }
@@ -72,7 +72,7 @@ export const useCadastrarVinculoFabricanteFornecedor = ({
                 title: `O Fabricante deve ser Informado!`,
                 type: 'warning',
                 showConfirmButton: false,
-                timer: 3000,
+                timer: 5000,
                 customClass: {
                     container: 'custom-swal',
                 }
@@ -119,16 +119,14 @@ export const useCadastrarVinculoFabricanteFornecedor = ({
             }
 
             const response = await post('/cadastrar-fabricante-fornecedor', postData)
-
-            
             const textDados = JSON.stringify(postData)
-            let textFuncao = 'COMPRAS/VINCULO DO FABRICANTE AO FORNECEDOR';
+            let textFuncao = 'COMPRAS/VINCULO DO FORNECEDOR-FABRICANTE';
             const ipUsuario = await getIPUsuario();
             const createtLog = {
                 IDFUNCIONARIO: String(usuarioLogado.id),
                 PATHFUNCAO: textFuncao,
                 DADOS: textDados,
-                IP: ipUsuario
+                IP: ipUsuario || 'Indisponível'
             }
             
             await post('/log-web', createtLog)
@@ -153,13 +151,13 @@ export const useCadastrarVinculoFabricanteFornecedor = ({
                 STATIVO: 'True',
             }
             const textDados = JSON.stringify(postData)
-            let textFuncao = 'COMPRAS/ERROA AO CRIAR VINCULO DO FABRICANTE AO FORNECEDOR';
+            let textFuncao = 'COMPRAS/ERRO AO CRIAR VINCULO DO FORNECEDOR-FABRICANTE';
             const ipUsuario = await getIPUsuario();
             const createtLog = {
                 IDFUNCIONARIO: String(usuarioLogado.id),
                 PATHFUNCAO: textFuncao,
                 DADOS: textDados,
-                IP: ipUsuario
+                IP: ipUsuario || 'Indisponível'
             }
             
             await post('/log-web', createtLog)

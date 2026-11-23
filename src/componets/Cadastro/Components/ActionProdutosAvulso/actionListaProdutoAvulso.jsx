@@ -2,11 +2,9 @@ import { Fragment, useState, useRef } from "react"
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { ButtonTable } from "../../../ButtonsTabela/ButtonTable";
-import { GrFormView, GrView } from "react-icons/gr";
-import { MdOutlineLocalPrintshop, MdOutlineSend } from "react-icons/md";
+import { GrView } from "react-icons/gr";
 import { formatMoeda } from "../../../../utils/formatMoeda";
 import { CiEdit } from "react-icons/ci";
-import { AiOutlineDelete } from "react-icons/ai";
 import { FaCheck } from "react-icons/fa";
 import { SiSap } from "react-icons/si";
 import { BsTrash3 } from "react-icons/bs";

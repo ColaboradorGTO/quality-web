@@ -3,9 +3,9 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { CiEdit } from "react-icons/ci";
 import { ButtonTable } from "../../../ButtonsTabela/ButtonTable";
+import { ActionEditarStatusModal } from "../../../ConferenciaCega/Components/ActionStatusDivergencia/ActionEditarStatusModal/actionEditarStatusModal";
 import { useReactToPrint } from "react-to-print";
 import HeaderTable from "../../../Tables/headerTable";
-import { ActionEditarStatusModal } from "./ActionEditarStatusModal/actionEditarStatusModal";
 
 export const ActionListaStatusDivergencia = ({
   dadosStatus,
@@ -185,6 +185,7 @@ export const ActionListaStatusDivergencia = ({
                 headerStyle={{ color: 'white', backgroundColor: "#7a59ad", border: '1px solid #e9e9e9', fontSize: '0.8rem' }}
                 footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }}
                 bodyStyle={{ fontSize: '0.8rem' }}
+
               />
             ))}
           </DataTable>

@@ -45,19 +45,19 @@ export const useFecharPedido = ({ optionsModulos, usuarioLogado }) => {
         let usuarioIP = null;
 
         try {
-            const { data: ipWhoisData } = await axios.get("http://ipwho.is/");
+            const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
             usuarioIP = ipWhoisData?.ip;
         } catch (error) {
-            console.error("Erro ao buscar IP via ipwho.is:", error);
+            console.error("Erro ao buscar IP via ifconfig.me:", error);
         }
 
         if (!usuarioIP) {
-            try {
-                const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-                usuarioIP = ipifyData?.ip;
-            } catch (error) {
-                console.error("Erro ao buscar IP via ipify.org:", error);
-            }
+        try {
+            const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
+            usuarioIP = ipifyData?.ip;
+        } catch (error) {
+            console.error("Erro ao buscar IP via ipify.org:", error);
+        }
         }
         setIpUsuario(usuarioIP);
         return usuarioIP;
@@ -78,7 +78,7 @@ export const useFecharPedido = ({ optionsModulos, usuarioLogado }) => {
             Swal.fire({
                 icon: 'error',
                 title: 'Atenção',
-                text: `${usuarioLogado?.NOFUNCIONARIO} Usuário não possui permissão para incluir produtos no pedido.`,
+                html: `${usuarioLogado?.NOFUNCIONARIO} <br/> Usuário não possui permissão para incluir produtos no pedido.`,
                 confirmButtonColor: '#3085d6',
                 confirmButtonText: 'OK'
             });
@@ -196,7 +196,7 @@ export const useFecharPedido = ({ optionsModulos, usuarioLogado }) => {
                     IDFUNCIONARIO: String(usuarioLogado.id),
                     PATHFUNCAO: textFuncao,
                     DADOS: textDados,
-                    IP: ipUsuario
+                    IP: ipUsuario || 'Indisponível'
                 }
 
                 await post('/log-web', createtLog)
@@ -222,7 +222,7 @@ export const useFecharPedido = ({ optionsModulos, usuarioLogado }) => {
                 IDFUNCIONARIO: String(usuarioLogado.id),
                 PATHFUNCAO: textFuncao,
                 DADOS: textDados,
-                IP: ipUsuario
+                IP: ipUsuario || 'Indisponível'
             }
             await post('/log-web', createtLog)
                 

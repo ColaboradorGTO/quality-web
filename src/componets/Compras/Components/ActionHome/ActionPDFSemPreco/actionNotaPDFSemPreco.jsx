@@ -7,59 +7,67 @@ import { ActionListaDetalheSempreco } from "./actionListaDetalheSempreco";
 export const ActionNotaPDFSemPreco = ({ dadosPedidoSemPreco, dadosDetalhePedido }) => {
 
     const styles = StyleSheet.create({
-        page: { padding: 30 },
+        page: { 
+            fontSize: 16,
+            backgroundColor: '#fff',
+        },
         section: { marginBottom: 10 },
-        title: { fontSize: 18, marginBottom: 10 },
+        title: {
+            fontFamily: 'Verdana', 
+            fontSize: 18,
+            marginBottom: 10 
+        },
     });
+    
 
-
-    const dados = dadosPedidoSemPreco.map((item, index) => {
+    const stOutlet = dadosPedidoSemPreco?.STOUTLET === "True";
+    
+    const dadosArray = Array.isArray(dadosPedidoSemPreco) 
+        ? dadosPedidoSemPreco 
+        : [dadosPedidoSemPreco[0] || dadosPedidoSemPreco];
+    
+    const logosEmpresas = [
+        '../img/tesoura.png',      // posição 0 -> IDSUBGRUPOPEDIDO = 1
+        '../img/magazine.png',     // posição 1 -> IDSUBGRUPOPEDIDO = 2
+        '../img/yorus.png',        // posição 2 -> IDSUBGRUPOPEDIDO = 3
+        '../img/freecenter.png',   // posição 3 -> IDSUBGRUPOPEDIDO = 4
+        '../img/outlet.png'        // posição 4 -> quando stOutlet = true
+    ];
+    
+    const dados = dadosArray?.map((item, index) => {
         let dsTipoFretePedido = '';
         let dsTipoFiscalPedido = '';
         let dsTipoArquivoPedido = '';
         let dsTipoEnviar = '';
         let logoPedido = '';
-
-        if (item.IDSUBGRUPOPEDIDO == 1) {
-            logoPedido = '../img/tesoura.png'
-        } else if (item.IDSUBGRUPOPEDIDO == 2) {
-            logoPedido = '../img/magazine.png'
-        } else if (item.IDSUBGRUPOPEDIDO == 3) {
-            logoPedido = '../img/freecenter.png'
-        } else {
-            logoPedido = '../img/yorus.png'
+        
+        if (index === 0) {
+            if (stOutlet) {
+                logoPedido = logosEmpresas[4]; // logoOutlet
+            } else {
+                logoPedido = logosEmpresas[item.IDSUBGRUPOPEDIDO - 1];
+            }
         }
 
-        if (item.TPARQUIVO == 'NE') {
-            dsTipoArquivoPedido = 'NÃO ENVIAR';
-        } else if (item.TPARQUIVO == 'ET') {
-            dsTipoArquivoPedido = 'ETIQUETA';
-        } else if (item.TPARQUIVO == 'AR') {
-            dsTipoArquivoPedido = 'ARQUIVO';
-        }
+        const objTpFrete = {
+            'PAGO': 'PAGO - CIF',
+            'APAGAR': 'APAGAR - FOB'
+        };
 
-        if (item.TPFRETE == 'PAGO') {
-            dsTipoFretePedido = 'PAGO A CIF';
-        } else if (item.TPFRETE == 'APAGAR') {
-            dsTipoFretePedido = 'A PAGAR - FOB';
-        }
+        const objTpFiscal = {
+            'N': 'Lucro Presumido',
+            'S': 'Simples Nacional'
+        };
 
+        const objTpEnviar = {
+            'NE': 'NÃO ENVIAR',
+            'ET': 'ETIQUETA',
+            'AR': 'ARQUIVO'
+        };
 
-        if (item.TPFISCAL == 'N') {
-            dsTipoFiscalPedido = 'Lucro Presumido';
-        } else if (item.TPFISCAL == 'S') {
-            dsTipoFiscalPedido = 'Simples Nacional';
-        } else {
-            dsTipoFiscalPedido = 'Lucro Real';
-        }
-
-        if (item.TPARQUIVO == 'NE') {
-            dsTipoEnviar = 'NÃO ENVIAR';
-        } else if (item.TPARQUIVO == 'ET') {
-            dsTipoEnviar = 'ETIQUETA';
-        } else {
-            dsTipoEnviar = 'ARQUIVO';
-        }
+        dsTipoFretePedido = objTpFrete[item.TPFRETE] || item.TPFRETE;
+        dsTipoFiscalPedido = objTpFiscal[item.TPFISCAL] || 'Lucro Real';  
+        dsTipoEnviar = objTpEnviar[item.TPARQUIVO] || item.TPARQUIVO;
 
         return {
             IDPEDIDO: item.IDPEDIDO,
@@ -124,14 +132,24 @@ export const ActionNotaPDFSemPreco = ({ dadosPedidoSemPreco, dadosDetalhePedido 
             STCANCELADO: item.STCANCELADO,
             TPARQUIVO: item.TPARQUIVO,
             FABRICANTE: item.FABRICANTE,
+            CONTATOS: item.CONTATOS,
             dsTipoFretePedido: dsTipoFretePedido,
             dsTipoFiscalPedido: dsTipoFiscalPedido,
-            dsTipoArquivoPedido: dsTipoArquivoPedido,
             dsTipoEnviar: dsTipoEnviar,
             logoPedido: logoPedido
         }
     })
 
+   
+    if (!dados || dados.length === 0) {
+        return (
+            <Fragment>
+                <div>Nenhum dado encontrado para exibir o pedido.</div>
+            </Fragment>
+        );
+    }
+
+    const dadoPrincipal = dados[0];
 
     return (
         <Fragment>
@@ -141,20 +159,96 @@ export const ActionNotaPDFSemPreco = ({ dadosPedidoSemPreco, dadosDetalhePedido 
                     <tbody>
                         <tr>
                             <td rowspan="2" width="200" align="center" id="marcapedido">
-                                <img src={dados[0]?.logoPedido} style={{ width: '200px', height: '100px', border: 'none' }} />
+                                <img src={dadoPrincipal?.logoPedido} style={{ width: '200px', height: '100px', border: 'none' }} />
                             </td>
                             <td rowspan="2" width="200" align="center" >
-                                <p style={{ fontSize: '1rem', margin: '0px', padding: '0px' }}> PEDIDO DE COMPRAS<br />{dados[0]?.MODPEDIDO}</p>
-                                <p style={{ fontSize: '1rem', margin: '0px' }}>Nº: <b>{dados[0]?.IDPEDIDO}</b></p></td>
-                            <td align="center" style={{ fontSize: '0.563rem' }}>
+                                <p style={{fontFamily: 'Verdana', fontSize: '1rem', padding: '0px' }}> PEDIDO DE COMPRAS<br />{dadoPrincipal?.MODPEDIDO}</p>
+                                <p style={{fontFamily: 'Verdana', fontSize: '1rem',  }}>Nº: <b>{dadoPrincipal?.IDPEDIDO}</b></p></td>
+                            <td align="center" style={{fontFamily: 'Verdana', fontSize: '13px' }}>
                                 Fabricante: <br />
-                                <b><p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.FABRICANTE}</p></b>
+                                <b><p style={{fontFamily: 'Verdana', fontSize: '13px',  }}>{dadoPrincipal?.FABRICANTE}</p></b>
                             </td>
                         </tr>
                         <tr>
-                            <td style={{ fontSize: '0.563rem' }}>
+                            <td style={{fontFamily: 'Verdana', fontSize: '13px' }}>
                                 Razão Social Fornecedor: <br />
-                                <p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.NOFORNECEDOR}</p>
+                                <p style={{fontFamily: 'Verdana', fontSize: '13px',  }}>{dadoPrincipal?.NOFORNECEDOR}</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table width="100%" className="bordasimples">
+                    <tbody>
+                        <tr
+                        
+                        >
+                            <td rowspan="2" width="400" 
+                                style={{
+                                    fontFamily: 'Verdana', 
+                                    fontSize: '9px', 
+                                    fontWeight: 400, 
+                                    color: '#666',
+                                    padding: '0px',
+                                    margin: '0px',                                     
+                                }}
+                            >
+                                 <p style={{margin: '0px', padding: '0px' }}>
+                                    
+                                    {dadoPrincipal?.CONTATOS?.map((contato, index) => (
+                                        <span key={index}>{contato} <br /></span>
+                                    ))}
+                                </p>
+                            </td>
+                            <td width="200" className="tdPdf" >CNPJ: <br />
+                                <p className="tdPdf">{dadoPrincipal?.CNPJFORN}</p>
+                            </td>
+                            <td className="tdPdf" >Email: <br />
+                                <p className="tdPdf">{dadoPrincipal?.EMAILFORN}</p>
+                            </td>
+                            <td width="100" className="tdPdf" >Tel: <br />
+                                <p className="tdPdf">{dadoPrincipal?.FONEFORN}</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" width="200" className="tdPdf">INSC EST: <br />
+                                <p className="tdPdf">{dadoPrincipal?.INSCESTFORN}</p>
+                            </td>
+                            <td className="tdPdf">Cel: <br />
+                                <p className="tdPdf">{dadoPrincipal?.FONEFORN}</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+
+                <table width="100%" className="bordasimples">
+                    <tbody>
+                        <tr>
+                            <td width="200" className="tdPdf">Data do Pedido: <br />
+                                <p className="tdPdf">{dadoPrincipal?.DTPEDIDO}</p>
+                            </td>
+                            <td width="200" className="tdPdf">Data da Entrega: <br />
+                                <p className="tdPdf">{dadoPrincipal?.DTENTREGAFORMATADA2}</p>
+                            </td>
+                            <td className="tdPdf">Endereço: <br /><p className="tdPdf">{dadoPrincipal?.ENDFORN}</p> </td>
+                            <td className="tdPdf">Complemento: <br /><p className="tdPdf">{dadoPrincipal?.COMPFORN}</p> <strong></strong> </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table width="100%" className="bordasimples">
+                    <tbody>
+                        <tr>
+                            <td width="400" className="tdPdf">
+                                Comprador: <br /><p className="tdPdf">{dadoPrincipal?.NOMECOMPRADOR}</p>
+                            </td>
+                            <td className="tdPdf">N°: <br />
+                                <p className="tdPdf">{dadoPrincipal?.NUMEROFORN}</p>
+                            </td>
+                            <td className="tdPdf">Bairro: <br /><p className="tdPdf">{dadoPrincipal?.BAIRROFORN}</p>
+                            </td>
+                            <td className="tdPdf">Transportadora/Telefone: <br /><p className="tdPdf">{dadoPrincipal?.NOMETRANSPORTADORA} - </p>
                             </td>
                         </tr>
                     </tbody>
@@ -163,88 +257,18 @@ export const ActionNotaPDFSemPreco = ({ dadosPedidoSemPreco, dadosDetalhePedido 
                 <table width="100%" className="bordasimples">
                     <tbody>
                         <tr>
-                            <td rowspan="2" width="400" style={{ fontSize: '0.563rem' }}>
-                                Calçados: andre.compras@grupotesouradeouro.com.br - (61) 99697-2844 <br />
-                                Faturamento: {dados[0]?.EEMAILFATURAMENTO} - {dados[0]?.NUTELFATURAMENTO}<br />
-                                Cobrança: {dados[0]?.EEMAILCOBRANCA} - {dados[0]?.NUTELCOBRANCA}<br />
-                                Financeiro: {dados[0]?.EEMAILFINANCEIRO} - {dados[0]?.NUTELFINANCEIRO}<br />
-                                Compras: {dados[0]?.EEMAILCOMPRAS} - {dados[0]?.NUTELCOMPRAS}<br />
-                                Cadastro: {dados[0]?.EEMAILCADASTRO} - {dados[0]?.NUTELCADASTRO}<br />
-                            </td>
-                            <td width="200" style={{ fontSize: '0.563rem' }}>CNPJ: <br />
-                                <p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.CNPJFORN}</p>
-                            </td>
-                            <td style={{ fontSize: '0.563rem' }}>Email: <br />
-                                <p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.EMAILFORN}</p>
-                            </td>
-                            <td width="100" style={{ fontSize: '0.563rem' }}>Tel: <br />
-                                <p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.FONEFORN}</p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" width="200" >INSC EST: <br />
-                                <p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.INSCESTFORN}</p>
-                            </td>
-                            <td style={{ fontSize: '0.563rem' }}>Cel: <br />
-                                <p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.FONEFORN}</p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-
-
-                <table width="100%" className="bordasimples">
-                    <tbody>
-                        <tr>
-                            <td width="200" style={{ fontSize: '0.563rem' }}>Data do Pedido: <br />
-                                <p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.DTPEDIDO}</p>
-                            </td>
-                            <td width="200" style={{ fontSize: '0.563rem' }}>Data da Entrega: <br />
-                                <p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.DTPREVENTREGAFORMATADA}</p>
-                            </td>
-                            <td style={{ fontSize: '0.563rem' }}>Endereço: <br /><p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.ENDFORN}</p> </td>
-                            <td style={{ fontSize: '0.563rem' }}>Complemento: <br /><p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.COMPFORN}</p> <strong></strong> </td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <table width="100%" className="bordasimples">
-                    <tbody>
-                        <tr>
-                            <td width="400" style={{ fontSize: '0.563rem' }}>
-                                Comprador: <br /><p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.NOMECOMPRADOR}</p>
-                            </td>
-                            <td style={{ fontSize: '0.563rem' }}>N°: <br />
-                                <p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.NUMEROFORN}</p>
-                            </td>
-                            <td style={{ fontSize: '0.563rem' }}>
-                                Bairro: <br /><p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.BAIRROFORN}</p>
-                            </td>
-                            <td style={{ fontSize: '0.563rem' }}>
-                                Transportadora/Telefone: <br /><p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.NOMETRANSPORTADORA} - </p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <table width="100%" className="bordasimples">
-                    <tbody>
-                        <tr>
-                            <td width="400" style={{ fontSize: '0.563rem' }}>
-                                Vendedor: <br /><p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.NOVENDEDOR}</p>
+                            <td width="400" className="tdPdf">
+                                Vendedor: <br /><p className="tdPdf">{dadoPrincipal?.NOVENDEDOR}</p>
                             </td>
 
-                            <td width="400" style={{ fontSize: '0.563rem' }}>
-                                Cidade: <br /><p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.CIDADEFORN}</p>
+                            <td width="400" className="tdPdf">
+                                Cidade: <br /><p className="tdPdf">{dadoPrincipal?.CIDADEFORN}</p>
                             </td>
-                            <td style={{ fontSize: '0.563rem' }}>
-                                Desc. I (%): <br /><p style={{ fontSize: '0.813rem', margin: '0px' }}>{formatMoeda(toFloat(dados[0]?.DESCPERC01))}</p>
+                            <td className="tdPdf">Desc. I (%): <br /><p className="tdPdf">{formatMoeda(toFloat(dadoPrincipal?.DESCPERC01))}</p>
                             </td>
-                            <td style={{ fontSize: '0.563rem' }}>
-                                Desc. II(%): <br /><p style={{ fontSize: '0.813rem', margin: '0px' }}>{formatMoeda(toFloat(dados[0]?.DESCPERC02))}</p>
+                            <td className="tdPdf">Desc. II(%): <br /><p className="tdPdf">{formatMoeda(toFloat(dadoPrincipal?.DESCPERC02))}</p>
                             </td>
-                            <td style={{ fontSize: '0.563rem' }}>
-                                Desc. III(%): <br /><p style={{ fontSize: '0.813rem', margin: '0px' }}>{formatMoeda(toFloat(dados[0]?.DESCPERC03))}</p>
+                            <td className="tdPdf">Desc. III(%): <br /><p className="tdPdf">{formatMoeda(toFloat(dadoPrincipal?.DESCPERC03))}</p>
                             </td>
                         </tr>
                     </tbody>
@@ -252,20 +276,20 @@ export const ActionNotaPDFSemPreco = ({ dadosPedidoSemPreco, dadosDetalhePedido 
 
                 <table width="100%" className="bordasimples">
                     <tbody><tr>
-                        <td width="400" style={{ fontSize: '0.563rem' }}>
-                            Cond. Pagamento: <br /><p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.DSCONDICAOPAG}</p>
+                        <td width="400" className="tdPdf">
+                            Cond. Pagamento: <br /><p className="tdPdf" >{dadoPrincipal?.DSCONDICAOPAG}</p>
                         </td>
 
-                        <td style={{ fontSize: '0.563rem' }}>
-                            CEP: <br /><p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.CEPFORN}</p>
+                        <td className="tdPdf">
+                            CEP: <br /><p className="tdPdf">{dadoPrincipal?.CEPFORN}</p>
                         </td>
-                        <td style={{ fontSize: '0.563rem' }}>
-                            UF: <br /><p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.UFFORN}</p>
+                        <td className="tdPdf">
+                            UF: <br /><p className="tdPdf">{dadoPrincipal?.UFFORN}</p>
                         </td>
-                        <td style={{ fontSize: '0.563rem' }}>
+                        <td className="tdPdf">
                             Frete: <br />
-                            <p style={{ fontSize: '0.813rem', margin: '0px' }}>
-                                {dados[0]?.dsTipoFretePedido}
+                            <p className="tdPdf">
+                                {dadoPrincipal?.dsTipoFretePedido}
                             </p>
                         </td>
                     </tr>
@@ -275,26 +299,27 @@ export const ActionNotaPDFSemPreco = ({ dadosPedidoSemPreco, dadosDetalhePedido 
                 <table width="100%" className="bordasimples">
                     <tbody>
                         <tr>
-                            <td width="400" style={{ fontSize: '0.563rem' }}>
-                                Observações: <br /><p style={{ fontSize: '0.563rem' }}>{dados[0]?.OBSPEDIDO} - {dados[0]?.OBSPEDIDO2} </p>
+                            <td width="400" className="tdPdf" >
+                                Observações: <p style={{fontFamily: 'Verdana', fontSize: '9px', margin: '0px', padding: '0px'}}>{dadoPrincipal?.OBSPEDIDO} - {dadoPrincipal?.OBSPEDIDO2} </p>
                             </td>
-                            <td style={{ fontSize: '0.563rem' }}>
-                                Fiscal: <br /><p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.dsTipoFiscalPedido}</p>
+                            <td className="tdPdf" >
+                                Fiscal: <p className="tdPdf" >{dadoPrincipal?.dsTipoFiscalPedido}</p>
                             </td>
-                            <td style={{ fontSize: '0.563rem' }}>
-                                Enviar: <br /><p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.dsTipoEnviar} </p>
+                            <td className="tdPdf" >
+                                Enviar: <p className="tdPdf" >{dadoPrincipal?.dsTipoEnviar} </p>
                             </td>
-                            <td style={{ fontSize: '0.563rem' }}>
-                                Tipo: <br /><p style={{ fontSize: '0.813rem', margin: '0px' }}>{dados[0]?.MODPEDIDO} </p>
+                            <td className="tdPdf" >
+                                Tipo: <p className="tdPdf" >{dadoPrincipal?.MODPEDIDO} </p>
                             </td>
-                            <td style={{ fontSize: '0.563rem' }}>
-                                Comissão: <br /><p style={{ fontSize: '0.813rem', margin: '0px' }}>{formatMoeda(toFloat(dados[0]?.PERCCOMISSAO))} </p>
+                            <td className="tdPdf" >
+                                Comissão: <p className="tdPdf" >{formatMoeda(toFloat(dadoPrincipal?.PERCCOMISSAO))} </p>
                             </td>
                         </tr>
                     </tbody>
                 </table>
 
                 <ActionListaDetalheSempreco dadosDetalhePedido={dadosDetalhePedido} />
+           
             </div>
         </Fragment>
     )

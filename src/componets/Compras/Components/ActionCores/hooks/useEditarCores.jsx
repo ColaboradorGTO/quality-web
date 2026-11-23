@@ -65,12 +65,21 @@ export const useEditarCores = ({dadosDetalheCores, usuarioLogado, optionsModulos
             });
             return;
         }
+        //  Produção
+        // const postData = {
+        //     IDCOR: Number(dadosDetalheCores[0]?.ID_COR),
+        //     IDGRUPOCOR: grupoCorSelecionado.value,
+        //     DSCOR: descricao,
+        //     STATIVO: statusSelecionado.value,
+        // }
 
         const postData = {
             IDCOR: Number(dadosDetalheCores[0]?.ID_COR),
             IDGRUPOCOR: grupoCorSelecionado.value,
             DSCOR: descricao,
+            DSSIGLA: '',
             STATIVO: statusSelecionado.value,
+            IDFUNCIONARIO: parseInt(usuarioLogado.id)
         }
 
         try {

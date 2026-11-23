@@ -23,13 +23,9 @@ export const ActionPesquisaNFE = ({ usuarioLogado }) => {
   const [fornecedorSelecionado, setFornecedorSelecionado] = useState("")
   const [numSerie, setNumSerie] = useState("")
   const [numNFE, setNumNFE] = useState("")
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(1000);
   const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
   const [modalVisivel, setModalVisivel] = useState(false);
-  const [dadosListaPedidosSemVinculoNFE, setDadosListaPedidosSemVinculoNFE] = useState([])
-  const [tabelaPedido, setTabelaPedido] = useState(false)
-  const [selectedIds, setSelectedIds] = useState([]);
+
 
   useEffect(() => {
     const dataAtual = getDataAtual()

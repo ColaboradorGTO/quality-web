@@ -1,5 +1,4 @@
 import React, { Fragment, useState, useEffect } from "react"
-import { MdAdd, MdOutlineEdit } from "react-icons/md";
 import { AiOutlineSearch } from "react-icons/ai";
 import { ActionMain } from "../../../../Actions/actionMain";
 import { InputField } from "../../../../Buttons/Input";
@@ -9,8 +8,6 @@ import { getDataAtual } from "../../../../../utils/dataAtual";
 import { get } from "../../../../../api/funcRequest";
 import { useQuery } from "react-query";
 import { animacaoCarregamento, fecharAnimacaoCarregamento, foiCancelado } from "../../../../../utils/animationCarregamento";
-import { useFetchData } from "../../../../../hooks/useFetchData";
-import { MultSelectActionAsync } from "../../../../Select/MultSelectActionAsync";
 import { FaDownload, FaUpload } from "react-icons/fa";
 import { MultSelectAction } from "../../../../Select/MultSelectAction";
 import * as XLSX from 'xlsx';
@@ -18,8 +15,7 @@ import { useCriarAlteracaoPreco } from "../hooks/useCriarAlteracaoPreco";
 import { ActionListaAlteracaoPrecoModal } from "./actionListaAlteracaoPrecoModal";
 import { ActionListaAlteracaoPreco } from "./actionListaAlteracaoPreco";
 import Swal from "sweetalert2";
-import { BsTrash } from "react-icons/bs";
-import { IoMdMenu } from "react-icons/io";
+
 
 export const ActionManualAlteracaoPreco = ({ usuarioLogado }) => {
   const [dataPesquisaInicio, setDataPesquisaInicio] = useState('');
@@ -27,26 +23,18 @@ export const ActionManualAlteracaoPreco = ({ usuarioLogado }) => {
   const [grupoSelecionado, setGrupoSelecionado] = useState('');
   const [subGrupoSelecionado, setSubGrupoSelecionado] = useState(null);
   const [listaPrecoSelecionada, setListaPrecoSelecionada] = useState(null);
-  const [responsavelSelcionado, setResponsavelSelecionado] = useState('');
   const [codBarra, setCodBarra] = useState('');
-  const [numeroAlteracao, setNumeroAlteracao] = useState('');
   const [descricaoProduto, setDescricaoProduto] = useState('');
   const [idProduto, setIdProduto] = useState('');
   const [precoInicial, setPrecoInicial] = useState('');
   const [precoFinal, setPrecoFinal] = useState('');
-  const [estruturaSelecionada, setEstruturaSelecionada] = useState([]);
-  const [subEstruturaSelecionada, setSubEstruturaSelecionada] = useState([]);
   const [produtosSelecionados, setProdutosSelecionados] = useState([]);
-  const [btnVisivel, setBtnVisivel] = useState(false);
   const [dadosAcumuladorProdutos, setDadosAcumuladorProdutos] = useState([]);
   const [precosNovos, setPrecosNovos] = useState({});
   const [selectAllChecked, setSelectAllChecked] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(1000);
   const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
   
   useEffect(() => {

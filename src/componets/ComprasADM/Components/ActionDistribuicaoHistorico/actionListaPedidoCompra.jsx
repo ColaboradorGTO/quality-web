@@ -3,25 +3,27 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { ButtonTable } from '../../../ButtonsTabela/ButtonTable';
 import { GrView } from 'react-icons/gr';
-import { FiSend } from 'react-icons/fi';
 import { get } from '../../../../api/funcRequest';
 import { ActionDetalhePedidoModal } from './actionDetalhePedidoModal';
-import { ActionListaDistribuicaoSugestoesHistorico } from './actionListaDistribuicaoSugestoesHistorico';
-import { ButtonType } from '../../../Buttons/ButtonType';
 import { useReactToPrint } from "react-to-print";
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import HeaderTable from '../../../Tables/headerTable';
+import Swal from 'sweetalert2';
+import axios from 'axios';
 
-export const ActionListaPedidoCompra = ({ show, dadosPedidosCompra }) => {
-  const [actionListaPedidos, setActionListaPedidos] = useState(true);
-  const [actionPedidoResumido, setActionPedidoResumido] = useState(true);
+export const ActionListaPedidoCompra = ({
+  show,
+  usuarioLogado,
+  optionsModulos,
+  dadosPedidosCompra,
+  setSelectedItens 
+}) => {
   const [rowClick, setRowClick] = useState(true);
   const [empresaSelecionada, setEmpresaSelecionada] = useState(null);
   const [modalDetalhePedido, setModalDetalhePedido] = useState(false);
   const [dadosDetalhePedido, setDadosDetalhePedido] = useState([]);
-  const [dadosSugestoesHistorico, setDadosSugestoesHistorico] = useState([]);
   const [globalFilterValue, setGlobalFilterValue] = useState('');
   const [selectedId, setSelectedId] = useState(null);
   const dataTableRef = useRef();
@@ -91,11 +93,13 @@ export const ActionListaPedidoCompra = ({ show, dadosPedidosCompra }) => {
             <div className="p-1">
               <ButtonTable
                 Icon={GrView}
-                cor={"success"}
+                cor={"primary"}
                 iconColor={"white"}
                 iconSize={20}
                 onClickButton={() => handleClickDetalhar(row)}
                 titleButton={"Visualizar Detalhes do Pedido"}
+                width="30px"
+                height="30px"
               />
             </div>
             <div className="custom-control custom-checkbox p-1">
@@ -104,6 +108,7 @@ export const ActionListaPedidoCompra = ({ show, dadosPedidosCompra }) => {
                 checked={selectedId === row.IDPEDIDOCOMPRA}
                 onChange={(e) => {
                   setSelectedId(e.target.checked ? row.IDPEDIDOCOMPRA : null);
+                  setSelectedItens(row.IDPEDIDOCOMPRA);
                 }}
                 selectionMode="single"
               />
@@ -128,27 +133,25 @@ export const ActionListaPedidoCompra = ({ show, dadosPedidosCompra }) => {
 
   const handleDetalhar = async (IDPEDIDOCOMPRA) => {
     try {
-      const response = await get(`/detalhe-distribuicao-compras?idResumoPedido=${IDPEDIDOCOMPRA}`);
-      setDadosDetalhePedido(response.data);
-      setModalDetalhePedido(true);
+      const response = await get(`/detalhe-distribuicao-compras?idPedido=${IDPEDIDOCOMPRA}`);
+      if (response.data && response.data.length > 0) {
+        setDadosDetalhePedido(response.data);
+        setModalDetalhePedido(true);
+      } else {
+        Swal.fire({
+          icon: 'info',
+          title: 'Sem detalhes',
+          text: 'Não foram encontrados detalhes para este pedido.',
+        })
+      }
     } catch (error) {
       console.error(error);
     }
   };
 
-  const handleClickCheck = async (IDPEDIDOCOMPRA) => {
-    try {
-      const response = await get(`/distribuicao-compras-sugestoes-historico?idPedidoCompra=${IDPEDIDOCOMPRA}`);
-      setDadosSugestoesHistorico(response);
-      return response.data;
-    } catch (error) {
-      console.log(error, "não foi possivel pegar os dados da tabela ");
-    }
-  };
-
   return (
     <Fragment>
-      <div className="panel" style={{ marginTop: "5rem" }}>
+      <div className="panel" >
         <div className="panel-hdr">
           <h2>Histórico da Distribuição de Compras </h2>
         </div>
@@ -162,7 +165,7 @@ export const ActionListaPedidoCompra = ({ show, dadosPedidosCompra }) => {
             exportToPDF={exportToPDF}
           />
         </div>
-        <div className="card mb-4" ref={dataTableRef}>
+        <div className="card" ref={dataTableRef}>
           <DataTable
             title="Histórico da Distribuição de Compras"
             value={dados}
@@ -173,7 +176,7 @@ export const ActionListaPedidoCompra = ({ show, dadosPedidosCompra }) => {
             sortOrder={-1}
             paginator={true}
             rows={10}
-            rowsPerPageOptions={[10, 20, 50, 100, dados.length]}
+            rowsPerPageOptions={[10, 20, 30, 40, 50, 100, dados.length]}
             showGridlines
             stripedRows
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
@@ -194,20 +197,7 @@ export const ActionListaPedidoCompra = ({ show, dadosPedidosCompra }) => {
             ))}
           </DataTable>
 
-          <ButtonType
-            textButton={"Pesquisar"}
-            Icon={FiSend}
-            cor={"primary"}
-            iconColor={"white"}
-            iconSize={20}
-            onClickButtonType={() => {
-              if (selectedId) {
-                handleClickCheck(selectedId);
-              } else {
-                alert("Selecione um pedido para pesquisar.");
-              }
-            }}
-          />
+      
         </div>
       </div>
 
@@ -217,9 +207,11 @@ export const ActionListaPedidoCompra = ({ show, dadosPedidosCompra }) => {
         dadosDetalhePedido={dadosDetalhePedido}
       />
 
-      <ActionListaDistribuicaoSugestoesHistorico
+      {/* <ActionListaDistribuicaoSugestoesHistorico
         dadosSugestoesHistorico={dadosSugestoesHistorico}
-      />
+      /> */}
+
+
     </Fragment>
   );
 };

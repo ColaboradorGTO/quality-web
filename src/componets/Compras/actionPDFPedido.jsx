@@ -139,6 +139,8 @@ export const ActionPDFPedido = ({ show, handleClose, dadosPedido }) => {
           onClickButtonCadastrar
           textButtonCadastrar={"Salvar"}
           corCadastrar={"success"}
+          loadingTextCadastrar={"Cadastrando..."}
+          autoLoadingCadastrar={true}
         />
       </Modal>
 

@@ -56,16 +56,8 @@ export const ActionPesquisaOrdemTransferencia = ({ usuarioLogado, menuFilhoAtual
     { staleTime: 5 * 60 * 1000 }
   );
 
-  const handleSelectEmpresaOrigem = (opt) => {
-    setEmpresaSelecionadaOrigem(opt ?? null);
-  }
-
-  const handleSelectEmpresaDestino = (opt) => {
-    setEmpresaSelecionadaDestino(opt ?? null);
-  }
-
   const fetchListaConferencia = async () => {
-    const urlBase = `/listaOrdemTransferenciaConferenciaCega?idEmpresaOrigem=${empresaSelecionadaOrigem.value}&idEmpresaDestino=${empresaSelecionadaDestino.value}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idtipofiltro=1`;
+    const urlBase = `/listaOrdemTransferenciaConferenciaCega?idEmpresaOrigem=${empresaSelecionadaOrigem}&idEmpresaDestino=${empresaSelecionadaDestino}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}`;
     let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
     urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
     try {
@@ -103,6 +95,19 @@ export const ActionPesquisaOrdemTransferencia = ({ usuarioLogado, menuFilhoAtual
     { enabled: false, }
   );
 
+  const handleSelectEmpresaOrigem = (e) => {
+    const selectedId = e.value;
+    if (selectedId) {
+      setEmpresaSelecionadaOrigem(selectedId);
+    }
+  }
+
+  const handleSelectEmpresaDestino = (e) => {
+    const selectedId = e.value;
+    if (selectedId) {
+      setEmpresaSelecionadaDestino(selectedId);
+    }
+  }
 
   const handleClick = () => {
     setCurrentPage(prevPage => prevPage + 1);
@@ -145,9 +150,8 @@ export const ActionPesquisaOrdemTransferencia = ({ usuarioLogado, menuFilhoAtual
           ...dadosEmpresa.map((empresa) => ({
             value: empresa.IDEMPRESA,
             label: empresa.NOFANTASIA,
-            isDisabled: empresa.IDEMPRESA === empresaSelecionadaOrigem.value
           }))]}
-        valueSelectEmpresa={empresaSelecionadaDestino}
+        valueSelectEmpresa={empresaSelecionadaOrigem}
         onChangeSelectEmpresa={handleSelectEmpresaDestino}
 
         ButtonSearchComponent={ButtonType}

@@ -9,7 +9,7 @@ import { AiOutlineSearch } from "react-icons/ai";
 import { ActionListaPrecoProdutoGrupoSubGrupo } from "./actionListaPrecoProdutoGrupoSubGrupo";
 import { getDataAtual } from "../../../../utils/dataAtual";
 import { useQuery } from "react-query";
-import { animacaoCarregamento, fecharAnimacaoCarregamento, foiCancelado } from "../../../../utils/animationCarregamento";
+import { animacaoCarregamento, fecharAnimacaoCarregamento } from "../../../../utils/animationCarregamento";
 
 
 export const ActionPesquisaPrecoProdutoGrupoSubGrupo = () => {
@@ -74,7 +74,7 @@ export const ActionPesquisaPrecoProdutoGrupoSubGrupo = () => {
 
       return response.data;
     },
-    { enabled: Boolean(grupoSelecionado) }
+    { enabled: Boolean(grupoSelecionado)}
   );
 
 
@@ -88,40 +88,35 @@ export const ActionPesquisaPrecoProdutoGrupoSubGrupo = () => {
     { enabled: true, staleTime: 5 * 60 * 1000, }
   );
 
+  console.log(dadosFornecedor, 'dadosFornecedor')
+
   const fetchEstoque = async () => {
     const urlBase = `/produtosPrecosEstoquesLojas?dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}&idMarca=${marcaSelecionada}&idEmpresa=${empresaSelecionada}&descricaoProduto=${descricaoProduto}&ufPesquisa=${ufSelecionado}&idFornecedor=${fornecedorSelecionado}&idGrupo=${grupoSelecionado}&idGrade=${subGrupoSelecionado}&idMarcaProduto=${produtoPesquisado}&vlPrecoProduto=${precoProduto}`;
     let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
     urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
-    const controller = new AbortController();
-    let allData = [];
-
     try {
-      animacaoCarregamento('Carregando dados...', true, true, () => controller.abort());
+      animacaoCarregamento('Carregando dados...', true);
 
       const primeiraPagina = 1;
-      const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`, { signal: controller.signal });
+      const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`);
       const page = primeiraResposta.page || primeiraPagina;
       const pageSize = primeiraResposta.pageSize || 1000;
       const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
       const totalPages = Math.ceil(totalRows / pageSize);
 
-      allData = [...(primeiraResposta.data || [])];
+      let allData = [...(primeiraResposta.data || [])];
 
       if (totalPages > 1) {
         for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
-          if (foiCancelado()) break;
-          animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true, true);
-          const responsePage = await get(`${urlApi}&page=${currentPage}`, { signal: controller.signal });
+          animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true);
+          const responsePage = await get(`${urlApi}&page=${currentPage}`);
           allData.push(...(responsePage.data || []));
         }
       }
 
       return allData;
     } catch (error) {
-      if (error.code === 'ERR_CANCELED') {
-        return allData;
-      }
-      console.error('Erro ao buscar dados:', error);
+      console.error('Erro ao buscar dados da api:', error);
       throw error;
     } finally {
       fecharAnimacaoCarregamento();
@@ -141,29 +136,29 @@ export const ActionPesquisaPrecoProdutoGrupoSubGrupo = () => {
 
   const handleEmpresaChange = (selectedOptions) => {
     const values = (selectedOptions || [])
-      .map((option) => option.value)
-      .filter((value) => value !== '' && value !== null && value !== undefined);
+    .map((option) => option.value)
+    .filter((value) => value !== '' && value !== null && value !== undefined);
     setEmpresaSelecionada(values);
   }
 
   const handleGrupoChange = (selectedOptions) => {
     const values = (selectedOptions || [])
-      .map((option) => option.value)
-      .filter((value) => value !== '' && value !== null && value !== undefined);
+    .map((option) => option.value)
+    .filter((value) => value !== '' && value !== null && value !== undefined);
     setGrupoSelecionado(values);
   }
 
   const handleSubGrupoChange = (selectedOptions) => {
     const values = (selectedOptions || [])
-      .map((option) => option.value)
-      .filter((value) => value !== '' && value !== null && value !== undefined);
+    .map((option) => option.value)
+    .filter((value) => value !== '' && value !== null && value !== undefined);
     setSubGrupoSelecionado(values);
   }
 
   const handleFornecedorChange = (selectedOptions) => {
     const values = (selectedOptions || [])
-      .map((option) => option.value)
-      .filter((value) => value !== '' && value !== null && value !== undefined);
+    .map((option) => option.value)
+    .filter((value) => value !== '' && value !== null && value !== undefined);
     setFornecedorSelecionado(values);
   }
 

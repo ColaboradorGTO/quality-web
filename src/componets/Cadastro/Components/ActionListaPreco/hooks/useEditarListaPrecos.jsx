@@ -1,15 +1,13 @@
 import Swal from "sweetalert2"
 import { useEffect, useState } from "react"
-import axios from "axios"
-import { get, put, post } from "../../../../../api/funcRequest"
+import { get, put } from "../../../../../api/funcRequest"
 import { situacao } from "../../../../../../parceiro.json"
 import { useQuery } from "react-query"
-
+import { registrarLogAuditoria } from "../../../../../services/auditLog"
 
 export const useEditarListaPrecos = ({ optionsModulos, usuarioLogado, dadosListaLoja, handleClose, refetchListaPreco }) => {
   const [descricao, setDescricao] = useState('')
   const [statusSelecionado, setStatusSelecionado] = useState([])
-  const [ipUsuario, setIpUsuario] = useState('');
   const [empresaSelecionada, setEmpresaSelecionada] = useState([]);
   const [nomeListaPreco, setNomeListaPreco] = useState('');
   const [selectedIds, setSelectedIds] = useState([]);
@@ -44,30 +42,6 @@ export const useEditarListaPrecos = ({ optionsModulos, usuarioLogado, dadosLista
       }
     }
   }, [dadosListaLoja, dadosEmpresas]);
-
-
-
-  const getIPUsuario = async () => {
-    let usuarioIP = null;
-
-    try {
-      const { data: ipWhoisData } = await axios.get("https://ifconfig.me/ip");
-      usuarioIP = ipWhoisData?.ip;
-    } catch (error) {
-      console.error("Erro ao buscar IP via ifconfig.me:", error);
-    }
-
-    if (!usuarioIP) {
-      try {
-        const { data: ipifyData } = await axios.get("https://api.ipify.org?format=json");
-        usuarioIP = ipifyData?.ip;
-      } catch (error) {
-        console.error("Erro ao buscar IP via ipify.org:", error);
-      }
-    }
-    setIpUsuario(usuarioIP);
-    return usuarioIP;
-  };
 
   useEffect(() => {
     if (dadosListaLoja && dadosListaLoja.length > 0) {
@@ -146,29 +120,14 @@ export const useEditarListaPrecos = ({ optionsModulos, usuarioLogado, dadosLista
       return;
     }
 
-    // const loadingAlert = Swal.fire({
-    //   title: 'Atualizando...',
-    //   text: 'Por favor aguarde.',
-    //   allowOutsideClick: false,
-    //   didOpen: () => {
-    //     Swal.showLoading();
-    //   }
-    // });
-
     try {
       const response = await put('/lista-de-preco/:id', dadosLista);
 
-      const textDados = JSON.stringify(dadosLista);
-      const textFuncao = 'CADASTRO / ALTERAÇÃO DE LISTA DE PREÇOS';
-      const ipUsuario = await getIPUsuario();
-      const createtLog = {
-        IDFUNCIONARIO: String(usuarioLogado.id),
-        PATHFUNCAO: textFuncao,
-        DADOS: textDados,
-        IP: ipUsuario || 'Indisponível'
-      };
-
-      await post('/log-web', createtLog);
+      await registrarLogAuditoria({
+        idFuncionario: usuarioLogado?.id,
+        pathFuncao: 'CADASTRO / ALTERAÇÃO DE LISTA DE PREÇOS',
+        dados: dadosLista
+      })
 
       Swal.fire({
         icon: 'success',
@@ -186,17 +145,12 @@ export const useEditarListaPrecos = ({ optionsModulos, usuarioLogado, dadosLista
     } catch (error) {
       console.error('Erro ao atualizar lista de preço:', error);
 
-      const textDados = JSON.stringify(dadosLista);
-      let textFuncao = 'CADASTRO / ERRO AO ALTERAR DE LISTA DE PREÇOS';
-      const ipUsuario = await getIPUsuario();
-      const createtLog = {
-        IDFUNCIONARIO: String(usuarioLogado.id),
-        PATHFUNCAO: textFuncao,
-        DADOS: textDados,
-        IP: ipUsuario || 'Indisponível'
-      };
-
-      await post('/log-web', createtLog);
+      await registrarLogAuditoria({
+        idFuncionario: usuarioLogado?.id,
+        pathFuncao: 'CADASTRO / ERRO AO ALTERAR DE LISTA DE PREÇOS',
+        dados: dadosLista
+      })
+      
       Swal.fire({
         icon: 'error',
         title: 'Erro',
@@ -205,8 +159,8 @@ export const useEditarListaPrecos = ({ optionsModulos, usuarioLogado, dadosLista
           container: 'custom-swal',
         },
       });
+      return;
     }
-
   }
 
 

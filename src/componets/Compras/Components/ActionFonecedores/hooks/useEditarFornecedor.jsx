@@ -400,8 +400,8 @@ export const useEditarFornecedor = ({dadosDetalheFornecedor, handleClose, usuari
                 }
             })
             await post('/log-web', createtLog)
-
-
+            handleClick()
+            handleFechar()
             return response.data;
         } catch (error) {
             const textDados = JSON.stringify(postData)

@@ -47,7 +47,7 @@ export const ActionPesquisaStatusDivergencia = ({ usuarioLogado }) => {
   const { data: dadosStatus = [], error: errorStatus, isLoading: isLoadingStatus, refetch: refetchStatus } = useQuery(
     'status-divergencia',
     async () => {
-      const response = await get(`/status-divergencia?dataInicio=${dataPesquisaInicio}&dataFim=${dataPesquisaFim}`);
+      const response = await get(`/status-divergencia`);
       return response.data;
     },
     { staleTime: 5 * 60 * 1000 }
@@ -56,7 +56,7 @@ export const ActionPesquisaStatusDivergencia = ({ usuarioLogado }) => {
   const handleClick = () => {
     setClickContador(prevContador => prevContador + 1);
     if (usuarioLogado && usuarioLogado.IDEMPRESA) {
-      refetchStatus()
+      refetchStatus();
       setTabelaVisivel(true);
     } else {
       console.log('Usuário não possui informações válidas.');

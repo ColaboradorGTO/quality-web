@@ -41,7 +41,8 @@ export const useExcluirVinculoPedido = ({usuarioLogado, optionsModulos, handleCl
             });
             return;
         }
-        console.log(row, 'row')
+    
+      
         Swal.fire({
           title: `Certeza que Deseja Excluir o Vínculo da Categoria?`,
           text: 'Você não poderá reverter a ação!',
@@ -50,12 +51,13 @@ export const useExcluirVinculoPedido = ({usuarioLogado, optionsModulos, handleCl
           showConfirmButton: true,
           cancelButtonText: 'Cancelar',
           confirmButtonText: 'OK',
+          buttonsStyling: false,
           customClass: {
-            confirmButton: 'btn btn-primary',
-            cancelButton: 'btn btn-danger',
+            confirmButton: 'btn btn-primary mr-2',
+            cancelButton: 'btn btn-danger ml-2',
             loader: 'custom-loader'
           },
-          buttonsStyling: false
+      
         }).then(async (result) => {
           if (result.isConfirmed) {
             try {
@@ -85,7 +87,7 @@ export const useExcluirVinculoPedido = ({usuarioLogado, optionsModulos, handleCl
                     timer: 5000,
                     showConfirmButton: false,
                 });
-    
+                handleClick()
                 return response.data;
             } catch (error) {
                 const putData = {

@@ -4,7 +4,7 @@ import { HeaderModal } from "../../../../Modais/HeaderModal/HeaderModal"
 import { FormularioCadastrar } from "./formularioCadastrar"
 
 
-export const ActionCadastroPromocaoModal = ({ show, handleClose }) => {
+export const ActionCadastroPromocaoModal = ({ show, handleClose, usuarioLogado, optionsModulos }) => {
   return (
 
     <Fragment>
@@ -24,7 +24,11 @@ export const ActionCadastroPromocaoModal = ({ show, handleClose }) => {
         />
 
         <Modal.Body>
-          <FormularioCadastrar handleClose={handleClose} />
+          <FormularioCadastrar 
+            handleClose={handleClose} 
+            usuarioLogado={usuarioLogado} 
+            optionsModulos={optionsModulos} 
+          />
         </Modal.Body>
 
       </Modal>

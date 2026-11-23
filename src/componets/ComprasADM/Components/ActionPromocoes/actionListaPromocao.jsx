@@ -13,14 +13,17 @@ import { useReactToPrint } from "react-to-print";
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import Swal from "sweetalert2";
 
-export const ActionListaPromocao = ({ dadosListaPromocao }) => {
+export const ActionListaPromocao = ({ dadosListaPromocao, usuarioLogado, optionsModulos }) => {
   const [dadosListaPromocaoEmpresa, setDadosListaPromocaoEmpresa] = useState([])
   const [modalVisivel, setModalVisivel] = useState(false)
   const [dadosProdutoOrigem, setDadosProdutoOrigem] = useState([])
   const [dadosProdutoDestino, setDadosProdutoDestino] = useState([])
+  const [dadosProdutoPromocao, setDadosProdutoPromocao] = useState([])
   const [modalDetalhePromocaoVisivel, setModalDetalhePromocaoVisivel] = useState(false)
   const [globalFilterValue, setGlobalFilterValue] = useState('');
+  const [rowSelection, setRowSelection] = useState(null);
   const dataTableRef = useRef();
 
   const onGlobalFilterChange = (e) => {
@@ -84,8 +87,8 @@ export const ActionListaPromocao = ({ dadosListaPromocao }) => {
     return {
       contador,
       DSPROMOCAOMARKETING: item.DSPROMOCAOMARKETING,
-      DTHORAINICIOFORMAT2: item.DTHORAINICIOFORMAT2,
-      DTHORAFIMFORMAT2: item.DTHORAFIMFORMAT2,
+      DTHORAINICIOFORMAT2: item.DTHORAINICIO,
+      DTHORAFIMFORMAT2: item.DTHORAFIM,
       TPAPLICADOA: item.TPAPLICADOA,
       APARTIRDEQTD: item.APARTIRDEQTD,
       APARTIRDOVLR: item.APARTIRDOVLR,
@@ -93,7 +96,8 @@ export const ActionListaPromocao = ({ dadosListaPromocao }) => {
       FATORPROMOPERC: item.FATORPROMOPERC,
       TPAPARTIRDE: item.TPAPARTIRDE,
       VLPRECOPRODUTO: item.VLPRECOPRODUTO,
-
+      STATIVO: item.STATIVO == 'True' ? 'Ativa' : 'Inativa',
+      STPRODUTO: item.STPRODUTO,  
       TPFATORPROMO: item.TPFATORPROMO,
       IDRESUMOPROMOCAOMARKETING: item.IDRESUMOPROMOCAOMARKETING,
     }
@@ -170,6 +174,12 @@ export const ActionListaPromocao = ({ dadosListaPromocao }) => {
       sortable: true,
     },
     {
+      field: 'STATIVO',
+      header: 'Status',
+      body: row => <th style={{color: row.STATIVO === 'Ativa' ? 'blue' : 'red'}}>{row.STATIVO}</th>,
+      sortable: true,
+    },
+    {
       field: 'IDRESUMOPROMOCAOMARKETING',
       header: 'Opções',
       width: '10%',
@@ -181,10 +191,11 @@ export const ActionListaPromocao = ({ dadosListaPromocao }) => {
               titleButton={"Detalhar Empresas da Promoção"}
               onClickButton={() => handleClickDetalhar(row)}
               Icon={FaRegBuilding}
-              iconSize={18}
+              iconSize={20}
               iconColor={"#fff"}
               cor={"success"}
-
+              width="30px"
+              height="30px"
             />
 
           </div>
@@ -193,9 +204,12 @@ export const ActionListaPromocao = ({ dadosListaPromocao }) => {
               titleButton={"Detalhar Produtos da Promoção"}
               onClickButton={() => handleClickDetalharProduto(row)}
               Icon={FaProductHunt}
-              iconSize={18}
+              iconSize={20}
               iconColor={"#fff"}
               cor={"info"}
+              width="30px"
+              height="30px"
+              // disabledBTN={row.STPRODUTO == 'False' || row.STPRODUTO == null}
             />
 
           </div>
@@ -209,12 +223,19 @@ export const ActionListaPromocao = ({ dadosListaPromocao }) => {
 
   const handleDetalhar = async (IDRESUMOPROMOCAOMARKETING) => {
 
-    try {
-      const response = await get(`/listaEmpresaPromocoes?idResumoPromocoes${IDRESUMOPROMOCAOMARKETING}`)
+    try {                                               
+      const response = await get(`/empresa-promocoes-ativas?idResumoPromocao=${IDRESUMOPROMOCAOMARKETING}`)
+      
       if (response.data && response.data.length > 0) {
         setDadosListaPromocaoEmpresa(response.data)
 
         setModalVisivel(true);
+      } else {
+        Swal.fire({
+          icon: 'info',
+          title: 'Nenhum resultado encontrado',
+          text: 'Não foram encontradas empresas para esta promoção.',
+        })
       }
     } catch (error) {
       console.error('Erro ao buscar detalhes da venda: ', error);
@@ -230,12 +251,20 @@ export const ActionListaPromocao = ({ dadosListaPromocao }) => {
   const handleDetalharProduto = async (IDRESUMOPROMOCAOMARKETING) => {
 
     try {
-      const response = await get(`/listaProdutosOrigemPromocoes?idResumoPromocoes${IDRESUMOPROMOCAOMARKETING}`)
-      const response2 = await get(`/listaProdutoDestinoPromocoes?idResumoPromocoes${IDRESUMOPROMOCAOMARKETING}`)
-      setDadosProdutoDestino(response2.data)
+      const response = await get(`/detalhe-promocoes-ativas?idResumoPromocao=${IDRESUMOPROMOCAOMARKETING}`)
+      // const response2 = await get(`/listaProdutoDestinoPromocoes?idResumoPromocoes=${IDRESUMOPROMOCAOMARKETING}`)
+      // setDadosProdutoDestino(response2.data)
+      // console.log('Resposta da API para detalhes da promoção: ', response.data[0]?.ResumoPromocao);
       if (response.data && response.data.length > 0) {
         setDadosProdutoOrigem(response.data)
+        setDadosProdutoPromocao(response.data)
         setModalDetalhePromocaoVisivel(true);
+      } else {
+        Swal.fire({
+          icon: 'info',
+          title: 'Nenhum resultado encontrado',
+          text: 'Não foram encontrados produtos para esta promoção.',
+        })
       }
     } catch (error) {
       console.error('Erro ao buscar detalhes da venda: ', error);
@@ -243,14 +272,22 @@ export const ActionListaPromocao = ({ dadosListaPromocao }) => {
   };
 
   const handleClickDetalharProduto = (row) => {
-    if (row && row.IDRESUMOPROMOCAOMARKETING) {
-      handleDetalharProduto(row.IDRESUMOPROMOCAOMARKETING);
+    if(optionsModulos[0]?.ALTERAR == 'False') {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Acesso Negado!',
+        html: `${usuarioLogado?.NOFUNCIONARIO} <br/> Você não tem permissão para alterar os produtos da promoção`,
+      })
+    } else { 
+      if (row && row.IDRESUMOPROMOCAOMARKETING) {
+        handleDetalharProduto(row.IDRESUMOPROMOCAOMARKETING);
+      }
     }
   };
 
   return (
     <Fragment>
-      <div className="panel" style={{ marginTop: "5rem" }}>
+      <div className="panel" >
         <div className="panel-hdr">
           <h2>Lista de Promoções </h2>
         </div>
@@ -264,15 +301,21 @@ export const ActionListaPromocao = ({ dadosListaPromocao }) => {
             exportToPDF={exportToPDF}
           />
         </div>
-        <div className="card mb-4" ref={dataTableRef}>
+        <div className="card" ref={dataTableRef}>
           <DataTable
             title="Progamação Promoções"
             value={dadosPromocao}
-            size="small"
             globalFilter={globalFilterValue}
+            size="small"
+            selectionMode="single"
+            selection={rowSelection}
+            onSelectionChange={(e) => setRowSelection(e.value)}
             paginator={true}
             rows={10}
             rowsPerPageOptions={[10, 20, 50, 100, dadosPromocao.length]}
+            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
+            filterDisplay="menu"
             showGridlines
             stripedRows
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado </div>}
@@ -300,14 +343,18 @@ export const ActionListaPromocao = ({ dadosListaPromocao }) => {
         handleClose={() => setModalVisivel(false)}
         dadosListaPromocaoEmpresa={dadosListaPromocaoEmpresa}
         dadosListaPromocao={dadosListaPromocao}
+        usuarioLogado={usuarioLogado}
+        optionsModulos={optionsModulos}
       />
 
       <ActionDetalheProdutoPromocao
         show={modalDetalhePromocaoVisivel}
         handleClose={() => setModalDetalhePromocaoVisivel(false)}
-        dadosProdutoOrigem={dadosProdutoOrigem}
-        dadosProdutoDestino={dadosProdutoDestino}
+        dadosProdutoPromocao={dadosProdutoPromocao}
         dadosListaPromocao={dadosListaPromocao}
+        usuarioLogado={usuarioLogado}
+        optionsModulos={optionsModulos}
+
       />
     </Fragment>
   )

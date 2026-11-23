@@ -393,15 +393,6 @@
   "optionsFormaPagamento": [
     { "value": "PIX", "label": "PIX" },
     { "value": "TED", "label": "TED" },
-    { "value": "TRANSFERENCIA", "label": "Transferência" },
-    { "value": "DINHEIRO", "label": "Dinheiro" },
-    { "value": "CARTAO", "label": "Cartão" },
-    { "value": "BOLETO", "label": "Boleto" },
-    { "value": "CHEQUE", "label": "Cheque" }
-  ],
-  "optionsAndamento": [
-    {"value": "APROVADO", "label": "APROVADO" },
-    {"value": "REPROVADO", "label": "REPROVADO" },
-    {"value": "PENDENTE", "label": "PENDENTE" }
+    { "value": "TRANSFERENCIA", "label": "Transferência" }
   ]
 }

@@ -215,7 +215,7 @@ export const ActionListaTransportador = ({
           <DataTable
             title="Transportadoras"
             value={dados}
-            globalFilterValue={globalFilterValue}
+            globalFilter={globalFilterValue}
             size="small"
             selectionMode="single"
             selection={rowSelection}
