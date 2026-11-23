@@ -1,0 +1,1 @@
+const o=s=>{if(!/^\d{13}$/.test(s))return!1;const i=s.split("").map(Number),c=i.slice(0,12).filter((e,t)=>t%2===0).reduce((e,t)=>e+t,0),r=i.slice(0,12).filter((e,t)=>t%2!==0).reduce((e,t)=>e+t,0)*3;return(10-(c+r)%10)%10===i[12]};export{o as i};

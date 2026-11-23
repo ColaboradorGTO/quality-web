@@ -16,7 +16,7 @@ import { InputSelectAction } from "../../Inputs/InputSelectAction";
 import { ActionMain } from "../../Actions/actionMain";
 import { useFetchData } from "../../../hooks/useFetchData";
 
-export const ActionPesquisaCreateVoucher = ({ usuarioLogado, ID }) => {
+export const ActionPesquisaCreateVoucher = ({ usuarioLogado, menuFilhoAtual }) => {
   const [actionPrincipal, setActionPrincipal] = useState(true);
   const [actionSecundaria, setActionSecundaria] = useState(false);
   const [tabelaVisivelVoucher, setTabelaVisivelVoucher] = useState(false);
@@ -29,7 +29,6 @@ export const ActionPesquisaCreateVoucher = ({ usuarioLogado, ID }) => {
   const [marcaSelecionado, setMarcaSelecionado] = useState('');
   const [dadosDetalheVoucherSelecionado, setDadosDetalheVoucherSelecionado] = useState([])
   const [modalVoucher, setModalVoucher] = useState(true);
-  const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
 
   const { data: optionsEmpresas = [] } = useFetchData('empresas', '/empresas');
 
@@ -53,13 +52,13 @@ export const ActionPesquisaCreateVoucher = ({ usuarioLogado, ID }) => {
   }, []);
 
 
-  useEffect(() => {
+/*   useEffect(() => {
     const menuSalvo = localStorage.getItem('menuFilhoSelecionado');
     if (menuSalvo) {
       const menuParsed = JSON.parse(menuSalvo);
       setMenuFilhoAtual(menuParsed);
     }
-  }, []);
+  }, []); */
 
   const { data: optionsModulos = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
     ['menus-usuario-excecao', menuFilhoAtual?.ID],
@@ -68,7 +67,7 @@ export const ActionPesquisaCreateVoucher = ({ usuarioLogado, ID }) => {
 
       return response.data;
     },
-    { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000, }
+    { enabled: Boolean(usuarioLogado?.id && menuFilhoAtual?.ID), staleTime: 5 * 60 * 1000, }
   );
 
 

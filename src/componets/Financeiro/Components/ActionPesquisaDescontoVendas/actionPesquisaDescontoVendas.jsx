@@ -12,6 +12,7 @@ import { ActionListaDescontoMotivoVenda } from "./actionListaDescontoMotivoVenda
 import { useQuery } from 'react-query';
 import { animacaoCarregamento, fecharAnimacaoCarregamento, foiCancelado } from "../../../../utils/animationCarregamento"
 import { useFetchData, useFetchEmpresas } from "../../../../hooks/useFetchData"
+import Swal from "sweetalert2"
 
 
 export const ActionPesquisaDescontoVendas = () => {

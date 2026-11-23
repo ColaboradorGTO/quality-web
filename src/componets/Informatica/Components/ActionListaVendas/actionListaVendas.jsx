@@ -95,6 +95,8 @@ export const ActionListaVendas = ({ dadosVendasLoja }) => {
       VRTOTALPAGO: item.VRTOTALPAGO,
       STCONTINGENCIA: item.STCONTINGENCIA == 'False' ? 'Contigência' : 'Emitida',
       STCONFERIDO: item.STCONFERIDO,
+      DEST_CPF: item.DEST_CPF,
+      DEST_CNPJ: item.DEST_CNPJ
 
     };
   });
@@ -148,6 +150,19 @@ export const ActionListaVendas = ({ dadosVendasLoja }) => {
       sortable: true,
 
     },
+    {
+      field: 'DEST_CPF',
+      header: 'CPF',
+      body: row => <th style={{ width: '100px', margin: '0px', fontWeight: 600 }}>{row.DEST_CPF}</th>,
+      sortable: true,
+    },
+    {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{ width: '100px', margin: '0px', fontWeight: 600 }}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
     {
       field: 'NFE_INFNFE_IDE_NNF',
       header: 'NFC-e',
@@ -257,7 +272,7 @@ export const ActionListaVendas = ({ dadosVendasLoja }) => {
     <ColumnGroup>
 
       <Row>
-        <Column footer="Total Vendas Ativas" colSpan={6} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem', textAlign: 'center' }} />
+        <Column footer="Total Vendas Ativas" colSpan={9} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem', textAlign: 'center' }} />
         <Column footer={formatMoeda(calcularTotalVendas())} colSpan={1} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={""} colSpan={4} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
       </Row>

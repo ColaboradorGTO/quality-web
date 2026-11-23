@@ -45,17 +45,22 @@ export const DashBoardEtiquetagem = () => {
     'menus-usuario',
     async () => {
       const response = await get(`/menus-usuario?idUsuario=${usuarioLogado?.id}&idModulo=${selectedModule?.ID}`);
-      
+
       return response.data;
     },
     { enabled: Boolean(usuarioLogado?.id), staleTime: 5 * 60 * 1000, }
   );
 
+  const menuFilhoResumo = selectedModule?.menuPai?.menuFilho?.find(
+    menu => menu.URL === "/etiquetagem/ActionPesquisaProdutoEtiqueta"
+  );
+
+
   let component = null;
 
   switch (componentToShow) {
     case "/etiquetagem/ActionPesquisaProdutoEtiqueta":
-      component = <ActionPesquisaProdutoEtiqueta usuarioLogado={usuarioLogado} />;
+      component = <ActionPesquisaProdutoEtiqueta usuarioLogado={usuarioLogado} menuFilhoAtual={menuFilhoResumo} />;
       break;
     default:
       component = null;
@@ -73,7 +78,7 @@ export const DashBoardEtiquetagem = () => {
                 handleShowComponent={handleShowComponent}
               />
               <div className="page-content-wrapper">
-                <HeaderMain optionsModulosPage={optionsModulosPage}/>
+                <HeaderMain optionsModulosPage={optionsModulosPage} />
 
                 <main id="js-page-content" role="main" className="page-content">
                   <div className="row">
@@ -82,7 +87,7 @@ export const DashBoardEtiquetagem = () => {
                         <div className="panel-container show">
                           <div className="panel-content">
                             <Suspense fallback={<div>Loading...</div>}>
-                              <ActionPesquisaProdutoEtiqueta usuarioLogado={usuarioLogado}/>
+                              <ActionPesquisaProdutoEtiqueta usuarioLogado={usuarioLogado} menuFilhoAtual={menuFilhoResumo} />
                               {componentToShow && component}
                             </Suspense>
                           </div>
@@ -101,6 +106,6 @@ export const DashBoardEtiquetagem = () => {
           </div>
         </SidebarProvider>
       )}
-   </Fragment>
+    </Fragment>
   )
 }

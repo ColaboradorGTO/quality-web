@@ -78,6 +78,10 @@ export const DashBoardCadastro = () => {
     setComponentToShow(componentName); 
   }
 
+const menuFilhoResumo = selectedModule?.menuPai?.menuFilho?.find(
+    menu => menu.URL === "/cadastro/ActionPesquisaHome"
+  );
+
   let component = null;
 
   // case "/cadastro/ReceberNFePedido":
@@ -85,7 +89,7 @@ export const DashBoardCadastro = () => {
   //   break;
   switch (componentToShow) {
     case "/cadastro/ActionPesquisaHome":
-      component = < ActionPesquisaHome usuarioLogado={usuarioLogado} />;
+      component = < ActionPesquisaHome usuarioLogado={usuarioLogado} menuFilhoAtual={menuFilhoResumo} />;
       break;
     case "/cadastro/ActionPesquisaProdutosAvulso":
       component = <ActionPesquisaProdutosAvulso usuarioLogado={usuarioLogado} />;

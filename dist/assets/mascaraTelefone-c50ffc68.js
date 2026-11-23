@@ -1,0 +1,1 @@
+const c=s=>s?(s=s.replace(/\D/g,""),s.length<=10?s.replace(/(\d{2})(\d{4})(\d{4})/,"($1) $2-$3"):s.replace(/(\d{2})(\d{1})(\d{4})(\d{4})/,"($1) $2 $3-$4")):"",d=s=>s?s.replace(/\D/g,""):"",n=s=>(s=String(s).replace(/\D/g,""),(s==null?void 0:s.length)<10?!1:/^(\(?\d{2}\)?\s?)?(\d{4,5}\-?\d{4})$/.test(s));export{c as m,d as r,n as v};

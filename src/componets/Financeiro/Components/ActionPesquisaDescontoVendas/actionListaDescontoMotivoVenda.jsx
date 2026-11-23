@@ -48,23 +48,23 @@ export const ActionListaDescontoMotivoVenda = ({ dadosDescontoMotivoVendas }) =>
     const workbook = XLSX.utils.book_new();
     const header = ['Venda', 'Data', 'Loja', 'Operador', 'Vr. Bruto', 'Vr Desconto', 'Vr. Pago', 'Motivo', 'Tipo Motivo'];
     worksheet['!cols'] = [
-      { wpx: 100, caption: 'Venda' }, 
-      { wpx: 150, caption: 'Data' }, 
-      { wpx: 200, caption: 'Loja' }, 
-      { wpx: 250, caption: 'Operador' }, 
-      { wpx: 100, caption: 'Vr. Bruto' }, 
-      { wpx: 100, caption: 'Vr. Desconto' }, 
-      { wpx: 100, caption: 'Vr. Pago' }, 
-      { wpx: 400, caption: 'Motivo' }, 
-      { wpx: 200, caption: 'Tipo Motivo' }, 
+      { wpx: 100, caption: 'Venda' },
+      { wpx: 150, caption: 'Data' },
+      { wpx: 200, caption: 'Loja' },
+      { wpx: 250, caption: 'Operador' },
+      { wpx: 100, caption: 'Vr. Bruto' },
+      { wpx: 100, caption: 'Vr. Desconto' },
+      { wpx: 100, caption: 'Vr. Pago' },
+      { wpx: 400, caption: 'Motivo' },
+      { wpx: 200, caption: 'Tipo Motivo' },
 
-      
-    ]; 
+
+    ];
     XLSX.utils.sheet_add_aoa(worksheet, [header], { origin: 'A1' });
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Motivo Desconta Vendas');
     XLSX.writeFile(workbook, 'motivo_desconto_venda.xlsx');
   };
-  
+
   const dadosExcel = Array.isArray(dadosDescontoMotivoVendas) ? dadosDescontoMotivoVendas.map((item, index) => {
     return {
       IDVENDA: item.IDVENDA,
@@ -76,6 +76,7 @@ export const ActionListaDescontoMotivoVenda = ({ dadosDescontoMotivoVendas }) =>
       TOTALLIQUIDO: toFloat(item.TOTALLIQUIDO),
       TXTMOTIVODESCONTO: item.TXTMOTIVODESCONTO,
       TIPODESCONTO: item.TIPODESCONTO,
+
     }
   }) : [];
 
@@ -117,6 +118,9 @@ export const ActionListaDescontoMotivoVenda = ({ dadosDescontoMotivoVendas }) =>
       TOTALLIQUIDO: toFloat(item.TOTALLIQUIDO),
       TXTMOTIVODESCONTO: item.TXTMOTIVODESCONTO,
       TIPODESCONTO: item.TIPODESCONTO,
+      DEST_CNPJ: item.DEST_CNPJ,
+      DEST_CPF: item.DEST_CPF,
+
     }
   })
 
@@ -124,35 +128,48 @@ export const ActionListaDescontoMotivoVenda = ({ dadosDescontoMotivoVendas }) =>
     {
       field: 'IDVENDA',
       header: 'Venda',
-      body: row => <p style={{ margin: 0, fontWeight: 600}}>{row.IDVENDA}</p>,
+      body: row => <p style={{ margin: 0, fontWeight: 600 }}>{row.IDVENDA}</p>,
       sortable: true,
     },
     {
+      field: 'DEST_CPF',
+      header: 'CPF',
+      body: row => <th style={{ margin: 0, fontWeight: 600 }}>{row.DEST_CPF}</th>,
+      sortable: true,
+    },
+    {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{ margin: 0, fontWeight: 600 }}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
+    {
       field: 'DTHORAFECHAMENTO',
       header: 'Data',
-      body: row => {return <p style={{width: 150, margin: 0, fontWeight: 600}}>{row.DTHORAFECHAMENTO}</p>},
+      body: row => { return <p style={{ width: 150, margin: 0, fontWeight: 600 }}>{row.DTHORAFECHAMENTO}</p> },
       sortable: true,
     },
     {
       field: 'NOFANTASIA',
       header: 'Loja',
-      body: row => {return <p style={{width: 200, margin: 0, fontWeight: 600}}>{row.NOFANTASIA}</p>},
+      body: row => { return <p style={{ width: 200, margin: 0, fontWeight: 600 }}>{row.NOFANTASIA}</p> },
       sortable: true,
     },
     {
       field: 'MATOPERADORFECHAMENTO',
       header: 'Operador',
-      body: row => <p style={{width: 200, margin: 0, fontWeight: 600}}>{`${row.MATOPERADORFECHAMENTO} - ${row.OPERADORFECHAMENTO}`}</p>,
+      body: row => <p style={{ width: 200, margin: 0, fontWeight: 600 }}>{`${row.MATOPERADORFECHAMENTO} - ${row.OPERADORFECHAMENTO}`}</p>,
       sortable: true,
     },
     {
       field: 'VALORTOTALPRODUTOBRUTO',
       header: 'Vl. Bruto',
-      body: row => {return <p style={{width: 150, margin: 0,fontWeight: 600}}>{formatMoeda(row.VALORTOTALPRODUTOBRUTO)}</p>},
+      body: row => { return <p style={{ width: 150, margin: 0, fontWeight: 600 }}>{formatMoeda(row.VALORTOTALPRODUTOBRUTO)}</p> },
       footer: (row) => {
         return (
           <div>
-            <p style={{ fontWeight: 600,margin: 0 }}>Total Venda Bruta:</p>
+            <p style={{ fontWeight: 600, margin: 0 }}>Total Venda Bruta:</p>
             <p style={{ fontWeight: 600, margin: 0 }}>{formatMoeda(calcularTotalBruto())}</p>
 
           </div>
@@ -163,7 +180,7 @@ export const ActionListaDescontoMotivoVenda = ({ dadosDescontoMotivoVendas }) =>
     {
       field: 'VRDESCONTO',
       header: 'Vl. Desconto',
-      body: row => {return <p style={{width: 150, margin: 0,fontWeight: 600}}>{formatMoeda(row.VRDESCONTO)}</p>},
+      body: row => { return <p style={{ width: 150, margin: 0, fontWeight: 600 }}>{formatMoeda(row.VRDESCONTO)}</p> },
       footer: (row) => {
         return (
           <div>
@@ -178,7 +195,7 @@ export const ActionListaDescontoMotivoVenda = ({ dadosDescontoMotivoVendas }) =>
     {
       field: 'TOTALLIQUIDO',
       header: 'Vl. Pago',
-      body: row => {return <p style={{width: 200, margin: 0, fontWeight: 600}}>{formatMoeda(row.TOTALLIQUIDO)}</p>},
+      body: row => { return <p style={{ width: 200, margin: 0, fontWeight: 600 }}>{formatMoeda(row.TOTALLIQUIDO)}</p> },
       footer: (row) => {
         return (
           <div>
@@ -192,13 +209,13 @@ export const ActionListaDescontoMotivoVenda = ({ dadosDescontoMotivoVendas }) =>
     {
       field: 'TXTMOTIVODESCONTO',
       header: 'Motivo',
-      body: row => {return <p style={{width: 200, margin: 0, fontWeight: 600}}>{row.TXTMOTIVODESCONTO}</p>},
+      body: row => { return <p style={{ width: 200, margin: 0, fontWeight: 600 }}>{row.TXTMOTIVODESCONTO}</p> },
       sortable: true,
     },
     {
       field: 'TIPODESCONTO',
       header: 'Tipo Motivo',
-      body: row => {return <p style={{width: 200, margin: 0, fontWeight: 600}}>{row.TIPODESCONTO}</p>},
+      body: row => { return <p style={{ width: 200, margin: 0, fontWeight: 600 }}>{row.TIPODESCONTO}</p> },
       sortable: true,
     }
   ]

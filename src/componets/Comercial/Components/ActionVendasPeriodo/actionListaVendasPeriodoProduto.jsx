@@ -113,6 +113,7 @@ export const ActionListaVendasPeriodoProduto = ({ dadosVendasConsolidadas }) => 
       CODPRODUTO: item.CODPRODUTO,
       DESCRICAO: item.DESCRICAO,
       NCM: item.NCM,
+
     }
   })
 

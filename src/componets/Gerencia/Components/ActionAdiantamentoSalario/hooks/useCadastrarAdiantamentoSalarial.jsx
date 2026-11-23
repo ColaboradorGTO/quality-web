@@ -6,7 +6,7 @@ import { useQuery } from "react-query";
 import { getDataAtual } from "../../../../../utils/dataAtual";
 import { removerFormatacaoMoeda } from "../../../../../utils/formatMoeda";
 
-export const useCadastrarAdiantamentoSalarial = ({ handleClose, optionsModulos, usuarioLogado }) => {
+export const useCadastrarAdiantamentoSalarial = ({ handleClose, optionsModulos, usuarioLogado, handleClick }) => {
   const [textoMotivo, setTextoMotivo] = useState('')
   const [valorDesconto, setValorDesconto] = useState(0)
   const [status, setStatus] = useState('')
@@ -107,6 +107,7 @@ export const useCadastrarAdiantamentoSalarial = ({ handleClose, optionsModulos, 
       setStatus('');
 
       handleClose();
+      handleClick();
 
 
       return response.data;

@@ -87,7 +87,10 @@ export const ActionListaVendasContingencia = ({ dadosVendasContigencia, optionsM
       VRTOTALPAGO: item.VRTOTALPAGO,
       PROTNFE_INFPROT_XMOTIVO: item.PROTNFE_INFPROT_XMOTIVO,
       IDCHAVENFE: item.IDCHAVENFE,
-      DTHORAFECHAMENTO: item.DTHORAFECHAMENTO
+      DTHORAFECHAMENTO: item.DTHORAFECHAMENTO,
+      DEST_CNPJ: item.DEST_CNPJ,
+      DEST_CPF: item.DEST_CPF,
+
     }
 
   })
@@ -117,6 +120,20 @@ export const ActionListaVendasContingencia = ({ dadosVendasContigencia, optionsM
       body: row => <th>{row.IDVENDA}</th>,
       sortable: true,
     },
+    {
+      field: 'DEST_CPF',
+      header: 'CPF',
+      body: row => <th style={{}}>{row.DEST_CPF}</th>,
+      sortable: true,
+    },
+    {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{}}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
+
     {
       field: 'SERIE',
       header: 'Série',

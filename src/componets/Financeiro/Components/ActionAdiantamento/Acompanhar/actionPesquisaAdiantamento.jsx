@@ -4,7 +4,6 @@ import { InputField } from "../../../../Buttons/Input"
 import { ButtonType } from "../../../../Buttons/ButtonType"
 import { InputSelectAction } from "../../../../Inputs/InputSelectAction"
 import { AiOutlineSearch } from "react-icons/ai"
-import { ActionCadastrarModal } from "../Solicitar/CadastrarSolicitacao/actionCadastrarModal"
 import { ActionListaAdiantamento } from "./actionListaAdiantamento"
 import { Departamentos } from "../../../../../../parceiro.json";
 import { Cards } from "../Cards/card"
@@ -88,7 +87,7 @@ export const ActionPesquisaAdiantamento = ({ usuarioLogado, ID }) => {
   const { data: dadosAdiantamentos = [], error: errorVendasConciliacao, isLoading: isLoadingVendasConciliacao, refetch } = useQuery(
     ['lista-adiantamento-departamento'],
     () => fetchListaVendasConciliacao(),
-    { enabled: false }
+    { enabled: false, staleTime: 60 *60  }
   );
 
   const { data: dadosDashboard = [], refetch: refetchDashboard } = useQuery(
@@ -96,6 +95,15 @@ export const ActionPesquisaAdiantamento = ({ usuarioLogado, ID }) => {
     () => fetchListaVendasConciliacao('', false),
     { enabled: false }
   );
+
+  useEffect(() => {
+    const intervalo = setInterval(() => {
+      refetchDashboard();
+      refetch()
+    }, 60000);
+
+    return () => clearInterval(intervalo);
+  }, [refetchDashboard, refetch]);
 
   const pesquisaPorCard = useRef(false);
 
@@ -189,11 +197,7 @@ export const ActionPesquisaAdiantamento = ({ usuarioLogado, ID }) => {
         corSearch={"primary"}
         IconSearch={AiOutlineSearch}
 
-      ButtonTypeCadastro={ButtonType}
-      linkNome={"Cadastrar"}
-      corCadastro={"success"}
-      onButtonClickCadastro={handleShowModal}
-      IconCadastro={IoMdAdd}
+  
       />
       <Cards
         dados={dadosAdiantamentos}
@@ -207,13 +211,6 @@ export const ActionPesquisaAdiantamento = ({ usuarioLogado, ID }) => {
         optionsModulos={optionsModulos}
         usuarioLogado={usuarioLogado}
         handleClick={handleClick}
-      />
-
-      <ActionCadastrarModal
-        show={modal}
-        handleClose={() => setModal(false)}
-        optionsModulos={optionsModulos}
-        usuarioLogado={usuarioLogado}
       />
 
     </Fragment>

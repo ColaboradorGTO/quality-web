@@ -10,6 +10,7 @@ import { useReactToPrint } from 'react-to-print';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import { FaGalacticSenate } from 'react-icons/fa';
 
 export const ActionListaVendasPCJ = ({ dadosVendasPCJ }) => {
   const [globalFilterValue, setGlobalFilterValue] = useState('');
@@ -81,7 +82,7 @@ export const ActionListaVendasPCJ = ({ dadosVendasPCJ }) => {
       NOFUNCIONARIO: item.caixa.NOFUNCIONARIO,
       TOTALPCJ18: toFloat(item.vendapcj[0]['venda-pcj'].TOTALPCJ18),
       TOTALPCJ78: toFloat(item.vendapcj[0]['venda-pcj'].TOTALPCJ78),
-      pcjTotal: toFloat(pcjTotal),
+      pcjTotal: pcjTotal.toFixed(2),
     };
   });
 
@@ -221,6 +222,7 @@ export const ActionListaVendasPCJ = ({ dadosVendasPCJ }) => {
             currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
             filterDisplay="menu"
             showGridlines
+            cellMemo={FaGalacticSenate}
             stripedRows
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado </div>}
           >

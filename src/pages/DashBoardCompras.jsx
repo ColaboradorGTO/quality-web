@@ -30,7 +30,7 @@ const ActionPesquisaProdutosPorPedido = lazy(() => import("../componets/Compras/
 
 export const DashBoardCompras = () => {
   const [usuarioLogado, setUsuarioLogado] = useState(null);
-  const [homeVisivel, setHomeVisivel ] = useState(true);
+  const [homeVisivel, setHomeVisivel] = useState(true);
   const [componentToShow, setComponentToShow] = useState("");
   const storedModule = localStorage.getItem('moduloselecionado');
   const selectedModule = JSON.parse(storedModule);
@@ -65,15 +65,19 @@ export const DashBoardCompras = () => {
     'menus-usuario',
     async () => {
       const response = await get(`/menus-usuario?idUsuario=${usuarioLogado?.id}&idModulo=${selectedModule?.ID}`);
-      
+
       return response.data;
     },
     { enabled: Boolean(usuarioLogado?.id), staleTime: 5 * 60 * 1000, }
   );
 
+  const menuFilhoResumo = selectedModule?.menuPai?.menuFilho?.find(
+    menu => menu.URL === "/compras/ActionPesquisaHome"
+  );
+
   const permissaoUsuario = selectedModule.menuPai.menuFilho;
-  const {   
-    ID, 
+  const {
+    ID,
   } = permissaoUsuario.map(item => ({
     ID: item.ID,
   })).reduce((acc, curr) => {
@@ -85,7 +89,7 @@ export const DashBoardCompras = () => {
 
   switch (componentToShow) {
     case "/compras/ActionPesquisaHome":
-      component = <ActionPesquisaHome usuarioLogado={usuarioLogado} ID={ID} />
+      component = <ActionPesquisaHome usuarioLogado={usuarioLogado} ID={ID} menuFilhoAtual={menuFilhoResumo} />
       break;
     case "/compras/ActionPesquisaNovoPedido":
       component = <ActionPesquisaNovoPedido usuarioLogado={usuarioLogado} ID={ID} />;
@@ -106,7 +110,7 @@ export const DashBoardCompras = () => {
     case "/compras/ActionPesquisaTransportador":
       component = <ActionPesquisaTransportador usuarioLogado={usuarioLogado} ID={ID} />;
       break;
-          
+
     case "/compras/ActionPesquisaCondicaoPagamento":
       component = <ActionPesquisaCondicaoPagamento usuarioLogado={usuarioLogado} ID={ID} />;
       break;
@@ -160,7 +164,7 @@ export const DashBoardCompras = () => {
                 handleShowComponent={handleShowComponent}
               />
               <div className="page-content-wrapper">
-                <HeaderMain optionsModulosPage={optionsModulosPage}/>
+                <HeaderMain optionsModulosPage={optionsModulosPage} />
 
                 <main id="js-page-content" role="main" className="page-content">
                   <div className="row">
@@ -171,7 +175,7 @@ export const DashBoardCompras = () => {
                             <Suspense fallback={<div>Loading...</div>}>
                               {homeVisivel && !componentToShow && (
 
-                                <ActionPesquisaHome />
+                                <ActionPesquisaHome menuFilhoAtual={menuFilhoResumo} />
                               )}
                               {componentToShow && component}
                             </Suspense>

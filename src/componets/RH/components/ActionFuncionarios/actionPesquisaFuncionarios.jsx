@@ -13,7 +13,7 @@ import { IoIosAdd } from "react-icons/io";
 import Swal from "sweetalert2";
 import { situacao } from "../../../../../parceiro.json";
 
-export const ActionPesquisaFuncionarios = ({ usuarioLogado, ID }) => {
+export const ActionPesquisaFuncionarios = ({ usuarioLogado, menuFilhoAtual }) => {
   const [tabelaVisivel, setTabelaVisivel] = useState(false);
   const [empresaSelecionada, setEmpresaSelecionada] = useState('');
   const [empresaSelecionadaNome, setEmpresaSelecionadaNome] = useState('');
@@ -21,24 +21,15 @@ export const ActionPesquisaFuncionarios = ({ usuarioLogado, ID }) => {
   const [cpfFiltro, setCpfFiltro] = useState("");
   const [situacaoSelecionada, setSituacaoSelecionada] = useState('');
   const [modalCadastro, setModalCadastro] = useState(false);
-  const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
 
-  useEffect(() => {
-    const menuSalvo = localStorage.getItem('menuFilhoSelecionado');
-    if (menuSalvo) {
-      const menuParsed = JSON.parse(menuSalvo);
-      setMenuFilhoAtual(menuParsed);
-    }
-  }, []);
-  
   const { data: optionsModulos = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
     ['menus-usuario-excecao', menuFilhoAtual?.ID],
     async () => {
-      const response = await get(`/menus-usuario-excecao?idUsuario=${usuarioLogado?.idFuncionario}&idMenuFilho=${ID}`);
-      
+      const response = await get(`/menus-usuario-excecao?idUsuario=${usuarioLogado?.idFuncionario}&idMenuFilho=${menuFilhoAtual?.ID}`);
+
       return response.data;
     },
-    { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000,}
+    { enabled: Boolean(usuarioLogado?.id && menuFilhoAtual?.ID), staleTime: 5 * 60 * 1000, }
   );
 
   const { data: optionsEmpresas = [], error: errorEmpresas, isLoading: isLoadingEmpresas } = useQuery(
@@ -153,7 +144,7 @@ export const ActionPesquisaFuncionarios = ({ usuarioLogado, ID }) => {
         valueSelectEmpresa={empresaSelecionada}
         onChangeSelectEmpresa={handlChangeEmpresa}
 
-         InputSelectGrupoComponent={InputSelectAction}
+        InputSelectGrupoComponent={InputSelectAction}
         optionsGrupos={situacao?.map((item) => ({
           value: item.value,
           label: item.label

@@ -15,7 +15,8 @@ import { ActionEditarPedido } from "./ActionEditarPedido/actionEditarPedido";
 import { ActionVisualizarPedido } from "./ActionVisualizar/actionVisualizarPedido";
  
 
-export const ActionPesquisaHome = ({ usuarioLogado }) => {
+
+export const ActionPesquisaHome = ({ usuarioLogado, ID, menuFilhoAtual }) => {
   const [actionHome, setActionHome] = useState(true)
   const [actionListaPedidos, setActionListaPedidos] = useState(true)
   const [actionPedidoResumido, setActionPedidoResumido] = useState(false)
@@ -31,8 +32,7 @@ export const ActionPesquisaHome = ({ usuarioLogado }) => {
   const [dadosVisualizarPedido, setDadosVisualizarPedido] = useState([]);
   const [dadosDetalhePedido, setDadosDetalhePedido] = useState([]);
   const [actionVisualizarPedido, setActionVisualizarPedido] = useState(false);
-  const [actionEditarPedido, setActionEditarPedido] = useState(false);
- 
+
   useEffect(() => {
     const dataInicial = getDataDoisMesesAtras();
     const dataFinal = getDataAtual();
@@ -41,24 +41,14 @@ export const ActionPesquisaHome = ({ usuarioLogado }) => {
   }, [])
 
 
-  useEffect(() => {
-    const menuSalvo = localStorage.getItem('menuFilhoSelecionado');
-    if (menuSalvo) {
-      const menuParsed = JSON.parse(menuSalvo);
-      setMenuFilhoAtual(menuParsed);
-      setActionHome(true)
-    }
-  }, [setActionHome]);
-
-  
   const { data: optionsModulos = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
     ['menus-usuario-excecao', menuFilhoAtual?.ID],
     async () => {
       const response = await get(`/menus-usuario-excecao?idUsuario=${usuarioLogado?.id}&idMenuFilho=${menuFilhoAtual?.ID}`);
-  
+
       return response.data;
     },
-    { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000, }
+    { enabled: Boolean(usuarioLogado?.id && menuFilhoAtual?.ID), staleTime: 5 * 60 * 1000, }
   );
 
   const { data: dadosFonecedores = [], error: errorFornecedor, isLoading: isLoadingFornecedo } = useQuery(

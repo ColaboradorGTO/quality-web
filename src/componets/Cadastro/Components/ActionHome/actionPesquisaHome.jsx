@@ -26,11 +26,7 @@ import { buscarComprador, buscarFabricante, buscarFornecedor, buscarMarca, busca
 import { fetchListaFabricantes, fetchListaPedidos, fetchPedidosCriados, fetchPedidosDetalhados, fetchPedidosResumido } from "./services/homeServices"
 import { ActionEditarPedido } from "./ActionEditarPedido/actionEditarPedido"
 
-export const ActionPesquisaHome = ({ usuarioLogado }) => {
-  const [actionHome, setActionHome] = useState(true)
-  const [actionListaPedidos, setActionListaPedidos] = useState(true)
-  const [actionPedidoResumido, setActionPedidoResumido] = useState(false)
-  const [actionPedidoDetalhado, setActionPedidoDetalhado] = useState(false)
+export const ActionPesquisaHome = ({ menuFilhoAtual }) => {
   const [dataInicio, setDataInicio] = useState('')
   const [dataFim, setDataFim] = useState('')
   const [tabelaPedidoPeriodo, setTabelaPedidoPeriodo] = useState(true);
@@ -64,17 +60,52 @@ export const ActionPesquisaHome = ({ usuarioLogado }) => {
     }
   }, []);
 
-  const { data: optionsModulos = [] } = useQuery(
-    ['menus-usuario-excecao', menuFilhoAtual?.ID],
-    () => buscarMenusExcecao(usuarioLogado?.id, menuFilhoAtual?.ID),
-    { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000 }
+  const { data: dadosFabricantes = [], error: errorFabricantes, isLoading: isLoadingFabricantes, refetch } = useQuery(
+    ['fabricantes', currentPage, pageSize],
+    () => fetchListaFabricantes(currentPage, pageSize),
+    { enabled: false, cacheTime: 5 * 60 * 1000 }
   );
 
-  // const { data: optionsEmpresas = [] } = useQuery(
-  //     ['listaEmpresaComercial', marcaSelecionada],
-  //     buscarEmpresasMarca({ idMarca: marcaSelecionada }),
-  //     { enabled: Boolean(marcaSelecionada), staleTime: 60 * 60 * 1000, cacheTime: 5 * 60 * 1000 }
-  // );
+  const fetchListaPedidos = async () => {
+    try {
+
+      const urlApi = `/listaTodosPedidos?dataPesquisaInicio=${dataInicio}&dataPesquisaFim=${dataFim}&idMarca=${marcaSelecionada}&idFornecedor=${fornecedorSelecionado}&idFabricante=${fabricanteSelecionado}&idComprador=${compradorSelecionado}&stSituacaoSap=${situacaoSelecionada}`;
+      const response = await get(urlApi);
+
+      if (response.data.length && response.data.length === pageSize) {
+        let allData = [...response.data];
+        animacaoCarregamento(`Carregando... Página ${currentPage} de ${response.data.length}`, true);
+
+        async function fetchNextPage(currentPage) {
+          try {
+            currentPage++;
+            const responseNextPage = await get(`${urlApi}&page=${currentPage}`);
+            if (responseNextPage.length) {
+              allData.push(...responseNextPage.data);
+              return fetchNextPage(currentPage);
+            } else {
+              return allData;
+            }
+          } catch (error) {
+            console.error('Erro ao buscar próxima página:', error);
+            throw error;
+          }
+        }
+
+        await fetchNextPage(currentPage);
+        return allData;
+      } else {
+
+        return response.data;
+      }
+
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      throw error;
+    } finally {
+      fecharAnimacaoCarregamento();
+    }
+  };
 
   const { data: dadosFornecedores = [], error: errorFornecedor, isLoading: isLoadingFornecedo } = useQuery(
     'fornecedores',
@@ -131,8 +162,10 @@ export const ActionPesquisaHome = ({ usuarioLogado }) => {
   );
 
   const handleClick = () => {
-    setActionListaPedidos(true)
-    setActionProdutosCriados(false)
+
+    setTabelaPedidoPeriodo(true)
+    setIsQueryPedidoResumido(true)
+    // refetchPedidosResumido()
     refetchListaPedidos()
   }
 

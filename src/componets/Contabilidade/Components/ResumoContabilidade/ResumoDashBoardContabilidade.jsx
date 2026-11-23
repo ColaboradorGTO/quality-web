@@ -14,20 +14,20 @@ import { toFloat } from "../../../../utils/toFloat";
 import { ActionListaVendasLojasResumo } from "./actionListaVendasLojasResumo";
 import { useQuery } from 'react-query';
 
-export const ResumoDashBoardContabilidade = ({usuarioLogado}) => {
+export const ResumoDashBoardContabilidade = ({usuarioLogado, menuFilhoAtual}) => {
   const [resumoVisivel, setResumoVisivel] = useState(false);
   const [dataPesquisa, setDataPesquisa] = useState('');
   const [isLoadingPesquisa, setIsLoadingPesquisa] = useState(true)
-  const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
+  //const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
 
 
-  useEffect(() => {
+ /*  useEffect(() => {
     const menuSalvo = localStorage.getItem('menuFilhoSelecionado');
     if (menuSalvo) {
       const menuParsed = JSON.parse(menuSalvo);
-      setMenuFilhoAtual(menuParsed);
+      //setMenuFilhoAtual(menuParsed);
     }
-  }, []);
+  }, []); */
   
   const { data: optionsModulos = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
     ['menus-usuario-excecao', menuFilhoAtual?.ID],

@@ -109,6 +109,8 @@ export const ActionListaVendasVouchers = ({
       diasAposCompra: DIFERENCAEMDIAS,
       stCortesia: stCortesia = DIFERENCAEMDIAS <= 32 ? 'Válida' : 'Inválida',
       stDefeito: stDefeito = DIFERENCAEMDIAS <= 90 ? 'Válida' : 'Inválida',
+      DEST_CNPJ: item.venda.DEST_CNPJ,
+      DEST_CPF: item.venda.DEST_CPF,
     }
   });
 
@@ -131,6 +133,19 @@ export const ActionListaVendasVouchers = ({
       body: row => <th >{row.IDVENDA}</th>,
       sortable: true,
     },
+    {
+      field: 'DEST_CPF',
+      header: 'CPF',
+      body: row => <th style={{}}>{row.DEST_CPF}</th>,
+      sortable: true,
+    },
+    {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{}}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
     {
       field: 'DTHORAFECHAMENTO',
       header: 'Data',

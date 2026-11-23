@@ -120,6 +120,17 @@
       "value": "False"
     }
   ],
+
+    "ativo": [
+    {
+      "label": "SIM",
+      "value": "True"
+    },
+    {
+      "label": "NÃO",
+      "value": "False"
+    }
+  ],
   "localizacao": [
     {
       "label": "Loja",

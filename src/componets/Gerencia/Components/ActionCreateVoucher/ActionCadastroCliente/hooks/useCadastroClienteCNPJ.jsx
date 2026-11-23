@@ -466,7 +466,7 @@ export const useCadastrarClienteCNPJ = ({ usuarioLogado, optionsModulos, handleC
 
         if (optionsModulos[0]?.CRIAR == 'False') {
             Swal.fire({
-                title: 'Erro!',
+                title: 'Erro! ',
                 text: `${usuarioLogado?.NOFUNCIONARIO},\nVocê não tem permissão para criar um novo Cliente!`,
                 icon: 'error',
                 confirmButtonText: 'Ok',

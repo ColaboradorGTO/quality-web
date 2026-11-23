@@ -7,6 +7,7 @@ export const ActionPagamentoModal = ({
   show,
   handleClose,
   dadosDetalheAdiantamento,
+  dadosDetalhePagamento,
   optionsModulos,
   usuarioLogado,
   handleClick
@@ -37,6 +38,7 @@ export const ActionPagamentoModal = ({
           <Formulario
             handleClose={handleClose}
             dadosDetalheAdiantamento={dadosDetalheAdiantamento}
+            dadosDetalhePagamento={dadosDetalhePagamento}
             optionsModulos={optionsModulos}
             usuarioLogado={usuarioLogado}
             handleClick={handleClick}

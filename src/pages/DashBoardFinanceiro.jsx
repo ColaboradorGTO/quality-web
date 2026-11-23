@@ -38,7 +38,6 @@ const ActionPesquisaConferenciaMalote = lazy(() => import('../componets/Financei
 const ActionPesquisaContas = lazy(() => import('../componets/Financeiro/Components/ActionContas/actionPesquisaContas').then(module => ({ default: module.ActionPesquisaContas })));
 const ActionPesquisaFaturasConsolidadas = lazy(() => import('../componets/Financeiro/Components/ActionFaturasConsolidadas/actionPesquisaFaturasConsolidadas').then(module => ({ default: module.ActionPesquisaFaturasConsolidadas })));
 const ActionPesquisaQuebraCaixaIntegracao = lazy(() => import('../componets/Financeiro/Components/ActionQuebraCaixaIntegracao/actionPesquisaQuebraCaixaIntegracao').then(module => ({ default: module.ActionPesquisaQuebraCaixaIntegracao })));
-const ActionPesquisaCriarAdiantamento = lazy(() => import('../componets/Financeiro/Components/ActionAdiantamento/Solicitar/actionPesquisaCriarAdiantamento').then(module => ({ default: module.ActionPesquisaCriarAdiantamento })));
 const ActionPesquisaAdiantamento = lazy(() => import('../componets/Financeiro/Components/ActionAdiantamento/Acompanhar/actionPesquisaAdiantamento').then(module => ({ default: module.ActionPesquisaAdiantamento })));
 
 
@@ -210,9 +209,6 @@ export const DashBoardFinanceiro = () => {
       break;
     case "/financeiro/ActionPesquisaQuebraCaixaIntegracao":
       component = <ActionPesquisaQuebraCaixaIntegracao usuarioLogado={usuarioLogado}  />
-      break;
-    case "/financeiro/ActionPesquisaCriarAdiantamento":
-      component = <ActionPesquisaCriarAdiantamento usuarioLogado={usuarioLogado} />
       break;
     case "/financeiro/ActionPesquisaAcompanharAdiantamentoFinanceiro":
       component = <ActionPesquisaAdiantamento usuarioLogado={usuarioLogado} />

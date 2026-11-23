@@ -102,6 +102,8 @@ export const ActionListaClientesVendas = ({ dadosClientes, usuarioLogado, option
       VRTOTALDESCONTO: item.VRTOTALDESCONTO,
       VRTOTALPAGO: item.VRTOTALPAGO,
       STCONTINGENCIA: item.STCONTINGENCIA,
+      DEST_CNPJ: item.DEST_CNPJ,
+      DEST_CPF: item.DEST_CPF,
 
     }
   });
@@ -128,9 +130,22 @@ export const ActionListaClientesVendas = ({ dadosClientes, usuarioLogado, option
     {
       field: 'IDVENDA',
       header: 'Nº Venda',
-    body: row => <p style={{ color: 'blue', width: '100px', margin: 0, fontWeight: 600 }}>{row.IDVENDA}</p>,
+      body: row => <p style={{ color: 'blue', width: '100px', margin: 0, fontWeight: 600 }}>{row.IDVENDA}</p>,
       sortable: true,
     },
+    {
+      field: 'DEST_CPF',
+      header: 'CPF',
+      body: row => <th style={{color: 'blue', width: '100px', margin: 0, fontWeight: 600 }}>{row.DEST_CPF}</th>,
+      sortable: true,
+    },
+     {
+      field: 'DEST_CNPJ',
+      header: 'CNPJ',
+      body: row => <th style={{ color: 'blue', width: '100px', margin: 0, fontWeight: 600}}>{row.DEST_CNPJ}</th>,
+      sortable: true,
+    },
+
     {
       field: 'NFE_INFNFE_IDE_NNF',
       header: 'NFCe',
@@ -292,12 +307,12 @@ export const ActionListaClientesVendas = ({ dadosClientes, usuarioLogado, option
   const footerGroup = (
     <ColumnGroup>
 
-      <Row> 
-        <Column footer="Total Vendas" colSpan={7} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem', textAlign: 'center' }} />
-        <Column footer={formatMoeda(calcularValorTotalBruto())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} /> 
-        <Column footer={formatMoeda(calcularValorTotalDescnto())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} /> 
-        <Column footer={formatMoeda(calcularValorTotalPago())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} /> 
-        <Column footer={""} colSpan={2}  footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }}/>
+      <Row>
+        <Column footer="Total Vendas" colSpan={9} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem', textAlign: 'center' }} />
+        <Column footer={formatMoeda(calcularValorTotalBruto())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
+        <Column footer={formatMoeda(calcularValorTotalDescnto())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
+        <Column footer={formatMoeda(calcularValorTotalPago())} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
+        <Column footer={""} colSpan={2} footerStyle={{ color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
       </Row>
     </ColumnGroup>
   )
