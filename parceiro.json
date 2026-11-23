@@ -223,13 +223,23 @@
     },
     {
       "label": "Prevenção e Perdas",
-      "value": "PREVENCAOPERDAS",
+      "value": "PREVENCAO",
       "id": 14
     },
     {
       "label": "PSF",
       "value": "PSF",
       "id": 15
+    },
+    {
+      "label": "Manutenções",
+      "value": "MANUTENCOES",
+      "id": 16
+    },
+    {
+      "label": "Expedição",
+      "value": "EXPEDICAO",
+      "id": 17
     }
   ],
   "optionsQuebraDeCaixa": [
@@ -393,6 +403,15 @@
   "optionsFormaPagamento": [
     { "value": "PIX", "label": "PIX" },
     { "value": "TED", "label": "TED" },
-    { "value": "TRANSFERENCIA", "label": "Transferência" }
+    { "value": "TRANSFERENCIA", "label": "Transferência" },
+    { "value": "DINHEIRO", "label": "Dinheiro" },
+    { "value": "CARTAO", "label": "Cartão" },
+    { "value": "BOLETO", "label": "Boleto" },
+    { "value": "CHEQUE", "label": "Cheque" }
+  ],
+  "optionsAndamento": [
+    {"value": "APROVADO", "label": "APROVADO" },
+    {"value": "REPROVADO", "label": "REPROVADO" },
+    {"value": "PENDENTE", "label": "PENDENTE" }
   ]
 }
