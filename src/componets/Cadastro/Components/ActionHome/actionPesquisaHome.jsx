@@ -39,7 +39,6 @@ export const ActionPesquisaHome = ({ usuarioLogado, menuFilhoAtual }) => {
   const [actionProdutosCriados, setActionProdutosCriados] = useState(false)
 
   const [pageSize, setPageSize] = useState(1000);
-  // const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
   const [dadosVisualizarPedido, setDadosVisualizarPedido] = useState([]);
   const [dadosDetalhePedido, setDadosDetalhePedido] = useState([]);
   const [actionVisualizarPedido, setActionVisualizarPedido] = useState(false);

@@ -28,7 +28,6 @@ export const ActionPesquisaHome = ({ usuarioLogado, ID, menuFilhoAtual }) => {
   const [marcaSelecionada, setMarcaSelecionada] = useState('');
   const [compradorSelecionado, setCompradorSelecionado] = useState('');
   const [numeroPedido, setNumeroPedido] = useState('');
-  const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
   const [dadosVisualizarPedido, setDadosVisualizarPedido] = useState([]);
   const [dadosDetalhePedido, setDadosDetalhePedido] = useState([]);
   const [actionVisualizarPedido, setActionVisualizarPedido] = useState(false);
