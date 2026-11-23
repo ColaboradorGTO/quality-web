@@ -11,8 +11,10 @@ const CARDS = [
     // { title: 'PAGO', label: 'Pago', cor: '#fd3995', Icon: FaBan },
     { title: 'AGUARDANDO NOTA FISCAL', label: 'Aguardando Nota Fiscal', cor: '#567ebb', Icon: FaMoneyBillWave, inclui: ['COMPROVANTE ANEXADO'] },
     { title: 'NOTA FISCAL EM ATRASO', label: 'Nota Fiscal Em Atraso', cor: '#FB0C06', Icon: FaMoneyBillWave },
+    { title: 'NOTA FISCAL ANEXADA', label: 'Nota Fiscal Anexada', cor: '#4de5d5', Icon: FaCheckDouble },
 ]
 
+ 
 const resumirPorStatus = (dados) => {
     const resumo = {}
     CARDS.forEach(c => { resumo[c.title] = { total: 0, departamentos: {} } })

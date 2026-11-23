@@ -136,7 +136,7 @@ export const useAnexarPagamento = ({
 
         const postData = {
             IDADIANTAMENTO: detalhe?.IDADIANTAMENTO,
-            STATUS: detalhe?.STATUS,
+            STATUS: 'NOTA FISCAL ANEXADA',
             DEPARTAMENTO: detalhe?.DEPARTAMENTO,
             IDEMPRESA: detalhe?.IDEMPRESA,
             NUCNPJEMPRESA: detalhe?.NUCNPJEMPRESA,

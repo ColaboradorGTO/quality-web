@@ -19,6 +19,7 @@ export const ActionPesquisaAdiantamento = ({ usuarioLogado, ID }) => {
   const [dataPesquisaFim, setDataPesquisaFim] = useState('');
   const [empresaSelecionada, setEmpresaSelecionada] = useState('');
   const [statusSelecionado, setStatusSelecionado] = useState('');
+  const [statusCard, setStatusCard] = useState('');
   const [departamentoSelecionado, setDepartamentoSelecionado] = useState('')
   const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
   const [modal, setModal] = useState(false)
@@ -86,8 +87,8 @@ export const ActionPesquisaAdiantamento = ({ usuarioLogado, ID }) => {
 
   const { data: dadosAdiantamentos = [], error: errorVendasConciliacao, isLoading: isLoadingVendasConciliacao, refetch } = useQuery(
     ['lista-adiantamento-departamento'],
-    () => fetchListaVendasConciliacao(),
-    { enabled: false, staleTime: 60 *60  }
+    () => fetchListaVendasConciliacao(statusCard || statusSelecionado),
+    { enabled: false, staleTime: 60 * 60  }
   );
 
   const { data: dadosDashboard = [], refetch: refetchDashboard } = useQuery(
@@ -112,7 +113,7 @@ export const ActionPesquisaAdiantamento = ({ usuarioLogado, ID }) => {
       pesquisaPorCard.current = false;
       refetch();
     }
-  }, [statusSelecionado]);
+  }, [statusCard]);
 
   const handleShowModal = () => {
     setModal(true)
@@ -133,18 +134,23 @@ export const ActionPesquisaAdiantamento = ({ usuarioLogado, ID }) => {
   ]
 
   const handleClick = () => {
-    refetch()
     refetchDashboard()
+    if (statusCard) {
+      pesquisaPorCard.current = true;
+      setStatusCard('');
+      return;
+    }
+    refetch()
   }
 
-  
+
   const handleClickCard = (status) => {
-    if (status === statusSelecionado) {
+    if (status === statusCard) {
       refetch();
       return;
     }
     pesquisaPorCard.current = true;
-    setStatusSelecionado(status);
+    setStatusCard(status);
   }
 
   return (
@@ -201,7 +207,7 @@ export const ActionPesquisaAdiantamento = ({ usuarioLogado, ID }) => {
       />
       <Cards
         dados={dadosAdiantamentos}
-        statusSelecionado={statusSelecionado}
+        statusSelecionado={statusCard}
         onClickCard={handleClickCard}
       />
       <GraficoEvolucao dados={dadosDashboard} />
