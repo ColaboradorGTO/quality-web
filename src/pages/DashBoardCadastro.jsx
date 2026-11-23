@@ -141,7 +141,7 @@ const menuFilhoResumo = selectedModule?.menuPai?.menuFilho?.find(
                             <Suspense fallback={<div>Loading...</div>}>
                             {resumoVisivel && !componentToShow && (
 
-                              <ActionPesquisaHome usuarioLogado={usuarioLogado} />
+                              <ActionPesquisaHome usuarioLogado={usuarioLogado} menuFilhoAtual={menuFilhoResumo}/>
                             )}
 
 

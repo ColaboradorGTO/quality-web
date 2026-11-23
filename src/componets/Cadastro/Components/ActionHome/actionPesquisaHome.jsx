@@ -26,7 +26,7 @@ import { buscarComprador, buscarFabricante, buscarFornecedor, buscarMarca, busca
 import { fetchListaFabricantes, fetchListaPedidos, fetchPedidosCriados, fetchPedidosDetalhados, fetchPedidosResumido } from "./services/homeServices"
 import { ActionEditarPedido } from "./ActionEditarPedido/actionEditarPedido"
 
-export const ActionPesquisaHome = ({ menuFilhoAtual }) => {
+export const ActionPesquisaHome = ({ usuarioLogado, menuFilhoAtual }) => {
   const [dataInicio, setDataInicio] = useState('')
   const [dataFim, setDataFim] = useState('')
   const [tabelaPedidoPeriodo, setTabelaPedidoPeriodo] = useState(true);
@@ -39,7 +39,7 @@ export const ActionPesquisaHome = ({ menuFilhoAtual }) => {
   const [actionProdutosCriados, setActionProdutosCriados] = useState(false)
 
   const [pageSize, setPageSize] = useState(1000);
-  const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
+  // const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
   const [dadosVisualizarPedido, setDadosVisualizarPedido] = useState([]);
   const [dadosDetalhePedido, setDadosDetalhePedido] = useState([]);
   const [actionVisualizarPedido, setActionVisualizarPedido] = useState(false);
@@ -52,13 +52,15 @@ export const ActionPesquisaHome = ({ menuFilhoAtual }) => {
     setDataFim(dataPesquisaFim)
   }, [])
 
-  useEffect(() => {
-    const menuSalvo = localStorage.getItem('menuFilhoSelecionado');
-    if (menuSalvo) {
-      setMenuFilhoAtual(JSON.parse(menuSalvo));
-      setActionHome(true)
-    }
-  }, []);
+   const { data: optionsModulos = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
+    ['menus-usuario-excecao', menuFilhoAtual?.ID],
+    async () => {
+      const response = await get(`/menus-usuario-excecao?idUsuario=${usuarioLogado?.id}&idMenuFilho=${menuFilhoAtual?.ID}`);
+
+      return response.data;
+    },
+    { enabled: Boolean(usuarioLogado?.id && menuFilhoAtual?.ID), staleTime: 5 * 60 * 1000, }
+  );
 
   const { data: dadosFabricantes = [], error: errorFabricantes, isLoading: isLoadingFabricantes, refetch } = useQuery(
     ['fabricantes', currentPage, pageSize],
@@ -131,11 +133,11 @@ export const ActionPesquisaHome = ({ menuFilhoAtual }) => {
     { enabled: true, }
   );
 
-  const { data: dadosFabricantes = [], error: errorFabricantes, isLoading: isLoadingFabricantes, refetch } = useQuery(
-    ['fabricantes',],
-    () => fetchListaFabricantes(),
-    { enabled: false, cacheTime: 5 * 60 * 1000 }
-  );
+  // const { data: dadosFabricantes = [], error: errorFabricantes, isLoading: isLoadingFabricantes, refetch } = useQuery(
+  //   ['fabricantes',],
+  //   () => fetchListaFabricantes(),
+  //   { enabled: false, cacheTime: 5 * 60 * 1000 }
+  // );
 
   const { data: dadosListaPedidos = [], error: errorPedido, isLoading: isLoadingPedido, refetch: refetchListaPedidos } = useQuery(
     ['lista-pedidos',],
