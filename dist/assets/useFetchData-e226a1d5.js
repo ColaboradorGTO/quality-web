@@ -1,0 +1,1 @@
+import{u as r}from"./query-287447a1.js";import{g as a}from"./index-daf11ca8.js";const p=(s,e,t)=>r(s,async()=>(await a(e)).data,{staleTime:5*60*1e3,enabled:t}),i=(s,e={})=>r(["listaEmpresaComercial",s],async()=>s?(await a(`/listaEmpresaComercial?idMarca=${s}`)).data:[],{enabled:!!s,staleTime:5*60*1e3,...e});export{i as a,p as u};
