@@ -12,7 +12,7 @@ import { useQuery } from "react-query";
 import { animacaoCarregamento, fecharAnimacaoCarregamento } from "../../../../utils/animationCarregamento";
 import { ActionIncluirOTModal } from "./ActionIncluirModalOT/actionIncluirOTModal";
 
-export const ActionPesquisaOT = ({ usuarioLogado }) => {
+export const ActionPesquisaOT = ({ usuarioLogado, menuFilhoAtual }) => {
   const [tabelaVisivel, setTabelaVisivel] = useState(false);
   const [modalVisivel, setModalVisivel] = useState(false);
   const [dataPesquisaInicio, setDataPesquisaInicio] = useState('')
@@ -22,7 +22,7 @@ export const ActionPesquisaOT = ({ usuarioLogado }) => {
   const [empresaSelecionada, setEmpresaSelecionada] = useState(null)
   const [valueLojaOrigem, setValueLojaOrigem] = useState('')
   const [rotinaSelecionada, setRotinaSelecionada] = useState('')
-  const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
+  //const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(1000);
 
@@ -43,14 +43,14 @@ export const ActionPesquisaOT = ({ usuarioLogado }) => {
     return () => clearTimeout(timer);
   }, [usuarioLogado]);
 
-  useEffect(() => {
+/*   useEffect(() => {
     const menuSalvo = localStorage.getItem('menuFilhoSelecionado');
     if (menuSalvo) {
       const menuParsed = JSON.parse(menuSalvo);
       setMenuFilhoAtual(menuParsed);
     }
   }, []);
-
+ */
   const { data: optionsModulos = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
     ['menus-usuario-excecao', menuFilhoAtual?.ID],
     async () => {
@@ -58,7 +58,7 @@ export const ActionPesquisaOT = ({ usuarioLogado }) => {
 
       return response.data;
     },
-    { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000, }
+    { enabled: Boolean(usuarioLogado?.id && menuFilhoAtual?.ID), staleTime: 5 * 60 * 1000, }
   );
 
 

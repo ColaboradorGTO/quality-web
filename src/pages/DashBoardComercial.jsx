@@ -91,12 +91,17 @@ export const DashBoardComercial = () => {
 
     setComponentToShow(componentName);
   }
+  
+  const menuFilhoResumo = selectedModule?.menuPai?.menuFilho?.find(
+    menu => menu.URL === "/comercial/ResumoDashBoardComercial"
+  );
+
 
   let component = null;
 
   switch (componentToShow) {
     case "/comercial/ResumoDashBoardComercial":
-      component = <ResumoDashBoardComercial />;
+      component = <ResumoDashBoardComercial menuFilhoAtual={menuFilhoResumo} />;
       break;
     case "/comercial/ActionPesquisaVendasPeriodo":
       component = <ActionPesquisaVendasPeriodo />;

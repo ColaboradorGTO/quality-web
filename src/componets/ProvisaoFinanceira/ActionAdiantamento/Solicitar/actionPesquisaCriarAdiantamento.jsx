@@ -18,13 +18,12 @@ import { Cards } from "../../../Financeiro/Components/ActionAdiantamento/Cards/c
 import { getDataAtual } from "../../../../utils/dataAtual"
 import { useQuery } from "react-query"
 
-export const ActionPesquisaCriarAdiantamento = ({ usuarioLogado, ID }) => {
+export const ActionPesquisaCriarAdiantamento = ({ usuarioLogado, ID, menuFilhoAtual }) => {
   const [dataPesquisaInicio, setDataPesquisaInicio] = useState('');
   const [dataPesquisaFim, setDataPesquisaFim] = useState('');
   const [empresaSelecionada, setEmpresaSelecionada] = useState('');
   const [statusSelecionado, setStatusSelecionado] = useState('');
   const [departamentoSelecionado, setDepartamentoSelecionado] = useState('')
-  const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
   const [modal, setModal] = useState(false)
   const [tabelaVisivel, setTabelaVisivel] = useState(false);
 
@@ -35,13 +34,6 @@ export const ActionPesquisaCriarAdiantamento = ({ usuarioLogado, ID }) => {
     // setDataPesquisaFim(dataFinal);
   }, [])
 
-  useEffect(() => {
-    const menuSalvo = localStorage.getItem('menuFilhoSelecionado');
-    if (menuSalvo) {
-      const menuParsed = JSON.parse(menuSalvo);
-      setMenuFilhoAtual(menuParsed);
-    }
-  }, []);
 
   const { data: optionsModulos = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
     ['menus-usuario-excecao', menuFilhoAtual?.ID],
@@ -50,7 +42,7 @@ export const ActionPesquisaCriarAdiantamento = ({ usuarioLogado, ID }) => {
 
       return response.data;
     },
-    { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000, }
+    { enabled: Boolean(usuarioLogado?.id && menuFilhoAtual?.ID), staleTime: 5 * 60 * 1000, }
   );
 
 
@@ -207,7 +199,7 @@ export const ActionPesquisaCriarAdiantamento = ({ usuarioLogado, ID }) => {
           }
         ]}
         valueSelectMarca={departamentoUsuario}
-        onChangeSelectMarcas={() => {}}
+        onChangeSelectMarcas={() => { }}
 
         InputSelectEmpresaComponent={InputSelectAction}
         onChangeSelectEmpresa={(e) => setStatusSelecionado(e.value)}
@@ -234,15 +226,15 @@ export const ActionPesquisaCriarAdiantamento = ({ usuarioLogado, ID }) => {
         IconCadastro={IoMdAdd}
 
       />
-      
+
       {possuiNotaFiscalEmAtraso && (
-      
-        <div className="alert alert-warning" role="alert" style={{fontSize: '15px'}}>
-          <h1 style={{fontWeight: 700}}>Atenção!</h1>
-            <strong style={{fontSize: '16px'}}>{usuarioLogado?.NOFUNCIONARIO}!</strong> Você não pode solicitar adiantamento, você Possui notas fiscais em atraso, entre em contato com o Gerente do Financeiro Wendel.
+
+        <div className="alert alert-warning" role="alert" style={{ fontSize: '15px' }}>
+          <h1 style={{ fontWeight: 700 }}>Atenção!</h1>
+          <strong style={{ fontSize: '16px' }}>{usuarioLogado?.NOFUNCIONARIO}!</strong> Você não pode solicitar adiantamento, você Possui notas fiscais em atraso, entre em contato com o Gerente do Financeiro Wendel.
         </div>
       )}
-      
+
       <Cards
         dados={dadosCards}
         statusSelecionado={statusSelecionado}

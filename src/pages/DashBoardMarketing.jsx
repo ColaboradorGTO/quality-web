@@ -37,32 +37,32 @@ export const DashBoardMarketing = ({ }) => {
       navigate('/');
     }
   }, [navigate]);
-  
-  
+
+
   useEffect(() => {
     const storedMenuFilho = JSON.parse(localStorage.getItem('menufilhoSelecionado'));
 
     if (storedMenuFilho) {
       setMenuSelected(selectedModule);
     }
-  
+
   }, [usuarioLogado]);
 
   const { data: optionsModulosPage = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
     'menus-usuario',
     async () => {
       const response = await get(`/menus-usuario?idUsuario=${usuarioLogado?.id}&idModulo=${selectedModule?.ID}`);
-      
+
       return response.data;
     },
     { enabled: Boolean(usuarioLogado?.id), staleTime: 5 * 60 * 1000, }
   );
 
-   function handleShowComponent(componentName) {
+  function handleShowComponent(componentName) {
     const menuFilhoSelecionado = selectedModule.menuPai.menuFilho.find(
       menu => menu.URL === componentName
     );
-  
+
     if (menuFilhoSelecionado) {
       // Salvar todas as informações do menu selecionado no localStorage
       localStorage.setItem('menuFilhoSelecionado', JSON.stringify({
@@ -83,9 +83,15 @@ export const DashBoardMarketing = ({ }) => {
     setComponentToShow(componentName);
   }
 
+  const menuFilhoResumo = selectedModule?.menuPai?.menuFilho?.find(
+    menu => menu.URL === "/marketing/ActionPesquisaVendasDigitalMarca"
+  );
+
+
+
   const permissaoUsuario = selectedModule.menuPai.menuFilho;
-  const {   
-    ID, 
+  const {
+    ID,
   } = permissaoUsuario.map(item => ({
     ID: item.ID,
   })).reduce((acc, curr) => {
@@ -97,16 +103,16 @@ export const DashBoardMarketing = ({ }) => {
 
   switch (componentToShow) {
     case "/marketing/ActionPesquisaVendasDigitalMarca":
-      component = <ActionPesquisaVendasDigitalMarca />;
+      component = <ActionPesquisaVendasDigitalMarca menuFilhoAtual={menuFilhoResumo} />;
       break;
     case "/marketing/ActionPesquisaPromocao":
-      component = <ActionPesquisaPromocao usuarioLogado={usuarioLogado} ID={ID}/>;
+      component = <ActionPesquisaPromocao usuarioLogado={usuarioLogado} ID={ID} />;
       break;
     case "/marketing/ActionPesquisaCampanha":
       component = <ActionPesquisaCampanha usuarioLogado={usuarioLogado} ID={ID} />;
       break;
     case "/marketing/ActionPesquisaCliente":
-      component = <ActionPesquisaCliente usuarioLogado={usuarioLogado} ID={ID}/>;
+      component = <ActionPesquisaCliente usuarioLogado={usuarioLogado} ID={ID} />;
       break;
     default:
       component = null;
@@ -126,7 +132,7 @@ export const DashBoardMarketing = ({ }) => {
                 handleShowComponent={handleShowComponent}
               />
               <div className="page-content-wrapper">
-                <HeaderMain optionsModulosPage={optionsModulosPage}/>
+                <HeaderMain optionsModulosPage={optionsModulosPage} />
 
                 <main id="js-page-content" role="main" className="page-content">
                   <div className="row">

@@ -12,6 +12,8 @@ import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import HeaderTable from "../../../Tables/headerTable";
 import Swal from "sweetalert2";
+import { formatarDataParaBR, } from "../../../../utils/dataFormatada";
+
 
 export const ActionListaVendasLoja = ({ dadosVendasPagamentos, dataPesquisa }) => {
   const [dadosDetalheFechamento, setDadosDetalheFechamento] = useState([]);
@@ -149,13 +151,24 @@ export const ActionListaVendasLoja = ({ dadosVendasPagamentos, dataPesquisa }) =
     }
     return total;
   }
+
   const calcularTotalDespesaColuna = () => {
     let total = 0;
+
     for (let venda of dados) {
-      total += parseFloat(venda.totalDespesasAdiantamento) ? parseFloat(venda.totalDespesasAdiantamento) : 0;
+      const valor = venda.totalDespesasAdiantamento
+        ?.replace('R$', '')
+        .trim()
+        .replace(/\./g, '')
+        .replace(',', '.') || '0';
+
+      total += parseFloat(valor);
+
     }
+
     return total;
-  }
+  };
+
   const calcularTotalDisponivelColuna = () => {
     let total = 0;
     for (let venda of dados) {
@@ -186,61 +199,69 @@ export const ActionListaVendasLoja = ({ dadosVendasPagamentos, dataPesquisa }) =
     }
   });
 
+
   const colunasVendasPagamento = [
     {
       field: 'dataPesquisa',
       header: 'Data',
-      body: (row) => <th >{row.dataPesquisa}</th>,
+      body: (row) => <th style={{ color: 'blue' }}
+      >{formatarDataParaBR(row.dataPesquisa)}</th>,
       sortable: true
     },
     {
       field: 'NOFANTASIA',
       header: 'Loja',
-      body: (row) => <th >{row.NOFANTASIA}</th>,
+      body: (row) => <th style={{ color: 'blue' }}>{row.NOFANTASIA}</th>,
       sortable: true,
       'footer': 'Total'
     },
     {
       field: 'VALORTOTALDINHEIRO',
       header: 'Dinheiro',
-      body: (row) => <th >{formatMoeda(row.VALORTOTALDINHEIRO)}</th>,
+      body: (row) => <th style={{ color: 'blue' }} >{formatMoeda(row.VALORTOTALDINHEIRO)}</th>,
       sortable: true,
       footer: formatMoeda(calcularTotalDinheiroColuna())
     },
     {
       field: 'VALORTOTALCARTAO',
       header: 'Cartão',
-      body: (row) => <th >{formatMoeda(row.VALORTOTALCARTAO)}</th>,
+      body: (row) => <th style={{ color: 'blue' }} >{formatMoeda(row.VALORTOTALCARTAO)}</th>,
       sortable: true,
       footer: formatMoeda(calcularTotalCartaoColuna())
     },
     {
       field: 'VALORTOTALPOS',
       header: 'POS',
-      body: (row) => <th >{formatMoeda(row.VALORTOTALPOS)}</th>,
+      body: (row) => <th style={{ color: 'blue' }} >{formatMoeda(row.VALORTOTALPOS)}</th>,
       sortable: true,
       footer: formatMoeda(calcularTotalPosColuna())
     },
     {
       field: 'VALORTOTALFATURA',
       header: 'Fatura',
-      body: (row) => <th >{formatMoeda(row.VALORTOTALFATURA)}</th>,
+      body: (row) => <th style={{ color: 'blue' }} >{formatMoeda(row.VALORTOTALFATURA)}</th>,
       sortable: true,
       footer: formatMoeda(calcularTotalFaturaColuna())
     },
     {
       field: 'totalDespesasAdiantamento',
       header: 'Despesas',
-      body: (row) => <th >{row.totalDespesasAdiantamento}</th>,
+      body: (row) => {
+        return <th style={{ color: 'red' }}>{row.totalDespesasAdiantamento}</th>;
+      },
       sortable: true,
-      footer: formatMoeda(calcularTotalDespesaColuna())
+      footer: () => {
+        return <th style={{ color: 'red' }}>{formatMoeda(calcularTotalDespesaColuna())}</th>;
+      }
     },
     {
       field: 'totalDisponivel',
       header: 'Disponível',
-      body: (row) => <th >{formatMoeda(row.totalDisponivel)}</th>,
+      body: (row) => <th style={{ color: 'blue' }}>{formatMoeda(row.totalDisponivel)}</th>,
       sortable: true,
-      footer: formatMoeda(calcularTotalDisponivelColuna())
+      footer: () => {
+        return <th >{formatMoeda(calcularTotalDisponivelColuna())}</th>;
+      },
     },
     {
       field: 'DINHEIRO',
@@ -327,6 +348,7 @@ export const ActionListaVendasLoja = ({ dadosVendasPagamentos, dataPesquisa }) =
             currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
             filterDisplay="menu"
             showGridlines
+            cellMemo={false}
             stripedRows
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
 

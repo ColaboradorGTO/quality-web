@@ -77,8 +77,11 @@ export const DashBoardInformatica = () => {
 
     setComponentToShow(componentName);
   }
-
-
+  
+  const menuFilhoResumo = selectedModule?.menuPai?.menuFilho?.find(
+    menu => menu.URL === "/informatica/InformaticaActionHome"
+  );
+  
   const permissaoUsuario = selectedModule.menuPai.menuFilho;
   const {
     ID,
@@ -88,12 +91,11 @@ export const DashBoardInformatica = () => {
     return { ...acc, ...curr };
   }, {});
 
-
   let component = null;
 
   switch (componentToShow) {
     case "/informatica/InformaticaActionHome":
-      component = <InformaticaActionHome usuarioLogado={usuarioLogado} ID={ID} />;
+      component = <InformaticaActionHome usuarioLogado={usuarioLogado} menuFilhoAtual={menuFilhoResumo} />;
       break;
     case "/informatica/ActionPesquisaVendas":
       component = <ActionPesquisaVendas />;
@@ -164,7 +166,7 @@ export const DashBoardInformatica = () => {
                         <div className="panel-container show">
                           <div className="panel-content">
                             <Suspense fallback={<div>Loading...</div>}>
-                              {actionVisivel && !componentToShow && (<InformaticaActionHome usuarioLogado={usuarioLogado} ID={ID} />)}
+                              {actionVisivel && !componentToShow && (<InformaticaActionHome usuarioLogado={usuarioLogado} ID={ID} menuFilhoAtual={menuFilhoResumo} />)}
 
                               {componentToShow && component}
                             </Suspense>

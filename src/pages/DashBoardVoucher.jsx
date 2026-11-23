@@ -8,7 +8,7 @@ import { FooterMain } from "../componets/Footer";
 import { get } from "../api/funcRequest";
 import { useQuery } from "react-query";
 
-const ActionPesquisaCreateVoucher = lazy(() => import("../componets/Vouchers/ActionCreateVoucher/actionPesquisaCreateVoucher").then(module => ({default: module.ActionPesquisaCreateVoucher })));
+const ActionPesquisaCreateVoucher = lazy(() => import("../componets/Vouchers/ActionCreateVoucher/actionPesquisaCreateVoucher").then(module => ({ default: module.ActionPesquisaCreateVoucher })));
 
 export const DashBoardVoucher = () => {
   const [actionVisivel, setActionVisivel] = useState(true);
@@ -36,12 +36,12 @@ export const DashBoardVoucher = () => {
     }
 
   }, [usuarioLogado]);
- 
+
   const { data: optionsModulosPage = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
     'menus-usuario',
     async () => {
       const response = await get(`/menus-usuario?idUsuario=${usuarioLogado?.id}&idModulo=${selectedModule?.id}`);
-      
+
       return response.data;
     },
     { enabled: Boolean(usuarioLogado?.id), staleTime: 5 * 60 * 1000, }
@@ -51,7 +51,7 @@ export const DashBoardVoucher = () => {
     const menuFilhoSelecionado = selectedModule.menuPai.menuFilho.find(
       menu => menu.URL === componentName
     );
-  
+
     if (menuFilhoSelecionado) {
       // Salvar todas as informações do menu selecionado no localStorage
       localStorage.setItem('menuFilhoSelecionado', JSON.stringify({
@@ -71,22 +71,26 @@ export const DashBoardVoucher = () => {
 
     setComponentToShow(componentName);
   }
-  
+
+  const menuFilhoResumo = selectedModule?.menuPai?.menuFilho?.find(
+    menu => menu.URL === "/vouchers/ActionPesquisaCreateVoucher"
+  );
+
   const permissaoUsuario = selectedModule.menuPai.menuFilho;
-  const {   
-    ID, 
+  const {
+    ID,
   } = permissaoUsuario.map(item => ({
     ID: item.ID,
   })).reduce((acc, curr) => {
     return { ...acc, ...curr };
   }, {});
 
-  
+
   let component = null;
 
   switch (componentToShow) {
     case "/vouchers/ActionPesquisaCreateVoucher":
-      component = <ActionPesquisaCreateVoucher usuarioLogado={usuarioLogado} />;
+      component = <ActionPesquisaCreateVoucher usuarioLogado={usuarioLogado} menuFilhoAtual={menuFilhoResumo} />;
       break;
     default:
       component = null;
@@ -96,46 +100,46 @@ export const DashBoardVoucher = () => {
   return (
 
 
-  <Fragment>
-  {usuarioLogado && (
-    <SidebarProvider>
+    <Fragment>
+      {usuarioLogado && (
+        <SidebarProvider>
 
-      <div className="page-wrapper">
-        <div className="page-inner">
-          <MenuSidebarAdmin
-            componentToShow={componentToShow}
-            handleShowComponent={handleShowComponent}
-          />
-          <div className="page-content-wrapper">
-            <HeaderMain optionsModulosPage={optionsModulosPage}/>
+          <div className="page-wrapper">
+            <div className="page-inner">
+              <MenuSidebarAdmin
+                componentToShow={componentToShow}
+                handleShowComponent={handleShowComponent}
+              />
+              <div className="page-content-wrapper">
+                <HeaderMain optionsModulosPage={optionsModulosPage} />
 
-            <main id="js-page-content" role="main" className="page-content">
-              <div className="row">
-                <div className="col-xl-12">
-                  <div id="panel-1" className="panel">
-                    <div className="panel-container show">
-                      <div className="panel-content">
-                        <Suspense fallback={<div>Loading...</div>}>
-                        {actionVisivel && !componentToShow && (<ActionPesquisaCreateVoucher usuarioLogado={usuarioLogado}  />)}
+                <main id="js-page-content" role="main" className="page-content">
+                  <div className="row">
+                    <div className="col-xl-12">
+                      <div id="panel-1" className="panel">
+                        <div className="panel-container show">
+                          <div className="panel-content">
+                            <Suspense fallback={<div>Loading...</div>}>
+                              {actionVisivel && !componentToShow && (<ActionPesquisaCreateVoucher usuarioLogado={usuarioLogado} />)}
 
-                          {componentToShow && component}
-                        </Suspense>
+                              {componentToShow && component}
+                            </Suspense>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </main>
+                </main>
 
-            <Fragment>
-              <MenuButton />
-              <FooterMain />
-            </Fragment>
+                <Fragment>
+                  <MenuButton />
+                  <FooterMain />
+                </Fragment>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    </SidebarProvider>
-  )}
-  </Fragment>
+        </SidebarProvider>
+      )}
+    </Fragment>
   )
 }

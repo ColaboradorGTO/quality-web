@@ -57,11 +57,15 @@ export const DashBoardConferenciaCega = () => {
     { enabled: Boolean(usuarioLogado?.id), staleTime: 5 * 60 * 1000, }
   );
 
+  const menuFilhoResumo = selectedModule?.menuPai?.menuFilho?.find(
+    menu => menu.URL === "/conferenciaCega/ActionPesquisaOrdemTransferencia"
+  );
+
   let component = null;
 
   switch (componentToShow) {
     case "/conferenciaCega/ActionPesquisaOrdemTransferencia":
-      component = <ActionPesquisaOrdemTransferencia usuarioLogado={usuarioLogado} />;
+      component = <ActionPesquisaOrdemTransferencia usuarioLogado={usuarioLogado} menuFilhoAtual={menuFilhoResumo} />;
       break;
     case "/conferenciaCega/ActionPesquisaFaturamentoOT":
       component = <ActionPesquisaFaturamentoOT usuarioLogado={usuarioLogado} />
@@ -98,7 +102,7 @@ export const DashBoardConferenciaCega = () => {
                           <div className="panel-content">
                             <Suspense fallback={<div>Loading...</div>}>
                               {resumoVisivel && !componentToShow && (
-                                <ActionPesquisaOrdemTransferencia  usuarioLogado={usuarioLogado}/>
+                                <ActionPesquisaOrdemTransferencia  usuarioLogado={usuarioLogado} menuFilhoAtual={menuFilhoResumo}/>
                             
                               )}
                               {componentToShow && component}

@@ -11,24 +11,15 @@ import { MdUpdate } from "react-icons/md";
 import { InputSelectAction } from "../../../Inputs/InputSelectAction";
 import { animacaoCarregamento, fecharAnimacaoCarregamento, foiCancelado } from "../../../../utils/animationCarregamento";
 
-export const InformaticaActionHome = ({ usuarioLogado, ID }) => {
+export const InformaticaActionHome = ({ usuarioLogado, menuFilhoAtual }) => {
   const [clickContador, setClickContador] = useState(0);
   const [tabelaVisivel, setTabelaVisivel] = useState(false);
   const [actionVisivel, setActionVisivel] = useState(true);
-  const [menuFilhoAtual, setMenuFilhoAtual] = useState('');
   const [Ufselecionada, setUfselecionada] = useState('');
   const [marcaSelecionada, setMarcaSelecionada] = useState('');
   const [empresaSelecionada, setEmpresaSelecionada] = useState('');
   const [situacaoSelecionada, setSituacaoSelecionada] = useState('');
-
-
-  useEffect(() => {
-    const menuSalvo = localStorage.getItem('menuFilhoSelecionado');
-    if (menuSalvo) {
-      const menuParsed = JSON.parse(menuSalvo);
-      setMenuFilhoAtual(menuParsed);
-    }
-  }, []);
+  
 
   const { data: optionsModulos = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
     ['menus-usuario-excecao', menuFilhoAtual?.ID],
@@ -37,8 +28,9 @@ export const InformaticaActionHome = ({ usuarioLogado, ID }) => {
 
       return response.data;
     },
-    { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000, }
+    { enabled: Boolean(usuarioLogado?.id && menuFilhoAtual?.ID), staleTime: 5 * 60 * 1000, }
   );
+
 
   const { data: dadosMarca = [], error: errorMarca, isLoading: isLoadingMarca, refetch: refetchMarca } = useQuery(
     'listaMarca',
