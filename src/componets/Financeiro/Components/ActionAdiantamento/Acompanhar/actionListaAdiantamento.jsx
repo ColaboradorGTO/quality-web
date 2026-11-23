@@ -384,7 +384,7 @@ export const ActionListaAdiantamento = ({
             </div>
        
             <div className="p-1">
-              {['PAGO', 'AUTORIZADO', 'COMPROVANTE ANEXADO', 'AGUARDANDO NOTA FISCAL', ].includes(row.STATUS) && (
+              {['PAGO', 'AUTORIZADO', 'COMPROVANTE ANEXADO', 'AGUARDANDO NOTA FISCAL', 'NOTA FISCAL ANEXADA'].includes(row.STATUS) && (
                 <ButtonTable
                   titleButton={"Exportar Comprovante"}
                   cor={"info"}
@@ -397,7 +397,7 @@ export const ActionListaAdiantamento = ({
               )}
             </div>
             <div className="p-1">
-              {['PAGO', 'AUTORIZADO', 'COMPROVANTE ANEXADO', 'AGUARDANDO NOTA FISCAL', ].includes(row.STATUS) && (
+              {['PAGO', 'AUTORIZADO', 'COMPROVANTE ANEXADO', 'AGUARDANDO NOTA FISCAL', 'NOTA FISCAL ANEXADA'].includes(row.STATUS) && (
                 <ButtonTable
                   titleButton={"Exportar Nota Fiscal"}
                   cor={"warning"}
