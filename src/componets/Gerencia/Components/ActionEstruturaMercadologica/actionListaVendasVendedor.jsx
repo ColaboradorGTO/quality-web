@@ -97,7 +97,6 @@ export const ActionListaVendasVendedor = ({ dadosVendasVendedor }) => {
       VRRECVOUCHER: item.VRRECVOUCHER,
       valorTotalVendaLiquida: valorTotalVendaLiquida,
       PRECO_COMPRA: item.PRECO_COMPRA,
-
     }
   });
 

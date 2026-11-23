@@ -265,7 +265,6 @@ export const ActionListaVendasEstrutura = ({ dadosVendasEstrutura }) => {
       body: row => <th>{formatMoeda(row.valorTotalLiquido)}</th>,
       sortable: true,
     },
-
   ]
 
   const filtrarDados = (dados, filtro) => {
