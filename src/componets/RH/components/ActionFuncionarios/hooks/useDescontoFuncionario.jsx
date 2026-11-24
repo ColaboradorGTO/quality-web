@@ -44,11 +44,11 @@ export const useEditarDescontoFuncionario = ({
         return usuarioIP;
     };
 
-    useEffect(() => {
-        const dataAtual = getDataAtual();
-        setDataInicioDesconto(dataAtual);
-        setDataFimDesconto(dataAtual);
-    }, [])
+    // useEffect(() => {
+    //     const dataAtual = getDataAtual();
+    //     setDataInicioDesconto(dataAtual);
+    //     setDataFimDesconto(dataAtual);
+    // }, [])
 
     useEffect(() => {
         if (dadosDescontoFuncionarios) {
@@ -56,6 +56,8 @@ export const useEditarDescontoFuncionario = ({
             setCpf(dadosDescontoFuncionarios[0]?.NUCPF);
             setFuncionario(dadosDescontoFuncionarios[0]?.NOFUNCIONARIO);
             setPercentualDesconto(dadosDescontoFuncionarios[0]?.PERCDESCUSUAUTORIZADO || "0" );   
+            setDataInicioDesconto(dadosDescontoFuncionarios[0]?.DTINICIODESC);
+        setDataFimDesconto(dadosDescontoFuncionarios[0]?.DTFIMDESC);
         }
     }, [dadosDescontoFuncionarios]);
 
