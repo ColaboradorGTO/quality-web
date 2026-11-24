@@ -359,6 +359,7 @@ export const ActionListaFuncionarios = ({ dadosFuncionarios, optionsModulos, usu
                 height="35px"
                 iconColor={"#fff"}
                 cor={"danger"}
+                disabledBTN={optionsModulos[0]?.ADMINISTRADOR == 'True' ? false : true}
               />
 
             </div>
