@@ -467,6 +467,7 @@ export const ActionListaFuncionarios = ({ dadosFuncionarios, optionsModulos, usu
             currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
             filterDisplay="menu"
             stripedRows
+            cellMemo={false}
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
           >
             {colunasFuncionarios.map(coluna => (

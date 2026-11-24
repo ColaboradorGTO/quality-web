@@ -43,7 +43,7 @@ export const DashBoardRecursosHumanos = ({ }) => {
     if (storedMenuFilho) {
       setMenuSelected(selectedModule);
     }
-    console.log(menuSelected, 'menuSelected')
+    
   }, [usuarioLogado]);
 
   const { data: optionsModulosPage = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
@@ -84,7 +84,7 @@ export const DashBoardRecursosHumanos = ({ }) => {
   const menuFilhoResumo = selectedModule?.menuPai?.menuFilho?.find(
     menu => menu.URL === "/recursosHumanos/ActionPesquisaFuncionarios"
   );
-
+ 
   const permissaoUsuario = selectedModule.menuPai.menuFilho;
   const {
     ID,
@@ -99,7 +99,7 @@ export const DashBoardRecursosHumanos = ({ }) => {
 
   switch (componentToShow) {
     case "/recursosHumanos/ActionPesquisaFuncionarios":
-      component = <ActionPesquisaFuncionarios usuarioLogado={usuarioLogado} ID={ID} menuFilhoAtual={menuFilhoResumo} />;
+      component = <ActionPesquisaFuncionarios usuarioLogado={usuarioLogado} menuFilhoAtual={menuFilhoResumo} />;
       break;
     default:
       component = null;
@@ -130,7 +130,7 @@ export const DashBoardRecursosHumanos = ({ }) => {
                           <div className="panel-content">
                             <Suspense fallback={<div>Loading...</div>}>
                               {usuarioLogado && actionVisivel && !componentToShow && (
-                                <ActionPesquisaFuncionarios usuarioLogado={usuarioLogado} ID={ID}  menuFilhoAtual={menuFilhoResumo}/>
+                                <ActionPesquisaFuncionarios usuarioLogado={usuarioLogado}  menuFilhoAtual={menuFilhoResumo}/>
                               )}
 
 
