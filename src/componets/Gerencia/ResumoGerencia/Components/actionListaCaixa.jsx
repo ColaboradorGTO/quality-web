@@ -10,6 +10,7 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import HeaderTable from '../../../Tables/headerTable';
+import { formatarPorcentagem } from '../../../../utils/formatarPorcentagem';
 
 export const ActionListaCaixa = ({ dadosListaCaixa, dadosDespesas, dadosAdiantamento, dadosQuebraCaixa }) => {
   const [globalFilterValue, setGlobalFilterValue] = useState('');
@@ -367,10 +368,10 @@ export const ActionListaCaixa = ({ dadosListaCaixa, dadosDespesas, dadosAdiantam
       header: '% PCJ',
       body: row => (
         <th style={{ color: row.pcjTotal === 0 ? 'red' : 'blue' }}>
-          {formatMoeda(row.pcjTotal)}
+          {formatarPorcentagem(row.pcjTotal)}
         </th>
       ),
-      footer: <th>{formatMoeda(calcularTotalPCJ())}</th>,
+      footer: <th>{formatarPorcentagem(calcularTotalPCJ())}</th>,
       sortable: true,
     },
     {
@@ -439,7 +440,7 @@ export const ActionListaCaixa = ({ dadosListaCaixa, dadosDespesas, dadosAdiantam
         <Column footer={formatMoeda(calcularTotalFaturaTotal())} footerStyle={{ textAlign: 'center', color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={formatMoeda(calcularTotalDinehiro())} footerStyle={{ textAlign: 'center', color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={formatMoeda(calcularTotalCartao())} footerStyle={{ textAlign: 'center', color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
-        <Column footer={formatMoeda(calcularTotalPCJ())} footerStyle={{ textAlign: 'center', color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
+        <Column footer={formatarPorcentagem(calcularTotalPCJ())} footerStyle={{ textAlign: 'center', color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={formatMoeda(calcularTotalPOS())} footerStyle={{ textAlign: 'center', color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={formatMoeda(calcularTotalPIX())} footerStyle={{ textAlign: 'center', color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />
         <Column footer={formatMoeda(calcularTotalVoucher())} footerStyle={{ textAlign: 'center', color: '#212529', backgroundColor: "#e9e9e9", border: '1px solid #ccc', fontSize: '0.8rem' }} />

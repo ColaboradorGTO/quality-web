@@ -12,6 +12,7 @@ import { ActionDetalheMaloteModal } from "./ActionDetalheMalote/actionDetalheMal
 import { ActionConferirMaloteModal } from "./ActionAlterarMalote/actionConferirMaloteModal"
 import { get } from "../../../api/funcRequest";
 import { FaEdit } from "react-icons/fa";
+import { formatarPorcentagem } from "../../../utils/formatarPorcentagem";
 
 export const ActionListaMovimentacaoCaixaDia = ({
   dadosMovimentacaoCaixaDoDia,
@@ -294,7 +295,7 @@ export const ActionListaMovimentacaoCaixaDia = ({
       header: '% PCJ',
       body: row => (
         <th style={{ color: row.pcjTotal < 30 ? 'red' : 'blue' }}>
-          {formatMoeda(row.pcjTotal)}
+          {formatarPorcentagem(row.pcjTotal)}
         </th>
       ),
       sortable: true,
