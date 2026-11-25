@@ -14,7 +14,7 @@ export const ActionPesquisaConsultaVouchers = ({ usuarioLogado }) => {
   const [tabelaVisivel, setTabelaVisivel] = useState(false);
   const [dataPesquisaInicio, setDataPesquisaInicio] = useState('')
   const [dataPesquisaFim, setDataPesquisaFim] = useState('')
-  const [numeroVoucher, setNumeroVoucher] = useState(0);
+  const [numeroVoucher, setNumeroVoucher] = useState('');
   const [empresaSelecionada, setEmpresaSelecionada] = useState('');
   const [empresaSelecionadaNome, setEmpresaSelecionadaNome] = useState('');
   const [marcaSelecionada, setMarcaSelecionada] = useState('')
