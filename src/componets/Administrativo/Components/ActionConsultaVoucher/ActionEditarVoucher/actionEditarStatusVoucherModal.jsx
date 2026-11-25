@@ -12,7 +12,7 @@ import { useEditarStatusVoucher } from "../hooks/useEditarStatusVoucher";
 import { InputFieldModal } from "../../../../Buttons/InputFieldModal";
 
 
-export const ActionEditarStatusVoucherModal = ({ show, handleClose, dadosEditarVoucher, usuarioLogado, optionsModulos,handleClick }) => {
+export const ActionEditarStatusVoucherModal = ({ show, handleClose, dadosEditarVoucher, usuarioLogado, optionsModulos, handleClick }) => {
 
   const {
     onSubmit,
@@ -26,6 +26,12 @@ export const ActionEditarStatusVoucherModal = ({ show, handleClose, dadosEditarV
     motivoTroca,
     setMotivoTroca,
   } = useEditarStatusVoucher({ optionsModulos, usuarioLogado, dadosEditarVoucher, handleClick, handleClose })
+
+  const condicoesVisualizacao =
+    statusSelecionado !== dadosEditarVoucher[0]?.voucher?.STSTATUS ||
+      trocaSelecionado !== dadosEditarVoucher[0]?.voucher?.STTIPOTROCA
+      ? 'block'
+      : 'none';
 
   return (
     <Fragment>
@@ -78,7 +84,7 @@ export const ActionEditarStatusVoucherModal = ({ show, handleClose, dadosEditarV
                       styles={customStyles}
                     />
                   </div>
-                  
+
                 </div>
                 <div className="row">
 
@@ -139,12 +145,11 @@ export const ActionEditarStatusVoucherModal = ({ show, handleClose, dadosEditarV
 
 
             ButtonTypeConfirmar={ButtonTypeModal}
-            textButtonConfirmar={"Confirmar"}
+            textButtonConfirmar={"Atualizar"}
             onClickButtonConfirmar={onSubmit}
             corConfirmar="success"
-            styleConfirmar={{ display: statusSelecionado == '' ? 'block' : 'none' }}
+            styleConfirmar={{ display: condicoesVisualizacao }}
           />
-
 
         </div>
       </Modal>
