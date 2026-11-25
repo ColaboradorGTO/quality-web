@@ -1,6 +1,15 @@
 import { Fragment, useState } from "react"
 
-export const InputFieldCheckBox = ({ label, readOnly, id, nome, placeholder }) => {
+export const InputFieldCheckBox = ({
+  label,
+  readOnly,
+  id,
+  nome,
+  placeholder,
+  disabledChecked,
+  checkedCheckBoxPedido,
+  onChangeCheckBoxPedido
+}) => {
   const [isChecked, setIsChecked] = useState(false);
 
   const handleCheckboxChange = () => {
@@ -14,18 +23,18 @@ export const InputFieldCheckBox = ({ label, readOnly, id, nome, placeholder }) =
         <input
           style={{
             width: "15px",
-            height: "15px", 
+            height: "15px",
             marginRight: "10px",
-           
 
           }}
           id={id}
           type="checkbox"
           name={nome}
           readOnly={readOnly}
-          checked={isChecked}
+          disabled={disabledChecked}
+          checked={checkedCheckBoxPedido ?? false}
           placeHolder={placeholder}
-          onChange={handleCheckboxChange}
+          onChange={onChangeCheckBoxPedido ?? (() => { })}
         />
         <label className="custom-label" htmlFor={id}>
           {label}

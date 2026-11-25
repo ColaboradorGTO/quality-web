@@ -20,6 +20,8 @@ export const useCriarMenuFilho = ({
   const [selectedModule, setSelectedModule] = useState(null)
   const [moduloUsuario, setModuloUsuario] = useState(null);
   const [ipUsuario, setIpUsuario] = useState('');
+  const navigate = useNavigate();
+
 
   const getIPUsuario = async () => {
     let usuarioIP = null;

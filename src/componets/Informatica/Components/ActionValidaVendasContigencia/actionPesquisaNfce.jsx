@@ -14,7 +14,7 @@ import { useEffect } from "react"
 import { getDataAtual } from "../../../../utils/dataAtual"
 
 
-export const ActionPesquisaNfce = ({usuarioLogado, ID}) => {
+export const ActionPesquisaNfce = ({ usuarioLogado, ID }) => {
   const [numeroVenda, setNumeroVenda] = useState('');
   const [dataInicio, setDataInicio] = useState('');
   const [dataFim, setDataFim] = useState('');
@@ -26,7 +26,7 @@ export const ActionPesquisaNfce = ({usuarioLogado, ID}) => {
     const dataAtual = getDataAtual();
     setDataInicio(dataAtual);
     setDataFim(dataAtual);
-  } , []);
+  }, []);
 
 
   useEffect(() => {
@@ -36,35 +36,35 @@ export const ActionPesquisaNfce = ({usuarioLogado, ID}) => {
       setMenuFilhoAtual(menuParsed);
     }
   }, []);
-    
+
   const { data: optionsModulos = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
     ['menus-usuario-excecao', menuFilhoAtual?.ID],
     async () => {
       const response = await get(`/menus-usuario-excecao?idUsuario=${usuarioLogado?.id}&idMenuFilho=${menuFilhoAtual?.ID}`);
-      
+
       return response.data;
     },
-    { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000,}
+    { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000, }
   );
 
   const { data: dadosVendas = [], error: errorVendas, isLoading: isLoadingVendas, refetch: refetchListaVendas } = useQuery(
     'https://gto.api.br/validarConsulta',
     async () => {
       const response = await axios.get(`https://gto.api.br/validarConsulta?dataInicio=${dataInicio}&dataFim=${dataFim}&page=${page}&pageSize=${pageSize}`);
-      
+
       return response.data.data;
     },
     { enabled: false }
   );
 
-  const handleClick= () => {
+  const handleClick = () => {
     refetchListaVendas();
   };
 
   const {
     onSubmit
-  } = useAtualizarVendasContigencia({dadosVendas, usuarioLogado, optionsModulos}); 
-  
+  } = useAtualizarVendasContigencia({ dadosVendas, usuarioLogado, optionsModulos });
+
   const handleAtualizarVendas = async () => {
     get(`/validarConsulta`).then((response) => {
       console.log('Resposta da validação:', response.data);
@@ -75,6 +75,13 @@ export const ActionPesquisaNfce = ({usuarioLogado, ID}) => {
   }
 
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleClick();
+    }
+  };
+
   return (
 
     <Fragment>
@@ -82,7 +89,7 @@ export const ActionPesquisaNfce = ({usuarioLogado, ID}) => {
         linkComponentAnterior={["Home"]}
         linkComponent={["Lista de Vendas"]}
         title="Lista de Vendas por Loja"
-        
+
         InputFieldDTInicioComponent={InputField}
         labelInputFieldDTInicio={"Data Início"}
         valueInputFieldDTInicio={dataInicio}
@@ -112,12 +119,12 @@ export const ActionPesquisaNfce = ({usuarioLogado, ID}) => {
         IconCadastro={FiSend}
       />
 
-      <ActionListaVendas 
-        dadosVendas={dadosVendas} 
+      <ActionListaVendas
+        dadosVendas={dadosVendas}
         usuarioLogado={usuarioLogado}
-        optionsModulos={optionsModulos}  
+        optionsModulos={optionsModulos}
       />
-      
+
 
     </Fragment>
   )

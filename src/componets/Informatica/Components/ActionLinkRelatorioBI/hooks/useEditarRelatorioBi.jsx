@@ -96,17 +96,6 @@ export const useEditarRelatorioBi = ({
 
             const response = await put('/linkRelatorioBI/:id', putData);
 
-            Swal.fire({
-                position: 'center',
-                icon: 'success',
-                title: 'Relatório atualizado com sucesso!',
-                customClass: {
-                    container: 'custom-swal',
-                },
-                showConfirmButton: false,
-                timer: 1500,
-            });
-
             const textDados = JSON.stringify(putData);
             let textoFuncao = 'INFORMATICA/ATUALIZAR LINK RELATORIO BI';
 
@@ -120,13 +109,39 @@ export const useEditarRelatorioBi = ({
             };
 
             const responsePost = await post('/log-web', postData);
+
+            Swal.fire({
+                position: 'center',
+                icon: 'success',
+                title: 'Relatório atualizado com sucesso!',
+                customClass: {
+                    container: 'custom-swal',
+                },
+                showConfirmButton: false,
+                timer: 1500,
+            });
+
             handleTabelaVisivel()
             handleClose()
             return responsePost.data;
 
         } catch (error) {
+            const textDados = JSON.stringify(putData);
+            let textoFuncao = 'INFORMATICA/ATUALIZAR LINK RELATORIO BI';
+
+            const ipUsuario = await getIPUsuario();
+
+            const postData = {
+                IDFUNCIONARIO: String(usuarioLogado.id),
+                PATHFUNCAO: textoFuncao,
+                DADOS: textDados,
+                IP: ipUsuario || 'INDISPONIVEL',
+            };
+
+            const responsePost = await post('/log-web', postData);
+
             Swal.fire({
-                position: 'center',
+                position: 'top-end',
                 icon: 'error',
                 title: 'Erro ao atualizar Relatório!',
                 customClass: {
@@ -136,21 +151,8 @@ export const useEditarRelatorioBi = ({
                 timer: 1500,
             });
             console.log(error);
-        }
-
-        const textDados = JSON.stringify(putData);
-        let textoFuncao = 'INFORMATICA/ATUALIZAR LINK RELATORIO BI';
-
-        const ipUsuario = await getIPUsuario();
-
-        const postData = {
-            IDFUNCIONARIO: String(usuarioLogado.id),
-            PATHFUNCAO: textoFuncao,
-            DADOS: textDados,
-            IP: ipUsuario || 'INDISPONIVEL',
+            return responsePost.data;
         };
-
-        const responsePost = await post('/log-web', postData);
     };
 
     const optionsStatus = [

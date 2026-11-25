@@ -213,7 +213,6 @@ export const ActionListaRelatorioBi = ({ dadosBI, optionsModulos, refetch, usuar
 
       </div>
 
-
       <ActionEditarRelatorioBIModal
         show={modalVisivel}
         handleClose={() => setModalVisivel(false)}

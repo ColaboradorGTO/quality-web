@@ -306,22 +306,22 @@ export const ActionListaConferenciaMalotes = ({ dadosMalotes, handleClick, optio
     },
   ]
 
-    const handleEnviarMalote = async (row) => {
-      if (optionsModulos[0]?.ALTERAR == 'True') {
-        if (row) {
-          await onSalvarMalote(row);
-        }
-  
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Acesso Negado',
-          html: `${usuarioLogado?.NOFUNCIONARIO} <br/> Você não tem permissão para realizar esta ação.`,
-          confirmButtonText: 'OK',
-          timer: 3000,
-        });
+  const handleEnviarMalote = async (row) => {
+    if (optionsModulos[0]?.ALTERAR == 'True') {
+      if (row) {
+        await onSalvarMalote(row);
       }
+
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Acesso Negado',
+        html: `${usuarioLogado?.NOFUNCIONARIO} <br/> Você não tem permissão para realizar esta ação.`,
+        confirmButtonText: 'OK',
+        timer: 3000,
+      });
     }
+  }
 
   return (
 
@@ -356,6 +356,7 @@ export const ActionListaConferenciaMalotes = ({ dadosMalotes, handleClick, optio
             currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} Registros"
             filterDisplay="menu"
             showGridlines
+            cellMemo={false}
             stripedRows
             response
             emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}

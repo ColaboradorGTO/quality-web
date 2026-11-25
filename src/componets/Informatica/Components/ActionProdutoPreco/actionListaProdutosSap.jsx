@@ -1,7 +1,7 @@
 import { Fragment, useRef, useState } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { dataFormatada } from '../../../../utils/dataFormatada';
+import { dataHoraFormatada, } from '../../../../utils/dataFormatada';
 import { formatMoeda } from '../../../../utils/formatMoeda';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
@@ -122,7 +122,7 @@ export const ActionListaProdutosSap = ({ dadosProdutosSap }) => {
     {
       field: 'DATA_ULTIMA_ALTERACAO_PDV',
       header: 'Alterado',
-      body: row => <th>{row.DATA_ULTIMA_ALTERACAO_PDV}</th>,
+      body: row => <th>{dataHoraFormatada(row.DATA_ULTIMA_ALTERACAO_PDV)}</th>,
       sortable: true,
     },
 

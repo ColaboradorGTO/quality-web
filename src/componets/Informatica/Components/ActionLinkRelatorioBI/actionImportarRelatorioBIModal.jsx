@@ -29,9 +29,7 @@ export const ActionImportarRelatorioBIModal = ({
     usuarioLogado
   })
 
-
- // console.log(file, 'file');
-
+  
   return (
     <Fragment>
       <Modal

@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useRef,useEffect } from "react"
+import React, { Fragment, useState, useRef, useEffect } from "react"
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { useReactToPrint } from "react-to-print";
@@ -8,6 +8,10 @@ import * as XLSX from 'xlsx';
 import HeaderTable from "../../../Tables/headerTable";;
 import { Checkbox } from "primereact/checkbox";
 import Swal from "sweetalert2";
+import { ButtonTable } from "../../../ButtonsTabela/ButtonTable";
+import { CiEdit } from "react-icons/ci";
+import { get } from "../../../../api/funcRequest";
+import { ActionEditarPerfilModal } from "./ActionEditarPermissao/actionEditarModal";
 
 
 export const ActionListaPerfilPermissao = ({
@@ -15,27 +19,32 @@ export const ActionListaPerfilPermissao = ({
   btnVisivel,
   setBtnVisivel,
   selectedItems,
-  setSelectedItems
+  setSelectedItems,
+  usuarioOrigem,
+  optionsModulos,
+  handleClick
 }) => {
-  
+
   const [globalFilterValue, setGlobalFilterValue] = useState('');
   const [first, setFirst] = useState(0)
   const [rowState, setRowState] = useState(10)
   const [rowSelection, setRowSelection] = useState(null);
   const [selectAllChecked, setSelectAllChecked] = useState(false);
+  const [dadosDetalhesPerfilPermissao, setDadosDetalhesPerfilPermissao] = useState([]);
+  const [modalEditarPerfilPermissao, setModalEditarPerfilPermissao] = useState(false);
 
   useEffect(() => {
     const itensSelecionaveis = dados.filter(item => item.IDPERFIL)
 
     const dadosPaginadosAtual = dados.slice(first, first + rowState);
     const intensSelecionaveisPaginaAtual = dadosPaginadosAtual.filter(item => selectedItems.some(selected => selected.IDPERFIL === item.IDPERFIL));
-    
-    if(selectedItems.length === 0) {
+
+    if (selectedItems.length === 0) {
       setSelectAllChecked(false);
-    } else if(
+    } else if (
       selectedItems.length === itensSelecionaveis.length ||
-      (selectedItems.length === intensSelecionaveisPaginaAtual.length && 
-        intensSelecionaveisPaginaAtual.length > 0 && 
+      (selectedItems.length === intensSelecionaveisPaginaAtual.length &&
+        intensSelecionaveisPaginaAtual.length > 0 &&
         intensSelecionaveisPaginaAtual.every(item => selectedItems.some(selected => selected.IDPERFIL === item.IDPERFIL))
       )
     ) {
@@ -43,16 +52,16 @@ export const ActionListaPerfilPermissao = ({
     } else {
       setSelectAllChecked(false);
     }
-  
+
   }, [selectedItems, first, rowState]);
-  
+
   const onPage = (event) => {
     setFirst(event.first);
     setRowState(event.rows)
   }
 
   const onSelectAllChange = (e) => {
-   
+
     if (e.checked) {
       Swal.fire({
         icon: 'question',
@@ -66,12 +75,12 @@ export const ActionListaPerfilPermissao = ({
         cancelButtonColor: '#2196F3',
         allowOutsideClick: false,
       }).then((result) => {
-  
+
         if (result.isConfirmed) {
           const itensSelecionaveis = dados.filter(item => item.IDPERFIL);
           setSelectedItems([...itensSelecionaveis]);
           setBtnVisivel(true);
-        } else if(result.dismiss === Swal.DismissReason.cancel) {
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
           const dadosPaginadosAtual = dados.slice(first, first + rowState);
           const itensSelecionaveisPaginaAtual = dadosPaginadosAtual.filter(item => item.IDPERFIL);
           setSelectedItems([...itensSelecionaveisPaginaAtual]);
@@ -80,9 +89,9 @@ export const ActionListaPerfilPermissao = ({
           setBtnVisivel(false);
           setSelectedItems([]);
         }
-  
+
       })
-      
+
     } else {
       setBtnVisivel(false);
       setSelectedItems([]);
@@ -258,6 +267,7 @@ export const ActionListaPerfilPermissao = ({
       ARRAYIDMFILHOS: nomeMenuFilho,
       IDMENU: item.IDMENU,
       IDMENUFILHO: item.IDMENUFILHO,
+      STATIVO: item.STATIVO == 'True' ? 'Ativo' : 'Inativado',
       modulo: modulo,
     };
   });
@@ -361,9 +371,86 @@ export const ActionListaPerfilPermissao = ({
       body: row => <p style={{ width: '100px', fontWeight: 600, margin: '0px' }}>{row.N4 == 'True' ? 'Sim' : 'Não'}</p>,
       sortable: true,
     },
+    {
+      field: 'situacao',
+      header: 'Situação',
+      body: row => <th
+
+        style={{
+          backgroundColor: row.STATIVO == "Ativo" ? "#28a745" : "#dc3545",
+          color: "#fff",
+          padding: "1px 4px",
+          borderRadius: "5px",
+          fontSize: "12px",
+          fontWeight: "bold"
+        }}>
+
+        {row.STATIVO}</th>,
+      sortable: true,
+    },
+    {
+      filed: 'Opçoes',
+      header: 'Opções',
+      body: row =>
+        <div>
+          <ButtonTable
+            titleButton={"Editar"}
+            onClickButton={() => handleClickEdit(row)}
+            Icon={CiEdit}
+            iconSize={20}
+            iconColor={"#fff"}
+            cor={"primary"}
+            width="30px"
+            height="30px"
+            disabledBTN={optionsModulos?.[0]?.ALTERAR == 'True' ? false : true}
+          />
+        </div>
+    }
   ]
 
+  const handleEdit = async (row) => {
+    try {
+      const response = await get(`/menus-usuario-excecao?idPerfil=${row.IDPERFIL}`)
+      //console.log(response.data, 'response.data')
+      if (response.data && response.data.length > 0) {
+        setDadosDetalhesPerfilPermissao(response.data)
+        setModalEditarPerfilPermissao(true);
+      } else {
+        Swal.fire({
+          title: 'Erro',
+          text: 'Dados do Menu não encontrado.',
+          icon: 'error',
+          timer: 3000,
+          customClass: {
+            container: 'custom-swal',
+          }
+        })
+        return;
+      }
+    } catch (error) {
+      console.error('Erro ao Buscar Lista de Menus Filhos: ', error);
+    }
+  };
 
+  const handleClickEdit = (row) => {
+    if (optionsModulos?.[0]?.ALTERAR == 'True') {
+      if (row) {
+        handleEdit(row);
+      }
+    } else {
+      Swal.fire({
+        title: 'Acesso Negado',
+        text: 'Você não tem permissão para acessar está funcionalidade.',
+        icon: 'warning',
+        timer: 3000,
+        customClass: {
+          container: 'custom-swal',
+        }
+      })
+    }
+  };
+
+  
   return (
 
     <Fragment>
@@ -383,7 +470,7 @@ export const ActionListaPerfilPermissao = ({
 
         </div>
 
-         <div style={{ width: "100%", display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <div style={{ width: "100%", display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
 
           <div className="custom-control custom-checkbox">
             <Checkbox
@@ -440,7 +527,15 @@ export const ActionListaPerfilPermissao = ({
 
         </div>
       </div>
-    
+      <ActionEditarPerfilModal
+        show={modalEditarPerfilPermissao}
+        handleClose={() => setModalEditarPerfilPermissao(false)}
+        dadosEditarPermissao={dadosDetalhesPerfilPermissao}
+        handleClick={handleClick}
+      //refetch={refetch}
+      //usuarioLogado={usuarioLogado}
+      />
+
     </Fragment>
   )
 }

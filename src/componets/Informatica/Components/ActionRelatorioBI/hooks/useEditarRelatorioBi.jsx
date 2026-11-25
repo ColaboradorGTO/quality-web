@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { post, put } from "../../../../../api/funcRequest";
 
-
 export const useEditarRelatorioBi = ({ handleClose, refetch, dadosRelatorios, optionsModulos, usuarioLogado }) => {
   const [statusSelecionado, setStatusSelecionado] = useState('');
   const [descricao, setDescricao] = useState('');
@@ -65,7 +64,6 @@ export const useEditarRelatorioBi = ({ handleClose, refetch, dadosRelatorios, op
       return;
     }
 
- 
     const postData = {
       DSRELATORIOBI: descricao,
       STATIVO: statusSelecionado,

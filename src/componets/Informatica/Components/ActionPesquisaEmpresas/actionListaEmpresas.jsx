@@ -254,7 +254,6 @@ export const ActionListaEmpresas = ({ dadosEmpresas, optionsModulos, usuarioLoga
                         filterDisplay="menu"
                         cellMemo={false}
                         showGridlines
-                        cellMemo={false}
                         stripedRows
                         emptyMessage={<div className="dataTables_empty">Nenhum resultado encontrado</div>}
                     >

@@ -6,7 +6,9 @@ import { ButtonTypeModal } from "../../../../Buttons/ButtonTypeModal"
 import { Controller, useForm } from "react-hook-form"
 import FormField from "../../../../Formularios/FormField"
 import { schema } from "./schema";
-export const FormularioEditar = ({ dadosEditarPermissao, handleClose, handleClick }) => {
+
+
+export const FormularioEditar = ({ dadosEditarPermissao, handleClose, handleClick, usuarioLogado }) => {
     const { handleSubmit, formState: { errors }, clearErrors, control, setError } = useForm({
         mode: "onChange"
     });
@@ -30,7 +32,8 @@ export const FormularioEditar = ({ dadosEditarPermissao, handleClose, handleClic
         isSubmitting,
         idMenuFilho,
         setIdMenuFilho,
-    } = useEditarPerfilPermissaoUsuario({ dadosEditarPermissao, handleClose, handleClick })
+        onSubmitUpdate
+    } = useEditarPerfilPermissaoUsuario({ dadosEditarPermissao, handleClose, handleClick, usuarioLogado })
 
     const handleValidatedSubmit = async () => {
         try {

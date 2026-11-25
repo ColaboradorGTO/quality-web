@@ -10,13 +10,14 @@ import { AiOutlineSearch } from "react-icons/ai"
 import { useQuery } from "react-query"
 import { animacaoCarregamento, fecharAnimacaoCarregamento, foiCancelado } from "../../../../utils/animationCarregamento"
 
-export const ActionPesquisaVendas = () => {
+export const ActionPesquisaVendas = ({ usuarioLogado }) => {
   const [tabelaVisivel, setTabelaVisivel] = useState(false);
   const [empresaSelecionada, setEmpresaSelecionada] = useState('');
   const [empresaSelecionadaNome, setEmpresaSelecionadaNome] = useState('');
   const [dataPesquisaInicio, setDataPesquisaInicio] = useState("");
   const [dataPesquisaFim, setDataPesquisaFim] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [menuFilhoAtual, setMenuFilhoAtual] = useState(null);
   const [pageSize, setPageSize] = useState(1000);
 
   useEffect(() => {
@@ -25,6 +26,25 @@ export const ActionPesquisaVendas = () => {
     setDataPesquisaInicio(dataInicio);
     setDataPesquisaFim(dataFim);
   }, []);
+
+  useEffect(() => {
+    const menuSalvo = localStorage.getItem('menuFilhoSelecionado');
+    if (menuSalvo) {
+      const menuParsed = JSON.parse(menuSalvo);
+      setMenuFilhoAtual(menuParsed);
+    }
+  }, []);
+
+  const { data: optionsModulos = [], error: errorModulos, isLoading: isLoadingModulos, refetch: refetchModulos } = useQuery(
+    ['menus-usuario-excecao', menuFilhoAtual?.ID],
+    async () => {
+      const response = await get(`/menus-usuario-excecao?idUsuario=${usuarioLogado?.id}&idMenuFilho=${menuFilhoAtual?.ID}`);
+
+      return response.data;
+    },
+    { enabled: Boolean(usuarioLogado?.id) }
+  );
+
 
   const { data: optionsEmpresas = [], error: errorEmpresas, isLoading: isLoadingEmpresas, refetch } = useQuery(
     'listaEmpresasIformatica',
@@ -79,8 +99,6 @@ export const ActionPesquisaVendas = () => {
     }
   };
 
-
-
   const { data: dadosVendasLoja = [], error: erroCliente, isLoading: isLoadingCliente, refetch: refetchListaVendas } = useQuery(
     'vendas-loja-informatica',
     () => fetchListaVendas(),
@@ -98,6 +116,13 @@ export const ActionPesquisaVendas = () => {
     refetchListaVendas();
     setTabelaVisivel(true);
 
+  };
+
+
+  const handleClick = () => {
+    setCurrentPage(prevPage => prevPage + 1);
+    refetchListaVendas();
+    setTabelaVisivel(true);
   };
 
   const handleKeyPress = (e) => {
@@ -146,8 +171,10 @@ export const ActionPesquisaVendas = () => {
         IconSearch={AiOutlineSearch}
       />
 
-      <ActionListaVendas 
-      dadosVendasLoja={dadosVendasLoja} />
+      <ActionListaVendas
+        dadosVendasLoja={dadosVendasLoja}
+        optionsModulos={optionsModulos}
+      />
 
     </Fragment>
   )

@@ -76,7 +76,7 @@ export const useReceberMalote = ({ usuarioLogado, optionsModulos, refetchLista }
       if (result.isConfirmed) {
 
         try {
-          const response = await put(`/malotes-por-loja/${row?.IDMALOTE}`, putData);
+          const response = await put(`/malotes-por-loja/:id`, putData);
 
           const textDados = JSON.stringify(putData);
           let textoFuncao = 'RECEPÇÃO DE MALOTE / RECEBIMENTO DE MALOTE';

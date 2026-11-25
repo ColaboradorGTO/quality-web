@@ -38,39 +38,6 @@ export const ActionPesquisaRecebimentoMalote = ({ usuarioLogado, ID, menuFilhoAt
         { enabled: Boolean(usuarioLogado?.id && menuFilhoAtual?.ID), staleTime: 5 * 60 * 1000, }
     );
 
-    /*    const fetchListaMalotes = async () => {
-           const urlBase = `/malotes-loja?idEmpresa=${empresaSelecionada}&statusMalote=${statusSelecionado}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}`;
-           let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
-           urlApi = urlApi.replace('&page=1', '').replace('page=1', '');
-           try {
-               animacaoCarregamento('Carregando dados...', true);
-   
-               const primeiraPagina = 1;
-               const primeiraResposta = await get(`${urlApi}&page=${primeiraPagina}`);
-               const page = primeiraResposta.page || primeiraPagina;
-               const pageSize = primeiraResposta.pageSize || 1000;
-               const totalRows = primeiraResposta.rows || primeiraResposta.data?.length || 0;
-               const totalPages = Math.ceil(totalRows / pageSize);
-   
-               let allData = [...(primeiraResposta.data || [])];
-   
-               if (totalPages > 1) {
-                   for (let currentPage = 2; currentPage <= totalPages; currentPage++) {
-                       animacaoCarregamento(`Página ${currentPage} de ${totalPages}`, true);
-                       const responsePage = await get(`${urlApi}&page=${currentPage}`);
-                       allData.push(...(responsePage.data || []));
-                   }
-               }
-   
-               return allData;
-           } catch (error) {
-               console.error('Error fetching data:', error);
-               throw error;
-           } finally {
-               fecharAnimacaoCarregamento();
-           }
-       }; */
-
     const fetchListaMalotes = async () => {
         const urlBase = `/malotes-loja?idEmpresa=${empresaSelecionada}&statusMalote=${statusSelecionado}&dataPesquisaInicio=${dataPesquisaInicio}&dataPesquisaFim=${dataPesquisaFim}`;
         let urlApi = urlBase.includes('?') ? urlBase : urlBase + '?';
@@ -111,7 +78,6 @@ export const ActionPesquisaRecebimentoMalote = ({ usuarioLogado, ID, menuFilhoAt
             fecharAnimacaoCarregamento();
         }
     };
-
 
     const { data: dadosMalotes = [], error: errorMalotes, isLoading: isLoadingMalotes, refetch: refetchLista } = useQuery(
         ['malotes-loja'],

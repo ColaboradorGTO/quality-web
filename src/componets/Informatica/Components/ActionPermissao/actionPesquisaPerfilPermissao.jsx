@@ -11,6 +11,7 @@ import Swal from "sweetalert2";
 import { useEffect } from "react";
 import { useCopiarPermissaoUsuario } from "./hooks/useEditarPermissao";
 
+
 export const ActionPesquisaPerfilPermissao = ({ usuarioLogado }) => {
   const [empresaSelecionada, setEmpresaSelecionada] = useState('');
   const [usuarioOrigem, setUsuarioOrigem] = useState('');
@@ -35,7 +36,7 @@ export const ActionPesquisaPerfilPermissao = ({ usuarioLogado }) => {
 
       return response.data;
     },
-    { enabled: Boolean(usuarioLogado?.id), staleTime: 60 * 60 * 1000, }
+    { enabled: Boolean(usuarioLogado?.id) }
   );
 
   const { data: optionsEmpresas = [], error: errorEmpresas, isLoading: isLoadingEmpresas } = useQuery(
@@ -144,11 +145,9 @@ export const ActionPesquisaPerfilPermissao = ({ usuarioLogado }) => {
     { enabled: Boolean(usuarioOrigem), staleTime: 60 * 60 * 1000, cacheTime: 60 * 60 * 1000, }
   );
 
-
   const handleClick = () => {
     refetch();
   }
-
 
   const {
     handleSubmit
@@ -177,7 +176,6 @@ export const ActionPesquisaPerfilPermissao = ({ usuarioLogado }) => {
     }
   }
 
-  console.log(usuarioDestino, 'usuarioDestino')
   return (
 
     <Fragment>
@@ -244,6 +242,9 @@ export const ActionPesquisaPerfilPermissao = ({ usuarioLogado }) => {
         btnVisivel={btnVisivel}
         selectedItems={selectedItems}
         setSelectedItems={setSelectedItems}
+        usuarioOrigem={usuarioOrigem}
+        optionsModulos={optionsModulos}
+        handleClick={handleClick}
       />
 
     </Fragment>

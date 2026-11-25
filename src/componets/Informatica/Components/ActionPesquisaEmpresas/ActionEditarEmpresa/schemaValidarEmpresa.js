@@ -2,10 +2,10 @@ import * as yup from 'yup';
 
 export const schema = yup.object().shape({
 
-/*     situacaoSelecionada: yup
+    situacaoSelecionada: yup
         .string()
         .nullable()
-        .required('Situação Obrigatório'), */
+        .required('Situação Obrigatório'),
 
     cepSelecionado: yup
         .string()
@@ -30,6 +30,5 @@ export const schema = yup.object().shape({
     emailSelecionado: yup
         .string()
         .required('Email Obrigatório'),
-
 
 });

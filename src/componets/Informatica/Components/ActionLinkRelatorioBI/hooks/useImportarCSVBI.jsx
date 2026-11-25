@@ -103,9 +103,6 @@ export const useImportarCSVBI = ({ optionsModulos, handleClose, usuarioLogado })
         });
     };
 
-    console.log(file, 'file no hook ')
-
-
     const onSubmitArquivo = async (e) => {
 
         if (optionsModulos[0]?.CRIAR == 'False') {
@@ -122,20 +119,30 @@ export const useImportarCSVBI = ({ optionsModulos, handleClose, usuarioLogado })
 
         }
 
-        if (!file) {
-            Swal.fire({ icon: 'warning', title: 'Selecione um arquivo CSV ou XLSX!' });
+       if (!file) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Selecione um arquivo CSV ou XLSX!',
+                customClass: {
+                    container: 'custom-swal',
+                },
+            });
             return;
         }
 
-        if (!relatorioSelecionado?.value) {
-            Swal.fire({ icon: 'warning', title: 'Selecione um relatório!' });
+         if (!relatorioSelecionado?.value) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Selecione um relatório!',
+                customClass: {
+                    container: 'custom-swal',
+                },
+            });
             return;
         }
 
         try {
             const dadosArquivo = await processFile(file);
-
-            console.log(dadosArquivo, 'dadosArquivo no hook ')
 
             if (!dadosArquivo.length) {
                 Swal.fire({ icon: 'warning', title: 'Arquivo vazio ou inválido!', customClass: { container: 'custom-swal' } });
