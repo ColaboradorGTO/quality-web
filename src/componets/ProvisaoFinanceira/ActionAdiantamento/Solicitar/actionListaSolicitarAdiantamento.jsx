@@ -357,7 +357,19 @@ export const ActionListaAdiantamento = ({
         } else {
 
           if(row.STATUS == 'AGUARDANDO FINANCEIRO'){
-            return <div></div>
+            return (
+                <div className="p-1">
+                  <ButtonTable
+                    titleButton={"Detalhes"}
+                    cor={"primary"}
+                    Icon={GrView}
+                    iconSize={20}
+                    width="35px"
+                    height="35px"
+                    onClickButton={() => handleClickVisualizar(row)}
+                  />
+                </div>
+            )
           } else {
             return (
               <div className="p-1 "
